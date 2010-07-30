@@ -1,0 +1,1072 @@
+﻿/* background color for the content part of the pages */
+Body
+{
+	background-color: white;
+	margin: 0px;
+}
+
+.ControlPanel, .PagingTable
+{
+	width: 100%;
+	background-color: #FFFFFF;
+	border-right: #003366 1px solid;
+	border-top: #003366 1px solid;
+	border-left: #003366 1px solid;
+	border-bottom: #003366 1px solid;
+}
+
+.SkinObject
+{
+	font-weight: bold;
+	font-size: 8.5pt;
+	color: #003366;
+	font-family: Tahoma, Arial, Helvetica;
+	text-decoration: none;
+}
+
+A.SkinObject:link
+{
+	text-decoration: none;
+	color: #003366;
+}
+
+A.SkinObject:visited
+{
+	text-decoration: none;
+	color: #003366;
+}
+
+A.SkinObject:hover
+{
+	text-decoration: none;
+	color: #003366;
+}
+
+A.SkinObject:active
+{
+	text-decoration: none;
+	color: #003366;
+}
+
+/* styles for LANGUAGE skinobject */
+.Language
+{
+	vertical-align: middle;
+	margin: 0px;
+}
+
+.Language img
+{
+	border: none;
+}
+
+
+/* style for module titles */
+.Head
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 20px;
+	font-weight: normal;
+	color: #333333;
+}
+
+/* style of item titles on edit and admin pages */
+.SubHead
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 11px;
+	font-weight: bold;
+	color: #003366;
+}
+
+/* module title style used instead of Head for compact rendering by QuickLinks and Signin modules */
+.SubSubHead
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 11px;
+	font-weight: bold;
+	color: black;
+}
+
+/* text style used for most text rendered by modules */
+.Normal, .NormalDisabled
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 11px;
+	font-weight: normal;
+}
+
+/* text style used for rendered text which should appear disabled */
+.NormalDisabled
+{
+	color: Silver;
+}
+
+/* text style used for rendered text which requires emphasis */
+.NormalBold
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 11px;
+	font-weight: bold;
+}
+
+/* text style used for error messages */
+.NormalRed
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 12px;
+	font-weight: bold;
+	color: #ff0000;
+}
+
+/* text style used for textboxes in the admin and edit pages, for Nav compatibility */
+.NormalTextBox
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 12px;
+	font-weight: normal;
+}
+
+/* styles used by Data Grids */
+.DataGrid_AlternatingItem
+{
+	background-color: White;
+	color: Red;
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 10px;
+	font-weight: normal;
+}
+.DataGrid_Container
+{
+	background-color: Transparent;
+}
+.DataGrid_Footer
+{
+	background-color: White;
+}
+.DataGrid_Header
+{
+	background-color: Transparent;
+	color: Black;
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 10px;
+	font-weight: bold;
+	text-align: center;
+}
+.DataGrid_Item
+{
+	background-color: Transparent;
+	color: Black;
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 10px;
+	font-weight: normal;
+}
+.DataGrid_SelectedItem
+{
+	background-color: Silver;
+	color: Blue;
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 10px;
+	font-weight: normal;
+}
+
+/* styles used by TreeMenu Skin Object */
+.TreeMenu_Node
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 12px;
+	font-weight: normal;
+}
+
+.TreeMenu_NodeSelected
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 12px;
+	font-weight: normal;
+	background-color: #dcdcdc;
+}
+
+A.TreeMenu_Node:link, A.TreeMenu_NodeSelected:link
+{
+	text-decoration: none;
+	color: #003366;
+}
+
+A.TreeMenu_Node:visited, A.TreeMenu_NodeSelected:visited
+{
+	text-decoration: none;
+	color: #003366;
+}
+
+A.TreeMenu_Node:hover, A.TreeMenu_NodeSelected:hover
+{
+	text-decoration: none;
+	color: #ff0000;
+}
+
+A.TreeMenu_Node:active, A.TreeMenu_NodeSelected:active
+{
+	text-decoration: none;
+	color: #003366;
+}
+
+/* styles used in the FileManager */
+.FileManager
+{
+	border-right: black 1px solid;
+	border-top: black 1px solid;
+	border-left: black 1px solid;
+	border-bottom: black 1px solid;
+	height: 400px;
+}
+.FileManager_ToolBar
+{
+	border-bottom: black 1px solid;
+	height: 25px;
+}
+.FileManager_Explorer
+{
+	height: 100%;
+	border: #696969 1px solid;
+	background-color: White;
+	margin: 2px 2px 2px 2px;
+}
+
+.FileManager_FileList
+{
+	height: 100%;
+	border: #696969 1px solid;
+	background-color: White;
+	margin: 2px 2px 2px 2px;
+	overflow: auto;
+}
+
+.FileManager_MessageBox
+{
+	text-align: center;
+	vertical-align: middle;
+	background-color: White;
+	padding: 25px 25px 25px 25px;
+}
+
+.FileManager_Header
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 11px;
+	font-weight: bold;
+	color: #E7E7FF;
+	background-color: #9EBFF6;
+	border-bottom: #696969 1px solid;
+	height: 25px;
+}
+
+.FileManager_Pager
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 11px;
+	font-weight: bold;
+	background-color: #EEEEEE;
+	border-top: #696969 1px solid;
+	height: 25px;
+}
+
+.FileManager_StatusBar
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 11px;
+	font-weight: normal;
+	background-color: #dedfde;
+	height: 25px;
+	margin: 2px 2px 2px 2px;
+}
+
+.FileManager_Item
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 11px;
+	font-weight: normal;
+	color: Black;
+	background-color: #F8F8F8;
+	border-top: black 1px dashed;
+	border-bottom: black 1px dashed;
+}
+
+.FileManager_AltItem
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 11px;
+	font-weight: normal;
+	color: Black;
+	background-color: #EEEEEE;
+	border-style: none;
+}
+.FileManager_SelItem
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 11px;
+	font-weight: bold;
+	color: White;
+	background-color: #99ffff;
+	border-style: none;
+}
+
+.FileManagerTreeNode
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 11px;
+	font-weight: normal;
+}
+
+.FileManagerTreeNodeSelected
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 11px;
+	font-weight: normal;
+	background-color: #dcdcdc;
+}
+
+A.FileManagerTreeNode:link, A.FileManagerTreeNodeSelected:link
+{
+	text-decoration: none;
+	color: #003366;
+}
+
+A.FileManagerTreeNode:visited, A.FileManagerTreeNodeSelected:visited
+{
+	text-decoration: none;
+	color: #003366;
+}
+
+A.FileManagerTreeNode:hover, A.FileManagerTreeNodeSelected:hover
+{
+	text-decoration: none;
+	color: #ff0000;
+}
+
+A.FileManagerTreeNode:active, A.FileManagerTreeNodeSelected:active
+{
+	text-decoration: none;
+	color: #003366;
+}
+
+/* styles used in the Wizard Framework */
+.Wizard
+{
+	border-right: black 1px solid;
+	border-top: black 1px solid;
+	border-left: black 1px solid;
+	border-bottom: black 1px solid;
+	height: 400px;
+	width: 650px;
+}
+.WizardButton
+{
+	border-right: #696969 1px solid;
+	padding-right: 2px;
+	border-top: #696969 1px solid;
+	padding-left: 2px;
+	padding-bottom: 2px;
+	border-left: #696969 1px solid;
+	padding-top: 2px;
+	border-bottom: #696969 1px solid;
+	background-color: #dcdcdc;
+}
+.WizardHeader
+{
+	background: #ffffcc;
+	border-bottom: black 1px solid;
+	height: 40px;
+}
+.WizardFooter
+{
+	border-top: black 1px solid;
+	background: #ccffcc;
+	height: 25px;
+	text-align: right;
+}
+.WizardBody
+{
+	padding-right: 10px;
+	padding-left: 10px;
+	padding-bottom: 10px;
+	padding-top: 10px;
+	height: 325px;
+}
+.WizardHelp
+{
+	padding-right: 5px;
+	padding-left: 5px;
+	font-size: 9pt;
+	padding-bottom: 5px;
+	border-left: black 1px solid;
+	width: 180px;
+	padding-top: 5px;
+	background-color: #ccffff;
+}
+.WizardHelpText
+{
+	overflow: auto;
+	font-size: 8pt;
+	width: 180px;
+	color: black;
+	font-family: Tahoma, Verdana, Arial, Sans-Serif;
+	height: 300px;
+}
+.WizardText
+{
+	font-size: 9pt;
+	color: black;
+	font-family: Tahoma, Verdana, Arial, Sans-Serif;
+}
+
+
+/* text style used for help text rendered by modules */
+.Help
+{
+	border-right: black 1px solid;
+	padding-right: 2px;
+	border-top: black 1px solid;
+	padding-left: 2px;
+	font-weight: normal;
+	font-size: 11px;
+	padding-bottom: 2px;
+	border-left: black 1px solid;
+	color: black;
+	padding-top: 2px;
+	border-bottom: black 1px solid;
+	font-family: Tahoma, Arial, Helvetica;
+	background-color: #ffff99;
+}
+
+/* text style for buttons and link buttons used in the portal admin pages */
+.CommandButton
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 11px;
+	font-weight: normal;
+}
+
+/* hyperlink style for buttons and link buttons used in the portal admin pages */
+A.CommandButton:link
+{
+	text-decoration: underline;
+	color: #003366;
+}
+
+A.CommandButton:visited
+{
+	text-decoration: underline;
+	color: #003366;
+}
+
+A.CommandButton:hover
+{
+	text-decoration: underline;
+	color: #ff0000;
+}
+
+A.CommandButton:active
+{
+	text-decoration: underline;
+	color: #003366;
+}
+
+/* button style for standard HTML buttons */
+.StandardButton
+{
+	padding-right: 5px;
+	padding-left: 5px;
+	font-weight: normal;
+	font-size: 11px;
+	background: #dddddd;
+	color: #000000;
+	font-family: Verdana, sans-serif;
+}
+
+
+/* GENERIC */
+H1
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 20px;
+	font-weight: normal;
+	color: #666644;
+}
+
+H2
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 20px;
+	font-weight: normal;
+	color: #666644;
+}
+
+H3
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 12px;
+	font-weight: normal;
+	color: #003366;
+}
+
+H4
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 12px;
+	font-weight: normal;
+	color: #003366;
+}
+
+H5, DT
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 11px;
+	font-weight: bold;
+	color: #003366;
+}
+
+H6
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 11px;
+	font-weight: bold;
+	color: #003366;
+}
+
+TFOOT, THEAD
+{
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 12px;
+	color: #003366;
+}
+
+TH
+{
+	vertical-align: baseline;
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 12px;
+	font-weight: bold;
+	color: #003366;
+}
+
+A:link
+{
+	text-decoration: none;
+	color: #003366;
+}
+
+A:visited
+{
+	text-decoration: none;
+	color: #003366;
+}
+
+A:hover
+{
+	text-decoration: underline;
+	color: #ff0000;
+}
+
+A:active
+{
+	text-decoration: none;
+	color: #003366;
+}
+
+SMALL
+{
+	font-size: 8px;
+}
+
+BIG
+{
+	font-size: 14px;
+}
+
+BLOCKQUOTE, PRE
+{
+	font-family: Lucida Console, monospace;
+}
+
+
+UL LI
+{
+	list-style-type: square;
+}
+
+UL LI LI
+{
+	list-style-type: disc;
+}
+
+UL LI LI LI
+{
+	list-style-type: circle;
+}
+
+OL LI
+{
+	list-style-type: decimal;
+}
+
+OL OL LI
+{
+	list-style-type: lower-alpha;
+}
+
+OL OL OL LI
+{
+	list-style-type: lower-roman;
+}
+OL UL LI
+{
+	list-style-type: disc;
+}
+
+HR
+{
+	color: #696969;
+	height: 1pt;
+	text-align: left;
+}
+
+/* Module Title Menu */
+.ModuleTitle_MenuContainer
+{
+	border-bottom: blue 0px solid;
+	border-left: blue 0px solid;
+	border-top: blue 0px solid;
+	border-right: blue 0px solid;
+}
+
+.ModuleTitle_MenuBar
+{
+	cursor: pointer;
+	height: 16px;
+	background-color: Transparent;
+}
+
+.ModuleTitle_MenuItem
+{
+	cursor: pointer;
+	color: black;
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 9pt;
+	font-weight: bold;
+	font-style: normal;
+	border-left: white 0px solid;
+	border-bottom: white 1px solid;
+	border-top: white 1px solid;
+	border-right: white 0px solid;
+	background-color: Transparent;
+}
+
+.ModuleTitle_MenuIcon
+{
+	cursor: pointer;
+	background-color: #EEEEEE;
+	border-left: #EEEEEE 1px solid;
+	border-bottom: #EEEEEE 1px solid;
+	border-top: #EEEEEE 1px solid;
+	text-align: center;
+	width: 15px;
+	height: 21px;
+}
+
+.ModuleTitle_SubMenu
+{
+	z-index: 1000;
+	cursor: pointer;
+	background-color: #FFFFFF;
+	border-bottom: #FFFFFF 0px solid;
+	border-left: #FFFFFF 0px solid;
+	border-top: #FFFFFF 0px solid;
+	border-right: #FFFFFF 0px solid;
+}
+
+.ModuleTitle_MenuBreak
+{
+	border-bottom: #EEEEEE 1px solid;
+	border-left: #EEEEEE 0px solid;
+	border-top: #EEEEEE 1px solid;
+	border-right: #EEEEEE 0px solid;
+	background-color: #EEEEEE;
+	height: 1px;
+}
+
+.ModuleTitle_MenuItemSel
+{
+	cursor: pointer;
+	color: black;
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 9pt;
+	font-weight: bold;
+	font-style: normal;
+	background-color: #C1D2EE;
+}
+
+.ModuleTitle_MenuArrow
+{
+	font-family: webdings;
+	font-size: 10pt;
+	cursor: pointer;
+	border-right: #FFFFFF 1px solid;
+	border-bottom: #FFFFFF 1px solid;
+	border-top: #FFFFFF 0px solid;
+}
+
+.ModuleTitle_RootMenuArrow
+{
+	font-family: webdings;
+	font-size: 10pt;
+	cursor: pointer;
+}
+
+/* Main Menu */
+.MainMenu_MenuContainer
+{
+	background-color: transparent;
+}
+.MainMenu_MenuBar
+{
+	cursor: pointer;
+	height: 16px;
+	background-color: Transparent;
+}
+.MainMenu_MenuItem
+{
+	cursor: pointer;
+	color: black;
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 9pt;
+	font-weight: bold;
+	font-style: normal;
+	border-left: white 0px solid;
+	border-bottom: white 1px solid;
+	border-top: white 1px solid;
+	border-right: white 0px solid;
+	background-color: Transparent;
+}
+.MainMenu_MenuIcon
+{
+	cursor: pointer;
+	background-color: #EEEEEE;
+	border-left: #EEEEEE 1px solid;
+	border-bottom: #EEEEEE 1px solid;
+	border-top: #EEEEEE 1px solid;
+	text-align: center;
+	width: 15px;
+	height: 21px;
+}
+.MainMenu_SubMenu
+{
+	z-index: 1000;
+	cursor: pointer;
+	background-color: #FFFFFF;
+	border-bottom: #FFFFFF 0px solid;
+	border-left: #FFFFFF 0px solid;
+	border-top: #FFFFFF 0px solid;
+	border-right: #FFFFFF 0px solid;
+}
+.MainMenu_MenuBreak
+{
+	border-bottom: #EEEEEE 1px solid;
+	border-left: #EEEEEE 0px solid;
+	border-top: #EEEEEE 1px solid;
+	border-right: #EEEEEE 0px solid;
+	background-color: #EEEEEE;
+	height: 1px;
+}
+.MainMenu_MenuItemSel
+{
+	cursor: pointer;
+	color: black;
+	font-family: Tahoma, Arial, Helvetica;
+	font-size: 9pt;
+	font-weight: bold;
+	font-style: normal;
+	background-color: #C1D2EE;
+}
+.MainMenu_MenuArrow
+{
+	font-family: webdings;
+	font-size: 10pt;
+	cursor: pointer;
+	border-right: #FFFFFF 1px solid;
+	border-bottom: #FFFFFF 1px solid;
+	border-top: #FFFFFF 0px solid;
+}
+.MainMenu_RootMenuArrow
+{
+	font-family: webdings;
+	font-size: 10pt;
+	cursor: pointer;
+}
+
+/* LEGACY STYLES from DNN 1-2 */
+.HeadBg
+{
+	background-color: #CCCCCC;
+}
+
+.TabBg
+{
+	background-color: black;
+}
+
+.SelectedTab
+{
+	font-weight: bold;
+	font-size: 8.5pt;
+	color: #FFFFFF;
+	font-family: Tahoma, Arial, Helvetica;
+	text-decoration: none;
+}
+
+A.SelectedTab:link
+{
+	text-decoration: none;
+	color: white;
+}
+
+A.SelectedTab:visited
+{
+	text-decoration: none;
+	color: #eeeeee;
+}
+
+A.SelectedTab:hover
+{
+	text-decoration: none;
+	color: #cccccc;
+}
+
+A.SelectedTab:active
+{
+	text-decoration: none;
+	color: #eeeeee;
+}
+
+.OtherTabs
+{
+	font-weight: bold;
+	font-size: 8.5pt;
+	color: white;
+	font-family: Tahoma, Arial, Helvetica;
+	text-decoration: none;
+}
+
+A.OtherTabs:link
+{
+	text-decoration: none;
+	color: white;
+}
+
+A.OtherTabs:visited
+{
+	text-decoration: none;
+	color: #eeeeee;
+}
+
+A.OtherTabs:hover
+{
+	text-decoration: none;
+	color: #cccccc;
+}
+
+A.OtherTabs:active
+{
+	text-decoration: none;
+	color: #eeeeee;
+}
+
+.PagingTable
+{
+	height: 33px;
+}
+
+/*
+.LabelEditOverClass
+{	
+	cursor: pointer;
+	text-decoration: underline overline;
+}
+*/
+
+.LabelEditTextClass
+{
+	border: solid 1px red;
+	background-color: Transparent;
+}
+
+.LabelEditWorkClass
+{
+	/*background: url(/DotNetNuke/images/dnnanim.gif) no-repeat right;*/
+	border: solid 0px red;
+	background-color: Transparent;
+}
+
+/* style for the DNNTextSuggest control select menu */
+.SuggestTextMenu
+{
+	border: solid 1px black;
+	white-space: nowrap;
+	background: white;
+}
+/* style for the DNNTextSuggest control selected menu node */
+.SuggestNodeOver
+{
+	background-color: navy;
+	color: White;
+}
+
+
+/*Edit In Place Tool Bar Classes*/
+.eipbackimg
+{
+	border: outset 1px; /*give toolbar a 3D look*/
+	position: absolute; /*needed so it doesn't take up space */
+	margin-top: -22px; /*specify toolbar to be just above text */
+	white-space: nowrap; /* makes toolbar horizontal */
+	background: url(../../images/eip_toolbar.gif);
+	background-color: #99cccc;
+	height: 22px;
+}
+
+.eipbuttonbackimg
+{
+	width: 21px;
+	height: 21px;
+	cursor: pointer; /*change mouse to pointer when hover over button*/
+	display: -moz-inline-box; /* Gecko proprietary  (ORDER IS IMPORTANT HERE!)*/
+	display: inline-block; /* supported by Opera and ? */
+}
+
+.eipbutton_edit
+{
+	background: url(../../images/eip_edit.gif) no-repeat 100% center;
+}
+.eipbutton_save
+{
+	background: url(../../images/eip_save.gif) no-repeat 100% center;
+}
+.eipborderhover
+{
+	border: outset 1px;
+}
+
+/* used to collapse panes without any content in them */
+.DNNEmptyPane
+{
+	width: 0px;
+}
+
+/* used to set the different module align options - from module settings */
+.DNNAlignleft
+{
+	text-align: left;
+}
+.DNNAlignright
+{
+	text-align: right;
+}
+.DNNAligncenter
+{
+	text-align: center;
+}
+
+/* Login Styles */
+.LoginPanel
+{
+
+}
+
+.LoginTabGroup
+{
+	
+}
+
+.LoginTab {
+	float: left;
+	background: url("../../images/tablogin_gray.gif") left top;
+	margin: 0 3px 3px 0;
+	padding: 5px 5px 4px 5px;
+	text-decoration: none;
+	color: #FFF;
+	border: 1px #25569a solid;
+}
+
+.LoginTabSelected{
+	float: left;
+	background: url("../../images/tablogin_gray.gif") left top;
+	margin: 0 3px 3px 0;
+	padding: 5px 5px 4px 5px;
+	text-decoration: none;
+	color: #FFF;
+	background-position: 0% -41px;
+	border: 1px #25569a solid;
+}
+
+.LoginTabHover
+{
+	float: left;
+	background: url("../../images/tablogin_gray.gif") left top;
+	margin: 0 3px 3px 0;
+	padding: 5px 5px 4px 5px;
+	text-decoration: none;
+	color: #555;
+	border: 1px #C00 solid;
+	cursor:pointer;
+}
+
+.LoginContainerGroup
+{
+	clear: both;
+	padding-top: 5px;
+}
+
+.LoginContainer
+{
+	
+}
+
+#tablist 
+{
+	width: 120px;
+	margin: 0;
+	border-right: 1px solid black;
+	padding-bottom: 10px;
+	float:left;
+}
+
+.dashboardPanel 
+{
+	margin-left: 120px;
+	padding: 0 10px 10px 10px;
+	
+}
+
+.dashboardPanel table td
+{
+	padding: 2px 4px;
+}
+
+.dashboardPanel table th
+{
+	padding: 2px 4px;
+	font-size: 1em;
+	font-weight: bold;
+	color: #036;
+	border-bottom: 1px solid #9FB1BC;
+}
+
+.dashboardTableAlt 
+{
+	background-color: #eee;
+}
+
+.dashboardGrid
+{
+	margin: 10px;
+}
+

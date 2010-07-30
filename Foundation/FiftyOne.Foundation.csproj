@@ -1,0 +1,218 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{2C9B0E11-2654-49AF-855A-BFA629F302E8}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>FiftyOne.Foundation</RootNamespace>
+    <AssemblyName>FiftyOne.Foundation</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <ApplicationIcon>PDA.ico</ApplicationIcon>
+    <SignAssembly>False</SignAssembly>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <DelaySign>false</DelaySign>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\FiftyOne.Foundation.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\FiftyOne.Foundation.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Bank|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Bank\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Live Tests|AnyCPU' ">
+    <OutputPath>bin\Live Tests\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Mobile" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Cache.cs" />
+    <Compile Include="Image\Support.cs" />
+    <Compile Include="Mobile\Configuration\UrlCollection.cs" />
+    <Compile Include="Mobile\Configuration\UrlElement.cs" />
+    <Compile Include="Mobile\Detection\DetectorModule.cs" />
+    <Compile Include="Mobile\Detection\Devices.cs" />
+    <Compile Include="Mobile\Detection\RequestHistory.cs" />
+    <Compile Include="Mobile\Configuration\RedirectSection.cs" />
+    <Compile Include="Mobile\Configuration\Support.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\AmoiHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\AndriodHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\AppleCoreMediaHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\AvantHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\BirdHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\BoltHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\ChromeHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\BrewHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\MaxonHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\SoftBankHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\ZuneHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\iTunesHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\LCTHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\MobileCatchAllHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\MobileSafariHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\PalmHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\SendoHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\TianyuHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\VersionHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Matchers\Algorithms.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Matchers\Final\Matcher.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Matchers\Result.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Matchers\Version\Matcher.cs" />
+    <Compile Include="Mobile\Detection\RequestHelper.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Configuration\NewDeviceDetail.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\MobileCapabilities.cs" />
+    <Compile Include="Mobile\Detection\Support.cs" />
+    <Compile Include="Mobile\Configuration\Manager.cs" />
+    <Compile Include="Mobile\Configuration\LogSection.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\AlphaNumericHandlers.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\EditDistanceHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\ReducedInitialStringHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Matchers\EditDistance\Request.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Matchers\EditDistance\Results.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Matchers\Matcher.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Matchers\Request.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Matchers\Results.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Matchers\Segment\Segment.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Matchers\Segment\Request.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Matchers\Segment\Results.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Matchers\Segment\Segments.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Matchers\UserAgentParser.cs" />
+    <Compile Include="EventLog.cs" />
+    <Compile Include="Log.cs" />
+    <Compile Include="Mobile\MobileException.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\DetectionConstants.cs" />
+    <Compile Include="Properties\WurflConstants.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Configuration\CapabilityCollection.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Configuration\CapabilityElement.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Configuration\Manager.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Configuration\PatchConfigElement.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Configuration\PatchesCollection.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Configuration\WurflSection.cs" />
+    <Compile Include="Mobile\Detection\Collection.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\DeviceInfo.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\AlcatelHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\AOLHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\AppleHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\BenQHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\BlackBerryHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\CatchAllHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\DoCoMoHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\FirefoxHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\GrundigHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\Handler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\HTCHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\KDDIHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\KyoceraHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\LGHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Matchers\ReducedInitialString\Matcher.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Matchers\EditDistance\Matcher.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Matchers\Segment\Matcher.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\SegmentHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\MitsubishiHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\MotorolaHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\MSIEHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\NecHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\NokiaHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\OperaHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\PanasonicHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\PantechHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\PhilipsHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\PortalmmmHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\QtekHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\SafariHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\SagemHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\SamsungHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\SanyoHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\SharpHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\SiemensHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\SonyEricssonHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\SPVHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\RegexSegmentHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\ToshibaHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\VodafoneHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\WindowsCEHandler.cs" />
+    <Compile Include="Mobile\Detection\Strings.cs" />
+    <Compile Include="Mobile\Detection\MobileCapabilities.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\WurflException.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Provider.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\NewDevice.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Processor.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="PDA.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
