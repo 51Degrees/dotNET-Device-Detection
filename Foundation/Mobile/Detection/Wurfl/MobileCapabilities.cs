@@ -43,6 +43,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// <summary>
         /// Creates an instance of the <see cref="MobileCapabilities"/> class.
         /// </summary>
+        public MobileCapabilities(IDictionary capabilities)
+            : base(capabilities)
+        {
+        }
+
+        /// <summary>
+        /// Creates an instance of the <see cref="MobileCapabilities"/> class.
+        /// </summary>
         public MobileCapabilities(string userAgent)
             : base(userAgent)
         {
@@ -379,19 +387,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// Enhances the this object with capabilities found in the DeviceInfo
         /// object identified in the constructor.
         /// </summary>
-        protected override void Init(DeviceInfo device)
+        protected void Init(DeviceInfo device)
         {
             // Enhance with the capabilities from the device data.
             if (device != null)
-            {
                 // Enhance the capabilities collection based on the device.
                 Enhance(Capabilities, device);
 
-                // Set the correct text writer for the render type.
-                HtmlTextWriter = GetTagWriter(
-                    device,
-                    this["preferredRenderingType"]).FullName;
-            }
+            base.Init();
         }
 
         #endregion
@@ -480,22 +483,19 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             SetValue(capabilities, "cookies", GetCookieSupport(device, (string)capabilities["cookies"]));
             SetAudio(capabilities, device);
 
-            // Determine the rendering formats.
-            string renderingMime = string.Empty, renderingType = string.Empty;
-            if (!GetPreferredRenderingFromHeaders(ref renderingMime, ref renderingType, device))
-            {
-                renderingType = GetPreferredRenderingTypeFromWURFL(device);
-                renderingMime = GetPreferredRenderingMimeFromWURFL(device, renderingType);
-            }
-            SetValue(capabilities, "preferredRenderingType", renderingType);
-            SetValue(capabilities, "preferredRenderingMime", renderingMime);
+            // Set the rendering type for the response.
+            string renderingType = GetPreferredRenderingTypeFromWURFL(device);
+            if (String.IsNullOrEmpty(renderingType) == false)
+                SetValue(capabilities, "preferredRenderingType", renderingType);
+
+            // Set the Mime type of the response.
+            string renderingMime = GetPreferredRenderingMimeFromWURFL(device, renderingType);
+            if (String.IsNullOrEmpty(renderingMime) == false)
+                SetValue(capabilities, "preferredRenderingMime", renderingMime);
 
             // Set values that require the rendering type or mime.
             SetValue(capabilities, "supportsCss", GetCssSupport(renderingType));
             SetValue(capabilities, "tables", GetTables(device, renderingType));
-
-            // Record the device ID for future reference.
-            SetValue(capabilities, "deviceID", device.DeviceId);
         }
 
         private static string GetSupportsImageSubmit(DeviceInfo device)
@@ -850,31 +850,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             return CssGroup.None.ToString();
         }
 
-        private static bool GetPreferredRenderingFromHeaders(ref string renderingMime, ref string renderingType, DeviceInfo device)
-        {
-            bool isRenderingSet = false;
-            if (HttpContext.Current.Request.Headers != null)
-            {
-                string acceptHeader = HttpContext.Current.Request.Headers["accept"];
-                if (!string.IsNullOrEmpty(acceptHeader))
-                {
-                    if (Regex.IsMatch(acceptHeader, @"((application/xhtml\+xml)|(profile|application/vnd\.wap\.xhtml\+xml))+"))
-                    {
-                        renderingMime = "application/xhtml+xml";
-                        renderingType = "xhtml-basic";
-                        isRenderingSet = true;
-                    }
-                    else 
-                    {
-                        renderingMime = "text/html";
-                        renderingType = GetPreferredRenderingTypeFromWURFL(device);
-                        isRenderingSet = true;
-                    }
-                }
-            }
-            return isRenderingSet;
-        }
-
         private static string GetPreferredRenderingMimeFromWURFL(DeviceInfo device, string renderingType)
         {
             switch (renderingType)
@@ -886,8 +861,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                 case "chtml10":
                 case "html4":
                 case "html32":
-                default:
                     return "text/html";
+
+                default:
+                    return null;
             }
         }
 
@@ -898,15 +875,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 
             // Look at all the possible markups that could be supported
             // and returned the 1st one found.
-            if (device.GetCapability("html_wi_oma_xhtmlmp_1_0", out value) && value)
+            if (device.GetCapability("html_wi_oma_xhtmlmp_1_0", out value) && value == true)
                 return "xhtml-mp";
-            else if (device.GetCapability("html_wi_w3_xhtmlbasic", out value) && value)
+            else if (device.GetCapability("html_wi_w3_xhtmlbasic", out value) && value == true)
                 return "xhtml-basic";
-            else if (device.GetCapability("html_wi_imode_compact_generic", out value) && value)
+            else if (device.GetCapability("html_wi_imode_compact_generic", out value) && value == true)
                 return MobileCapabilities.PreferredRenderingTypeChtml10;
-            else if (device.GetCapability("html_web_4_0", out value) && value)
+            else if (device.GetCapability("html_web_4_0", out value) && value == true)
                 return MobileCapabilities.PreferredRenderingTypeHtml32;
-            else if (device.GetCapability("html_web_3_2", out value) && value)
+            else if (device.GetCapability("html_web_3_2", out value) && value == true)
                 return MobileCapabilities.PreferredRenderingTypeHtml32;
             else
                 return null;
@@ -914,64 +891,22 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 
         private static string GetPreferredRenderingTypeFromWURFL(DeviceInfo device)
         {
-            // Get the first one that the device will support from WURFL. This allows
-            // use to prefer XHTML based types over what ever the device prefers
-            // so that we can minimise page weight and improve CSS compaitability.
-            string renderingType = GetFirstRenderingTypeFromWURFL(device);
-
-            if (String.IsNullOrEmpty(renderingType) == true)
+            switch (device.GetCapability("preferred_markup"))
             {
-                // Use the preferred markup capability if we can't find one
-                // by looking at the supported markup types.
-                switch (device.GetCapability("preferred_markup"))
-                {
-                    case "html_web_3_2": renderingType = MobileCapabilities.PreferredRenderingTypeHtml32; break;
-                    case "html_web_4_0": renderingType = "html4"; break;
-                    case "html_wi_oma_xhtmlmp_1_0": renderingType = "xhtml-mp"; break;
-                    case "html_wi_w3_xhtmlbasic": renderingType = "xhtml-basic"; break;
-                    case "html_wi_imode_htmlx_1":
-                    case "html_wi_imode_html_1":
-                    case "html_wi_imode_html_2":
-                    case "html_wi_imode_html_3":
-                    case "html_wi_imode_html_4":
-                    case "html_wi_imode_html_5":
-                    case "html_wi_imode_html_6":
-                    case "html_wi_imode_htmlx_1_1":
-                    case "html_wi_imode_compact_generic": renderingType = MobileCapabilities.PreferredRenderingTypeChtml10; break;
-                    default: renderingType = "html4"; break;
-                }
-            }
-            return renderingType;
-        }
-        
-        private static Type GetTagWriter(DeviceInfo device, string renderingType)
-        {
-            switch (renderingType)
-            {
-                case "xhtml-mp":
-                case "xhtml-basic":
-                    return typeof(System.Web.UI.XhtmlTextWriter);
-
-                case "chtml10":
-                    return typeof(System.Web.UI.ChtmlTextWriter);
-
-                case "html4":
-                    return typeof(System.Web.UI.HtmlTextWriter);
-
-                case "html32":
-                    bool html4;
-                    device.GetCapability("html_web_4_0", out html4);
-                    if (html4)
-                        return typeof(System.Web.UI.HtmlTextWriter);
-                    else
-                        return typeof(System.Web.UI.Html32TextWriter);
-
-                case "wml11":
-                case "wml12":
-                    return typeof(System.Web.UI.Html32TextWriter);
-
-                default:
-                    return typeof(System.Web.UI.Html32TextWriter);
+                case "html_web_3_2": return MobileCapabilities.PreferredRenderingTypeHtml32;
+                case "html_web_4_0": return "html4"; 
+                case "html_wi_oma_xhtmlmp_1_0": return "xhtml-mp"; 
+                case "html_wi_w3_xhtmlbasic": return "xhtml-basic"; 
+                case "html_wi_imode_htmlx_1":
+                case "html_wi_imode_html_1":
+                case "html_wi_imode_html_2":
+                case "html_wi_imode_html_3":
+                case "html_wi_imode_html_4":
+                case "html_wi_imode_html_5":
+                case "html_wi_imode_html_6":
+                case "html_wi_imode_htmlx_1_1":
+                case "html_wi_imode_compact_generic": return MobileCapabilities.PreferredRenderingTypeChtml10; 
+                default: return GetFirstRenderingTypeFromWURFL(device); 
             }
         }
 

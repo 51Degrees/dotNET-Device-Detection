@@ -23,6 +23,8 @@
 
 using System.Web;
 using System;
+using System.Collections;
+using System.Web.UI.Adapters;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
@@ -32,7 +34,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Cache for mobile capabilities. Items are removed approx. 60 minutes after the last
         /// time they were used.
         /// </summary>
-        private static Cache<MobileCapabilities> _cache = new Cache<MobileCapabilities>(60);
+        private static Cache<IDictionary> _cache = new Cache<IDictionary>(60);
 
         /// <summary>
         /// Checks to determine if the device is mobile by making a direct
@@ -56,16 +58,27 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns></returns>
         internal static MobileCapabilities Create(string userAgent)
         {
-            MobileCapabilities caps = null;
+            IDictionary caps = null;
+            MobileCapabilities mobCaps = null;
 
-            if (_cache.GetTryParse(userAgent, out caps) == false &&
-                Wurfl.Configuration.Manager.Enabled == true)
+            if (Wurfl.Configuration.Manager.Enabled == true)
             {
-                caps = new Wurfl.MobileCapabilities(userAgent);
-                _cache[userAgent] = caps;
+                if (_cache.GetTryParse(userAgent, out caps) == true)
+                {
+                    // Create a new mobile capabilities instance using the capabilities
+                    // found previously.
+                    mobCaps = new Wurfl.MobileCapabilities(caps);
+                }
+                else
+                {
+                    // Create the new mobile capabilities and record the collection of
+                    // capabilities for quick creation in future requests.
+                    mobCaps = new Wurfl.MobileCapabilities(userAgent);
+                    _cache[userAgent] = mobCaps.Capabilities;
+                }
             }
 
-            return caps;
+            return mobCaps;
         }
 
         /// <summary>
@@ -73,20 +86,38 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// of the requesting device.
         /// </summary>
         /// <param name="context"><see cref="HttpContext"/> of the requesting device.</param>
-        /// <returns></returns>
+        /// <returns>A new mobile capabilities</returns>
         internal static MobileCapabilities Create(HttpContext context)
         {
-            MobileCapabilities caps = null;
+            IDictionary caps = null;
+            MobileCapabilities mobCaps = null;
 
-            if (String.IsNullOrEmpty(context.Request.UserAgent) == false &&
-                _cache.GetTryParse(context.Request.UserAgent, out caps) == false &&
-                Wurfl.Configuration.Manager.Enabled == true)
+            if (String.IsNullOrEmpty(context.Request.UserAgent) == false)
             {
-                caps = new Wurfl.MobileCapabilities(context);
-                _cache[context.Request.UserAgent] = caps;
+                if (Wurfl.Configuration.Manager.Enabled == true)
+                {
+                    if (_cache.GetTryParse(context.Request.UserAgent, out caps) == true)
+                    {
+                        // Create a new mobile capabilities instance using the capabilities
+                        // found previously.
+                        mobCaps = new Wurfl.MobileCapabilities(caps);
+                    }
+                    else
+                    {
+                        // Create the new mobile capabilities and record the collection of
+                        // capabilities for quick creation in future requests.
+                        mobCaps = new Wurfl.MobileCapabilities(context);
+                        _cache[context.Request.UserAgent] = mobCaps.Capabilities;
+                    }
+                }
             }
 
-            return caps;
+            // Copy over the adapters collections from the base capabilities.
+            foreach (object key in context.Request.Browser.Adapters.Keys)
+                mobCaps.Adapters.Add(key, context.Request.Browser.Adapters[key]);
+
+            // Check to ensure the tagWriter.
+            return mobCaps;
         }
     }
 }

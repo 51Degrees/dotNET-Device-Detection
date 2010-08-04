@@ -134,11 +134,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
             // Intercept request event after the hander and the state have been assigned
             // to redirect the page.
             application.PostAcquireRequestState += new EventHandler(OnPostAcquireRequestState);
-            
+
+            // Check for a MobilePage handler being used.
+            application.PreRequestHandlerExecute += new EventHandler(OnPreRequestHandlerExecuteMobilePage);
+
             // If client targets are specified then check to see if one is being used
             // and override the requesting device information.
             if (_clientTargets != null)
-                application.PreRequestHandlerExecute +=new EventHandler(OnPreRequestHandlerExecute);
+                application.PreRequestHandlerExecute +=new EventHandler(OnPreRequestHandlerExecuteSetClientTargets);
         }
         
         #endregion
@@ -146,21 +149,44 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Events
 
         /// <summary>
+        /// If the handler is a MobilePage then ensure a compaitable textwriter will be used.
+        /// </summary>
+        /// <param name="sender">HttpApplication related to the request.</param>
+        /// <param name="e">EventArgs related to the event. Not used.</param>
+        public void OnPreRequestHandlerExecuteMobilePage(object sender, EventArgs e)
+        {
+            if (sender is HttpApplication)
+            {
+                HttpContext context = ((HttpApplication)sender).Context;
+
+                // Check to see if the handler is a mobile page. If so then the preferred markup
+                // needs to change as the legacy mobile controls do not work with html4 specified.
+                // If these lines are removed a "No mobile controls device configuration was registered 
+                // for the requesting device" exception is likely to occur.
+                if (context.Handler is System.Web.UI.MobileControls.MobilePage &&
+                    "html4" == context.Request.Browser.Capabilities["preferredRenderingType"] as string)
+                {
+                    context.Request.Browser.Capabilities["preferredRenderingType"] = "html32";
+                }
+            }
+        }
+
+        /// <summary>
         /// Ensures the PreInit event of the page is processed by the module
         /// to override capabilities associated with a client target specification.
         /// </summary>
         /// <param name="sender">HttpApplication related to the request.</param>
         /// <param name="e">EventArgs related to the event. Not used.</param>
-        public void OnPreRequestHandlerExecute(object sender, EventArgs e)
+        public void OnPreRequestHandlerExecuteSetClientTargets(object sender, EventArgs e)
         {
             if (sender is HttpApplication)
             {
                 HttpContext context = ((HttpApplication)sender).Context;
-                
+                                
                 // If this handler relates to a page use the preinit event of the page
                 // to set the capabilities providing time for the page to set the 
                 // clienttarget property if required.
-                if (context != null && 
+                if (context != null &&
                     context.Handler is System.Web.UI.Page)
                     ((System.Web.UI.Page)context.Handler).PreInit += new EventHandler(OnPreInitPage);
             }
@@ -216,11 +242,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
                 if (context != null)
                 {
-                    // Override the capabilities incase the capabilies loaded in the 
-                    // BeginRequest event have been overridden by ASP.NET defaults.
-                    if (context.Request.Browser is MobileCapabilities == false)
-                        OverrideCapabilities(context);
-
                     // Check to see if the request should be redirected.
                     if (context.Handler != null &&
                         String.IsNullOrEmpty(_mobileHomePageUrl) == false &&
@@ -257,7 +278,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             // Check to see if a client target has been specified and if it has
             // use the associated useragent string to assign the capabilities.
             string userAgent = null;
-            if (_clientTargets.TryGetValue(page.ClientTarget, out userAgent) == true)
+            if (page != null && _clientTargets.TryGetValue(page.ClientTarget, out userAgent) == true)
                 OverrideCapabilities(page.Request, userAgent);
         }
 

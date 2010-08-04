@@ -223,17 +223,17 @@ namespace FiftyOne.Foundation.Mobile.Detection
         
         #endregion
 
-        #region Fields
+        #region Constructor
 
         /// <summary>
-        /// If set will be used instead of the base class when determining the 
-        /// tag writer to use to render markup.
+        /// Creates an instance of the <see cref="MobileCapabilities"/> class using
+        /// the list of capabilities provided.
         /// </summary>
-        protected Type _tagWriter = null;
-
-        #endregion
-
-        #region Constructor
+        internal MobileCapabilities(IDictionary capabilities)
+            : base()
+        {
+            Capabilities = new Hashtable(capabilities);
+        }
 
         /// <summary>
         /// Creates an instance of the <see cref="MobileCapabilities"/> class using
@@ -262,17 +262,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
             SetJavaScript(Capabilities, GetJavascriptSupport(context));
         }
 
-        #endregion
-
-        #region Abstracts
-
-        /// <summary>
-        /// Called when the class is initialised. Sets the correct text
-        /// writer based ont he preferred rendering type of the browser.
-        /// </summary>
-        /// <param name="device">The device details to use when setting the tag writer.</param>
-        protected abstract void Init(DeviceInfo device);
-        
         #endregion
 
         #region Properties
@@ -361,10 +350,20 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="format">Audio format to query.</param>
         /// <returns>True if supported. False if not.</returns>
         internal abstract bool IsAudioFormatSupported(AudioFormats format);
-        
+
         #endregion
         
         #region Methods
+
+        /// <summary>
+        /// Called when the class is initialised. Sets the correct text
+        /// writer based on the preferred rendering type of the browser.
+        /// </summary>
+        protected virtual void Init()
+        {
+            // Set the tagwriter.
+            Capabilities["tagwriter"] = GetTagWriter();
+        }
 
         /// <summary>
         /// Sets the javascript boolean string in the capabilities dictionary.
@@ -396,11 +395,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
             return false;
         }
         
-        internal new System.Web.UI.HtmlTextWriter CreateHtmlTextWriter(TextWriter w)
-        {
-            return base.CreateHtmlTextWriter(w);
-        }
-
         #endregion
 
         #region Static Methods
@@ -432,6 +426,29 @@ namespace FiftyOne.Foundation.Mobile.Detection
             #if DEBUG
             EventLog.Debug(String.Format("Setting '{0}' to '{1}'", key, value != null ? value.ToString() : "null"));
             #endif
+        }
+
+
+        private string GetTagWriter()
+        {
+            switch (Capabilities["preferredRenderingType"] as string)
+            {
+                case "xhtml-mp":
+                case "xhtml-basic":
+                    return "System.Web.UI.XhtmlTextWriter";
+
+                case "chtml10":
+                    return "System.Web.UI.ChtmlTextWriter";
+
+                case "html4":
+                    return "System.Web.UI.HtmlTextWriter";
+
+                case "html32":
+                    return "System.Web.UI.Html32TextWriter";
+
+                default:
+                    return "System.Web.UI.Html32TextWriter";
+            }
         }
 
         #endregion

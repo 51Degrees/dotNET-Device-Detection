@@ -7,11 +7,11 @@ using System.Security;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle(".NET Mobile API")]
-[assembly: AssemblyDescription(".NET Mobile API")]
+[assembly: AssemblyTitle("51degrees.mobi - Foundation")]
+[assembly: AssemblyDescription("51degrees.mobi - Foundation open source")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("51 Degrees Mobile Experts Limited")]
-[assembly: AssemblyProduct(".NET Mobile API")]
+[assembly: AssemblyProduct("51degrees.mobi - Foundation")]
 [assembly: AssemblyCopyright("51 Degrees Mobile Experts Limited")]
 [assembly: AssemblyTrademark("51degrees.mobi")]
 [assembly: AssemblyCulture("")]
@@ -31,8 +31,8 @@ using System.Security;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("0.1.10.2")]
-[assembly: AssemblyFileVersion("0.1.10.2")]
+[assembly: AssemblyVersion("0.1.10.3")]
+[assembly: AssemblyFileVersion("0.1.10.3")]
 [assembly: NeutralResourcesLanguageAttribute("en-GB")]
 [assembly: AllowPartiallyTrustedCallers]
 
