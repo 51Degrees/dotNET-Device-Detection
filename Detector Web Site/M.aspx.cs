@@ -25,7 +25,7 @@ using System;
 
 namespace Detector
 {
-    public partial class M : System.Web.UI.MobileControls.MobilePage
+    public partial class M : System.Web.UI.Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {

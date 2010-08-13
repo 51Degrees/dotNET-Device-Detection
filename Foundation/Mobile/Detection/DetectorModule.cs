@@ -100,7 +100,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// The login url for forms authentication.
         /// </summary>
         private string _formsLoginUrl = null;
-        
+
         #endregion
 
         #region Initialisers

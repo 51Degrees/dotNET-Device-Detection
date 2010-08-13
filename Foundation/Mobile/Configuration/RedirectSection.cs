@@ -112,20 +112,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
                 return (string)this["mobileHomePageUrl"];
             }
         }
-
-        /// <summary>
-        /// A url to display an image in error page to mobile devices
-        /// </summary>
-        [ConfigurationProperty("errorImageUrl", DefaultValue = "")]
-        [StringValidator(MaxLength = 255)]
-        public string ErrorImageUrl
-        {
-            get
-            {
-                return (string)this["errorImageUrl"];
-            }
-        }
-
+        
         /// <summary>
         /// A regular expression used to identify pages on the web site that are designed 
         /// for mobile phones. Any page that derives from System.Web.UI.MobileControls.MobilePage 
