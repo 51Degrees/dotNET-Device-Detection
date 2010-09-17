@@ -21,11 +21,12 @@
  * 
  * ********************************************************************* */
 
+#region
+
 using System;
-using System.Text;
 using System.Configuration;
-using System.Web;
-using System.Security.Permissions;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Configuration
 {
@@ -35,13 +36,6 @@ namespace FiftyOne.Foundation.Mobile.Configuration
     public sealed class UrlCollection : ConfigurationElementCollection
     {
         #region Constructors
-
-        /// <summary>
-        /// Creates a new instance of <see cref="UrlCollection"/>.
-        /// </summary>
-        public UrlCollection()
-        {
-        }
 
         #endregion
 
@@ -60,7 +54,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         /// </summary>
         protected override Object GetElementKey(ConfigurationElement element)
         {
-            return ((UrlElement)element).Url;
+            return ((UrlElement) element).Url;
         }
 
         /// <summary>
@@ -80,7 +74,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         public int IndexOf(UrlElement element)
         {
             if (element == null)
-                throw new System.ArgumentNullException("element");
+                throw new ArgumentNullException("element");
             return BaseIndexOf(element);
         }
 
@@ -92,7 +86,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         public void Add(UrlElement element)
         {
             if (element == null)
-                throw new System.ArgumentNullException("element");
+                throw new ArgumentNullException("element");
             BaseAdd(element);
         }
 
@@ -104,7 +98,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         public void Remove(UrlElement element)
         {
             if (element == null)
-                throw new System.ArgumentNullException("element");
+                throw new ArgumentNullException("element");
 
             if (BaseIndexOf(element) >= 0)
                 BaseRemove(element.Url);
@@ -118,7 +112,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         public void RemoveAt(int index)
         {
             if ((index < 0) || (index > base.Count - 1))
-                throw new System.ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException("index");
             BaseRemoveAt(index);
         }
 
@@ -130,7 +124,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         public void Remove(string url)
         {
             if (string.IsNullOrEmpty(url))
-                throw new System.ArgumentNullException("url");
+                throw new ArgumentNullException("url");
 
             BaseRemove(url);
         }
@@ -152,11 +146,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         /// </summary>
         public UrlElement this[int index]
         {
-            get
-            {
-
-                return (UrlElement)BaseGet(index);
-            }
+            get { return (UrlElement) BaseGet(index); }
             set
             {
                 if (BaseGet(index) != null)
@@ -170,12 +160,9 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         /// <summary>
         /// Gets or sets the <typeparamref name="UrlElement"/>.
         /// </summary>        
-        new public UrlElement this[string name]
+        public new UrlElement this[string name]
         {
-            get
-            {
-                return (UrlElement)BaseGet(name);
-            }
+            get { return (UrlElement) BaseGet(name); }
         }
 
         #endregion

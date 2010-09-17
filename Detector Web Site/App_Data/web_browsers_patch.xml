@@ -60,8 +60,11 @@
 				<capability name="model_name" value="3.5" />
 			</group>
 		</device>
-
-
+    <device user_agent="Firefox/4.0" fall_back="firefox" id="firefox_4_0">
+      <group id="product_info">
+        <capability name="model_name" value="4.0" />
+      </group>
+    </device>
 
 		<!--  Opera -->
 		<device user_agent="Opera" fall_back="generic_web_browser" id="opera">

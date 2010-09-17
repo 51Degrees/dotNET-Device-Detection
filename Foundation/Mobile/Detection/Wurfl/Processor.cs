@@ -22,37 +22,45 @@
  * 
  * ********************************************************************* */
 
+#if VER4 
+using System.Linq;
+#endif
+
+#region
+
 using System;
+using System.Collections.Specialized;
 using System.IO;
+using System.IO.Compression;
 using System.Xml;
 using System.Xml.Schema;
-using System.Collections.Specialized;
-using System.IO.Compression;
 using FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 {
     /// <summary>
     /// Constains all methods needed to process the WURFL xml file.
     /// </summary>
-    internal static class WurflProcessor
+    internal static class Processor
     {
         #region Constants
 
-        private static readonly string[] COMPRESSED = { ".gz" };
+        private static readonly string[] COMPRESSED = {".gz"};
 
         #endregion
 
         #region Fields
 
-        static bool _loadOnlyCapabilitiesWhiteListed;
-        static StringCollection _capabilitiesWhiteListed = new StringCollection();
+        private static readonly StringCollection _capabilitiesWhiteListed = new StringCollection();
+        private static bool _loadOnlyCapabilitiesWhiteListed;
 
         #endregion
 
         #region Constructors
 
-        static WurflProcessor()
+        static Processor()
         {
             foreach (string capability in Constants.DefaultUsedCapabilities)
                 _capabilitiesWhiteListed.Add(capability);
@@ -94,7 +102,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// device database if it was created after the master file's date and time.</param>
         /// <remarks>If no files are found devices will remain unchanged.</remarks>
         private static void ParseWurflFiles(Provider devices, StringCollection wurflFilePaths,
-            DateTime masterFileDate)
+                                            DateTime masterFileDate)
         {
             StringCollection availableCapabilities = new StringCollection();
 
@@ -110,12 +118,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 
         private static bool IsCompressed(FileInfo file)
         {
+#if VER4
+            return COMPRESSED.Any(extension => file.Extension == extension);
+#elif VER2
             foreach (string extension in COMPRESSED)
             {
                 if (file.Extension == extension)
                     return true;
             }
             return false;
+#endif
         }
 
         private static void LoadXmlData(
@@ -124,157 +136,142 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             string filePath,
             DateTime masterFileDate)
         {
-            XmlReaderSettings settings = GetXmlReaderSettings();
             DeviceInfo device = null;
             FileInfo file = new FileInfo(filePath);
-            Stream stream = null;
-            GZipStream gzipStream = null;
-            XmlReader reader = null;
-            bool ignoreDevicesWithoutFallbacks = false;
-            bool isActualDeviceRoot = false;
 
-            if (file.Exists == true)
+            if (file.Exists)
             {
-                try
+                // Open the reader using decompression if the file has an extension
+                // that indicates it's compressed.
+                using (XmlReader reader = GetReader(file))
                 {
-                    // Open the reader using decompression if the file has an extension
-                    // that indicates it's compressed.
-                    if (IsCompressed(file) == true)
+                    try
                     {
-                        stream = File.OpenRead(filePath);
-                        gzipStream = new GZipStream(stream, CompressionMode.Decompress);
-                        reader = XmlReader.Create(gzipStream);
-                    }
-                    else
-                    {
-                        reader = XmlReader.Create(file.FullName, settings);
-                    }
-
-                    // Process the data file.
-                    while (reader.Read())
-                    {
-                        switch (reader.Name)
+                        // Process the data file.
+                        while (reader.Read())
                         {
-                            // Remove the device if it's older than the current master file.
-                            case Constants.CreatedDate:
-                                // Tell subsequent processing to ignore devices that
-                                // have no fallback devices already loaded.
-                                ignoreDevicesWithoutFallbacks = true;
-
-                                // If the element is a valid date element.
-                                if (masterFileDate != null && device != null && reader.IsStartElement())
-                                {
-                                    // Get the date and time the current device was created in 
-                                    // the wurfl patch file.
-                                    DateTime createdDate = reader.ReadElementContentAsDateTime();
-                                    if (createdDate < masterFileDate)
+                            switch (reader.Name)
+                            {
+                                    // Load Device Data
+                                case Constants.DeviceNodeName:
+                                    if (reader.IsStartElement())
                                     {
-                                        EventLog.Debug(String.Format("Device ID '{0}' has not been loaded as it was created prior to the current master file.",
-                                            device.DeviceId));
-                                        device = null;
+                                        // If a device has already been created ensure it's saved.
+                                        if (device != null)
+                                            devices.Set(device);
+
+                                        // Create or get the device related to the current XML element.
+                                        device = LoadDevice(devices, reader);
                                     }
-                                }
-                                break;
-                            // Load Device Data
-                            case Constants.DeviceNodeName:
-                                if (reader.IsStartElement())
-                                {
-                                    // If a device has already been created ensure it's saved.
-                                    if (device != null)
+                                    break;
+
+                                    // Load the device capability.
+                                case Constants.CapabilityNodeName:
+                                    if (reader.IsStartElement())
                                     {
-                                        devices.Set(device);
-                                        device = null;
+                                        LoadCapabilityData(
+                                            reader,
+                                            device,
+                                            availableCapabilities);
                                     }
-
-                                    // Create the next device using the fallback device if available.
-                                    string deviceId = reader.GetAttribute(Constants.IdAttributeName, string.Empty);
-                                    string userAgent = reader.GetAttribute(Constants.UserAgentAttributeName, string.Empty);
-                                    string fallbackDeviceId = reader.GetAttribute(Constants.FallbackAttributeName, string.Empty);
-                                    
-                                    // If the device already exists then use the previous one. This may happen
-                                    // when an earlier device referenced a fallback device that had not yet
-                                    // been created.
-                                    device = devices.GetDeviceInfoFromID(deviceId);
-                                    if (device == null)
-                                    {
-                                        // Create the new device.
-                                        device = new DeviceInfo(devices, deviceId, userAgent);
-                                    }
-                                    else
-                                    {
-                                        // Ensure the correct UserAgent string is assigned to this device.
-                                        device.SetUserAgent(userAgent);
-                                    }
-
-                                    // If the Actual Device Root attribute is specified then set the value 
-                                    // for this device.
-                                    if (bool.TryParse(reader.GetAttribute(Constants.ActualDeviceRoot, string.Empty), out isActualDeviceRoot) == true)
-                                        device.IsActualDeviceRoot = isActualDeviceRoot;
-
-                                    // Check the fallback device is different to the device being loaded.
-                                    if (device.DeviceId != fallbackDeviceId && fallbackDeviceId != null)
-                                    {
-                                        // Does the fallback device already exist?
-                                        device.FallbackDevice = devices.GetDeviceInfoFromID(fallbackDeviceId);
-                                        if (device.FallbackDevice == null && ignoreDevicesWithoutFallbacks == false)
-                                        {
-                                            // No. So create new fallback device.
-                                            device.FallbackDevice = new DeviceInfo(devices, fallbackDeviceId);
-                                            // Add it to the available devices.
-                                            devices.Set(device.FallbackDevice);
-                                        }
-                                    }
-
-                                    // Check to see if we should ignore devices without fallbacks.
-                                    if (ignoreDevicesWithoutFallbacks == true && device.FallbackDevice == null)
-                                        device = null;
-                                }
-                                break;
-
-                            // Load the device capability.
-                            case Constants.CapabilityNodeName:
-                                if (reader.IsStartElement())
-                                {
-                                    LoadCapabilityData(
-                                        reader,
-                                        device,
-                                        availableCapabilities);
-                                }
-                                break;
+                                    break;
+                            }
                         }
+
+                        // If a device has not been written ensure it's added to the device dataset.
+                        if (device != null)
+                            devices.Set(device);
                     }
-                    
-                    // If a device is outstanding ensure it's added to the device dataset.
-                    if (device != null)
+                    catch (XmlException ex)
                     {
-                        devices.Set(device);
-                        device = null;
+                        throw new WurflException(
+                            String.Format("XML exception processing wurfl file '{0}'.", filePath),
+                            ex);
+                    }
+                    catch (IOException ex)
+                    {
+                        throw new WurflException(
+                            String.Format("IO exception processing wurfl file '{0}'.", filePath),
+                            ex);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new WurflException(
+                            String.Format("Exception processing wurfl file '{0}'.", filePath),
+                            ex);
                     }
                 }
-                catch (XmlException ex)
+            }
+        }
+
+        /// <summary>
+        /// Processes the XML element containing the device attributes.
+        /// </summary>
+        /// <param name="devices">A list of loaded devices.</param>
+        /// <param name="reader">The XML stream readers.</param>
+        /// <returns>An empty device.</returns>
+        private static DeviceInfo LoadDevice(Provider devices, XmlReader reader)
+        {
+            // Create the next device using the fallback device if available.
+            string deviceId = reader.GetAttribute(Constants.IdAttributeName, string.Empty);
+            string userAgent = reader.GetAttribute(Constants.UserAgentAttributeName, string.Empty);
+            string fallbackDeviceId = reader.GetAttribute(Constants.FallbackAttributeName, string.Empty);
+
+            // If the device already exists then use the previous one. This may happen
+            // when an earlier device referenced a fallback device that had not yet
+            // been created.
+            DeviceInfo device = devices.GetDeviceInfoFromID(deviceId);
+            if (device == null)
+            {
+                // Create the new device.
+                device = new DeviceInfo(devices, deviceId, userAgent ?? String.Empty);
+            }
+            else if (userAgent != null)
+            {
+                // Ensure the correct UserAgent string is assigned to this device.
+                device.SetUserAgent(userAgent);
+            }
+
+            // If the Actual Device Root attribute is specified then set the value 
+            // for this device.
+            bool isActualDeviceRoot;
+            if (bool.TryParse(reader.GetAttribute(Constants.ActualDeviceRoot, string.Empty), out isActualDeviceRoot))
+                device.IsActualDeviceRoot = isActualDeviceRoot;
+
+            // Check the fallback device is different to the device being loaded.
+            if (fallbackDeviceId != null && device.DeviceId != fallbackDeviceId)
+            {
+                // Does the fallback device already exist?
+                device.FallbackDevice = devices.GetDeviceInfoFromID(fallbackDeviceId);
+                if (device.FallbackDevice == null)
                 {
-                    throw new WurflException(
-                        String.Format("XML exception processing wurfl file '{0}'.", filePath),
-                        ex);
+                    // No. So create new fallback device.
+                    device.FallbackDevice = new DeviceInfo(devices, fallbackDeviceId);
+                    // Add it to the available devices.
+                    devices.Set(device.FallbackDevice);
                 }
-                catch (IOException ex)
-                {
-                    throw new WurflException(
-                        String.Format("IO exception processing wurfl file '{0}'.", filePath),
-                        ex);
-                }
-                catch (Exception ex)
-                {
-                    throw new WurflException(
-                        String.Format("Exception processing wurfl file '{0}'.", filePath),
-                        ex);
-                }
-                finally
-                {
-                    if (reader != null) { reader.Close(); }
-                    if (gzipStream != null) { gzipStream.Close(); gzipStream.Dispose(); }
-                    if (stream != null) { stream.Close(); stream.Dispose(); }
-                }
+            }
+            return device;
+        }
+
+        /// <summary>
+        /// Opens the Xml reader after first checking if the file is compressed.
+        /// </summary>
+        /// <param name="file">Information about the file to be opened.</param>
+        /// <returns>An open XmlReader.</returns>
+        private static XmlReader GetReader(FileInfo file)
+        {
+            XmlReaderSettings settings = GetXmlReaderSettings();
+            if (IsCompressed(file))
+            {
+                return XmlReader.Create(
+                    new GZipStream(
+                        File.OpenRead(file.FullName), CompressionMode.Decompress),
+                    settings);
+            }
+            else
+            {
+                return XmlReader.Create(file.FullName, settings);
             }
         }
 
@@ -287,7 +284,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 
             // If it is not white listed, do not load into the memory.
             // This is to keep memory consumption down.
-            if (_loadOnlyCapabilitiesWhiteListed == true &&
+            if (_loadOnlyCapabilitiesWhiteListed &&
                 _capabilitiesWhiteListed.Contains(capabilityName) == false)
                 return;
 
@@ -373,9 +370,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             if (capabilitiesWhiteList != null)
             {
                 _loadOnlyCapabilitiesWhiteListed = capabilitiesWhiteList.Count > 0;
+#if VER4
+                foreach (string capability in
+                    capabilitiesWhiteList.Cast<string>().Where(capability => !_capabilitiesWhiteListed.Contains(capability)))
+                {
+                    _capabilitiesWhiteListed.Add(capability);
+                }
+#elif VER2
                 foreach (string capability in capabilitiesWhiteList)
                     if (!_capabilitiesWhiteListed.Contains(capability))
                         _capabilitiesWhiteListed.Add(capability);
+#endif
             }
 
             StringCollection wurflFilePaths = new StringCollection();

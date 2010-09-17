@@ -21,11 +21,11 @@
  * 
  * ********************************************************************* */
 
-using System;
+#region
+
 using System.Configuration;
-using System.Web;
-using System.IO;
-using System.Security.Permissions;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Configuration
 {
@@ -35,11 +35,6 @@ namespace FiftyOne.Foundation.Mobile.Configuration
     public class LogSection : ConfigurationSection
     {
         #region Constructors
-
-        /// <summary>
-        /// Creates a new instance of Section.
-        /// </summary>
-        public LogSection() { }
 
         #endregion
 
@@ -60,10 +55,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         [StringValidator(InvalidCharacters = "!@#$%^&*()[]{};'\"|", MaxLength = 255)]
         public string LogFile
         {
-            get
-            {
-                return (string)this["logFile"];
-            }
+            get { return (string) this["logFile"]; }
         }
 
         /// <summary>
@@ -77,10 +69,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         [StringValidator(InvalidCharacters = "!@#$%^&*()[]{};'\"|", MaxLength = 5)]
         public string LogLevel
         {
-            get
-            {
-                return (string)this["logLevel"];
-            }
+            get { return (string) this["logLevel"]; }
         }
 
         /// <summary>
@@ -99,10 +88,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         [StringValidator(InvalidCharacters = "!@#$%^&*()[]{};'\"|", MaxLength = 255)]
         public string PageLogDirectory
         {
-            get
-            {
-                return Support.GetFilePath((string)this["pageLogDirectory"]);
-            }
+            get { return Support.GetFilePath((string) this["pageLogDirectory"]); }
         }
 
         #endregion

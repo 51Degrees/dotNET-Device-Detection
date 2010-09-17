@@ -21,9 +21,11 @@
  * 
  * ********************************************************************* */
 
+#region
+
 using System.Configuration;
-using System.Web;
-using System.Security.Permissions;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Configuration
 {
@@ -35,27 +37,18 @@ namespace FiftyOne.Foundation.Mobile.Configuration
     {
         #region Constructors
 
-        /// <summary>
-        /// Creates a new instance of <see cref="UrlElement"/>.
-        /// </summary>
-        public UrlElement()
-        { }
-
         #endregion
 
         #region Properties
 
-         /// <summary>
+        /// <summary>
         /// Gets or sets the url.
         /// </summary>
         [ConfigurationProperty("url", IsRequired = true)]
         [StringValidator(InvalidCharacters = "!@#$%^*()[]{};'\"|", MaxLength = 255)]
         public string Url
         {
-            get
-            {
-                return (string)this["url"];
-            }
+            get { return (string) this["url"]; }
         }
 
         /// <summary>
@@ -64,10 +57,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         [ConfigurationProperty("days", IsRequired = false, DefaultValue = 7)]
         public int Days
         {
-            get
-            {
-                return (int)this["days"];
-            }
+            get { return (int) this["days"]; }
         }
 
         /// <summary>
@@ -76,10 +66,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         [ConfigurationProperty("enabled", IsRequired = false, DefaultValue = true)]
         public bool Enabled
         {
-            get
-            {
-                return (bool)this["enabled"];
-            }
+            get { return (bool) this["enabled"]; }
         }
 
         #endregion

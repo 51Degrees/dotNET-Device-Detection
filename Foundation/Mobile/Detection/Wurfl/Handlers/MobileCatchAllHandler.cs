@@ -33,14 +33,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
             get { return CONFIDENCE; }
         }
 
-        internal protected override bool CanHandle(string userAgent)
+        protected internal override bool CanHandle(string userAgent)
         {
             return userAgent.Contains("WAP") ||
-                userAgent.Contains("MIDP") ||
-                userAgent.Contains("CLDC") ||
-                userAgent.Contains("Teleca-") ||
-                userAgent.Contains("Screen-") ||
-                userAgent.Contains("mobile");
+                   userAgent.Contains("MIDP") ||
+                   userAgent.Contains("CLDC") ||
+                   userAgent.Contains("Teleca-") ||
+                   userAgent.Contains("Screen-") ||
+                   userAgent.Contains("mobile");
         }
     }
 }

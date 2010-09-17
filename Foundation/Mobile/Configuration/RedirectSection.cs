@@ -21,11 +21,11 @@
  * 
  * ********************************************************************* */
 
-using System;
+#region
+
 using System.Configuration;
-using System.Web;
-using System.IO;
-using System.Security.Permissions;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Configuration
 {
@@ -36,15 +36,10 @@ namespace FiftyOne.Foundation.Mobile.Configuration
     {
         #region Constructors
 
-        /// <summary>
-        /// Creates a new instance of Section.
-        /// </summary>
-        public RedirectSection() { }
-
         #endregion
-        
+
         #region Properties
-        
+
         /// <summary>
         /// Returns true if the functionality of <see cref="RedirectSection"/> is enabled.
         /// </summary>
@@ -64,10 +59,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         [StringValidator(InvalidCharacters = "!@#$%^&*()[]{};'\"|", MaxLength = 255)]
         public string DevicesFile
         {
-            get
-            {
-                return (string)this["devicesFile"];
-            }
+            get { return (string) this["devicesFile"]; }
         }
 
         /// <summary>
@@ -79,12 +71,9 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         [ConfigurationProperty("timeout", IsRequired = false, DefaultValue = "20")]
         public int Timeout
         {
-            get
-            {
-                return (int)this["timeout"];
-            }
+            get { return (int) this["timeout"]; }
         }
-        
+
         /// <summary>
         /// If set to true only the first request received by the web site is redirected
         /// to the mobileUrl when the site is accessed from a mobile device.
@@ -93,10 +82,30 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         [ConfigurationProperty("firstRequestOnly", IsRequired = false, DefaultValue = "true")]
         public bool FirstRequestOnly
         {
-            get
-            {
-                return (bool)this["firstRequestOnly"];
-            }
+            get { return (bool) this["firstRequestOnly"]; }
+        }
+
+        /// <summary>
+        /// When set to true tablet devices will be treated as mobile devices for
+        /// the purposes of redirection.
+        /// (Optional – defaults to true)
+        /// </summary>
+        [ConfigurationProperty("treatTabletAsMobile", IsRequired = false, DefaultValue = "true")]
+        public bool TreatTabletAsMobile
+        {
+            get { return (bool) this["treatTabletAsMobile"]; }
+        }
+
+        /// <summary>
+        /// This attribute is used when redirecting to a mobile home page.
+        /// If set to true the original URL will be encoded and set
+        /// as the query string for the <see cref="MobileHomePageUrl"/>.
+        /// (Optional – defaults to false)
+        /// </summary>
+        [ConfigurationProperty("originalUrlAsQueryString", IsRequired = false, DefaultValue = "false")]
+        public bool OriginalUrlAsQueryString
+        {
+            get { return (bool) this["originalUrlAsQueryString"]; }
         }
 
         /// <summary>
@@ -107,17 +116,16 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         [StringValidator(MaxLength = 255)]
         public string MobileHomePageUrl
         {
-            get
-            {
-                return (string)this["mobileHomePageUrl"];
-            }
+            get { return (string) this["mobileHomePageUrl"]; }
         }
-        
+
         /// <summary>
         /// A regular expression used to identify pages on the web site that are designed 
         /// for mobile phones. Any page that derives from System.Web.UI.MobileControls.MobilePage 
         /// will automatically be treated as a mobile page. Use this attribute to tell redirection
         /// about mobile pages derived from other base classes such as System.Web.UI.Page.
+        /// The value is evaluated against the HttpRequests AppRelativeCurrentExecutionFilePath and
+        /// Url properties.
         /// Redirection needs to be aware of mobile pages so that requests to these pages can be
         /// ignored. (Optional)
         /// </summary>
@@ -125,10 +133,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         [StringValidator(MaxLength = 2048)]
         public string MobilePagesRegex
         {
-            get
-            {
-                return (string)this["mobilePagesRegex"];
-            }
+            get { return (string) this["mobilePagesRegex"]; }
         }
 
         #endregion

@@ -21,12 +21,11 @@
  * 
  * ********************************************************************* */
 
-using System;
-using System.Text;
+#region
+
 using System.Configuration;
-using System.Web.Configuration;
-using System.Web;
-using System.Security.Permissions;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
 {
@@ -36,12 +35,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
     public sealed class CapabilityElement : ConfigurationElement
     {
         #region Constructors
-
-        /// <summary>
-        /// Creates a new instance of <see cref="CapabilityElement"/>.
-        /// </summary>
-        public CapabilityElement()
-        { }
 
         #endregion
 
@@ -54,14 +47,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         [StringValidator(InvalidCharacters = ".!@#$%^&*()[]{};'\"|\\", MinLength = 1, MaxLength = 255)]
         public string CapabilityName
         {
-            get
-            {
-                return (string)this["capabilityName"];
-            }
-            set
-            {
-                this["capabilityName"] = value;
-            }
+            get { return (string) this["capabilityName"]; }
+            set { this["capabilityName"] = value; }
         }
 
         #endregion

@@ -21,11 +21,11 @@
  * 
  * ********************************************************************* */
 
-using System;
-using System.Text;
+#region
+
 using System.Configuration;
-using System.Web;
-using System.Security.Permissions;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
 {
@@ -35,12 +35,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
     public sealed class PatchConfigElement : ConfigurationElement
     {
         #region Constructors
-
-        /// <summary>
-        /// Creates a new instance of <see cref="PatchConfigElement"/>.
-        /// </summary>
-        public PatchConfigElement()
-        { }
 
         #endregion
 
@@ -53,14 +47,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         [StringValidator(InvalidCharacters = "!@#$%^&*()[]{};'\"|\\", MinLength = 1, MaxLength = 60)]
         public string Name
         {
-            get
-            {
-                return (string)this["name"];
-            }
-            set
-            {
-                this["name"] = value;
-            }
+            get { return (string) this["name"]; }
+            set { this["name"] = value; }
         }
 
         /// <summary>
@@ -70,14 +58,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         [StringValidator(InvalidCharacters = "!@#$%^&*()[]{};'\"|", MaxLength = 255)]
         public string FilePath
         {
-            get
-            {
-                return (string)this["filePath"];
-            }
-            set
-            {
-                this["filePath"] = value;
-            }
+            get { return (string) this["filePath"]; }
+            set { this["filePath"] = value; }
         }
 
         /// <summary>
@@ -86,14 +68,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         [ConfigurationProperty("enabled", IsRequired = false, DefaultValue = true)]
         public bool Enabled
         {
-            get
-            {
-                return (bool)this["enabled"];
-            }
-            set
-            {
-                this["enabled"] = value;
-            }
+            get { return (bool) this["enabled"]; }
+            set { this["enabled"] = value; }
         }
 
         #endregion

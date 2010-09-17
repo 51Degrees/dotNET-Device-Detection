@@ -21,9 +21,6 @@
  * 
  * ********************************************************************* */
 
-using FiftyOne.Foundation.Mobile.Detection.Wurfl;
-using FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers;
-
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
     internal class SoftBankHandler : RegexSegmentHandler
@@ -32,13 +29,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 
         private static readonly string PATTERN = @"(SoftBank|Vodafone|J-PHONE)\/\d\.\d\/\w+";
 
-        internal SoftBankHandler() : base(PATTERN) { }
-
-        internal protected override bool CanHandle(string userAgent)
+        internal SoftBankHandler() : base(PATTERN)
         {
-            return (userAgent.StartsWith("SoftBank") ||
-                    userAgent.StartsWith("Vodafone") ||
-                    userAgent.StartsWith("J-PHONE"));
         }
 
         internal override DeviceInfo DefaultDevice
@@ -55,5 +47,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
             }
         }
 
+        protected internal override bool CanHandle(string userAgent)
+        {
+            return (userAgent.StartsWith("SoftBank") ||
+                    userAgent.StartsWith("Vodafone") ||
+                    userAgent.StartsWith("J-PHONE"));
+        }
     }
 }

@@ -25,10 +25,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Segment
 {
     internal class Segment
     {
-        private int _score = 0;
-        private bool _isValid = false;
+        private bool _isValid;
+        private int _score;
 
-        internal string Value = null;
+        internal string Value;
+
+        internal Segment(string value)
+        {
+            Value = value;
+        }
 
         internal int Score
         {
@@ -43,11 +48,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Segment
         internal bool IsValid
         {
             get { return _isValid; }
-        }
-
-        internal Segment(string value)
-        {
-            Value = value;
         }
     }
 }

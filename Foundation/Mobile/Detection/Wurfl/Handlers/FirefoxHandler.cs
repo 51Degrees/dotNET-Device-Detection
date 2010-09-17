@@ -25,13 +25,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
     internal class FirefoxHandler : RegexSegmentHandler
     {
-        private const string REGEX = "Mozilla/5.0\\s*(?:\\(([^;]*);?\\s*U;\\s*([^;]*);?\\s*([^;]*);?\\s*(?:rv.*);?\\s*(?:.*)?\\))(?:.*)Gecko/(?:[\\d]+)?(?:.*)?Firefox/(\\d.\\w)(?:[\\.\\w]+)?\\s*(.*)?";
+        private const string REGEX =
+            "Mozilla/5.0\\s*(?:\\(([^;]*);?\\s*U;\\s*([^;]*);?\\s*([^;]*);?\\s*(?:rv.*);?\\s*(?:.*)?\\))(?:.*)Gecko/(?:[\\d]+)?(?:.*)?Firefox/(\\d.\\w)(?:[\\.\\w]+)?\\s*(.*)?";
 
         // Initialise the regular expression tokens.
-        internal FirefoxHandler() : base(REGEX, new int[] { 1, 1, 1, 2, 0}) {}
-        
+        internal FirefoxHandler() : base(REGEX, new[] {1, 1, 1, 2, 0})
+        {
+        }
+
         // Checks the given UA contains "Firefox".
-        internal protected override bool CanHandle(string userAgent)
+        protected internal override bool CanHandle(string userAgent)
         {
             return userAgent.Contains("Firefox");
         }
@@ -41,33 +44,27 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
     {
         private const string DEFAULT_DEVICE = "firefox";
         private const byte EXTRA_CONFIDENCE = 1;
-        private static readonly string[] SUPPORTED_ROOT_DEVICES = new string[] { DEFAULT_DEVICE };
+        private static readonly string[] SUPPORTED_ROOT_DEVICES = new[] {DEFAULT_DEVICE};
 
         /// <summary>
         /// Provides a higher degree of confidence because only devices in the "firefox"
         /// branch of the device tree are available for matching.
         /// </summary>
-        internal override byte Confidence { get { return (byte)(base.Confidence + EXTRA_CONFIDENCE); } }
+        internal override byte Confidence
+        {
+            get { return (byte) (base.Confidence + EXTRA_CONFIDENCE); }
+        }
 
         /// <summary>
         /// An array of supported root devices that devices from the WURFL
         /// data file need to be children of to be valid for this handler.
         /// </summary>
-        protected override string[] SupportedRootDeviceIds { get { return SUPPORTED_ROOT_DEVICES; } }
+        protected override string[] SupportedRootDeviceIds
+        {
+            get { return SUPPORTED_ROOT_DEVICES; }
+        }
 
         // Checks the US does not contain mobile strings and does contain desktop strings.
-        internal protected override bool CanHandle(string userAgent)
-        {
-            return 
-                (userAgent.Contains("Firefox") ||
-                userAgent.Contains("Iceweasel") ||
-                userAgent.Contains("Thunderbird") ||
-                userAgent.Contains("Gecko/"))
-                &&
-                (userAgent.Contains("(Macintosh;") ||
-                userAgent.Contains("(Windows;") ||
-                userAgent.Contains("(X11;"));
-        }
 
         internal override DeviceInfo DefaultDevice
         {
@@ -78,6 +75,19 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
                     return device;
                 return base.DefaultDevice;
             }
+        }
+
+        protected internal override bool CanHandle(string userAgent)
+        {
+            return
+                (userAgent.Contains("Firefox") ||
+                 userAgent.Contains("Iceweasel") ||
+                 userAgent.Contains("Thunderbird") ||
+                 userAgent.Contains("Gecko/"))
+                &&
+                (userAgent.Contains("(Macintosh;") ||
+                 userAgent.Contains("(Windows") ||
+                 userAgent.Contains("(X11;"));
         }
     }
 }

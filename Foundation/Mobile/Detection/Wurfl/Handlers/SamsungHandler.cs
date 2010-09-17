@@ -21,40 +21,54 @@
  * 
  * ********************************************************************* */
 
+#region
+
+using System;
 using FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers;
+using Matcher=FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.EditDistance.Matcher;
+
+#endregion
+
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
     internal class SamsungHandler : RegexSegmentHandler
     {
         private const byte EXTRA_CONFIDENCE = 1;
-        private static readonly string[] PATTERNS = {
-            // Samsung model details.
-            @"(?i)(?:(?<=samsung|SEC-)[^/]+)",
-            // Version details.
-            @"(?i)(?:(?<=samsung|SEC-[^/]+/)[^\s]+)" };
 
-        internal SamsungHandler() : base(PATTERNS, new int[] { 100, 1 }) { }
+        private static readonly string[] PATTERNS = {
+                                                        // Samsung model details.
+                                                        @"(?i)(?:(?<=samsung|SEC-)[^/]+)",
+                                                        // Version details.
+                                                        @"(?i)(?:(?<=samsung|SEC-[^/]+/)[^\s]+)"
+                                                    };
+
+        internal SamsungHandler() : base(PATTERNS, new[] {100, 1})
+        {
+        }
 
         /// <summary>
         /// Provides a higher degree of confidence so that this handler will not be overruled
         /// by desktop handlers.
         /// </summary>
-        internal override byte Confidence { get { return (byte)(base.Confidence + EXTRA_CONFIDENCE); } }
-
-        // Checks given UA contains "Samsung" in any case.
-        internal protected override bool CanHandle(string userAgent)
+        internal override byte Confidence
         {
-            return ((userAgent.IndexOf("samsung", System.StringComparison.InvariantCultureIgnoreCase) > -1) ||
-                userAgent.StartsWith("SEC-")) &&
-                base.CanHandle(userAgent);
+            get { return (byte) (base.Confidence + EXTRA_CONFIDENCE); }
         }
 
-        internal protected override Results Match(string userAgent)
+        // Checks given UA contains "Samsung" in any case.
+        protected internal override bool CanHandle(string userAgent)
         {
-            Results results =  base.Match(userAgent);
+            return ((userAgent.IndexOf("samsung", StringComparison.InvariantCultureIgnoreCase) > -1) ||
+                    userAgent.StartsWith("SEC-")) &&
+                   base.CanHandle(userAgent);
+        }
+
+        protected internal override Results Match(string userAgent)
+        {
+            Results results = base.Match(userAgent);
             // Use Edit Distance if the segment match failed.
             if (results == null || results.Count == 0)
-                results = FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.EditDistance.Matcher.Match(userAgent, this);
+                results = Matcher.Match(userAgent, this);
             return results;
         }
     }

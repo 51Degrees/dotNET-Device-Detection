@@ -22,10 +22,12 @@
  * 
  * ********************************************************************* */
 
+#region
+
 using System;
-using System.Drawing.Imaging;
-using System.Web;
-using System.Security.Permissions;
+using FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 {
@@ -40,12 +42,36 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// Holds all capabilities from the current device
         /// </summary>
         private Collection _deviceCapabilities;
-        
+
+        /// <summary>
+        /// The Id of the device.
+        /// </summary>
         private string _deviceId;
-        private string _userAgent;
-        private bool _isActualDeviceRoot;
-        private DeviceInfo _fallbackDevice;
+
+        /// <summary>
+        /// A reference to the collection of all devices.
+        /// </summary>
         private Provider _devices;
+
+        /// <summary>
+        /// The fallback device.
+        /// </summary>
+        private DeviceInfo _fallbackDevice;
+
+        /// <summary>
+        /// The useragent string of the device.
+        /// </summary>
+        private string _userAgent;
+
+        /// <summary>
+        /// The static index of the "is_wireless_device" string in the Strings static collection.
+        /// </summary>
+        private static readonly int IsWirelessDeviceIndex = Strings.Add("is_wireless_device");
+
+        /// <summary>
+        /// The static index of the "is_tablet" string in the Strings static collection.
+        /// </summary>
+        private static readonly int IsTabletDeviceIndex = Strings.Add("is_tablet");
         
         #endregion
 
@@ -54,15 +80,19 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// <summary>
         /// Hide the default constructor.
         /// </summary>
-        private DeviceInfo() {}
+        private DeviceInfo()
+        {
+        }
 
         /// <summary>
         /// Creates a new device using the source device as the fallback.
         /// </summary>
         /// <param name="source">Source device for the new device.</param>
         /// <param name="deviceId">Id of the new device.</param>
-        internal DeviceInfo(DeviceInfo source, string deviceId) 
-            : this(source._devices, deviceId, source._userAgent, source) {}
+        internal DeviceInfo(DeviceInfo source, string deviceId)
+            : this(source._devices, deviceId, source._userAgent, source)
+        {
+        }
 
         /// <summary>
         /// Creates an instance of DeviceInfo.
@@ -113,7 +143,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             Provider devices,
             string deviceId)
         {
-            if (string.IsNullOrEmpty(deviceId) == true)
+            if (string.IsNullOrEmpty(deviceId))
                 throw new ArgumentNullException("deviceId");
 
             if (devices == null)
@@ -132,34 +162,46 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             if (userAgent == null)
                 throw new ArgumentNullException("userAgent");
 
-            _userAgent = FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.UserAgentParser.Parse(userAgent);
+            _userAgent = UserAgentParser.Parse(userAgent);
 
             Init(devices, deviceId);
         }
-        
+
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// Returns true if the device is a tablet device.
+        /// </summary>
+        internal bool IsTabletDevice
+        {
+            get
+            {
+                return bool.TrueString.Equals(
+                    Strings.Get(GetCapability(IsTabletDeviceIndex)),
+                    StringComparison.InvariantCultureIgnoreCase);
+            }
+        }
 
         /// <summary>
         /// Returns true if the device is a wireless device.
         /// </summary>
         internal bool IsMobileDevice
         {
-            get { return bool.TrueString.Equals(
-                GetCapability("is_wireless_device"), 
-                StringComparison.InvariantCultureIgnoreCase); }
+            get
+            {
+                return bool.TrueString.Equals(
+                    Strings.Get(GetCapability(IsWirelessDeviceIndex)),
+                    StringComparison.InvariantCultureIgnoreCase);
+            }
         }
 
         /// <summary>
         /// Returns true if the device is a root device.
         /// </summary>
-        internal bool IsActualDeviceRoot
-        {
-            get { return _isActualDeviceRoot; }
-            set { _isActualDeviceRoot = value; }
-        }
-        
+        internal bool IsActualDeviceRoot { get; set; }
+
         /// <summary>
         /// Gets the internal identifier of the device as specified in the WURFL.
         /// </summary>
@@ -174,6 +216,20 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         internal string UserAgent
         {
             get { return _userAgent; }
+        }
+
+        internal DeviceInfo FallbackDevice
+        {
+            set { _fallbackDevice = value; }
+            get { return _fallbackDevice; }
+        }
+
+        /// <summary>
+        /// The list of device capabilities.
+        /// </summary>
+        internal Collection Capabilities
+        {
+            get { return _deviceCapabilities; }
         }
 
         /// <summary>
@@ -191,104 +247,37 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             }
         }
 
-        internal DeviceInfo FallbackDevice
-        {
-            set { _fallbackDevice = value; }
-            get { return _fallbackDevice; }
-        }
-        
-        /// <summary>
-        /// The list of device capabilities.
-        /// </summary>
-        internal Collection Capabilities
-        {
-            get { return _deviceCapabilities; }
-        }
-
         #endregion
 
         #region Methods
-        
+
         /// <summary>
-        /// Gets the capability value for this device
+        /// Gets the capability value index in the static Strings collection for this device
+        /// based on the index of the capability name.
         /// </summary>
-        /// <param name="capabilityName">Capability name.</param>
-        /// <returns>Capability value in string format.</returns>
-        public string GetCapability(string capabilityName)
+        /// <param name="index">Capability name index.</param>
+        /// <returns>Capability index value in the String collection, or -1 if the capability does not exist.</returns>
+        internal int GetCapability(int index)
         {
-            string value = _deviceCapabilities.Get(capabilityName);
-            if (value == null && _fallbackDevice != null)
-            {
-                value = _fallbackDevice.GetCapability(capabilityName);
-                if (value != null)
-                {
-                    _deviceCapabilities.Set(capabilityName, value);
-                }
-            }
-            return value;
+            if (_deviceCapabilities.ContainsKey(index))
+                return _deviceCapabilities[index];
+            if (_fallbackDevice != null)
+                return _fallbackDevice.GetCapability(index);
+            return -1;
         }
 
         /// <summary>
-        /// Returns the value of the capability without refering to a
-        /// fall back device. Used for capabilities that the fallback
-        /// device does not matter for. For example; uaprof information.
+        /// Gets the capability value index in the static Strings collection for this device
+        /// based on the index of the capability name. The fallback device will not be checked.
         /// </summary>
-        /// <param name="capabilityName">Capability name.</param>
-        /// <returns>Capability value in string format.</returns>
-        internal string GetCapabilityNoFallback(string capabilityName)
-        {
-            return _deviceCapabilities.Get(capabilityName);
-        }
-        
-        /// <summary>
-        /// Gets the capability value for this device and convert it into a bool.
-        /// </summary>
-        /// <param name="capabilityName">Capability name.</param>
-        /// <param name="capabilityValue">Capability value.</param>
-        /// <returns>Indicates if the capability was successfully converted.</returns>
-        public bool GetCapability(string capabilityName, out bool capabilityValue)
-        {
-            return bool.TryParse(GetCapability(capabilityName), out capabilityValue);
-        }
+        /// <param name="index">Capability name index.</param>
+        /// <returns>Capability index value in the String collection, or -1 if the capability does not exist.</returns>
 
-        /// <summary>
-        /// Gets the capability value for this device and convert it into an integer.
-        /// </summary>
-        /// <param name="capabilityName">Capability name.</param>
-        /// <param name="capabilityValue">Capability value.</param>
-        /// <returns>Indicates if the capability was successfully converted.</returns>
-        public bool GetCapability(string capabilityName, out int capabilityValue)
+        internal int GetCapabilityNoFallback(int index)
         {
-            return int.TryParse(GetCapability(capabilityName), out capabilityValue);
-        }
-
-        /// <summary>
-        /// Gets the capability value for this device and convert it into a long.
-        /// </summary>
-        /// <param name="capabilityName">Capability name.</param>
-        /// <param name="capabilityValue">Capability value.</param>
-        /// <returns>Indicates if the capability was successfully converted.</returns>
-        public bool GetCapability(string capabilityName, out long capabilityValue)
-        {
-            return long.TryParse(GetCapability(capabilityName), out capabilityValue);
-        }
-
-        /// <summary>
-        /// Checks the device data to determine if the image format is supported.
-        /// </summary>
-        /// <param name="format">Image format being requested.</param>
-        /// <returns>True if the format is supported. Otherwise false.</returns>
-        public bool SupportsImageFormat(ImageFormat format)
-        {
-            string capabilityName = null;
-            if (format.Guid == ImageFormat.Gif.Guid) capabilityName = "gif";
-            else if (format.Guid == ImageFormat.Png.Guid) capabilityName = "png";
-            else if (format.Guid == ImageFormat.Jpeg.Guid) capabilityName = "gif";
-            if (capabilityName != null && bool.TrueString.Equals(GetCapability(capabilityName)) == true)
-            {
-                return true;
-            }
-            return false;
+            if (_deviceCapabilities.ContainsKey(index))
+                return _deviceCapabilities[index];
+            return -1;
         }
 
         #endregion

@@ -21,12 +21,12 @@
  * 
  * ********************************************************************* */
 
-namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers 
+namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
     internal class ToshibaHandler : EditDistanceHandler
     {
         // Intercept all UAs starting with "Toshiba"
-        internal protected override bool CanHandle(string userAgent)
+        protected internal override bool CanHandle(string userAgent)
         {
             return userAgent.StartsWith("Toshiba");
         }

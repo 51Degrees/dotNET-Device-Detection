@@ -21,12 +21,12 @@
  * 
  * ********************************************************************* */
 
-namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers 
+namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
     internal class HTCHandler : EditDistanceHandler
     {
         // Checks given UA contains "HTC"
-        internal protected override bool CanHandle(string userAgent)
+        protected internal override bool CanHandle(string userAgent)
         {
             return userAgent.Contains("HTC") || userAgent.StartsWith("HD2");
         }

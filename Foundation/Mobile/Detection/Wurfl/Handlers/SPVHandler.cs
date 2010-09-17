@@ -27,13 +27,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
     {
         private const string REGEX = "(.*)(SPV\\s+.+);(.*)\\s+OpVer\\s+(\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+)(.*)";
 
-        internal SPVHandler() : base(REGEX, new int[] { 16, 16, 16, 8, 4, 2, 1, 16 }) { }
+        internal SPVHandler() : base(REGEX, new[] {16, 16, 16, 8, 4, 2, 1, 16})
+        {
+        }
 
         // Checks UA contains "SPV"
-        internal protected override bool CanHandle(string userAgent)
+        protected internal override bool CanHandle(string userAgent)
         {
             return userAgent.Contains("SPV") &&
-                base.CanHandle(userAgent);
+                   base.CanHandle(userAgent);
         }
     }
 }

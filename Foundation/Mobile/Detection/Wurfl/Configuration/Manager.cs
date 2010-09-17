@@ -22,12 +22,19 @@
  * 
  * ********************************************************************* */
 
-using System.Collections.Specialized;
-using System.Collections.Generic;
-using System.Web.Configuration;
+#region
+
 using System;
-using System.Web;
-using System.Security.Permissions;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Web.Configuration;
+using FiftyOne.Foundation.Mobile.Configuration;
+
+#endregion
+
+#if VER4
+using System.Linq;
+#endif
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
 {
@@ -38,7 +45,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
     {
         #region Fields
 
-        private static WurflSection _configurationSection;
+        private static readonly WurflSection _configurationSection;
 
         #endregion
 
@@ -46,7 +53,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
 
         static Manager()
         {
-            _configurationSection = (WurflSection)WebConfigurationManager.GetWebApplicationSection("fiftyOne/wurfl");
+            _configurationSection = (WurflSection) WebConfigurationManager.GetWebApplicationSection("fiftyOne/wurfl");
         }
 
         #endregion
@@ -61,7 +68,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         {
             get
             {
-                if (_configurationSection != null && _configurationSection.ElementInformation.IsPresent == true)
+                if (_configurationSection != null && _configurationSection.ElementInformation.IsPresent)
                 {
                     return String.IsNullOrEmpty(_configurationSection.WurflFilePath) == false;
                 }
@@ -75,10 +82,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// </summary>
         internal static bool UseActualDeviceRoot
         {
-            get
-            {
-                return _configurationSection.UseActualDeviceRoot;
-            }
+            get { return _configurationSection.UseActualDeviceRoot; }
         }
 
         /// <summary>
@@ -86,10 +90,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// </summary>
         internal static string WurflFilePath
         {
-            get
-            {
-                return Mobile.Configuration.Support.GetFilePath(_configurationSection.WurflFilePath);
-            }
+            get { return Support.GetFilePath(_configurationSection.WurflFilePath); }
         }
 
         /// <summary>
@@ -97,10 +98,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// </summary>
         internal static string NewDevicesURL
         {
-            get
-            {
-                return _configurationSection.NewDevicesURL;
-            }
+            get { return _configurationSection.NewDevicesURL; }
         }
 
         internal static NewDeviceDetail NewDeviceDetail
@@ -109,12 +107,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
             {
                 switch (_configurationSection.NewDeviceDetail)
                 {
-                    case "maximum": return NewDeviceDetail.Maximum;
-                    default: return NewDeviceDetail.Minimum;
+                    case "maximum":
+                        return NewDeviceDetail.Maximum;
+                    default:
+                        return NewDeviceDetail.Minimum;
                 }
             }
         }
-        
+
         /// <summary>
         /// Gets a list containing the names of the capabilities to be used.
         /// If none, all capabilities will be loaded into the memory.
@@ -129,7 +129,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
                 return capabilitiesWhiteList;
             }
         }
-        
+
 
         /// <summary>
         /// Gets a list containing the path of the wurfl patches to be applied.
@@ -138,14 +138,20 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         {
             get
             {
+#if VER4
+                return  (from PatchConfigElement patch in _configurationSection.WurflPatches
+                         where patch.Enabled
+                         select Mobile.Configuration.Support.GetFilePath(patch.FilePath)).ToArray();
+#elif VER2
                 List<string> patchFiles = new List<string>();
                 foreach (PatchConfigElement patch in _configurationSection.WurflPatches)
                     if (patch.Enabled)
-                        patchFiles.Add(Mobile.Configuration.Support.GetFilePath(patch.FilePath));
-                return  patchFiles.ToArray();
+                        patchFiles.Add(Support.GetFilePath(patch.FilePath));
+                return patchFiles.ToArray();
+#endif
             }
         }
-        
+
         #endregion
     }
 }

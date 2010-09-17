@@ -21,43 +21,44 @@
  * 
  * ********************************************************************* */
 
+#region
+
+using System;
 using System.Collections.Generic;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
     internal class Collection : Dictionary<int, int>
     {
-        internal Collection() : base() {}
+        internal Collection() : base()
+        {
+        }
 
         internal void Set(string capabilityName, string value)
         {
+            if (capabilityName == null)
+                throw new ArgumentNullException("capabilityName");
+
             int id = Strings.Add(capabilityName);
             if (id >= 0)
             {
                 lock (this)
                 {
                     // Does this capability already exist in the list?
-                    if (this.ContainsKey(id) == false)
+                    if (ContainsKey(id) == false)
                     {
                         // No. Create a new value and add it to the list.
-                        base.Add(id, Strings.Add(value));
+                        base.Add(id, Strings.Add(value ?? String.Empty));
                     }
                     else
                     {
                         // Yes. Replace it's value with the current one.
-                        base[id] = Strings.Add(value);
+                        base[id] = Strings.Add(value ?? String.Empty);
                     }
                 }
             }
-        }
-
-        internal string Get(string capabilityName)
-        {
-            int valueIndex = 0;
-            int capabilityIndex = Strings.IndexOf(capabilityName);
-            if (this.TryGetValue(capabilityIndex, out valueIndex) == true)
-                return Strings.Get(valueIndex);
-            return null;
         }
     }
 }

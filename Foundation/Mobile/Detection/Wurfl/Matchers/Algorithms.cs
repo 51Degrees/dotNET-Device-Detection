@@ -21,13 +21,19 @@
  * 
  * ********************************************************************* */
 
+#region
+
 using System;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers
 {
+    /// <summary>
+    /// Contains major matching algorithms used by the solution.
+    /// </summary>
     internal class Algorithms
     {
-
         /// <summary>
         /// Measures the amount of difference between two strings using the Levenshtein 
         /// Distance algorithm. This implementation uses a modified version of the pseudo
@@ -44,8 +50,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers
         internal static int EditDistance(string str1, string str2, int maxValue)
         {
             // Confirm input strings are valid.
-            if (str1 == null) throw new ArgumentNullException("str1 can not be null.");
-            if (str2 == null) throw new ArgumentNullException("str2 can not be null.");
+            if (str1 == null) throw new ArgumentNullException("str1");
+            if (str2 == null) throw new ArgumentNullException("str2");
 
             // Get string lengths and check for zero length.
             int l1 = str1.Length, l2 = str2.Length;
@@ -54,7 +60,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers
 
             // Initialise the data structures.
             int curRow = 0, nextRow = 1;
-            int[][] rows = new int[][] { new int[l1 + 1], new int[l1 + 1] };
+            int[][] rows = new[] {new int[l1 + 1], new int[l1 + 1]};
             for (int x = 0; x <= l1; ++x) rows[curRow][x] = x;
 
             for (int y = 1; y <= l2; ++y)
@@ -67,7 +73,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers
                     int value = Math.Min(
                         rows[curRow][x] + 1,
                         Math.Min(rows[nextRow][x - 1] + 1,
-                        rows[curRow][x - 1] + ((str1[x - 1] == str2[y - 1]) ? 0 : 1)));
+                                 rows[curRow][x - 1] + ((str1[x - 1] == str2[y - 1]) ? 0 : 1)));
                     rows[nextRow][x] = value;
 
                     // Record the lowest value on this row.
@@ -81,8 +87,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers
                     return int.MaxValue;
 
                 // Swap the current and next rows
-                if (curRow == 0) { curRow = 1; nextRow = 0; }
-                else { curRow = 0; nextRow = 1; }
+                if (curRow == 0)
+                {
+                    curRow = 1;
+                    nextRow = 0;
+                }
+                else
+                {
+                    curRow = 0;
+                    nextRow = 1;
+                }
             }
 
             return rows[curRow][l1];

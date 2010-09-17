@@ -21,9 +21,12 @@
  * 
  * ********************************************************************* */
 
-using System;
+#region
+
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers
 {
@@ -33,8 +36,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers
 
         private class ReplaceFilter
         {
-            private Regex _regex;
-            private string _replacement;
+            private readonly Regex _regex;
+            private readonly string _replacement;
 
             internal ReplaceFilter(string expression, string replacement)
             {
@@ -50,43 +53,41 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers
 
         #endregion
 
-        #region Fields
+        #region Static Fields
 
-        private static List<ReplaceFilter> _replaceFilters = new List<ReplaceFilter>();
+        private static readonly List<ReplaceFilter> ReplaceFilters = new List<ReplaceFilter>();
 
         #endregion
 
         #region Methods
-        
+
         /// <summary>
         /// Create the regular expressions that are used to filter out common
         /// problems with useragent strings.
         /// </summary>
         private static void InitReplaceFilters()
         {
-            lock (_replaceFilters)
+            lock (ReplaceFilters)
             {
-                if (_replaceFilters.Count == 0)
-                {
-                    _replaceFilters.Add(new ReplaceFilter(@"UP.Link/[\d.]+", "")); // Removes UP.Link from user agents strings that should not be in the WURFL.
-                    _replaceFilters.Add(new ReplaceFilter(@"/IMEI/SN[\d|X]+", "")); // Removes IMEI numbers added to the useragent string.
-                    _replaceFilters.Add(new ReplaceFilter(@"^\s+|\s+$", "")); // Removes leading and trailing spaces.
-                }
+                if (ReplaceFilters.Count != 0) return;
+                ReplaceFilters.Add(new ReplaceFilter(@"UP.Link/[\d.]+", ""));
+                // Removes UP.Link from user agents strings that should not be in the WURFL.
+                ReplaceFilters.Add(new ReplaceFilter(@"/IMEI/SN[\d|X]+", ""));
+                // Removes IMEI numbers added to the useragent string.
+                ReplaceFilters.Add(new ReplaceFilter(@"^\s+|\s+$", "")); // Removes leading and trailing spaces.
             }
         }
 
         /// <summary>
         /// Check the user agent string for common errors that hinder matching. 
         /// </summary>
-        /// <param name="userAgent"></param>
-        /// <returns></returns>
+        /// <param name="userAgent">A useragent string to be cleaned.</param>
+        /// <returns>A cleaned useragent string.</returns>
         internal static string Parse(string userAgent)
         {
             InitReplaceFilters();
-            foreach (ReplaceFilter filter in _replaceFilters)
-            {
+            foreach (ReplaceFilter filter in ReplaceFilters)
                 userAgent = filter.ParseString(userAgent);
-            }
             return userAgent;
         }
 

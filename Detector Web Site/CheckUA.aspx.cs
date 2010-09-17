@@ -50,6 +50,8 @@ namespace Detector
                 PanelAdvanced.Controls.Add(CreateResultLabel("Screen Width", response.Headers["ScreenPixelsWidth"]));
                 PanelAdvanced.Controls.Add(CreateResultLabel("Pointing Method", response.Headers["PointingMethod"]));
                 PanelAdvanced.Controls.Add(CreateResultLabel("Actual Device Root", response.Headers["ActualDeviceRoot"]));
+                PanelAdvanced.Controls.Add(CreateResultLabel("Tablet", response.Headers["IsTabletDevice"]));
+                PanelAdvanced.Controls.Add(CreateResultLabel("Version", response.Headers["Version"]));
 
                 PanelBasic.Visible = true;
                 PanelAdvanced.Visible = true;

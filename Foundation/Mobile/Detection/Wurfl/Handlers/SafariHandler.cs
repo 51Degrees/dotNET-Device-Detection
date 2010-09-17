@@ -23,28 +23,37 @@
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
-    internal class SafariHandler : RegexSegmentHandler 
+    internal class SafariHandler : RegexSegmentHandler
     {
         private const string DEFAULT_DEVICE = "generic_xhtml";
-        private static readonly string[] UNSUPPORTED_ROOT_DEVICES = new string[] { "safari" };
 
         private static readonly string[] PATTERNS = {
-            // Details about the device.
-            @"(?<=Mozilla/\d.\d \()[^)]+",
-            // Apple Apple Web Kit verion
-            @"(?<=AppleWebKit/)[\d.]+",
-            // Major version
-            @"(?<=Version/)[\d.]+",
-            // Safari version
-            @"(?<=Safari/)[\d.]+" };
+                                                        // Details about the device.
+                                                        @"(?<=Mozilla/\d.\d \()[^)]+",
+                                                        // Apple Apple Web Kit verion
+                                                        @"(?<=AppleWebKit/)[\d.]+",
+                                                        // Major version
+                                                        @"(?<=Version/)[\d.]+",
+                                                        // Safari version
+                                                        @"(?<=Safari/)[\d.]+"
+                                                    };
 
-        internal SafariHandler(string[] regexs, int[] weights) : base(regexs, weights) { _firstMatchOnly = true; }
-        internal SafariHandler() : base(PATTERNS, new int[] { 3, 1, 1, 1 }) { _firstMatchOnly = true; }
-        
-        internal protected override bool CanHandle(DeviceInfo device)
+        private static readonly string[] UNSUPPORTED_ROOT_DEVICES = new[] {"safari"};
+
+        internal SafariHandler(string[] regexs, int[] weights) : base(regexs, weights)
+        {
+            _firstMatchOnly = true;
+        }
+
+        internal SafariHandler() : base(PATTERNS, new[] {3, 1, 1, 1})
+        {
+            _firstMatchOnly = true;
+        }
+
+        protected internal override bool CanHandle(DeviceInfo device)
         {
             return base.CanHandle(device) &&
-                CanHandleDevice(device);
+                   CanHandleDevice(device);
         }
 
         /// <summary>
@@ -64,15 +73,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
                 return CanHandleDevice(device.FallbackDevice);
             return true;
         }
-        
+
         // Checks given UA contains "Safari"
-        internal protected override bool CanHandle(string userAgent)
+        protected internal override bool CanHandle(string userAgent)
         {
-            return  userAgent.StartsWith("Mozilla") == true && 
-                    userAgent.Contains("Safari") == true &&
-                    userAgent.Contains("iPhone") == false &&
-                    userAgent.Contains("iPod") == false &&
-                    userAgent.Contains("iPad") == false;
+            return userAgent.StartsWith("Mozilla") &&
+                   userAgent.Contains("Safari") &&
+                   userAgent.Contains("iPhone") == false &&
+                   userAgent.Contains("iPod") == false &&
+                   userAgent.Contains("iPad") == false;
         }
     }
 
@@ -80,38 +89,41 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
     {
         private const string DEFAULT_DEVICE = "safari";
         private const byte EXTRA_CONFIDENCE = 1;
-        private static readonly string[] SUPPORTED_ROOT_DEVICES = new string[] { DEFAULT_DEVICE };
 
         private static readonly string[] PATTERNS = {
-            // Base OS platform.
-            @"(?<=Mozilla/\d.\d \()[^;]+",
-            // Safari major version
-            @"(?<=Safari/)[\d.]+" };
+                                                        // Base OS platform.
+                                                        @"(?<=Mozilla/\d.\d \()[^;]+",
+                                                        // Safari major version
+                                                        @"(?<=Safari/)[\d.]+"
+                                                    };
 
-        internal SafariDesktopHandler() : base(PATTERNS, new int[] { 3, 1 }) { _firstMatchOnly = true; }
+        private static readonly string[] SUPPORTED_ROOT_DEVICES = new[] {DEFAULT_DEVICE};
+
+        internal SafariDesktopHandler() : base(PATTERNS, new[] {3, 1})
+        {
+            _firstMatchOnly = true;
+        }
 
         /// <summary>
         /// Provides a higher degree of confidence because only devices in the "safari"
         /// branch of the device tree are available for matching.
         /// </summary>
-        internal override byte Confidence { get { return (byte)(base.Confidence + EXTRA_CONFIDENCE); } }
+        internal override byte Confidence
+        {
+            get { return (byte) (base.Confidence + EXTRA_CONFIDENCE); }
+        }
 
         /// <summary>
         /// An array of supported root devices that devices from the WURFL
         /// data file need to be children of to be valid for this handler.
         /// </summary>
-        protected override string[] SupportedRootDeviceIds { get { return SUPPORTED_ROOT_DEVICES; } }
+        protected override string[] SupportedRootDeviceIds
+        {
+            get { return SUPPORTED_ROOT_DEVICES; }
+        }
 
         // Checks given UA contains "Safari" as well as "Windows"
         // or "Macintosh" and does not have a "Mobile" version.
-        internal protected override bool CanHandle(string userAgent)
-        {
-            return userAgent.StartsWith("Mozilla") &&
-                userAgent.Contains("Safari") && 
-                (userAgent.Contains("Windows") ||
-                userAgent.Contains("Macintosh") ||
-                userAgent.Contains("X11"));
-        }
 
         internal override DeviceInfo DefaultDevice
         {
@@ -122,6 +134,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
                     return device;
                 return base.DefaultDevice;
             }
+        }
+
+        protected internal override bool CanHandle(string userAgent)
+        {
+            return userAgent.StartsWith("Mozilla") &&
+                   userAgent.Contains("Safari") &&
+                   (userAgent.Contains("Windows") ||
+                    userAgent.Contains("Macintosh") ||
+                    userAgent.Contains("X11"));
         }
     }
 }

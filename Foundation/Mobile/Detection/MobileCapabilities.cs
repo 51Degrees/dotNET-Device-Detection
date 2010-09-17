@@ -21,349 +21,107 @@
  * 
  * ********************************************************************* */
 
-using System.Web;
-using System.Collections.Generic;
-using System.Collections;
+#if VER4
+using System.Linq;
+#endif
+
+#region
+
 using System;
-using FiftyOne.Foundation.Mobile.Detection;
-using FiftyOne.Foundation.Mobile.Detection.Wurfl;
-using System.Web.Caching;
-using System.Reflection;
-using System.Web.UI;
-using System.IO;
-using System.Security.Permissions;
-using System.Web.UI.WebControls;
+using System.Collections;
+using System.Collections.Generic;
+using System.Web;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
-    #region Enumerations
-
-    /// <summary>
-    /// Provides information about support for dual orientation.
-    /// </summary>
-    public enum DualOrientation
-    {
-        /// <summary>
-        /// It's not been possible to determine if dual orientation
-        /// is supported or noe.
-        /// </summary>
-        Unknown,
-        /// <summary>
-        /// Dual orientation is supported.
-        /// </summary>
-        True,
-        /// <summary>
-        /// Dual orientation is not supported.
-        /// </summary>
-        False
-    }
-
-    /// <summary>
-    /// Pointing methods used if by mobile devices.
-    /// </summary>
-    public enum PointingMethods
-    {
-        /// <summary>
-        /// Device uses a stylus as a pointing method.
-        /// </summary>
-        Stylus,
-        /// <summary>
-        /// Device uses a joystick as a pointing method.
-        /// </summary>
-        Joystick,
-        /// <summary>
-        /// Devices uses a click wheel as a pointing method.
-        /// </summary>
-        Clickwheel,
-        /// <summary>
-        /// Device uses the old fashioned finger as a pointing method.
-        /// </summary>
-        Touchscreen,
-        /// <summary>
-        /// The device does not have a pointing method or it's unknown
-        /// which method is supported.
-        /// </summary>
-        Unknown
-    }
-
-    /// <summary>
-    /// Audio formats detected by the API.
-    /// </summary>
-    public enum AudioFormats
-    {
-        /// <summary>
-        /// Supports the rmf sound format (Beatnik format).
-        /// </summary>
-        Rmf,
-        /// <summary>
-        /// Supports the Qualcomm Code Excited Linear Predictive waveform format.
-        /// </summary>
-        Qcelp,
-        /// <summary>
-        /// AMR wide band standard sound format.
-        /// </summary>
-        Awb,
-        /// <summary>
-        /// Supports the smf (Standard MIDI File) sound format
-        /// </summary>
-        Smf,
-        /// <summary>
-        /// Supports the .wav (Waveform) sound format.
-        /// </summary>
-        Wav,
-        /// <summary>
-        /// Supports the Nokia ringing tone sound format.
-        /// </summary>
-        NokiaRingtone,
-        /// <summary>
-        /// AAC standard sound format.
-        /// </summary>
-        Aac,
-        /// <summary>
-        /// A compact polyphonic sound format developed by the Digiplug company.
-        /// </summary>
-        Digiplug,
-        /// <summary>
-        /// Supports the Scalable Polyphonic MIDI sound format.
-        /// </summary>
-        SpMidi,
-        /// <summary>
-        /// Supports the Compact MIDI sound format (a Faith Inc. format).
-        /// </summary>
-        CompactMidi,
-        /// <summary>
-        /// Supports the mp3 sound format.
-        /// </summary>
-        Mp3,
-        /// <summary>
-        /// An iMode sound format.
-        /// </summary>
-        Mld,
-        /// <summary>
-        /// Supports the Enhanced Variable Rate Codec waveform format.
-        /// </summary>
-        Evrc,
-        /// <summary>
-        /// AMR standard sound format.
-        /// </summary>
-        Amr,
-        /// <summary>
-        /// Supports the XMF sound format (Beatnik format).
-        /// </summary>
-        Xmf,
-        /// <summary>
-        /// Supports the MMF (a Yamaha format) sound format.
-        /// </summary>
-        Mmf,
-        /// <summary>
-        /// A standard file format for melodies, also adopted as the ringtone format by the 4 companies developing the EMS standard.
-        /// </summary>
-        IMelody,
-        /// <summary>
-        /// Supports the midi (Musical Instrument Digital Interface) monophonic sound format.
-        /// </summary>
-        MidiMonophonic,
-        /// <summary>
-        /// Also called the uLaw, NeXT, or Sun Audio format.
-        /// </summary>
-        Au,
-        /// <summary>
-        /// Supports the midi (Musical Instrument Digital Interface) polyphonic sound format.
-        /// </summary>
-        MidiPolyphonic
-    }
-
-    /// <summary>
-    /// WURFL CSS capabilities
-    /// </summary>
-    public enum CssGroup
-    {
-        /// <summary>
-        /// No value set 
-        /// </summary>
-        None,
-        /// <summary>
-        /// Device supports CSS3 standards
-        /// </summary>
-        CSS3,
-        /// <summary>
-        /// Device supports Webkit browser engine
-        /// </summary>
-        WebKit,
-        /// <summary>
-        /// Device supports Mozilla browser
-        /// </summary>
-        Mozilla,
-        /// <summary>
-        /// Device supports Opera browser
-        /// </summary>
-        Opera
-    }
-
-    #endregion
-
     /// <summary>
     /// Enhanced mobile capabilities assigned to mobile devices.
     /// </summary>
-    public abstract class MobileCapabilities : System.Web.Mobile.MobileCapabilities
+    internal abstract class MobileCapabilities
     {
-        #region Constants
+        #region Configuration Values
 
         /// <summary>
-        /// Key in the capabilities collection to identify the bool value
-        /// indicating if the mobile device supports dual orientation.
+        /// When set to true tablet devices will be treated as mobile devices for
+        /// the purposes of redirection.
         /// </summary>
-        protected const string DUAL_ORIENTATION = "dualOrientation";
+        protected bool _treatTabletAsMobile = true;
 
-        /// <summary>
-        /// Key in the capabilities collection to return the 
-        /// <see cref="PointingMethods"/> supported by the device.
-        /// </summary>
-        protected const string POINTING_METHOD = "pointingMethod";
-        
         #endregion
 
-        #region Constructor
+        #region Constructors
 
         /// <summary>
-        /// Creates an instance of the <see cref="MobileCapabilities"/> class using
-        /// the list of capabilities provided.
+        /// Constructs MobileCapabilities setting the treat tablet as mobile 
+        /// configuration field if redirect is enabled.
         /// </summary>
-        internal MobileCapabilities(IDictionary capabilities)
-            : base()
+        internal MobileCapabilities()
         {
-            Capabilities = new Hashtable(capabilities);
+            if (Configuration.Manager.Redirect != null)
+                _treatTabletAsMobile = Configuration.Manager.Redirect.TreatTabletAsMobile;
         }
 
-        /// <summary>
-        /// Creates an instance of the <see cref="MobileCapabilities"/> class using
-        /// the useragent to determine the capabilities.
-        /// </summary>
-        internal MobileCapabilities(string userAgent)
-            : base()
-        {
-            Capabilities = new Hashtable();
+        #endregion
 
-            // Assume javascript support is true and rely on the implementing
-            // inheritor to provide confirmation.
-            SetJavaScript(Capabilities, true);
-        }
+        #region Create Methods
 
         /// <summary>
-        /// Creates an instance of the <see cref="MobileCapabilities"/> class
-        /// initialising all the capabilities to the values of the context provided.
+        /// Creates a new set of capabilities based on the context provided.
         /// </summary>
-        internal MobileCapabilities(HttpContext context)
-            : base()
+        /// <param name="context">HttpContext of the device.</param>
+        /// <returns>A dictionary of capabilities.</returns>
+        internal virtual IDictionary Create(HttpContext context)
         {
-            Capabilities = new Hashtable(context.Request.Browser.Capabilities);
-            
+            // Create the mobile capabilities hashtable.
+            IDictionary capabilities = new Hashtable();
+
             // Get support for javascript from the Accept header.
-            SetJavaScript(Capabilities, GetJavascriptSupport(context));
+            SetJavaScript(capabilities, GetJavascriptSupport(context));
+
+            return capabilities;
+        }
+
+        /// <summary>
+        /// Creates a new set of capabilities based on the userAgent string provided.
+        /// </summary>
+        /// <param name="userAgent">UserAgent string of the device.</param>
+        /// <returns>A dictionary of capabilities.</returns>
+        internal virtual IDictionary Create(string userAgent)
+        {
+            // Create the mobile capabilities hashtable.
+            return new Hashtable();
         }
 
         #endregion
 
-        #region Properties
+        #region Abstract Methods
 
         /// <summary>
-        /// Provides the maximum image width in pixels as an integer.
+        /// Returns true if the requesting context is associated with a device
+        /// that should be redirected.
         /// </summary>
-        public abstract int MaxImagePixelsWidth { get; }
-
-        /// <summary>
-        /// Provides the maximum image height in pixels as an integer.
-        /// </summary>
-        public abstract int MaxImagePixelsHeight { get; }
-
-        /// <summary>
-        /// Provides details of device support for dual orientation.
-        /// </summary>
-        public abstract DualOrientation DualOrientation { get; }
-
-        /// <summary>
-        /// Returns true if the browser supports the manipulation of
-        /// css properties via javascript.
-        /// </summary>
-        public abstract bool CssManipulation { get; }
-
-        /// <summary>
-        /// Returns the physical width of the screen in milimeters.
-        /// </summary>
-        public abstract int PhysicalScreenWidth { get; }
-
-        /// <summary>
-        /// Returns the physical height of the screen in milimeters.
-        /// </summary>
-        public abstract int PhysicalScreenHeight { get; }
-
-        /// <summary>
-        /// Provides the pointing method used by the mobile device.
-        /// </summary>
-        public abstract PointingMethods PointingMethod { get; }
-
-        /// <summary>
-        /// Is the 'Viewport' META tag supported
-        /// </summary>
-        public abstract bool MetaViewportSupported { get; }
-
-        /// <summary>
-        /// Checks the META tag
-        /// Check if the device prevent the browser from trying to adapt the page to fit the mobile screen
-        /// </summary>
-        public abstract bool MetaMobileOptimizedSupported { get; }
-
-        /// <summary>
-        /// Checks the META tag
-        /// Check if the device prevent the browser from trying to adapt the page to fit the mobile screen
-        /// </summary>
-        public abstract bool MetaHandHeldFriendlySupported { get; }
-
-        /// <summary>
-        /// Checks if the device work when CSS defined as percentage
-        /// </summary>
-        public abstract bool CssSupportsWidthAsPercentage { get; }
-
-        /// <summary>
-        /// Check if the device can refer to pictures and use them in different circimstances as backgounds.
-        /// </summary>
-        public abstract bool CssSpriting { get; }
-
-        /// <summary>
-        /// Check which Css group provides gradient support for Css
-        /// </summary>
-        public abstract CssGroup CssGradientSupport { get; }
-
-        /// <summary>
-        /// Check which Css group provides border image support for Css
-        /// </summary>
-        public abstract CssGroup CssBorderImageSupport { get; }
-
-        /// <summary>
-        /// Check which Css group provides rounded corner support for Css
-        /// </summary>
-        public abstract CssGroup CssRoundedCornerSupport { get; }
-
-        /// <summary>
-        /// Returns true if the audio format is supported by the device.
-        /// </summary>
-        /// <param name="format">Audio format to query.</param>
-        /// <returns>True if supported. False if not.</returns>
-        internal abstract bool IsAudioFormatSupported(AudioFormats format);
+        /// <param name="context"></param>
+        /// <returns></returns>
+        internal abstract bool IsRedirectDevice(HttpContext context);
 
         #endregion
-        
-        #region Methods
+
+        #region Virtual Methods
 
         /// <summary>
-        /// Called when the class is initialised. Sets the correct text
-        /// writer based on the preferred rendering type of the browser.
+        /// Initialises the IDictionary of capabilities.
         /// </summary>
-        protected virtual void Init()
+        protected virtual void Init(IDictionary capabilities)
         {
             // Set the tagwriter.
-            Capabilities["tagwriter"] = GetTagWriter();
+            capabilities["tagwriter"] = GetTagWriter(capabilities);
         }
+
+        #endregion
+
+        #region Static Methods
 
         /// <summary>
         /// Sets the javascript boolean string in the capabilities dictionary.
@@ -387,17 +145,20 @@ namespace FiftyOne.Foundation.Mobile.Detection
             if (context.Request.AcceptTypes != null)
             {
                 List<string> acceptTypes = new List<string>(context.Request.AcceptTypes);
+#if VER2
                 foreach (string checkType in Constants.JAVASCRIPT_ACCEPTS)
-                    foreach(string acceptType in acceptTypes)
-                        if (acceptType.StartsWith(checkType, StringComparison.InvariantCultureIgnoreCase) == true)
+                    foreach (string acceptType in acceptTypes)
+                        if (acceptType.StartsWith(checkType, StringComparison.InvariantCultureIgnoreCase))
                             return true;
+#elif VER4
+                return (from checkType in Constants.JAVASCRIPT_ACCEPTS
+                    from acceptType in acceptTypes
+                    where acceptType.StartsWith(checkType, StringComparison.InvariantCultureIgnoreCase) == true
+                    select checkType).Any();
+#endif
             }
             return false;
         }
-        
-        #endregion
-
-        #region Static Methods
 
         /// <summary>
         /// Sets the key in the capabilities dictionary to the object provided. If the key 
@@ -410,7 +171,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         internal static void SetValue(IDictionary capabilities, string key, object value)
         {
             // Ignore new values that are empty strings.
-            if (value is string && String.IsNullOrEmpty(((string)value)) == true)
+            if (value is string && String.IsNullOrEmpty(((string) value)))
                 return;
 
             // Change or add the new capability.
@@ -423,15 +184,19 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 capabilities[key] = value;
             }
 
-            #if DEBUG
-            EventLog.Debug(String.Format("Setting '{0}' to '{1}'", key, value != null ? value.ToString() : "null"));
-            #endif
+#if DEBUG
+            EventLog.Debug(String.Format("Setting '{0}' to '{1}'.", key, value != null ? value.ToString() : "null"));
+#endif
         }
 
-
-        private string GetTagWriter()
+        /// <summary>
+        /// Returns the class to use as a text writer for the output stream.
+        /// </summary>
+        /// <param name="capabilities">Dictionary of device capabilities.</param>
+        /// <returns>A string containing the text writer class name.</returns>
+        private static string GetTagWriter(IDictionary capabilities)
         {
-            switch (Capabilities["preferredRenderingType"] as string)
+            switch (capabilities["preferredRenderingType"] as string)
             {
                 case "xhtml-mp":
                 case "xhtml-basic":

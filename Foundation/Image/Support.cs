@@ -21,29 +21,48 @@
  * 
  * ********************************************************************* */
 
-using System.Web;
+#if VER4
+using System.Linq;
+#endif
+
+#region
+
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.Drawing.Imaging;
+
+#endregion
 
 namespace FiftyOne.Foundation.Image
 {
-    internal class Support
+    /// <summary>
+    /// Class contains static methods to support image management.
+    /// </summary>
+    internal static class Support
     {
-        #region Classes
+        #region Private Classes
 
-        internal protected class ColorsToBitsPerPixel
+        /// <summary>
+        /// Used to convert colors to bits per pixel.
+        /// </summary>
+        private class ColorsToBitsPerPixel
         {
-            private int _bitsPerPixel;
-            private long _colors;
+            private readonly int _bitsPerPixel;
+            private readonly long _colors;
 
-            internal protected int BitsPerPixel { get { return _bitsPerPixel; } }
-            internal protected long Colors { get { return _colors; } }
-
-            internal protected ColorsToBitsPerPixel(int bitsPerPixel, long colors)
+            protected internal ColorsToBitsPerPixel(int bitsPerPixel, long colors)
             {
                 _bitsPerPixel = bitsPerPixel;
                 _colors = colors;
+            }
+
+            protected internal int BitsPerPixel
+            {
+                get { return _bitsPerPixel; }
+            }
+
+            protected internal long Colors
+            {
+                get { return _colors; }
             }
         }
 
@@ -51,8 +70,8 @@ namespace FiftyOne.Foundation.Image
 
         #region Fields
 
-        private static Dictionary<ImageFormat, string> _contentTypes = null;
-        private static List<ColorsToBitsPerPixel> _colorTable = null;
+        private static List<ColorsToBitsPerPixel> _colorTable;
+        private static Dictionary<ImageFormat, string> _contentTypes;
 
         #endregion
 
@@ -64,6 +83,9 @@ namespace FiftyOne.Foundation.Image
             InitContentTypes();
         }
 
+        /// <summary>
+        /// Initialises the colours lookup table.
+        /// </summary>
         private static void InitColorTable()
         {
             _colorTable = new List<ColorsToBitsPerPixel>();
@@ -101,6 +123,9 @@ namespace FiftyOne.Foundation.Image
             AddPair(_colorTable, 32, 4294967296);
         }
 
+        /// <summary>
+        /// Populates the lookup table with context types.
+        /// </summary>
         internal static void InitContentTypes()
         {
             _contentTypes = new Dictionary<ImageFormat, string>();
@@ -122,17 +147,24 @@ namespace FiftyOne.Foundation.Image
 
         internal static int GetBitsPerPixel(long colors)
         {
+#if VER4
+            foreach (ColorsToBitsPerPixel current in _colorTable.Where(current => colors <= current.Colors))
+            {
+                return current.BitsPerPixel;
+            }
+#elif VER2
             foreach (ColorsToBitsPerPixel current in _colorTable)
             {
                 if (colors <= current.Colors)
                     return current.BitsPerPixel;
             }
+#endif
             return 8;
         }
 
         internal static string GetContentType(ImageFormat format)
         {
-            if (format != null && _contentTypes.ContainsKey(format) == true)
+            if (format != null && _contentTypes.ContainsKey(format))
                 return _contentTypes[format];
             return null;
         }

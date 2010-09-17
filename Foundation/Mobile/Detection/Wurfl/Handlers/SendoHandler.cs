@@ -26,7 +26,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
     internal class SendoHandler : EditDistanceHandler
     {
         // Checks the given UA contains with "Sendo"
-        internal protected override bool CanHandle(string userAgent)
+        protected internal override bool CanHandle(string userAgent)
         {
             return userAgent.Contains("Sendo");
         }

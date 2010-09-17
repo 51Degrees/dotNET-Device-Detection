@@ -21,28 +21,26 @@
  * 
  * ********************************************************************* */
 
+#region
+
 using System.Text.RegularExpressions;
-using System.Collections.Generic;
+using System.Web;
 using FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Segment;
 
-namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers 
+#endregion
+
+namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
     internal abstract class RegexSegmentHandler : SegmentHandler
     {
-        private const string DEFAULT_PATTERN = @"[^ ]+";
-  
         // This is a more precise method of matching a useragent to a device and
         // we can therefore assign a higher level of confidence.
         internal const byte CONFIDENCE = 7;
-                
+        private const string DEFAULT_PATTERN = @"[^ ]+";
+        protected bool _firstMatchOnly;
+
         protected Regex[] _patterns;
         protected int[] _weights;
-        protected bool _firstMatchOnly = false;
-
-        internal override byte Confidence
-        {
-            get { return CONFIDENCE; }
-        }
 
         /// <summary>
         /// Constructs an instance of <cref see="RegexSegmentHandler"/>.
@@ -50,7 +48,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
         /// <param name="regex">The regular expression to use for a single segment.</param>
         internal RegexSegmentHandler(string regex)
         {
-            Init(new string[] { regex }, new int[] { 1 }, false);
+            Init(new[] {regex}, new[] {1}, false);
         }
 
         /// <summary>
@@ -60,7 +58,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
         /// <param name="weights">A single item array with the weight of the item.</param>
         internal RegexSegmentHandler(string regex, int[] weights)
         {
-            Init(new string[] { regex }, weights, false);
+            Init(new[] {regex}, weights, false);
         }
 
         /// <summary>
@@ -81,7 +79,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
         /// <param name="firstMatchOnly">True if the 1st device matched should be returned.</param>
         internal RegexSegmentHandler(string regex, int[] weights, bool firstMatchOnly)
         {
-            Init(new string[] { regex }, weights, firstMatchOnly);
+            Init(new[] {regex}, weights, firstMatchOnly);
         }
 
         /// <summary>
@@ -93,6 +91,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
         internal RegexSegmentHandler(string[] regexs, int[] weights, bool firstMatchOnly)
         {
             Init(regexs, weights, firstMatchOnly);
+        }
+
+        internal override byte Confidence
+        {
+            get { return CONFIDENCE; }
         }
 
         private void Init(string[] regexs, int[] weights, bool firstMatchOnly)
@@ -108,7 +111,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 
         internal override Segments CreateSegments(string source)
         {
-            if (_firstMatchOnly == true)
+            if (_firstMatchOnly)
                 return CreateSegmentsFirstMatch(source);
             else
                 return CreateSegmentsMultipleMatches(source);
@@ -137,7 +140,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
             foreach (Regex pattern in _patterns)
             {
                 Match match = pattern.Match(source);
-                if (match != null && match.Success == true)
+                if (match != null && match.Success)
                     segments.Add(new Segment(match.Value));
                 else
                     segments.Add(new Segment(string.Empty));
@@ -161,7 +164,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        internal override bool CanHandle(System.Web.HttpRequest request)
+        internal override bool CanHandle(HttpRequest request)
         {
             return CanHandle(Provider.GetUserAgent(request));
         }
@@ -171,11 +174,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
         /// </summary>
         /// <param name="userAgent"></param>
         /// <returns></returns>
-        internal protected override bool CanHandle(string userAgent)
+        protected internal override bool CanHandle(string userAgent)
         {
             foreach (Regex pattern in _patterns)
             {
-                if (pattern.IsMatch(userAgent) == true)
+                if (pattern.IsMatch(userAgent))
                     return true;
             }
             return false;

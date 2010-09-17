@@ -21,17 +21,22 @@
  * 
  * ********************************************************************* */
 
+#region
+
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Web;
-using System.Text.RegularExpressions;
 using System.IO;
-using System.Threading;
 using System.Net;
+using System.Text;
+using System.Threading;
+using System.Web;
 using FiftyOne.Foundation.Mobile.Configuration;
-using System.Web.Caching;
-using System.Runtime.Serialization.Formatters.Binary;
+
+#endregion
+
+#if VER4
+using System.Linq;
+#endif
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
@@ -40,15 +45,24 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// mobile web site to determine if the request is the 1st one or a 
     /// subsequent one.
     /// </summary>
-    internal class RequestHistory
+    internal static class RequestHistory
     {
         #region Private Classes
 
-        internal protected class PreviousDevices
+        #region Nested type: PreviousDevices
+
+        /// <summary>
+        /// Contains details of the previous devices held in the request history.
+        /// </summary>
+        private static class PreviousDevices
         {
-            internal protected static SortedList<long, long> Devices = new SortedList<long, long>();
-            internal protected static RequestRecord lastDevice = new RequestRecord();
+            internal static readonly SortedList<long, long> Devices = new SortedList<long, long>();
+            internal static RequestRecord lastDevice = new RequestRecord();
         }
+
+        #endregion
+
+        #region Nested type: RequestRecord
 
         /// <summary>
         /// Class used to convert a HttpRequest into a single long value that is
@@ -60,48 +74,58 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// The date and time the request was received is also recorded to enable 
         /// out of date records to be removed from the list.
         /// </summary>
-        internal protected class RequestRecord : IComparable
+        private class RequestRecord : IComparable
         {
             #region Constants
 
             // Headers used to create a hashcode based on their values when present.
-            private static readonly string[] ADDITIONAL_HEADERS = new string[] {
-                // Common headers
-                "Accept-Language",
-                "Host",
-                "Via",
-                "UA", // Another user agent field
+            private static readonly string[] ADDITIONAL_HEADERS = new[]
+                                                                      {
+                                                                          // Common headers
+                                                                          "Accept-Language",
+                                                                          "Host",
+                                                                          "Via",
+                                                                          "UA", // Another user agent field
 
-                // Common x headers
-                "x-forwarded-for", // Originating IP of a client connection to the server
-                "x-source-id", // Could be an internal MNO IP address
-                "x-wap-profile", // A reference to the user-agent profile
-                "x-forwarded-host", // Origination host name
-                "x-forwarded-server", // Originating server name
+                                                                          // Common x headers
+                                                                          "x-forwarded-for",
+                                                                          // Originating IP of a client connection to the server
+                                                                          "x-source-id",
+                                                                          // Could be an internal MNO IP address
+                                                                          "x-wap-profile",
+                                                                          // A reference to the user-agent profile
+                                                                          "x-forwarded-host", // Origination host name
+                                                                          "x-forwarded-server",
+                                                                          // Originating server name
 
-                // OpenWave gateway headers:
-                "x-up-calling-line-id", // End users phone number
+                                                                          // OpenWave gateway headers:
+                                                                          "x-up-calling-line-id",
+                                                                          // End users phone number
 
-                // Nokia gateway headers:
-                "x-nokia-alias", //The end users phone number. encrypted.
-                "x-nokia-msisdn", // The users phone number in plain text.
-                "x-nokia-ipaddress", // Internal IP address
-                "x-nokia-imsi", // Imsi value 
+                                                                          // Nokia gateway headers:
+                                                                          "x-nokia-alias",
+                                                                          //The end users phone number. encrypted.
+                                                                          "x-nokia-msisdn",
+                                                                          // The users phone number in plain text.
+                                                                          "x-nokia-ipaddress", // Internal IP address
+                                                                          "x-nokia-imsi", // Imsi value 
 
-                // Other headers:
-                "x-imsi",  // The imsi number. Identifies the end user. 
-                "x-msisdn",  // The end users phone number  
+                                                                          // Other headers:
+                                                                          "x-imsi",
+                                                                          // The imsi number. Identifies the end user. 
+                                                                          "x-msisdn", // The end users phone number  
 
-                // AvantGo headers.
-                "x-avantgo-userid" // Identifying the end user.
-                };
+                                                                          // AvantGo headers.
+                                                                          "x-avantgo-userid"
+                                                                          // Identifying the end user.
+                                                                      };
 
             #endregion
 
             #region Fields
 
             // The key for this device record.
-            private long _key = 0;
+            private long _key;
 
             // The date and time the device was last active.
             private long _lastActiveDate;
@@ -113,7 +137,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
             /// <summary>
             /// Creates a new empty instance of <see cref="RequestRecord"/> class.
             /// </summary>
-            internal protected RequestRecord() { }
+            protected internal RequestRecord()
+            {
+            }
 
             /// <summary>
             /// Constructs a new instance of <see cref="RequestRecord"/> class.
@@ -121,7 +147,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             /// the new instance.
             /// </summary>
             /// <param name="recordToCopy"></param>
-            internal protected RequestRecord(RequestRecord recordToCopy)
+            protected internal RequestRecord(RequestRecord recordToCopy)
             {
                 _key = recordToCopy.Key;
                 _lastActiveDate = recordToCopy.LastActiveDate;
@@ -135,7 +161,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             /// If anything else which we can't image use a hashcode of the string value.
             /// </summary>
             /// <param name="request"></param>
-            internal protected RequestRecord(HttpRequest request)
+            protected internal RequestRecord(HttpRequest request)
             {
                 byte[] buffer = new byte[8];
                 byte[] address = IPAddress.Parse(request.UserHostAddress).GetAddressBytes();
@@ -148,12 +174,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     SetHashCode(buffer, request);
                     _key = BitConverter.ToInt64(buffer, 0);
                 }
-                // Use the value unaltered as a 64 bit value.
+                    // Use the value unaltered as a 64 bit value.
                 else if (address.Length == 8)
                 {
                     _key = BitConverter.ToInt64(address, 0);
                 }
-                // Another value so use the hashcode.
+                    // Another value so use the hashcode.
                 else
                 {
                     byte[] hashcode = BitConverter.GetBytes(address.GetHashCode());
@@ -167,7 +193,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 _lastActiveDate = DateTime.UtcNow.Ticks;
             }
 
-            internal protected RequestRecord(BinaryReader reader)
+            protected internal RequestRecord(BinaryReader reader)
             {
                 _key = reader.ReadInt64();
                 _lastActiveDate = reader.ReadInt64();
@@ -180,13 +206,16 @@ namespace FiftyOne.Foundation.Mobile.Detection
             /// <summary>
             /// The unique key for the device.
             /// </summary>
-            internal protected long Key { get { return _key; } }
+            protected internal long Key
+            {
+                get { return _key; }
+            }
 
             /// <summary>
             /// The date and device was last seen as active expressed 
             /// as a long value.
             /// </summary>
-            internal protected long LastActiveDate
+            protected internal long LastActiveDate
             {
                 get { return _lastActiveDate; }
                 set { _lastActiveDate = value; }
@@ -196,13 +225,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
             #region Methods
 
-            internal protected void Read(BinaryReader reader)
+            protected internal void Read(BinaryReader reader)
             {
                 _key = reader.ReadInt64();
                 _lastActiveDate = reader.ReadInt64();
             }
 
-            internal protected void Write(Stream stream)
+            protected internal void Write(Stream stream)
             {
                 BinaryWriter writer = new BinaryWriter(stream);
                 writer.Write(_key);
@@ -219,27 +248,39 @@ namespace FiftyOne.Foundation.Mobile.Detection
             {
                 StringBuilder headers = new StringBuilder();
                 headers.Append(request.UserAgent);
+#if VER4
+                foreach (string key in ADDITIONAL_HEADERS.Where(key => request.Headers[key] != null))
+                {
+                    headers.Append(key).Append(request.Headers[key]);
+                }
+#elif VER2
                 foreach (string key in ADDITIONAL_HEADERS)
                 {
                     if (request.Headers[key] != null)
                         headers.Append(key).Append(request.Headers[key]);
                 }
+#endif
                 int hashCode = headers.ToString().GetHashCode();
-                buffer[0] = (byte)(hashCode);
-                buffer[1] = (byte)(hashCode >> 8);
-                buffer[2] = (byte)(hashCode >> 16);
-                buffer[3] = (byte)(hashCode >> 24);
+                buffer[0] = (byte) (hashCode);
+                buffer[1] = (byte) (hashCode >> 8);
+                buffer[2] = (byte) (hashCode >> 16);
+                buffer[3] = (byte) (hashCode >> 24);
             }
 
             #endregion
 
             #region IComparable Members
 
+            /// <summary>
+            /// Compares one request to another to determine if they are the same.
+            /// </summary>
+            /// <param name="obj">The object being compared.</param>
+            /// <returns>If the object contains the same value as this instance.</returns>
             public int CompareTo(object obj)
             {
-                if (obj is RequestRecord)
+                RequestRecord candidate = obj as RequestRecord;
+                if (candidate != null)
                 {
-                    RequestRecord candidate = (RequestRecord)obj;
                     if (candidate.LastActiveDate < LastActiveDate)
                         return -1;
                     if (candidate.LastActiveDate > LastActiveDate)
@@ -253,8 +294,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 throw new MobileException(
                     String.Format(
                         "Can not compare object of type '{0}' with '{1}'.",
-                        obj.GetType().ToString(),
-                        GetType().ToString()));
+                        obj.GetType(),
+                        GetType()));
             }
 
             #endregion
@@ -262,8 +303,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         #endregion
 
+        #endregion
+
         #region Constants
-        
+
         // The length of each request history record.
         private const int RECORD_LENGTH = 16;
 
@@ -272,20 +315,19 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         // The number of minutes to wait between trimming the
         // request history file.
-        private const int FILE_SERVICE_FREQUENCY = 1;
 
         #endregion
 
         #region Fields
 
         // Stores the path for the devices cache file.
-        private static string _syncFilePath = null;
+        private static readonly string _syncFilePath;
 
         // The last time this process serviced the cache file.
-        private static DateTime _nextServiceTime = DateTime.MinValue;
 
         // The last time the sync file was modified.
         private static DateTime _lastAccessedTime = DateTime.MinValue;
+        private static DateTime _nextServiceTime = DateTime.MinValue;
 
         #endregion
 
@@ -293,14 +335,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         static RequestHistory()
         {
-            if (Manager.Redirect.Enabled == true)
+            if (Manager.Redirect.Enabled)
             {
                 // Get the request history file and set to null it
                 // it's empty.
-                _syncFilePath = Mobile.Configuration.Support.GetFilePath(Manager.Redirect.DevicesFile);
+                _syncFilePath = Support.GetFilePath(Manager.Redirect.DevicesFile);
                 if (_syncFilePath == String.Empty)
                     _syncFilePath = null;
-                
+
                 // Process the syncfile.
                 if (_syncFilePath != null)
                     ProcessSyncFile();
@@ -359,7 +401,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 _lastAccessedTime = info.LastAccessTimeUtc;
             }
         }
-        
+
         /// <summary>
         /// Adds the current request record to the file containing details of
         /// all the available requests.
@@ -373,7 +415,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 {
                     if (stream != null)
                     {
-                        ((RequestRecord)record).Write(stream);
+                        ((RequestRecord) record).Write(stream);
                         stream.Flush();
                         stream.Close();
                     }
@@ -383,7 +425,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         private static void ProcessSyncFile()
         {
-            if (File.Exists(_syncFilePath) == true)
+            if (File.Exists(_syncFilePath))
             {
                 // Lock the list of devices we're about to update to ensure they can't be
                 // changed by subsequent requests to this callback.
@@ -402,14 +444,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
                             BinaryReader reader = new BinaryReader(stream);
                             RequestRecord record = new RequestRecord();
                             RequestRecord firstDevice = null;
-                            long rows = length / RECORD_LENGTH;
+                            long rows = length/RECORD_LENGTH;
                             for (long row = 0; row < rows; row++)
                             {
                                 // Read the current row in reverse order. Capture EOF exceptions
                                 // in case the file length has changed since we started processing.
                                 try
                                 {
-                                    stream.Position = ((rows - row) * RECORD_LENGTH) - RECORD_LENGTH;
+                                    stream.Position = ((rows - row)*RECORD_LENGTH) - RECORD_LENGTH;
                                     record.Read(reader);
                                 }
                                 catch (EndOfStreamException ex)
@@ -427,7 +469,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                                     break;
 
                                 // Update the memory cache.
-                                if (PreviousDevices.Devices.ContainsKey(record.Key) == true)
+                                if (PreviousDevices.Devices.ContainsKey(record.Key))
                                     PreviousDevices.Devices[record.Key] = record.LastActiveDate;
                                 else
                                     PreviousDevices.Devices.Add(record.Key, record.LastActiveDate);
@@ -470,10 +512,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         stream = null;
                         Thread.Sleep(new Random().Next(200));
                     }
-                } while (stream == null && DateTime.UtcNow < timeout) ;
+                }
+                while (stream == null && DateTime.UtcNow < timeout) ;
                 if (stream == null)
                     throw new MobileException(
-                        String.Format("Could not open request history file '{0}' in mode '{1}', with access '{2}' and share '{3}'.", _syncFilePath, mode, access, share));
+                        String.Format(
+                            "Could not open request history file '{0}' in mode '{1}', with access '{2}' and share '{3}'.",
+                            _syncFilePath, mode, access, share));
             }
             return stream;
         }
@@ -487,12 +532,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             if (_nextServiceTime < DateTime.UtcNow)
             {
-                long purgeDate = 
-                    (PreviousDevices.lastDevice.LastActiveDate == DateTime.MinValue.Ticks ?
-                    DateTime.UtcNow.Ticks : PreviousDevices.lastDevice.LastActiveDate) - 
-                    (TimeSpan.TicksPerMinute * Manager.Redirect.Timeout);
+                long purgeDate =
+                    (PreviousDevices.lastDevice.LastActiveDate == DateTime.MinValue.Ticks
+                         ?
+                             DateTime.UtcNow.Ticks
+                         : PreviousDevices.lastDevice.LastActiveDate) -
+                    (TimeSpan.TicksPerMinute*Manager.Redirect.Timeout);
                 ThreadPool.QueueUserWorkItem(
-                    new WaitCallback(ServiceRequestHistory),
+                    ServiceRequestHistory,
                     purgeDate);
             }
         }
@@ -514,7 +561,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     // Trim the cache file if it needs trimming and it has not
                     // been changed since the service routine started.
                     long originalLength = stream.Length;
-                    byte[] buffer = ReadRecords(stream, (long)purgeDate);
+                    byte[] buffer = ReadRecords(stream, (long) purgeDate);
                     if (buffer != null && stream.Length == originalLength)
                     {
                         stream.Position = 0;
@@ -522,7 +569,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         stream.Flush();
                         stream.SetLength(buffer.Length);
                         stream.Flush();
-                        EventLog.Info(String.Format("Trimmed request history file '{0}' by removing {1} bytes.", _syncFilePath, originalLength - buffer.Length));
+                        EventLog.Info(String.Format("Trimmed request history file '{0}' by removing {1} bytes.",
+                                                    _syncFilePath, originalLength - buffer.Length));
                     }
                     stream.Close();
                 }
@@ -534,7 +582,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 int index = 0;
                 while (index < PreviousDevices.Devices.Count)
                 {
-                    if (PreviousDevices.Devices.Values[index] < (long)purgeDate)
+                    if (PreviousDevices.Devices.Values[index] < (long) purgeDate)
                         PreviousDevices.Devices.RemoveAt(index);
                     else
                         index++;
@@ -565,7 +613,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
             if (offset > 0 && offset < stream.Length)
             {
-                int length = (int)(stream.Length - offset);
+                int length = (int) (stream.Length - offset);
                 buffer = new byte[length];
                 stream.Position = offset;
                 stream.Read(buffer, 0, length);

@@ -21,15 +21,20 @@
  * 
  * ********************************************************************* */
 
+#region
+
 using FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers;
+using Matcher=FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.EditDistance.Matcher;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
     internal abstract class EditDistanceHandler : Handler
     {
-        internal protected override Results Match(string userAgent)
+        protected internal override Results Match(string userAgent)
         {
-            return FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.EditDistance.Matcher.Match(userAgent, this);
+            return Matcher.Match(userAgent, this);
         }
     }
 }

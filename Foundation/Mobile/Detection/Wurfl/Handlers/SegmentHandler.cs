@@ -21,19 +21,24 @@
  * 
  * ********************************************************************* */
 
-using System.Collections.Generic;
+#region
+
+using FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Segment;
+using Results=FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Results;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
     internal abstract class SegmentHandler : Handler
     {
-        internal abstract Matchers.Segment.Segments CreateSegments(string source);
+        internal abstract Segments CreateSegments(string source);
 
         internal abstract int GetSegmentWeight(int index, int numberOfSegments);
 
-        internal protected override Matchers.Results Match(string userAgent)
+        protected internal override Results Match(string userAgent)
         {
-            return FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Segment.Matcher.Match(userAgent, this);
+            return Matcher.Match(userAgent, this);
         }
     }
 }

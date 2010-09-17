@@ -21,28 +21,29 @@
  * 
  * ********************************************************************* */
 
-using System.Text.RegularExpressions;
-
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
     internal class BlackBerryHandler : RegexSegmentHandler
     {
         private static readonly string[] PATTERNS = {
-            // BlackBerry Model
-            "(?:(?<=Black[B|b]erry)[^/]+)",
-            // Version
-            @"(?<=Black[B|b]erry\d+/)([\d.]+)",
-            // Vendor ID
-            @"VendorID/\d+" };
+                                                        // BlackBerry Model
+                                                        "(?:(?<=Black[B|b]erry)[^/]+)",
+                                                        // Version
+                                                        @"(?<=Black[B|b]erry\d+/)([\d.]+)",
+                                                        // Vendor ID
+                                                        @"VendorID/\d+"
+                                                    };
 
-        internal BlackBerryHandler() : base (PATTERNS, new int[] { 10, 2, 1 }) {}
+        internal BlackBerryHandler() : base(PATTERNS, new[] {10, 2, 1})
+        {
+        }
 
         // Checks UA contains "BlackBerry"
-        internal protected override bool CanHandle(string userAgent)
+        protected internal override bool CanHandle(string userAgent)
         {
             return (userAgent.StartsWith("BlackBerry") ||
-                userAgent.StartsWith("Blackberry")) &&
-                base.CanHandle(userAgent);
+                    userAgent.StartsWith("Blackberry")) &&
+                   base.CanHandle(userAgent);
         }
     }
 }

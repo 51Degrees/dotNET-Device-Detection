@@ -21,12 +21,12 @@
  * 
  * ********************************************************************* */
 
-namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers 
+namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
     internal class GrundigHandler : EditDistanceHandler
     {
         // Checks given UA starts with "Grundig" or "GRUNDIG"
-        internal protected override bool CanHandle(string userAgent)
+        protected internal override bool CanHandle(string userAgent)
         {
             return (userAgent.StartsWith("Grundig") || userAgent.StartsWith("GRUNDIG"));
         }

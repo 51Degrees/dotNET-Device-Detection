@@ -22,12 +22,12 @@
  * 
  * ********************************************************************* */
 
-using System;
-using System.Text;
+#region
+
 using System.Configuration;
 using FiftyOne.Foundation.Mobile.Configuration;
-using System.Web;
-using System.Security.Permissions;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
 {
@@ -66,15 +66,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
     {
         #region Constructors
 
-        /// <summary>
-        /// <para>
-        /// Creates a new instance of <see cref="WurflSection"/>.
-        /// </para>
-        /// </summary>
-        public WurflSection()
-        {
-        }
-
         #endregion
 
         #region Properties
@@ -88,10 +79,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         [ConfigurationProperty("useActualDeviceRoot", IsRequired = false, DefaultValue = "false")]
         public bool UseActualDeviceRoot
         {
-            get
-            {
-                return (bool)this["useActualDeviceRoot"];
-            }
+            get { return (bool) this["useActualDeviceRoot"]; }
         }
 
         /// <summary>
@@ -101,10 +89,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         [StringValidator(InvalidCharacters = "!@#$%^&*()[]{};'\"|", MaxLength = 255)]
         public string WurflFilePath
         {
-            get
-            {
-                return (string)this["wurflFilePath"];
-            }
+            get { return (string) this["wurflFilePath"]; }
         }
 
         /// <summary>
@@ -113,10 +98,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         [ConfigurationProperty("wurflUpdateUrls", IsRequired = false)]
         public UrlCollection WurflUpdateUrls
         {
-            get
-            {
-                return (UrlCollection)this["wurflUpdateUrls"];
-            }
+            get { return (UrlCollection) this["wurflUpdateUrls"]; }
         }
 
         /// <summary>
@@ -125,10 +107,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         [ConfigurationProperty("wurflPatches", IsRequired = false)]
         public PatchesCollection WurflPatches
         {
-            get
-            {
-                return (PatchesCollection)this["wurflPatches"];
-            }
+            get { return (PatchesCollection) this["wurflPatches"]; }
         }
 
         /// <summary>
@@ -141,10 +120,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         [StringValidator(InvalidCharacters = "!@#$%^&*()[]{};'\"|", MaxLength = 255)]
         public string NewDevicesURL
         {
-            get
-            {
-                return (string)this["newDevicesURL"];
-            }
+            get { return (string) this["newDevicesURL"]; }
         }
 
         /// <summary>
@@ -160,10 +136,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         [StringValidator(InvalidCharacters = "!@#$%^&*()[]{};'\"|", MaxLength = 7)]
         public string NewDeviceDetail
         {
-            get
-            {
-                return (string)this["newDeviceDetail"];
-            }
+            get { return (string) this["newDeviceDetail"]; }
         }
 
         /// <summary>
@@ -174,10 +147,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         [ConfigurationProperty("capabilitiesWhiteList", IsRequired = false)]
         public CapabilityCollection CapabilitiesWhiteList
         {
-            get
-            {
-                return (CapabilityCollection)this["capabilitiesWhiteList"];
-            }
+            get { return (CapabilityCollection) this["capabilitiesWhiteList"]; }
         }
 
         #endregion

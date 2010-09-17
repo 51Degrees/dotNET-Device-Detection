@@ -21,9 +21,12 @@
  * 
  * ********************************************************************* */
 
-using System.Collections.Generic;
+#region
+
 using System.Threading;
 using FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Segment
 {
@@ -31,8 +34,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Segment
     {
         #region Fields
 
-        private Segments _target = null;
-        private Results _results = null;
+        private readonly Results _results;
+        private readonly Segments _target;
 
         #endregion
 
@@ -45,7 +48,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Segment
 
         internal new SegmentHandler Handler
         {
-            get { return (SegmentHandler)base.Handler; }
+            get { return (SegmentHandler) base.Handler; }
         }
 
         internal Results Results

@@ -21,10 +21,13 @@
  * 
  * ********************************************************************* */
 
-using System.Collections.Generic;
+#region
+
 using System;
 using System.Threading;
 using FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.EditDistance
 {
@@ -39,7 +42,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.EditDistance
         /// <returns>best match userAgent</returns>
         internal static Results Match(string userAgent, Handler handler)
         {
-            if (Environment.ProcessorCount > 1 && 
+            if (Environment.ProcessorCount > 1 &&
                 Detection.Constants.ForceSingleProcessor == false)
             {
                 return MatchMultiProcessor(userAgent, handler);
@@ -71,7 +74,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.EditDistance
             {
                 // For each thread add this to the queue.
                 for (int i = 0; i < Environment.ProcessorCount; i++)
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(ServiceRequest), request);
+                    ThreadPool.QueueUserWorkItem(ServiceRequest, request);
 
                 // Wait until a signal is received. Keeping coming back to
                 // this thread so that a request to close the request
@@ -79,7 +82,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.EditDistance
                 while (waiter.WaitOne(1, false) == false)
                 {
                     // Do nothing 
-                };
+                }
+                ;
             }
             // Return the results.
             return request.Results;
@@ -87,7 +91,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.EditDistance
 
         private static void ServiceRequest(object sender)
         {
-            ServiceRequest((Request)sender);
+            ServiceRequest((Request) sender);
         }
 
         private static void ServiceRequest(Request request)

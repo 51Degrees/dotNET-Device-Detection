@@ -21,13 +21,15 @@
  * 
  * ********************************************************************* */
 
-using System;
-using System.Text;
-
 namespace FiftyOne.Foundation.Mobile.Detection
 {
-    internal class Constants
+    internal static class Constants
     {
+        /// <summary>
+        /// Used to indicate the device has already accessed the web site.
+        /// </summary>
+        internal const string AlreadyAccessedCookieName = "51D";
+
         /// <summary>
         /// Forces the useragent matcher to use a single thread if 
         /// multiple processors are available.
@@ -35,38 +37,36 @@ namespace FiftyOne.Foundation.Mobile.Detection
         internal const bool ForceSingleProcessor = false;
 
         /// <summary>
-        /// Used to indicate the device has already accessed the web site.
-        /// </summary>
-        internal const string AlreadyAccessedCookieName = "51D";
-
-        /// <summary>
         /// When set to true indicates the request being processed is the 1st
         /// one from that device. False if a subsequent request.
         /// </summary>
         internal const string IsFirstRequest = "51dIsFirstRequest";
-        
-        /// <summary>
-        /// Array of transcoder HTTP headers that represent the useragent string of the
-        /// mobile device rather than the desktop browser.
-        /// </summary>
-        internal static readonly string[] TRANSCODER_USERAGENT_HEADERS = new string[] {
-            "x-Device-User-Agent",
-            "X-Device-User-Agent",
-            "X-OperaMini-Phone-UA"};
 
         /// <summary>
         /// An array of accept types that indicate javascript support.
         /// </summary>
-        internal static readonly string[] JAVASCRIPT_ACCEPTS = new string[] {
-            "application/x-javascript",
-            "text/javascript",
-            "text/x-javascript",
-            "text/js",
-            "text/x-js",
-            "text/jscript",
-            "text/ecmascript",
-            "*/*",
-            "application/vnd.rim.jscriptc"
-        };
+        internal static readonly string[] JAVASCRIPT_ACCEPTS = new[]
+                                                                   {
+                                                                       "application/x-javascript",
+                                                                       "text/javascript",
+                                                                       "text/x-javascript",
+                                                                       "text/js",
+                                                                       "text/x-js",
+                                                                       "text/jscript",
+                                                                       "text/ecmascript",
+                                                                       "*/*",
+                                                                       "application/vnd.rim.jscriptc"
+                                                                   };
+
+        /// <summary>
+        /// Array of transcoder HTTP headers that represent the useragent string of the
+        /// mobile device rather than the desktop browser.
+        /// </summary>
+        internal static readonly string[] TRANSCODER_USERAGENT_HEADERS = new[]
+                                                                             {
+                                                                                 "x-Device-User-Agent",
+                                                                                 "X-Device-User-Agent",
+                                                                                 "X-OperaMini-Phone-UA"
+                                                                             };
     }
 }

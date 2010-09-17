@@ -21,9 +21,6 @@
  * 
  * ********************************************************************* */
 
-using System.Collections.Generic;
-using System;
-
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers
 {
     internal abstract class Matcher

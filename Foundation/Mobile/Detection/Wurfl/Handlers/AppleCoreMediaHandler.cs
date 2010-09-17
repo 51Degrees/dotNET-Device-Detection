@@ -26,10 +26,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
     internal class AppleCoreMediaHandler : EditDistanceHandler
     {
         // Checks the given UA contains with "CoreMedia" and startswith "Apple".
-        internal protected override bool CanHandle(string userAgent)
+        protected internal override bool CanHandle(string userAgent)
         {
-            return userAgent.StartsWith("Apple") && 
-                userAgent.Contains("CoreMedia");
+            return userAgent.StartsWith("Apple") &&
+                   userAgent.Contains("CoreMedia");
         }
     }
 }

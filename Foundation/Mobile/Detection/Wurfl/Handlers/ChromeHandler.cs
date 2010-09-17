@@ -30,14 +30,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
         // The Chrome version
         private static readonly string PATTERN = @"(?<=Chrome/)[\d+.]+";
 
-        public ChromeHandler(): base(PATTERN) { }
+        public ChromeHandler() : base(PATTERN)
+        {
+        }
 
         // Checks the given UA contains "Chrome" indicating the browser
         // is almost certainly of the Google Chrome family.
-        internal protected override bool CanHandle(string userAgent)
-        {
-            return userAgent.Contains("Chrome");
-        }
 
         internal override DeviceInfo DefaultDevice
         {
@@ -48,6 +46,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
                     return device;
                 return base.DefaultDevice;
             }
+        }
+
+        protected internal override bool CanHandle(string userAgent)
+        {
+            return userAgent.Contains("Chrome");
         }
     }
 }

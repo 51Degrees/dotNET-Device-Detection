@@ -21,12 +21,18 @@
  * 
  * ********************************************************************* */
 
-using System.IO;
+#region
+
 using System;
-using System.Threading;
 using System.Collections.Generic;
-using System.Web;
-using System.Security.Permissions;
+using System.IO;
+using System.Threading;
+
+#endregion
+
+#if VER4 
+using System.Threading.Tasks;
+#endif
 
 namespace FiftyOne
 {
@@ -34,8 +40,8 @@ namespace FiftyOne
     {
         protected static object _syncQueue = new object();
         protected static object _syncWait = new object();
-        private bool _running = false;
-        private Queue<string> _queue = new Queue<string>();
+        private readonly Queue<string> _queue = new Queue<string>();
+        private bool _running;
 
         /// <summary>
         /// Returns the full path to the file to be written to.
@@ -130,11 +136,11 @@ namespace FiftyOne
             // If the queue is very large sleep for 10ms and
             // give it time to reduce.
             // This should never happen if debug is disabled.
-            if (_queue.Count > 100 && _running == true)
+            if (_queue.Count > 100 && _running)
             {
                 lock (_syncWait)
                 {
-                    if (_queue.Count > 100 && _running == true)
+                    if (_queue.Count > 100 && _running)
                     {
                         Thread.Sleep(10);
                     }
@@ -155,8 +161,11 @@ namespace FiftyOne
                     if (_running == false)
                     {
                         _running = true;
-                        ThreadPool.QueueUserWorkItem(
-                            new WaitCallback(Run));
+#if VER4
+                        Task.Factory.StartNew(() => Run(null));
+#elif VER2
+                        ThreadPool.QueueUserWorkItem(Run);
+#endif
                     }
                 }
             }

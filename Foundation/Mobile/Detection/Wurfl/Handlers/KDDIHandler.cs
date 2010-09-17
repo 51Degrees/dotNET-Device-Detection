@@ -21,7 +21,7 @@
  * 
  * ********************************************************************* */
 
-namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers 
+namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
     internal class KDDIHandler : RegexSegmentHandler
     {
@@ -29,14 +29,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 
         private static readonly string PATTERN = @"KDDI-\w+";
 
-        internal KDDIHandler() : base(PATTERN) { }
+        internal KDDIHandler() : base(PATTERN)
+        {
+        }
 
         // Checks UA starts with "KDDI"
-        internal protected override bool CanHandle(string userAgent)
-        {
-            return userAgent.StartsWith("KDDI") &&
-                base.CanHandle(userAgent);
-        }
 
         internal override DeviceInfo DefaultDevice
         {
@@ -47,6 +44,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
                     return device;
                 return base.DefaultDevice;
             }
+        }
+
+        protected internal override bool CanHandle(string userAgent)
+        {
+            return userAgent.StartsWith("KDDI") &&
+                   base.CanHandle(userAgent);
         }
     }
 }

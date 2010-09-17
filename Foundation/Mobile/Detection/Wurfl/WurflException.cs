@@ -21,10 +21,12 @@
  * 
  * ********************************************************************* */
 
+#region
+
 using System;
 using System.Runtime.Serialization;
-using System.Web;
-using System.Security.Permissions;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 {
@@ -38,8 +40,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// Initializes a new instance of <typeparamref name="WurflException"/>
         /// </summary>
         public WurflException()
-            : base()
-        { }
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of <typeparamref name="WurflException"/>
@@ -47,7 +49,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// <param name="message">The human readable message explaining the exception.</param>
         public WurflException(string message)
             : base(message)
-        { }
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of <typeparamref name="WurflException"/>
@@ -56,13 +59,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// <param name="innerException">The exception that caused the new one.</param>
         public WurflException(string message, Exception innerException)
             : base(message, innerException)
-        { }
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of <typeparamref name="WurflException"/>
         /// </summary>
         protected WurflException(SerializationInfo info, StreamingContext context)
             : base(info, context)
-        { }
+        {
+        }
     }
 }

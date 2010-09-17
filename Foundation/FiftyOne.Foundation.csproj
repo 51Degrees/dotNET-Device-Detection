@@ -17,7 +17,7 @@
     <SccAuxPath>SAK</SccAuxPath>
     <SccProvider>SAK</SccProvider>
     <ApplicationIcon>PDA.ico</ApplicationIcon>
-    <SignAssembly>False</SignAssembly>
+    <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
@@ -46,7 +46,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;VER2</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Debug\FiftyOne.Foundation.XML</DocumentationFile>
@@ -55,7 +55,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;VER2</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\FiftyOne.Foundation.XML</DocumentationFile>
@@ -78,6 +78,28 @@
     <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'VER2|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\VER2\</OutputPath>
+    <DefineConstants>VER2</DefineConstants>
+    <DocumentationFile>bin\Debug\FiftyOne.Foundation.XML</DocumentationFile>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'VER4|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\VER4\</OutputPath>
+    <DefineConstants>VER4</DefineConstants>
+    <DocumentationFile>bin\Debug\FiftyOne.Foundation.XML</DocumentationFile>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -93,7 +115,7 @@
     <Compile Include="Mobile\Configuration\UrlCollection.cs" />
     <Compile Include="Mobile\Configuration\UrlElement.cs" />
     <Compile Include="Mobile\Detection\DetectorModule.cs" />
-    <Compile Include="Mobile\Detection\Devices.cs" />
+    <Compile Include="Mobile\Detection\Factory.cs" />
     <Compile Include="Mobile\Detection\RequestHistory.cs" />
     <Compile Include="Mobile\Configuration\RedirectSection.cs" />
     <Compile Include="Mobile\Configuration\Support.cs" />
@@ -123,7 +145,6 @@
     <Compile Include="Mobile\Detection\RequestHelper.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Configuration\NewDeviceDetail.cs" />
     <Compile Include="Mobile\Detection\Wurfl\MobileCapabilities.cs" />
-    <Compile Include="Mobile\Detection\Support.cs" />
     <Compile Include="Mobile\Configuration\Manager.cs" />
     <Compile Include="Mobile\Configuration\LogSection.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Handlers\AlphaNumericHandlers.cs" />

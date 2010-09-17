@@ -21,28 +21,31 @@
  * 
  * ********************************************************************* */
 
-using System.Collections.Generic;
+#region
+
 using System;
 using System.Threading;
 using FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Segment
 {
     internal class Matcher : Matchers.Matcher
     {
         internal static Results Match(string userAgent,
-            FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers.SegmentHandler handler)
+                                      SegmentHandler handler)
         {
             if (handler.UserAgents.Count > 0)
             {
-                if (Environment.ProcessorCount > 1 && 
+                if (Environment.ProcessorCount > 1 &&
                     Detection.Constants.ForceSingleProcessor == false)
                 {
                     return MatchMultiProcessor(userAgent, handler);
                 }
                 else
                 {
-                    return MatchSingleProcessor(userAgent,  handler);
+                    return MatchSingleProcessor(userAgent, handler);
                 }
             }
             return null;
@@ -69,7 +72,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Segment
             {
                 // For each thread add this to the queue.
                 for (int i = 0; i < Environment.ProcessorCount; i++)
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(ServiceRequest), request);
+                    ThreadPool.QueueUserWorkItem(ServiceRequest, request);
 
                 // Wait until a signal is received. Keeping coming back to
                 // this thread so that a request to close the request
@@ -77,7 +80,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Segment
                 while (waiter.WaitOne(1, false) == false)
                 {
                     // Do nothing 
-                };
+                }
+                ;
             }
             // Return the results.
             return request.Results;
@@ -85,7 +89,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Segment
 
         private static void ServiceRequest(object sender)
         {
-            ServiceRequest((Request)sender);
+            ServiceRequest((Request) sender);
         }
 
         private static void ServiceRequest(Request request)
@@ -105,14 +109,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Segment
                     // If the two segments are exactly equal score as zero.
                     if (request.Target[i].Value == compare[i].Value)
                         compare[i].Score = 0;
-                    // Otherwise assign the EditDistance value multiplied by the
-                    // segment weight or if one is not available the index of the segment.
+                        // Otherwise assign the EditDistance value multiplied by the
+                        // segment weight or if one is not available the index of the segment.
                     else
                     {
                         compare[i].Score = Algorithms.EditDistance(
-                            request.Target[i].Value,
-                            compare[i].Value,
-                            int.MaxValue) * weight;
+                                               request.Target[i].Value,
+                                               compare[i].Value,
+                                               int.MaxValue)*weight;
                     }
                 }
                 int totalScore = compare.TotalScore;

@@ -21,69 +21,30 @@
  * 
  * ********************************************************************* */
 
+#region
+
 using System;
-using System.Text;
 using System.IO;
-using System.Xml;
-using System.Collections.Specialized;
-using System.Web;
-using System.Threading;
 using System.Net;
-using System.Collections.Generic;
-using FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration;
 using System.Security;
+using System.Threading;
+using System.Web;
+using FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration;
+
+#endregion
+
+#if VER4
+using System.Linq;
+using System.Threading.Tasks;
+#endif
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 {
     internal class WurflNewDevice
     {
-        internal class NewDeviceData
-        {
-            string _content = null;
-            string _userAgent = null;
-            bool _isLocal = false;
-            bool _ignore = false;
-            private static NewDeviceDetail _newDeviceDetail;
+        private static readonly Uri _newDevicesUrl;
+        private static bool _enabled;
 
-            static NewDeviceData()
-            {
-                _newDeviceDetail = Manager.NewDeviceDetail;
-            }
-
-            internal NewDeviceData(HttpRequest request)
-            {
-                _content = RequestHelper.GetContent(request,
-                     _newDeviceDetail == NewDeviceDetail.Maximum);
-                _userAgent = Provider.GetUserAgent(request);
-                _isLocal = request.IsLocal;
-                _ignore = request.Headers["51D"] != null;
-            }
-
-            /// <summary>
-            /// XML content containing details about the client device.
-            /// </summary>
-            internal string Content { get { return _content; } }
-
-            /// <summary>
-            /// Returns the useragent string of the requesting device.
-            /// </summary>
-            internal string UserAgent { get { return _userAgent; } }
-
-            /// <summary>
-            /// Returns true if the content relates to a local client.
-            /// </summary>
-            internal bool IsLocal { get { return _isLocal; } }
-
-            /// <summary>
-            /// Returns true if the device should be ignored based on 
-            /// settings in the request header.
-            /// </summary>
-            internal bool Ignore { get { return _ignore; } }
-        }
-
-        private static bool _enabled = false;
-        private static Uri _newDevicesUrl = null;
-        
         /// <summary>
         /// Sets the enabled state of the class.
         /// </summary>
@@ -96,7 +57,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// <summary>
         /// Returns if the new device recording functionality is enabled.
         /// </summary>
-        internal protected static bool Enabled
+        protected internal static bool Enabled
         {
             get { return _enabled; }
         }
@@ -112,8 +73,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         {
             // Get the new device details.
             NewDeviceData data = new NewDeviceData(request);
+#if VER4
+            if (!data.Ignore)
+                Task.Factory.StartNew(() => ProcessNewDevice(data));
+#elif VER2
             if (data.Ignore == false)
-                ThreadPool.QueueUserWorkItem(new WaitCallback(ProcessNewDevice), data);
+                ThreadPool.QueueUserWorkItem(ProcessNewDevice, data);
+#endif
         }
 
         private static void ProcessNewDevice(object sender)
@@ -132,7 +98,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                 }
                 catch (SecurityException)
                 {
-                    EventLog.Warn(String.Format("Insufficient permission to send new device information to '{0}'.", _newDevicesUrl));
+                    EventLog.Warn(String.Format("Insufficient permission to send new device information to '{0}'.",
+                                                _newDevicesUrl));
                     _enabled = false;
                 }
                 catch (WebException ex)
@@ -141,11 +108,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                     {
                         if (newDevice.IsLocal == false)
                         {
-                            EventLog.Warn(String.Format("Could not write device information for useragent '{0}' to URL '{1}'. Exception '{2}'", newDevice.UserAgent, _newDevicesUrl.ToString(), ex.Message));
+                            EventLog.Warn(
+                                String.Format(
+                                    "Could not write device information for useragent '{0}' to URL '{1}'. Exception '{2}'",
+                                    newDevice.UserAgent, _newDevicesUrl, ex.Message));
                         }
                         else
                         {
-                            EventLog.Debug(String.Format("Could not write device information for useragent '{0}' to URL '{1}'. Exception '{2}'", newDevice.UserAgent, _newDevicesUrl.ToString(), ex.Message));
+                            EventLog.Debug(
+                                String.Format(
+                                    "Could not write device information for useragent '{0}' to URL '{1}'. Exception '{2}'",
+                                    newDevice.UserAgent, _newDevicesUrl, ex.Message));
                         }
                     }
                     catch
@@ -158,16 +131,76 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 
         private static void RecordToURL(NewDeviceData newDevice)
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(_newDevicesUrl);
-            request.Timeout = Constants.NewURLTimeOut;
+            HttpWebRequest request = WebRequest.Create(_newDevicesUrl) as HttpWebRequest;
+            request.Timeout = Constants.NewUrlTimeOut;
             request.Method = "POST";
 
             StreamWriter writer = new StreamWriter(request.GetRequestStream());
             writer.Write(newDevice.Content);
             writer.Flush();
             writer.Close();
-            
+
             request.GetResponse();
         }
+
+        #region Nested type: NewDeviceData
+
+        internal class NewDeviceData
+        {
+            private static readonly NewDeviceDetail _newDeviceDetail;
+            private readonly string _content;
+            private readonly bool _ignore;
+            private readonly bool _isLocal;
+            private readonly string _userAgent;
+
+            static NewDeviceData()
+            {
+                _newDeviceDetail = Manager.NewDeviceDetail;
+            }
+
+            internal NewDeviceData(HttpRequest request)
+            {
+                _content = RequestHelper.GetContent(request,
+                                                    _newDeviceDetail == NewDeviceDetail.Maximum);
+                _userAgent = Provider.GetUserAgent(request);
+                _isLocal = request.IsLocal;
+                _ignore = request.Headers["51D"] != null;
+            }
+
+            /// <summary>
+            /// XML content containing details about the client device.
+            /// </summary>
+            internal string Content
+            {
+                get { return _content; }
+            }
+
+            /// <summary>
+            /// Returns the useragent string of the requesting device.
+            /// </summary>
+            internal string UserAgent
+            {
+                get { return _userAgent; }
+            }
+
+            /// <summary>
+            /// Returns true if the content relates to a local client.
+            /// </summary>
+            internal bool IsLocal
+            {
+                get { return _isLocal; }
+            }
+
+            /// <summary>
+            /// Returns true if the device should be ignored based on 
+            /// settings in the request header.
+            /// </summary>
+            internal bool Ignore
+            {
+                get { return _ignore; }
+            }
+        }
+
+        #endregion
     }
 }

@@ -28,10 +28,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
         private const string DEFAULT_DEVICE = "ms_mobile_browser_ver1";
 
         // Checks given UA contains "Mozilla/" and "Windows CE"
-        internal protected override bool CanHandle(string userAgent)
-        {
-            return userAgent.Contains("Mozilla/") && userAgent.Contains("Windows CE");
-        }
 
         internal override DeviceInfo DefaultDevice
         {
@@ -42,6 +38,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
                     return device;
                 return base.DefaultDevice;
             }
+        }
+
+        protected internal override bool CanHandle(string userAgent)
+        {
+            return userAgent.Contains("Mozilla/") && userAgent.Contains("Windows CE");
         }
     }
 }

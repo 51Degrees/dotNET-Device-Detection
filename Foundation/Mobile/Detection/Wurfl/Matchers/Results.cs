@@ -21,13 +21,19 @@
  * 
  * ********************************************************************* */
 
+#region
+
 using System.Collections.Generic;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers
 {
     internal class Results : List<Result>
     {
-        internal Results() { }
+        internal Results()
+        {
+        }
 
         internal Results(DeviceInfo device)
         {

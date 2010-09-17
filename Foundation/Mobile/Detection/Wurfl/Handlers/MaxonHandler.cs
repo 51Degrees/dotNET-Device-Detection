@@ -26,7 +26,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
     internal class MaxonHandler : EditDistanceHandler
     {
         // Checks the given UA starts with "Maxon"
-        internal protected override bool CanHandle(string userAgent)
+        protected internal override bool CanHandle(string userAgent)
         {
             return userAgent.Contains("Maxon");
         }

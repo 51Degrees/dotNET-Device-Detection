@@ -26,7 +26,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
     internal class AlcatelHandler : EditDistanceHandler
     {
         // Checks the given UA starts with "Alcatel" or "ALCATEL"
-        internal protected override bool CanHandle(string userAgent)
+        protected internal override bool CanHandle(string userAgent)
         {
             return (userAgent.StartsWith("Alcatel") || userAgent.StartsWith("ALCATEL"));
         }

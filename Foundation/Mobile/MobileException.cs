@@ -21,10 +21,12 @@
  * 
  * ********************************************************************* */
 
+#region
+
 using System;
 using System.Runtime.Serialization;
-using System.Security.Permissions;
-using System.Web;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile
 {
@@ -40,32 +42,35 @@ namespace FiftyOne.Foundation.Mobile
         /// <summary>
         /// Initializes a new instance of <see cref="MobileException"/>.
         /// </summary>
-        public MobileException()
-            : base()
-        { }
+        internal MobileException()
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of <see cref="MobileException"/>.
         /// </summary>
         /// <param name="message">The human readable message explaining the exception.</param>
-        public MobileException(string message)
+        internal MobileException(string message)
             : base(message)
-        { }
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of <see cref="MobileException"/>.
         /// </summary>
         /// <param name="message">The human readable message explaining the exception.</param>
         /// <param name="innerException">The exception that caused the new one.</param>
-        public MobileException(string message, Exception innerException)
+        internal MobileException(string message, Exception innerException)
             : base(message, innerException)
-        { }
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of <see cref="MobileException"/>.
         /// </summary>
-        protected MobileException(SerializationInfo info, StreamingContext context)
+        protected internal MobileException(SerializationInfo info, StreamingContext context)
             : base(info, context)
-        { }
+        {
+        }
     }
 }

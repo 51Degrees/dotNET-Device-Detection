@@ -21,19 +21,26 @@
  * 
  * ********************************************************************* */
 
+#if VER4
+using System.Linq;
+#endif
+
+#region
+
 using System;
-using System.Web;
-using System.Diagnostics;
-using System.Text.RegularExpressions;
-using FiftyOne.Foundation.Mobile.Configuration;
-using FiftyOne.Foundation.Mobile.Detection.Wurfl;
-using System.Drawing;
-using System.Web.Configuration;
-using System.Security.Permissions;
-using System.Security;
+using System.Collections;
 using System.Collections.Generic;
-using System.Web.Security;
+using System.Security;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Web;
+using System.Web.Configuration;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.MobileControls;
+using FiftyOne.Foundation.Mobile.Configuration;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
@@ -46,30 +53,32 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Constants
 
         /// <summary>
-        /// Full type names of classes representing standard
-        /// page handlers.
-        /// </summary>
-        private readonly static string[] PAGES = new string[] {
-            "System.Web.UI.MobileControls.MobilePage",
-            "System.Web.UI.Page" };
-
-        /// <summary>
         /// Full type names of classes representing mobile
         /// page handlers.
         /// </summary>
-        private readonly static string[] MOBILE_PAGES = {
-            "System.Web.UI.MobileControls.MobilePage"};
+        private static readonly string[] MOBILE_PAGES = {
+                                                            "System.Web.UI.MobileControls.MobilePage"
+                                                        };
+
+        /// <summary>
+        /// Full type names of classes representing standard
+        /// page handlers.
+        /// </summary>
+        private static readonly string[] PAGES = new[]
+                                                     {
+                                                         "System.Web.UI.MobileControls.MobilePage",
+                                                         "System.Web.UI.Page"
+                                                     };
 
         #endregion
 
         #region Fields
 
         /// <summary>
-        /// The URL to use to redirect a mobile device accessing
-        /// a non mobile web page to. Initialised from the <c>web.config</c> file
-        /// when the module is created.
+        /// Collection of client targets used by the application with the key
+        /// field representing the alias and the value the useragent.
         /// </summary>
-        private string _mobileHomePageUrl = null;
+        private SortedList<string, string> _clientTargets;
 
         /// <summary>
         /// If set to true only the first eligable request received by the web
@@ -77,6 +86,18 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// _mobileRedirectUrl.
         /// </summary>
         private bool _firstRequestOnly = true;
+
+        /// <summary>
+        /// The login url for forms authentication.
+        /// </summary>
+        private string _formsLoginUrl;
+
+        /// <summary>
+        /// The URL to use to redirect a mobile device accessing
+        /// a non mobile web page to. Initialised from the <c>web.config</c> file
+        /// when the module is created.
+        /// </summary>
+        private string _mobileHomePageUrl;
 
         /// <summary>
         /// A regular expression that when applied to the current request Path
@@ -88,18 +109,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// System.Web.UI.MobileControls.MobilePage will automatically be treated 
         /// as a mobile page irrespective of this attribute. (Optional)
         /// </summary>
-        private Regex _mobilePageRegex = null;
+        private Regex _mobilePageRegex;
 
-        /// <summary>
-        /// Collection of client targets used by the application with the key
-        /// field representing the alias and the value the useragent.
-        /// </summary>
-        private SortedList<string, string> _clientTargets = null;
-
-        /// <summary>
-        /// The login url for forms authentication.
-        /// </summary>
-        private string _formsLoginUrl = null;
+        private bool _originalUrlAsQueryString;
 
         #endregion
 
@@ -116,34 +128,36 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
             // Fetch the redirect url, first time redirect indicator and wire up the
             // events if a url has been provided.
-            if (Manager.Redirect != null && Manager.Redirect.Enabled == true)
+            if (Manager.Redirect != null && Manager.Redirect.Enabled)
             {
                 _mobileHomePageUrl = Manager.Redirect.MobileHomePageUrl;
                 _firstRequestOnly = Manager.Redirect.FirstRequestOnly;
                 if (String.IsNullOrEmpty(Manager.Redirect.MobilePagesRegex) == false)
-                    _mobilePageRegex = new Regex(Manager.Redirect.MobilePagesRegex, RegexOptions.Compiled|RegexOptions.IgnoreCase);
+                    _mobilePageRegex = new Regex(Manager.Redirect.MobilePagesRegex,
+                                                 RegexOptions.Compiled | RegexOptions.IgnoreCase);
                 _formsLoginUrl = FormsAuthentication.LoginUrl;
+                _originalUrlAsQueryString = Manager.Redirect.OriginalUrlAsQueryString;
             }
 
             // Get a list of the client target names.
             _clientTargets = GetClientTargets();
 
             // Intercept the beginning of the request to override the capabilities.
-            application.BeginRequest += new EventHandler(OnBeginRequest);
+            application.BeginRequest += OnBeginRequest;
 
             // Intercept request event after the hander and the state have been assigned
             // to redirect the page.
-            application.PostAcquireRequestState += new EventHandler(OnPostAcquireRequestState);
+            application.PostAcquireRequestState += OnPostAcquireRequestState;
 
             // Check for a MobilePage handler being used.
-            application.PreRequestHandlerExecute += new EventHandler(OnPreRequestHandlerExecuteMobilePage);
+            application.PreRequestHandlerExecute += SetPreferredRenderingType;
 
             // If client targets are specified then check to see if one is being used
             // and override the requesting device information.
             if (_clientTargets != null)
-                application.PreRequestHandlerExecute +=new EventHandler(OnPreRequestHandlerExecuteSetClientTargets);
+                application.PreRequestHandlerExecute += SetPagePreIntClientTargets;
         }
-        
+
         #endregion
 
         #region Events
@@ -153,17 +167,17 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="sender">HttpApplication related to the request.</param>
         /// <param name="e">EventArgs related to the event. Not used.</param>
-        public void OnPreRequestHandlerExecuteMobilePage(object sender, EventArgs e)
+        private void SetPreferredRenderingType(object sender, EventArgs e)
         {
             if (sender is HttpApplication)
             {
-                HttpContext context = ((HttpApplication)sender).Context;
+                HttpContext context = ((HttpApplication) sender).Context;
 
                 // Check to see if the handler is a mobile page. If so then the preferred markup
                 // needs to change as the legacy mobile controls do not work with html4 specified.
                 // If these lines are removed a "No mobile controls device configuration was registered 
                 // for the requesting device" exception is likely to occur.
-                if (context.Handler is System.Web.UI.MobileControls.MobilePage &&
+                if (context.Handler is MobilePage &&
                     "html4" == context.Request.Browser.Capabilities["preferredRenderingType"] as string)
                 {
                     context.Request.Browser.Capabilities["preferredRenderingType"] = "html32";
@@ -177,18 +191,18 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="sender">HttpApplication related to the request.</param>
         /// <param name="e">EventArgs related to the event. Not used.</param>
-        public void OnPreRequestHandlerExecuteSetClientTargets(object sender, EventArgs e)
+        private void SetPagePreIntClientTargets(object sender, EventArgs e)
         {
             if (sender is HttpApplication)
             {
-                HttpContext context = ((HttpApplication)sender).Context;
-                                
+                HttpContext context = ((HttpApplication) sender).Context;
+
                 // If this handler relates to a page use the preinit event of the page
                 // to set the capabilities providing time for the page to set the 
                 // clienttarget property if required.
                 if (context != null &&
-                    context.Handler is System.Web.UI.Page)
-                    ((System.Web.UI.Page)context.Handler).PreInit += new EventHandler(OnPreInitPage);
+                    context.Handler is Page)
+                    ((Page) context.Handler).PreInit += OnPreInitPage;
             }
         }
 
@@ -201,7 +215,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             if (sender is HttpApplication)
             {
-                HttpContext context = ((HttpApplication)sender).Context;
+                HttpContext context = ((HttpApplication) sender).Context;
                 if (context != null)
                 {
                     try
@@ -217,7 +231,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     {
                         StringBuilder builder = new StringBuilder("A Null Exception occured which has the following header info:");
                         foreach (string key in context.Request.Headers.Keys)
-                            builder.Append(Environment.NewLine).Append(key).Append("=").Append(context.Request.Headers[key]);
+                            builder.Append(Environment.NewLine).Append(key).Append("=").Append(
+                                context.Request.Headers[key]);
 
                         // Create new exception with the additional information and record to the log file.
                         EventLog.Fatal(new MobileException(builder.ToString(), ex));
@@ -238,33 +253,35 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             if (sender is HttpApplication)
             {
-                HttpContext context = ((HttpApplication)sender).Context;
+                HttpContext context = ((HttpApplication) sender).Context;
 
                 if (context != null)
                 {
                     // Check to see if the request should be redirected.
-                    if (context.Handler != null &&
-                        String.IsNullOrEmpty(_mobileHomePageUrl) == false &&
-                        IsRedirectPage(context) == false &&
-                        IsPage(context) == true &&
-                        IsMobilePage(context) == false &&
-                        context.Request.Browser.IsMobileDevice == true &&
-                        IsFirstTime(context, _firstRequestOnly) == true &&
-                        IsRestrictedPageForRedirect(context) == false)
+                    if (ShouldRequestRedirect(context))
                     {
                         string newUrl = null;
-                        if (String.IsNullOrEmpty(context.Request.QueryString.ToString()) == false)
+                        if (_originalUrlAsQueryString)
+                            // Use an encoded version of the requesting Url
+                            // as the query string.
+                            newUrl = String.Format("{0}?origUrl={1}",
+                                                   _mobileHomePageUrl,
+                                                   HttpUtility.UrlEncode(context.Request.Url.ToString()));
+                        else if (String.IsNullOrEmpty(context.Request.QueryString.ToString()) == false)
+                            // Use the current query string.
                             newUrl = String.Format("{0}?{1}",
-                                _mobileHomePageUrl,
-                                context.Request.QueryString.ToString());
+                                                   _mobileHomePageUrl,
+                                                   context.Request.QueryString);
                         else
+                            // Use the raw redirect Url without a query string.
                             newUrl = _mobileHomePageUrl;
+
                         context.Response.Redirect(newUrl, true);
                     }
                 }
             }
         }
-        
+
         /// <summary>
         /// Before the page initialises make sure the latest browser capabilities
         /// are available if a client target has been specified.
@@ -273,28 +290,28 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="e">Event arguements.</param>
         public void OnPreInitPage(object sender, EventArgs e)
         {
-            System.Web.UI.Page page = sender as System.Web.UI.Page;
+            Page page = sender as Page;
 
             // Check to see if a client target has been specified and if it has
             // use the associated useragent string to assign the capabilities.
             string userAgent = null;
-            if (page != null && _clientTargets.TryGetValue(page.ClientTarget, out userAgent) == true)
+            if (page != null && _clientTargets.TryGetValue(page.ClientTarget, out userAgent))
                 OverrideCapabilities(page.Request, userAgent);
         }
 
         #endregion
 
-        #region Methods
-        
+        #region Static Methods
+
         /// <summary>
         /// Gets the client target section from the configuration if the security level
         /// allows this method to be used. Will fail in medium trust environments.
         /// </summary>
         /// <returns></returns>
-        private ClientTargetSection GetClientTargetsSection()
+        private static ClientTargetSection GetClientTargetsSection()
         {
             return WebConfigurationManager.GetWebApplicationSection(
-                "system.web/clientTarget") as ClientTargetSection;
+                       "system.web/clientTarget") as ClientTargetSection;
         }
 
         /// <summary>
@@ -302,14 +319,16 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// if either target names are not defined or unrestricted security access is not available.
         /// </summary>
         /// <returns>A list of client target names.</returns>
-        private SortedList<string, string> GetClientTargets()
+        private static SortedList<string, string> GetClientTargets()
         {
             try
             {
                 ClientTargetSection targets = GetClientTargetsSection();
                 if (targets != null)
                 {
-                    SortedList<string, string> clientNames = new SortedList<string, string>();
+                    // Client targets have been defined so set the sorted list to include
+                    // these details.
+                    var clientNames = new SortedList<string, string>();
                     for (int index = 0; index < targets.ClientTargets.Count; index++)
                     {
                         clientNames.Add(
@@ -321,9 +340,38 @@ namespace FiftyOne.Foundation.Mobile.Detection
             }
             catch (SecurityException)
             {
+                // There is nothing we can do so return null.
                 return null;
             }
             return null;
+        }
+
+        /// <summary>
+        /// Adds the capabilities provided into the existing dictionary of capabilities
+        /// already assigned by Microsoft.
+        /// </summary>
+        /// <param name="currentCapabilities"></param>
+        /// <param name="overrideCapabilities"></param>
+        private static HttpBrowserCapabilities AddNewCapabilities(HttpBrowserCapabilities currentCapabilities, IDictionary overrideCapabilities)
+        {
+            // We can't do anything with null capabilities. Return the current ones.
+            if (overrideCapabilities == null)
+                return currentCapabilities;
+
+            var capabilities = new System.Web.Mobile.MobileCapabilities();
+            capabilities.Capabilities = new Hashtable();
+            
+            // Copy the keys from both the original and new capabilities.
+            foreach (object key in currentCapabilities.Capabilities.Keys)
+                capabilities.Capabilities[key] = currentCapabilities.Capabilities[key];
+            foreach (object key in overrideCapabilities.Keys)
+                capabilities.Capabilities[key] = overrideCapabilities[key];
+
+            // Copy the adapters from the original.
+            foreach (object key in currentCapabilities.Adapters.Keys)
+                capabilities.Adapters.Add(key, currentCapabilities.Adapters[key]);
+
+            return capabilities;
         }
 
         /// <summary>
@@ -335,24 +383,47 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="context"><see cref="HttpContext"/> to be tested and overridden.</param>
         private static void OverrideCapabilities(HttpContext context)
         {
-            if (context.Request.Browser is MobileCapabilities == false)
-            {
-                bool newIsMobile = Devices.IsMobileDevice(context);
-                newIsMobile = true;
-                if (newIsMobile == true || newIsMobile != context.Request.Browser.IsMobileDevice)
-                {
-                    MobileCapabilities newCap = Devices.Create(context);
-                    if (newCap != null)
-                        context.Request.Browser = newCap;
-                }
-            }
+            context.Request.Browser = AddNewCapabilities(context.Request.Browser, Factory.Create(context));
         }
 
+        /// <summary>
+        /// Adds new capabilities for the useragent provided rather than the request details
+        /// provided in the request paramters.
+        /// </summary>
+        /// <param name="request">The request who's capabilities collection should be updated.</param>
+        /// <param name="userAgent">The useragent string of the device requiring capabilities to be added.</param>
         private static void OverrideCapabilities(HttpRequest request, string userAgent)
         {
-            MobileCapabilities newCap = Devices.Create(userAgent);
-            if (newCap != null)
-                request.Browser = newCap;
+            request.Browser = AddNewCapabilities(request.Browser, Factory.Create(userAgent));
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Records the module being disposed if debug enabled.
+        /// </summary>
+        public void Dispose()
+        {
+            EventLog.Debug("Disposing Detector Module");
+        }
+
+        /// <summary>
+        /// Returns true if the request should be redirected.
+        /// </summary>
+        /// <param name="context">The HttpContext of the request.</param>
+        /// <returns>True if the request should be redirected.</returns>
+        private bool ShouldRequestRedirect(HttpContext context)
+        {
+            return context.Handler != null &&
+                   String.IsNullOrEmpty(_mobileHomePageUrl) == false &&
+                   IsRedirectPage(context) == false &&
+                   IsPage(context) &&
+                   IsMobilePage(context) == false &&
+                   Factory.IsRedirectDevice(context) &&
+                   IsFirstTime(context, _firstRequestOnly) &&
+                   IsRestrictedPageForRedirect(context) == false;
         }
 
         /// <summary>
@@ -364,7 +435,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>True if the page is restricted from being redirected.</returns>
         private bool IsRestrictedPageForRedirect(HttpContext context)
         {
-            System.Web.UI.Page page = context.Handler as System.Web.UI.Page;
+            Page page = context.Handler as Page;
             if (page != null)
             {
                 string currentPage = page.ResolveUrl(context.Request.AppRelativeCurrentExecutionFilePath);
@@ -411,7 +482,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
             // Check to see if the requested IP address and HTTP headers hashcode is
             // on record as having been seen before.
-            if (RequestHistory.IsPresent(context.Request) == true)
+            if (RequestHistory.IsPresent(context.Request))
                 return false;
 
             // The 4 checks have all failed so we're now certain this is the 1st request
@@ -426,7 +497,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
             // Add a cookie to the response setting the expiry time to the session timeout
             // or if not available the redirection timeout.
             // Modified to check for existance of cookie to avoid recreating.
-            if (new List<string>(context.Response.Cookies.AllKeys).Contains(Constants.AlreadyAccessedCookieName) == false)
+            if (new List<string>(context.Response.Cookies.AllKeys).Contains(Constants.AlreadyAccessedCookieName) ==
+                false)
             {
                 HttpCookie alreadyAccessed = new HttpCookie(Constants.AlreadyAccessedCookieName);
                 if (context.Session != null)
@@ -446,12 +518,16 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>True if the string is present. False if not.</returns>
         private static bool IsInArray(string value, string[] array)
         {
+#if VER4
+            return array.Any(current => value == current);
+#elif VER2
             foreach (string current in array)
             {
                 if (value == current)
                     return true;
             }
             return false;
+#endif
         }
 
         /// <summary>
@@ -464,7 +540,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             if (type != null)
             {
-                if (IsInArray(type.FullName, PAGES) == true)
+                if (IsInArray(type.FullName, PAGES))
                     return true;
                 else if (type.BaseType != null)
                     return IsPageType(type.BaseType);
@@ -492,7 +568,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             if (type != null)
             {
-                if (IsInArray(type.FullName, MOBILE_PAGES) == true)
+                if (IsInArray(type.FullName, MOBILE_PAGES))
                     return true;
                 else if (type.BaseType != null)
                     return IsMobileType(type.BaseType);
@@ -501,8 +577,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
 
         /// <summary>
-        /// Checks to see if the request.Path property of the request is matched
-        /// by the regular expression returning the result.
+        /// Checks to see if the regular expression provided matches either the
+        /// relative executing path or the Url of the request.
         /// </summary>
         /// <param name="request">The HttpRequest to be checked.</param>
         /// <returns>True if this request should be considered associated with
@@ -510,7 +586,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
         private bool IsMobileRegexPage(HttpRequest request)
         {
             if (_mobilePageRegex != null)
-                return _mobilePageRegex.IsMatch(request.AppRelativeCurrentExecutionFilePath);
+                return _mobilePageRegex.IsMatch(request.AppRelativeCurrentExecutionFilePath) ||
+                       _mobilePageRegex.IsMatch(request.Url.ToString());
             return false;
         }
 
@@ -521,7 +598,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         private bool IsMobilePage(HttpContext context)
         {
             return IsMobileType(context.Handler.GetType()) ||
-                IsMobileRegexPage(context.Request);
+                   IsMobileRegexPage(context.Request);
         }
 
         /// <summary>
@@ -535,14 +612,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
             return _mobileHomePageUrl.Equals(
                 context.Request.AppRelativeCurrentExecutionFilePath,
                 StringComparison.InvariantCultureIgnoreCase);
-        }
-
-        /// <summary>
-        /// Records the module being disposed if debug enabled.
-        /// </summary>
-        public void Dispose()
-        {
-            EventLog.Debug("Disposing Detector Module");
         }
 
         #endregion

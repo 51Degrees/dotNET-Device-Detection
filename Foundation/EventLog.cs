@@ -21,29 +21,28 @@
  * 
  * ********************************************************************* */
 
-using System.IO;
+#region
+
 using System;
-using System.Threading;
-using System.Collections.Generic;
-using System.Web;
 using System.Diagnostics;
-using FiftyOne.Foundation.Mobile.Configuration;
-using System.Security.Permissions;
 using System.Security;
+using FiftyOne.Foundation.Mobile.Configuration;
+
+#endregion
 
 namespace FiftyOne
 {
     internal class EventLog : Log
     {
         /// <summary>
-        /// An instance of the event log.
+        /// Used to lock during the creation of the log level parameter and instance.
         /// </summary>
-        private static EventLog _instance = null;
+        private static readonly object _sync = new object();
 
         /// <summary>
-        /// The process id for the application.
+        /// An instance of the event log.
         /// </summary>
-        private static int _processId = -1;
+        private static EventLog _instance;
 
         /// <summary>
         /// Set to minus 1 to ensure value loaded correctly from web.config
@@ -52,14 +51,14 @@ namespace FiftyOne
         private static int _logLevel = -1;
 
         /// <summary>
-        /// The file name for the log file.
+        /// The process id for the application.
         /// </summary>
-        private string _logFile = null;
+        private static int _processId = -1;
 
         /// <summary>
-        /// Used to lock during the creation of the log level parameter and instance.
+        /// The file name for the log file.
         /// </summary>
-        private static object _sync = new object();
+        private string _logFile;
 
         protected internal static EventLog Instance
         {
@@ -87,9 +86,9 @@ namespace FiftyOne
                     {
                         if (_logFile == null)
                         {
-                            if (Manager.Log != null && Manager.Log.Enabled == true)
+                            if (Manager.Log != null && Manager.Log.Enabled)
                             {
-                                _logFile = FiftyOne.Foundation.Mobile.Configuration.Support.GetFilePath(Manager.Log.LogFile);
+                                _logFile = Support.GetFilePath(Manager.Log.LogFile);
                             }
                         }
                     }
@@ -106,15 +105,25 @@ namespace FiftyOne
                 {
                     lock (_sync)
                     {
-                        if (_logLevel == -1 && Manager.Log != null && Manager.Log.Enabled == true)
+                        if (_logLevel == -1 && Manager.Log != null && Manager.Log.Enabled)
                         {
                             switch (Manager.Log.LogLevel)
                             {
-                                case "Debug": _logLevel = 4; break;
-                                case "Info": _logLevel = 3; break;
-                                case "Warn": _logLevel = 2; break;
-                                case "Fatal": _logLevel = 1; break;
-                                default: _logLevel = 0; break;
+                                case "Debug":
+                                    _logLevel = 4;
+                                    break;
+                                case "Info":
+                                    _logLevel = 3;
+                                    break;
+                                case "Warn":
+                                    _logLevel = 2;
+                                    break;
+                                case "Fatal":
+                                    _logLevel = 1;
+                                    break;
+                                default:
+                                    _logLevel = 0;
+                                    break;
                             }
                         }
                     }
@@ -144,79 +153,6 @@ namespace FiftyOne
             get { return LogLevel >= 1; }
         }
 
-        internal static void Debug(Exception ex)
-        {
-            if (IsDebug == true)
-            {
-                Write("Debug", ex.Message);
-                Write("Debug", ex.StackTrace);
-                if (ex.InnerException != null)
-                    Debug(ex.InnerException);
-            }
-        }
-
-        internal static void Info(Exception ex)
-        {
-            if (IsInfo == true)
-            {
-                Write("Info", ex.Message);
-                Write("Info", ex.StackTrace);
-                if (ex.InnerException != null)
-                    Info(ex.InnerException);
-            }
-        }
-
-        internal static void Warn(Exception ex)
-        {
-            if (IsWarn == true)
-            {
-                Write("Warn", ex.Message);
-                Write("Warn", ex.StackTrace);
-                if (ex.InnerException != null)
-                    Warn(ex.InnerException);
-            }
-        }
-
-        internal static void Fatal(Exception ex)
-        {
-            if (IsFatal == true)
-            {
-                Write("Fatal", ex.Message);
-                Write("Fatal", ex.StackTrace);
-                if (ex.InnerException != null)
-                    Fatal(ex.InnerException);
-            }
-        }
-
-        internal static void Debug(string message)
-        {
-            if (IsDebug == true)
-                Write("Debug", message);
-        }
-
-        internal static void Info(string message)
-        {
-            if (IsInfo == true)
-                Write("Info", message);
-        }
-
-        internal static void Warn(string message)
-        {
-            if (IsWarn == true)
-                Write("Warn", message);
-        }
-
-        internal static void Fatal(string message)
-        {
-            if (IsFatal == true)
-                Write("Fatal", message);
-        }
-
-        private static int GetProcessId()
-        {
-            return Process.GetCurrentProcess().Id;
-        }
-
         private static int ProcessId
         {
             get
@@ -242,13 +178,86 @@ namespace FiftyOne
             }
         }
 
-        internal protected static void Write(string level, string message)
+        internal static void Debug(Exception ex)
         {
-            Instance.Write(String.Format("{0:s} - {1} - {2} - {3}",
-                    DateTime.UtcNow,
-                    ProcessId,
-                    level,
-                    message));
+            if (IsDebug)
+            {
+                Write("Debug", ex.Message);
+                Write("Debug", ex.StackTrace);
+                if (ex.InnerException != null)
+                    Debug(ex.InnerException);
+            }
+        }
+
+        internal static void Info(Exception ex)
+        {
+            if (IsInfo)
+            {
+                Write("Info", ex.Message);
+                Write("Info", ex.StackTrace);
+                if (ex.InnerException != null)
+                    Info(ex.InnerException);
+            }
+        }
+
+        internal static void Warn(Exception ex)
+        {
+            if (IsWarn)
+            {
+                Write("Warn", ex.Message);
+                Write("Warn", ex.StackTrace);
+                if (ex.InnerException != null)
+                    Warn(ex.InnerException);
+            }
+        }
+
+        internal static void Fatal(Exception ex)
+        {
+            if (IsFatal)
+            {
+                Write("Fatal", ex.Message);
+                Write("Fatal", ex.StackTrace);
+                if (ex.InnerException != null)
+                    Fatal(ex.InnerException);
+            }
+        }
+
+        internal static void Debug(string message)
+        {
+            if (IsDebug)
+                Write("Debug", message);
+        }
+
+        internal static void Info(string message)
+        {
+            if (IsInfo)
+                Write("Info", message);
+        }
+
+        internal static void Warn(string message)
+        {
+            if (IsWarn)
+                Write("Warn", message);
+        }
+
+        internal static void Fatal(string message)
+        {
+            if (IsFatal)
+                Write("Fatal", message);
+        }
+
+        private static int GetProcessId()
+        {
+            return Process.GetCurrentProcess().Id;
+        }
+
+        protected internal static void Write(string level, string message)
+        {
+            Instance.Write(String.Format("{0:o} - {1} - {2} - {3}",
+                                         DateTime.UtcNow,
+                                         ProcessId,
+                                         level,
+                                         message));
         }
     }
 }

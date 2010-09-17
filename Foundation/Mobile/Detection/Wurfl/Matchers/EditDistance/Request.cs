@@ -21,9 +21,12 @@
  * 
  * ********************************************************************* */
 
-using System.Collections.Generic;
+#region
+
 using System.Threading;
 using FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.EditDistance
 {
@@ -31,7 +34,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.EditDistance
     {
         #region Fields
 
-        private Results _results = null;
+        private readonly Results _results;
 
         #endregion
 
@@ -53,7 +56,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.EditDistance
         }
 
         internal Request(string userAgent, Handler handler, AutoResetEvent completeEvent) :
-            base(userAgent, handler, completeEvent) 
+            base(userAgent, handler, completeEvent)
         {
             _results = new Results();
         }

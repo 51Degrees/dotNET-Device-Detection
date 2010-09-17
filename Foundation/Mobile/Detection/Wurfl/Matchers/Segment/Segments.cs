@@ -21,11 +21,15 @@
  * 
  * ********************************************************************* */
 
+#region
+
 using System.Collections.Generic;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Segment
 {
-    internal class Segments : List<Segment> 
+    internal class Segments : List<Segment>
     {
         internal int TotalScore
         {
@@ -34,7 +38,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Segment
                 int totalScore = 0;
                 foreach (Segment current in this)
                 {
-                    if (current.IsValid == true)
+                    if (current.IsValid)
                         totalScore += current.Score;
                 }
                 return totalScore;

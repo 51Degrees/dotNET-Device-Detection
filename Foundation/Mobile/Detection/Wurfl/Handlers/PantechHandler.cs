@@ -21,15 +21,16 @@
  * 
  * ********************************************************************* */
 
-namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers 
+namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
-    internal class PantechHandler : EditDistanceHandler 
+    internal class PantechHandler : EditDistanceHandler
     {
         // Checks given UA starts with "Pantech","PANTECH","PT-" or "PG-"
-        internal protected override bool CanHandle(string userAgent)
+        protected internal override bool CanHandle(string userAgent)
         {
-            return (userAgent.StartsWith("Pantech") || userAgent.StartsWith("PT-") || userAgent.StartsWith("PANTECH") || userAgent
-                    .StartsWith("PG-"));
+            return (userAgent.StartsWith("Pantech") || userAgent.StartsWith("PT-") || userAgent.StartsWith("PANTECH") ||
+                    userAgent
+                        .StartsWith("PG-"));
         }
     }
 }

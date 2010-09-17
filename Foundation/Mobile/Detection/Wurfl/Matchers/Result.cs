@@ -21,24 +21,20 @@
  * 
  * ********************************************************************* */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers
 {
     internal class Result
     {
-        private DeviceInfo _device;
-
-        internal DeviceInfo Device
-        {
-            get { return _device; }
-        }
+        private readonly DeviceInfo _device;
 
         internal Result(DeviceInfo device)
         {
             _device = device;
+        }
+
+        internal DeviceInfo Device
+        {
+            get { return _device; }
         }
     }
 }

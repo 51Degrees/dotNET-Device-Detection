@@ -21,25 +21,29 @@
  * 
  * ********************************************************************* */
 
-namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers 
+namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
     internal class SonyEricssonHandler : RegexSegmentHandler
     {
         private static readonly string[] PATTERNS = {
-            // Model name
-            @"(?:(?<=SonyEricsson)[^/]+)",
-            // Version
-            @"(?:(?<=SonyEricsson[^/]+/)[\w\d]+)",
-            // Everything between the 1st and 2nd spaces
-            @"(?:(?<= )[^ ]+)" };
+                                                        // Model name
+                                                        @"(?:(?<=SonyEricsson)[^/]+)",
+                                                        // Version
+                                                        @"(?:(?<=SonyEricsson[^/]+/)[\w\d]+)",
+                                                        // Everything between the 1st and 2nd spaces
+                                                        @"(?:(?<= )[^ ]+)"
+                                                    };
 
         // Checks given UA contains "SonyEricsson"
-        internal protected override bool CanHandle(string userAgent)
+
+        internal SonyEricssonHandler() : base(PATTERNS, new[] {100, 1, 1}, true)
         {
-            return userAgent.Contains("SonyEricsson") &&
-                base.CanHandle(userAgent);
         }
 
-        internal SonyEricssonHandler() : base (PATTERNS, new int[] { 100, 1, 1 }, true ) {}
+        protected internal override bool CanHandle(string userAgent)
+        {
+            return userAgent.Contains("SonyEricsson") &&
+                   base.CanHandle(userAgent);
+        }
     }
 }

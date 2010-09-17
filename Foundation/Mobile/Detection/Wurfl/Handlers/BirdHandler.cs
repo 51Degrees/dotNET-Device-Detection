@@ -26,7 +26,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
     internal class BirdHandler : EditDistanceHandler
     {
         // Checks the given UA starts with "BIRD"
-        internal protected override bool CanHandle(string userAgent)
+        protected internal override bool CanHandle(string userAgent)
         {
             return userAgent.StartsWith("BIRD");
         }

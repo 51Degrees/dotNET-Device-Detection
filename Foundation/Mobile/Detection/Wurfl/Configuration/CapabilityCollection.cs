@@ -21,11 +21,12 @@
  * 
  * ********************************************************************* */
 
+#region
+
 using System;
-using System.Text;
 using System.Configuration;
-using System.Web;
-using System.Security.Permissions;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
 {
@@ -35,13 +36,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
     public sealed class CapabilityCollection : ConfigurationElementCollection
     {
         #region Constructors
-
-        /// <summary>
-        /// Creates a new instance of <see cref="CapabilityCollection"/> class.
-        /// </summary>
-        public CapabilityCollection()
-        {
-        }
 
         #endregion
 
@@ -60,7 +54,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// </summary>
         protected override Object GetElementKey(ConfigurationElement element)
         {
-            return ((CapabilityElement)element).CapabilityName;
+            return ((CapabilityElement) element).CapabilityName;
         }
 
         /// <summary>
@@ -80,7 +74,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         public int IndexOf(CapabilityElement capability)
         {
             if (capability == null)
-                throw new System.ArgumentNullException("capability");
+                throw new ArgumentNullException("capability");
 
             return BaseIndexOf(capability);
         }
@@ -120,11 +114,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         public void RemoveAt(int index)
         {
             if ((index < 0) || (index > base.Count - 1))
-                throw new System.ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException("index");
 
             BaseRemoveAt(index);
         }
-        
+
         /// <summary>
         /// Removes a <typeparamref name="System.Configuration.ConfigurationElement"/> from the collection.
         /// </summary>
@@ -133,7 +127,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         public void Remove(string capabilityName)
         {
             if (string.IsNullOrEmpty(capabilityName))
-                throw new System.ArgumentNullException("capabilityName");
+                throw new ArgumentNullException("capabilityName");
 
             BaseRemove(capabilityName);
         }
@@ -155,11 +149,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// </summary>
         public CapabilityElement this[int index]
         {
-            get
-            {
-                
-                return (CapabilityElement)BaseGet(index);
-            }
+            get { return (CapabilityElement) BaseGet(index); }
             set
             {
                 if (BaseGet(index) != null)
@@ -169,16 +159,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
                 BaseAdd(index, value);
             }
         }
-        
+
         /// <summary>
         /// Gets or sets the <typeparamref name="WurflCapabilityElement"/>.
         /// </summary>        
-        new public CapabilityElement this[string capabilityName]
+        public new CapabilityElement this[string capabilityName]
         {
-            get
-            {
-                return (CapabilityElement)BaseGet(capabilityName);
-            }
+            get { return (CapabilityElement) BaseGet(capabilityName); }
         }
 
         #endregion

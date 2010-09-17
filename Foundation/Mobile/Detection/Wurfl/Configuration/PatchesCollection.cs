@@ -21,11 +21,12 @@
  * 
  * ********************************************************************* */
 
+#region
+
 using System;
-using System.Text;
 using System.Configuration;
-using System.Web;
-using System.Security.Permissions;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
 {
@@ -35,13 +36,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
     public sealed class PatchesCollection : ConfigurationElementCollection
     {
         #region Constructors
-
-        /// <summary>
-        /// Creates a new instance of <see cref="PatchesCollection"/>.
-        /// </summary>
-        public PatchesCollection()
-        {
-        }
 
         #endregion
 
@@ -60,7 +54,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// </summary>
         protected override Object GetElementKey(ConfigurationElement element)
         {
-            return ((PatchConfigElement)element).Name;
+            return ((PatchConfigElement) element).Name;
         }
 
         /// <summary>
@@ -80,7 +74,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         public int IndexOf(PatchConfigElement wurflPatch)
         {
             if (wurflPatch == null)
-                throw new System.ArgumentNullException("wurflPatch");
+                throw new ArgumentNullException("wurflPatch");
 
             return BaseIndexOf(wurflPatch);
         }
@@ -120,11 +114,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         public void RemoveAt(int index)
         {
             if ((index < 0) || (index > base.Count - 1))
-                throw new System.ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException("index");
 
             BaseRemoveAt(index);
         }
-        
+
         /// <summary>
         /// Removes a <typeparamref name="System.Configuration.ConfigurationElement"/> from the collection.
         /// </summary>
@@ -133,7 +127,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         public void Remove(string name)
         {
             if (string.IsNullOrEmpty(name))
-                throw new System.ArgumentNullException("name");
+                throw new ArgumentNullException("name");
 
             BaseRemove(name);
         }
@@ -155,11 +149,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// </summary>
         public PatchConfigElement this[int index]
         {
-            get
-            {
-                
-                return (PatchConfigElement)BaseGet(index);
-            }
+            get { return (PatchConfigElement) BaseGet(index); }
             set
             {
                 if (BaseGet(index) != null)
@@ -169,16 +159,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
                 BaseAdd(index, value);
             }
         }
-        
+
         /// <summary>
         /// Gets or sets the <typeparamref name="PatchConfigElement"/>.
         /// </summary>        
-        new public PatchConfigElement this[string name]
+        public new PatchConfigElement this[string name]
         {
-            get
-            {
-                return (PatchConfigElement)BaseGet(name);
-            }
+            get { return (PatchConfigElement) BaseGet(name); }
         }
 
         #endregion

@@ -21,13 +21,13 @@
  * 
  * ********************************************************************* */
 
-namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers 
+namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
     internal class MotorolaHandler : EditDistanceHandler
     {
         // Intercept all UAs starting with "Mot-", or containing "MOT-" or
         // "Motorola".
-        internal protected override bool CanHandle(string userAgent)
+        protected internal override bool CanHandle(string userAgent)
         {
             return (userAgent.StartsWith("Mot-")
                     || userAgent.Contains("MOT-")

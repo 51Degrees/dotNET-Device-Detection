@@ -21,13 +21,14 @@
  * 
  * ********************************************************************* */
 
+#region
+
 using System;
 using System.Collections.Generic;
-using System.Threading;
-using System.Collections;
-using System.Collections.Specialized;
 using System.Web;
 using FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
@@ -36,46 +37,50 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
         #region Constants
 
         /// <summary>
+        /// The default confidence to assign to results from the handler.
+        /// </summary>
+        private const byte DEFAULT_CONFIDENCE = 5;
+
+        /// <summary>
         /// WURFL uaprof capabilities to check.
         /// </summary>
-        private static readonly string[] UAPROF_CAPABILITIES = new string[] {
-            "uaprof",
-            "uaprof2",
-            "uaprof3" };
+        private static readonly int[] UAPROF_CAPABILITIES = new[]
+                                                                   {
+                                                                       Strings.Add("uaprof"),
+                                                                       Strings.Add("uaprof2"),
+                                                                       Strings.Add("uaprof3")
+                                                                   };
 
         /// <summary>
         /// HTTP headers containing uaprof urls.
         /// </summary>
-        private static readonly string[] UAPROF_HEADERS = new string[] {
-            "profile",
-            "x-wap-profile",
-            "X-Wap-Profile"};
-
-        /// <summary>
-        /// The default confidence to assign to results from the handler.
-        /// </summary>
-        private const byte DEFAULT_CONFIDENCE = 5;
+        private static readonly string[] UAPROF_HEADERS = new[]
+                                                              {
+                                                                  "profile",
+                                                                  "x-wap-profile",
+                                                                  "X-Wap-Profile"
+                                                              };
 
         #endregion
 
         #region Fields
 
         /// <summary>
-        /// A single collection of all useragent strings and devices assigned to this handler.
+        /// A collection of domain names used with uaprof urls.
         /// </summary>
-        private SortedDictionary<int, DeviceInfo[]> _useragents =
-            new SortedDictionary<int, DeviceInfo[]>();
+        private readonly List<string> _uaProfDomains = new List<string>();
 
         /// <summary>
         /// A single collection of all uaprof urls used by devices assigned to this handler.
         /// </summary>
-        private SortedDictionary<int, DeviceInfo[]> _uaprofs =
+        private readonly SortedDictionary<int, DeviceInfo[]> _uaprofs =
             new SortedDictionary<int, DeviceInfo[]>();
 
         /// <summary>
-        /// A collection of domain names used with uaprof urls.
+        /// A single collection of all useragent strings and devices assigned to this handler.
         /// </summary>
-        private List<string> _uaProfDomains = new List<string>();
+        private readonly SortedDictionary<int, DeviceInfo[]> _useragents =
+            new SortedDictionary<int, DeviceInfo[]>();
 
         #endregion
 
@@ -86,7 +91,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
         /// to enable the handler to support the device. Overriden in 
         /// derived classess to provide an array of root device ids.
         /// </summary>
-        protected virtual string[] SupportedRootDeviceIds { get { return null; } }
+        protected virtual string[] SupportedRootDeviceIds
+        {
+            get { return null; }
+        }
 
         /// <summary>
         /// Returns the device values without the hashcode used to rapidly
@@ -114,7 +122,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
         /// </summary>
         /// <param name="userAgent">The useragent to match.</param>
         /// <returns>A result set of matching devices.</returns>
-        internal protected abstract Results Match(string userAgent);
+        protected internal abstract Results Match(string userAgent);
 
         /// <summary>
         /// Returns true or false depending on the handlers ability
@@ -122,11 +130,20 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
         /// </summary>
         /// <param name="userAgent"></param>
         /// <returns></returns>
-        internal protected abstract bool CanHandle(string userAgent);
+        protected internal abstract bool CanHandle(string userAgent);
 
         #endregion
 
         #region Internal Methods
+
+        /// <summary>
+        /// The default device for the handler. If not overriden the default
+        /// device for the API will be returned.
+        /// </summary>
+        internal virtual DeviceInfo DefaultDevice
+        {
+            get { return Provider.DefaultDevice; }
+        }
 
         /// <summary>
         /// Adds a new device to the handler.
@@ -135,9 +152,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
         internal virtual void Set(DeviceInfo device)
         {
             SetUserAgent(device);
-            SetUAProf(device);
+            SetUaProf(device);
         }
-        
+
         /// <summary>
         /// Returns the device matching the userAgent string if one is available.
         /// </summary>
@@ -197,7 +214,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
         /// within it and the device's useragent string can be handled. Or true if if
         /// the useragent string can be handled but no supported root devices are provided.
         /// Otherwise false.</returns>
-        internal protected virtual bool CanHandle(DeviceInfo device)
+        protected internal virtual bool CanHandle(DeviceInfo device)
         {
             if (SupportedRootDeviceIds == null)
                 return CanHandle(device.UserAgent);
@@ -252,23 +269,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
                 {
                     string value = request.Headers[header];
                     if (value != null &&
-                        Uri.TryCreate(value, UriKind.Absolute, out url) == true &&
-                        _uaProfDomains.Contains(url.Host) == true)
+                        Uri.TryCreate(value, UriKind.Absolute, out url) &&
+                        _uaProfDomains.Contains(url.Host))
                     {
                         return true;
                     }
                 }
             }
             return canHandle;
-        }
-
-        /// <summary>
-        /// The default device for the handler. If not overriden the default
-        /// device for the API will be returned.
-        /// </summary>
-        internal virtual DeviceInfo DefaultDevice
-        {
-            get { return Provider.DefaultDevice; }
         }
 
         /// <summary>
@@ -298,8 +306,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
                         Results results = GetResultsFromUAProf(value);
                         if (results != null && results.Count > 0)
                         {
-                            if (EventLog.IsDebug == true)
-                                EventLog.Debug(String.Format("UAProf matched '{0}' devices to header '{1}'.", results.Count, value));
+                            if (EventLog.IsDebug)
+                                EventLog.Debug(String.Format("UAProf matched '{0}' devices to header '{1}'.",
+                                                             results.Count, value));
                             return results;
                         }
                     }
@@ -335,7 +344,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
             lock (_useragents)
             {
                 // Does the hashcode already exist?
-                if (_useragents.ContainsKey(hashcode) == true)
+                if (_useragents.ContainsKey(hashcode))
                 {
                     // Does the key already exist?
                     for (int i = 0; i < _useragents[hashcode].Length; i++)
@@ -355,69 +364,74 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
                 else
                 {
                     // Add the device to the collection.
-                    _useragents.Add(hashcode, new DeviceInfo[] { device });
+                    _useragents.Add(hashcode, new[] {device});
                 }
             }
         }
-        
+
         /// <summary>
         /// Adds the device to the collection of devices with UA prof information.
         /// If the device already exists the previous one is replaced.
         /// </summary>
         /// <param name="device">Device to be added.</param>
-        private void SetUAProf(DeviceInfo device)
+        private void SetUaProf(DeviceInfo device)
         {
-            foreach (string uaprof in UAPROF_CAPABILITIES)
+            foreach (int uaprof in UAPROF_CAPABILITIES)
             {
-                string value = device.GetCapability(uaprof);
-                if (String.IsNullOrEmpty(value) == false)
+                string value = Strings.Get(device.GetCapability(uaprof));
+                
+                // Don't process empty values.
+                if (String.IsNullOrEmpty(value)) continue;
+                
+                // Clean the useragent prof.
+                value = CleanUaProf(value);
+                Uri url = null;
+                
+                // If the url is not value don't continue processing.
+                if (!Uri.TryCreate(value, UriKind.Absolute, out url)) continue;
+                
+                // Get the hashcode before locking the list and processing
+                // the device and hashcode.
+                int hashcode = value.GetHashCode();
+                lock (_uaprofs)
                 {
-                    value = CleanUaProf(value);
-                    Uri url = null;
-                    if (Uri.TryCreate(value, UriKind.Absolute, out url) == true)
-                    {
-                        int hashcode = value.GetHashCode();
-                        lock (_uaprofs)
-                        {
-                            // Does the hashcode already exist?
-                            if (_uaprofs.ContainsKey(hashcode) == true)
-                            {
-                                // Does the key already exist?
-                                int index;
-                                for (index = 0; index < _uaprofs[hashcode].Length; index++)
-                                {
-                                    if (_uaprofs[hashcode][index].DeviceId == device.DeviceId)
-                                    {
-                                        // Yes. Update with the new device and then exit.
-                                        _uaprofs[hashcode][index] = device;
-                                        break;
-                                    }
-                                }
-                                // No. Expand the array adding the new device.
-                                if (index == _uaprofs[hashcode].Length)
-                                {
-                                    List<DeviceInfo> newList = new List<DeviceInfo>(_uaprofs[hashcode]);
-                                    newList.Add(device);
-                                    _uaprofs[hashcode] = newList.ToArray();
-                                }
-                            }
-                            else
-                            {
-                                // Add the device to the collection.
-                                _uaprofs.Add(hashcode, new DeviceInfo[] { device });
-                            }
-                        }
-                        // Add the domain to the list of domains for the handler.
-                        lock (_uaProfDomains)
-                        {
-                            if (_uaProfDomains.Contains(url.Host) == false)
-                                _uaProfDomains.Add(url.Host);
-                        }
-                    }
+                    ProcessUaProf(device, hashcode);
+                }
+
+                // Add the domain to the list of domains for the handler.
+                lock (_uaProfDomains)
+                {
+                    if (_uaProfDomains.Contains(url.Host) == false)
+                        _uaProfDomains.Add(url.Host);
                 }
             }
         }
-     
+
+        private void ProcessUaProf(DeviceInfo device, int hashcode)
+        {
+            // Does the hashcode already exist?
+            if (_uaprofs.ContainsKey(hashcode))
+            {
+                // Does the key already exist?
+                int index;
+                for (index = 0; index < _uaprofs[hashcode].Length; index++)
+                {
+                    if (_uaprofs[hashcode][index].DeviceId != device.DeviceId) continue;
+                    // Yes. Update with the new device and then exit.
+                    _uaprofs[hashcode][index] = device;
+                    return;
+                }
+                // No. Expand the array adding the new device.
+                List<DeviceInfo> newList = new List<DeviceInfo>(_uaprofs[hashcode]) { device };
+                _uaprofs[hashcode] = newList.ToArray();
+            }
+            else
+            {
+                // Add the device to the collection.
+                _uaprofs.Add(hashcode, new[] {device});
+            }
+        }
+
         /// <summary>
         /// Returns the devices that match a specific hashcode.
         /// </summary>
@@ -426,13 +440,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
         /// <returns>Array of devices matching the value.</returns>
         private static DeviceInfo[] GetDeviceInfo(SortedDictionary<int, DeviceInfo[]> _dictionary, string value)
         {
-            DeviceInfo[] devices = null;
             int hashcode = value.GetHashCode();
-            if (_dictionary.ContainsKey(hashcode) == true)
-            {
-                return _dictionary[hashcode];
-            }
-            return devices;
+            return _dictionary.ContainsKey(hashcode) ? _dictionary[hashcode] : null;
         }
 
         #endregion

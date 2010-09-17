@@ -21,13 +21,17 @@
  * 
  * ********************************************************************* */
 
-using System.IO;
+#region
+
 using System;
-using System.Web;
+using System.IO;
 using System.Security;
+
+#endregion
+
 namespace FiftyOne.Foundation.Mobile.Configuration
 {
-    internal class Support
+    internal static class Support
     {
         #region Methods
 
@@ -40,7 +44,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
             // allow this.
             try
             {
-                if (DoesDirectoryOrFileExist(pathSetOnWebConfig) == true)
+                if (DoesDirectoryOrFileExist(pathSetOnWebConfig))
                     return pathSetOnWebConfig;
             }
             catch (SecurityException)
@@ -51,7 +55,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
 
             // If this is a virtual path then remove the tilda, make absolute
             // and then add the base directory.
-            if (pathSetOnWebConfig.StartsWith("~") == true)
+            if (pathSetOnWebConfig.StartsWith("~"))
                 return MakeAbsolute(RemoveTilda(pathSetOnWebConfig));
 
             // Return the original path.
@@ -61,7 +65,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         private static bool DoesDirectoryOrFileExist(string pathSetOnWebConfig)
         {
             FileInfo info = new FileInfo(pathSetOnWebConfig);
-            if (info.Exists == true || info.Directory.Exists == true)
+            if (info.Exists || info.Directory.Exists)
                 return true;
             return false;
         }
@@ -76,7 +80,8 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         internal static string MakeAbsolute(string partialPath)
         {
             // Remove any leading directory markers.
-            if (partialPath.StartsWith(Path.AltDirectorySeparatorChar.ToString()) || partialPath.StartsWith(Path.DirectorySeparatorChar.ToString()))
+            if (partialPath.StartsWith(Path.AltDirectorySeparatorChar.ToString()) ||
+                partialPath.StartsWith(Path.DirectorySeparatorChar.ToString()))
                 partialPath = partialPath.Substring(1, partialPath.Length - 1);
             // Combing with the application root.
             return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, partialPath).Replace("/", "\\");

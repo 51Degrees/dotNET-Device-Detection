@@ -21,8 +21,15 @@
  * 
  * ********************************************************************* */
 
+#region
+
 using System.Collections.Generic;
-using System.Diagnostics;
+
+#endregion
+
+#if VER4
+using System.Linq;
+#endif
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
@@ -32,17 +39,35 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// </summary>
     internal class Strings
     {
-        /// <summary>
-        /// All the strings used in the Wurfl file are held in this list.
-        /// </summary>
-        private static List<string> _values = new List<string>();
-        
+        #region Fields
+
         /// <summary>
         /// Index containing the hashcode of the string as the index and either the index in the _values
         /// list as the value or a list of values that match the hashcode. It is possible for several 
         /// different values to share the same hashcode.
         /// </summary>
-        private static Dictionary<int, object> _index = new Dictionary<int, object>();
+        private static readonly Dictionary<int, object> _index = new Dictionary<int, object>();
+
+        /// <summary>
+        /// All the strings used in the Wurfl file are held in this stack.
+        /// </summary>
+        private static readonly List<string> _values = new List<string>();
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// The number of items in the list.
+        /// </summary>
+        internal static int Count
+        {
+            get { return _values.Count; }
+        }
+
+        #endregion
+
+        #region Internal Methods
 
         /// <summary>
         /// Adds a new string value to the list of Wurfl strings. If the value already exists
@@ -52,110 +77,118 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>Index of the string in the _values list. Used the Get method to retrieve the string value later.</returns>
         internal static int Add(string value)
         {
-            int result = 0;
             int hashcode = value.GetHashCode();
-            // Lock the index to ensure no other threads are operating on it
-            // before the check and possible update is performed.
-            lock (_index)
+            int result = IndexOf(value, hashcode);
+            
+            // If the string does not exist lock the index and then check it
+            // still does not exist before adding to the index and values.
+            if (result == -1)
             {
-                result = IndexOf(value, hashcode);
-                if (result == -1)
+                lock (_index)
                 {
-                    // This hashcode does not exist so add a new entry to the list.
-                    result = AddValue(value);
-                    _index.Add(hashcode, result);
-                }
-                else
-                {
-                    // If this isn't the value we're looking for because another string
-                    // shares the same hashcode add it's position to the index after the
-                    // new string has been added to the values list.
-                    if (_values[result] != value)
+                    result = IndexOf(value, hashcode);
+                    if (result == -1)
                     {
-                        // Create the new list for the indexes.
-                        List<int> newList = null;
-                        object obj = _index[hashcode];
-                        if (obj is int)
-                        {
-                            newList = new List<int>();
-                            newList.Add((int)obj);
-                        }
-                        else
-                        {
-                            newList = new List<int>((int[])obj);
-                        }
-                        // This is a new value for an existing hashcode. Add it to
-                        // the list of strings before updating the index.
+                        // This hashcode does not exist so add a new entry to the list.
                         result = AddValue(value);
-                        newList.Add(result);
-                        _index[hashcode] = newList.ToArray();
+                        _index.Add(hashcode, result);
+                        return result;
                     }
                 }
             }
 
-            // Perform assertion checks to ensure the _values and _index are correct.
-            Debug.Assert(result >= 0 && result < _values.Count,
-                "Result is out of value range.");
-            Debug.Assert(result == _values.IndexOf(value),
-                "New value was not found at correct position in the list.");
-            Debug.Assert(IndexOf(value) == result,
-                "Index does not return matching string position.");
+            // If this isn't the value we're looking for because another string
+            // shares the same hashcode add it's position to the index after the
+            // new string has been added to the values list.
+            if (_values[result] != value)
+            {
+                // Create the new list for the indexes.
+                List<int> newList = null;
+                lock (_index)
+                {
+                    object obj = _index[hashcode];
+                    if (obj is int)
+                        newList = new List<int> {(int) obj};
+                    else
+                        newList = new List<int>((int[]) obj);
 
+                    // This is a new value for an existing hashcode. Add it to
+                    // the list of strings before updating the index.
+                    result = AddValue(value);
+                    newList.Add(result);
+                    _index[hashcode] = newList.ToArray();
+                }
+            }
+            
             return result;
         }
 
+        /// <summary>
+        /// Returns the string at the index position provided. If the index is
+        /// invalid then return null.
+        /// </summary>
+        /// <param name="index">Index of string required.</param>
+        /// <returns>String value at the specified index.</returns>
+        internal static string Get(int index)
+        {
+            if (index == -1) return null;
+            return _values[index];
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        /// <summary>
+        /// Adds a value to the list and returns it's index in the list.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         private static int AddValue(string value)
         {
             int result;
             lock (_values)
             {
+                result = _values.Count;
                 _values.Add(value);
-                result = _values.IndexOf(value);
             }
             return result;
         }
 
-        internal static bool Contains(string value)
-        {
-            return IndexOf(value) >= 0;
-        }
-        
-        internal static int IndexOf(string value, int hashcode)
+        /// <summary>
+        /// Gets the index of the value and hashcode. The hashcode is provided
+        /// to avoid calculating when it already exists from the string.
+        /// </summary>
+        /// <param name="value">The value who's index is required from the list.</param>
+        /// <param name="hashcode">The hashcode of the value.</param>
+        /// <returns>The integer index of the string value in the list, otherwise -1.</returns>
+        private static int IndexOf(string value, int hashcode)
         {
             object obj = null;
-            if (_index.TryGetValue(hashcode, out obj) == true)
+            // Does the hashcode exist in the list.
+            if (_index.TryGetValue(hashcode, out obj))
             {
+                // If the object is an integer return the index.
                 if (obj is int)
-                    return (int)obj;
-                int[] list = (int[])obj;
+                    return (int) obj;
+
+                // If it's an array of objects, which is very rare because the hashcodes
+                // will have to match return the 1st item if only one exists, or one that
+                // matches the string value passed into the method.
+                int[] list = (int[]) obj;
                 if (list.Length == 1)
                 {
                     return list[0];
                 }
+
+                // Find the matching index.
                 foreach (int index in list)
-                {
                     if (_values[index] == value)
-                    {
                         return index;
-                    }
-                }
             }
             return -1;
         }
 
-        internal static int IndexOf(string value)
-        {
-            return IndexOf(value, value.GetHashCode());
-        }
-
-        internal static string Get(int index)
-        {
-            return _values[index];
-        }
-
-        internal static int Count
-        {
-            get { return _values.Count; }
-        }
+        #endregion
     }
 }

@@ -21,7 +21,11 @@
  * 
  * ********************************************************************* */
 
+#region
+
 using System.Text.RegularExpressions;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
@@ -30,20 +34,21 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
         // This is among the least precise handler.
         private const int CONFIDENCE = 2;
 
-        internal override byte Confidence
-        {
-            get { return CONFIDENCE; }
-        }
-
-        private Regex _pattern = null;
-        protected abstract string Expression { get; }
+        private readonly Regex _pattern;
 
         internal AlphaNumericHandler()
         {
             _pattern = new Regex(Expression, RegexOptions.Compiled);
         }
 
-        internal protected override bool CanHandle(string userAgent)
+        internal override byte Confidence
+        {
+            get { return CONFIDENCE; }
+        }
+
+        protected abstract string Expression { get; }
+
+        protected internal override bool CanHandle(string userAgent)
         {
             return _pattern.IsMatch(userAgent);
         }
@@ -59,11 +64,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
             get { return CONFIDENCE; }
         }
 
-        internal NumericHandler() : base() { }
-        
         protected override string Expression
         {
-            get { return @"^\d";  }
+            get { return @"^\d"; }
         }
     }
 
@@ -77,8 +80,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
             get { return CONFIDENCE; }
         }
 
-        internal AlphaHandlerAtoF() : base() { }
-        
         protected override string Expression
         {
             get { return @"(?i)^[A-F]"; }
@@ -95,8 +96,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
             get { return CONFIDENCE; }
         }
 
-        internal AlphaHandlerGtoN() : base() { }
-        
         protected override string Expression
         {
             get { return @"(?i)^[G-N]"; }
@@ -113,8 +112,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
             get { return CONFIDENCE; }
         }
 
-        internal AlphaHandlerOtoS() : base() { }
-        
         protected override string Expression
         {
             get { return @"(?i)^[O-S]"; }
@@ -131,8 +128,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
             get { return CONFIDENCE; }
         }
 
-        internal AlphaHandlerTtoZ() : base() { }
-        
         protected override string Expression
         {
             get { return @"(?i)^[T-Z]"; }

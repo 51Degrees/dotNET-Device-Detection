@@ -26,7 +26,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
     internal class iTunesHandler : EditDistanceHandler
     {
         // Checks the given UA starts with "iTunes"
-        internal protected override bool CanHandle(string userAgent)
+        protected internal override bool CanHandle(string userAgent)
         {
             return userAgent.StartsWith("iTunes");
         }

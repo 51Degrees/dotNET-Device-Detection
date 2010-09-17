@@ -21,7 +21,7 @@
  * 
  * ********************************************************************* */
 
-namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers 
+namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
     internal class DoCoMoHandler : RegexSegmentHandler
     {
@@ -29,14 +29,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 
         private static readonly string PATTERN = @"DoCoMo\/\d\.\d[\/ ]\w+";
 
-        internal DoCoMoHandler() : base(PATTERN) { }
+        internal DoCoMoHandler() : base(PATTERN)
+        {
+        }
 
         // Checks given UA starts with "DoCoMo"
-        internal protected override bool CanHandle(string userAgent)
-        {
-            return userAgent.StartsWith("DoCoMo") &&
-                base.CanHandle(userAgent);;
-        }
 
         internal override DeviceInfo DefaultDevice
         {
@@ -47,6 +44,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
                     return device;
                 return base.DefaultDevice;
             }
+        }
+
+        protected internal override bool CanHandle(string userAgent)
+        {
+            return userAgent.StartsWith("DoCoMo") &&
+                   base.CanHandle(userAgent);
+            ;
         }
     }
 }

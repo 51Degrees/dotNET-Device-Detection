@@ -21,9 +21,13 @@
  * 
  * ********************************************************************* */
 
+#region
+
 using System.Collections.Generic;
 using System.Threading;
 using FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers
 {
@@ -31,11 +35,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers
     {
         #region Fields
 
-        protected Queue<DeviceInfo> _queue;
-        protected int _inProcess = 0;
-        protected string _userAgent;
+        private readonly Handler _handler;
         protected AutoResetEvent _completeEvent;
-        private FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers.Handler _handler = null;
+        protected int _inProcess;
+        protected Queue<DeviceInfo> _queue;
+        protected string _userAgent;
 
         #endregion
 
@@ -128,7 +132,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers
             Queue<DeviceInfo> queue = new Queue<DeviceInfo>(handler.UserAgents.Count);
             lock (handler.UserAgents)
             {
-                foreach (DeviceInfo[] devices in handler.UserAgents)
+                foreach (var devices in handler.UserAgents)
                 {
                     foreach (DeviceInfo device in devices)
                     {

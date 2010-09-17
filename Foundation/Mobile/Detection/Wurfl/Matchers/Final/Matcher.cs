@@ -21,14 +21,20 @@
  * 
  * ********************************************************************* */
 
-using System.Collections;
+#region
+
 using System.Collections.Generic;
+
+#endregion
+
+#if VER4
+using System.Linq;
+#endif
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Final
 {
     internal class Matcher
     {
-
         /// <summary>
         /// Examines each string in the list to find the one that has the highest number of
         /// initial matching characters. If only one is found this is returned. If more than
@@ -47,8 +53,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Final
             {
                 // Find the shortest length and compare characters
                 // upto this point.
-                int length = result.Device.UserAgent.Length > userAgent.Length ?
-                    userAgent.Length : result.Device.UserAgent.Length;
+                int length = result.Device.UserAgent.Length > userAgent.Length
+                                 ?
+                                     userAgent.Length
+                                 : result.Device.UserAgent.Length;
                 // For each character check equality. If the characters
                 // aren't equal record this position.
                 for (pos = 0; pos < length; pos++)
@@ -65,8 +73,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Final
                     subset.Clear();
                     subset.Add(result.Device);
                 }
-                // If the position is the same as the best one found so far
-                // then add it to the results.
+                    // If the position is the same as the best one found so far
+                    // then add it to the results.
                 else if (pos == highestPosition)
                 {
                     subset.Add(result.Device);
@@ -87,6 +95,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Final
             Queue<string> tails = new Queue<string>();
 
             // Get the tails of all the strings and add them to the queue.
+#if VER4
+            foreach (string tail in
+                devices.Select(device => device.UserAgent.Substring(pos, device.UserAgent.Length - pos)))
+            {
+                tails.Enqueue(tail);
+                if (tail.Length > longestSubset)
+                    longestSubset = tail.Length;
+            }
+#elif VER2
             foreach (DeviceInfo device in devices)
             {
                 string tail = device.UserAgent.Substring(pos, device.UserAgent.Length - pos);
@@ -94,10 +111,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Final
                 if (tail.Length > longestSubset)
                     longestSubset = tail.Length;
             }
-
+#endif
             // Get the longest part of the tail needed.
             string userAgentTail = userAgent.Substring(pos,
-                longestSubset + pos < userAgent.Length ? longestSubset : userAgent.Length - pos);
+                                                       longestSubset + pos < userAgent.Length
+                                                           ? longestSubset
+                                                           : userAgent.Length - pos);
 
             // Find the tail with the closest edit distance match.
             string closestTail = null;
@@ -114,12 +133,18 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Final
             }
 
             // Find the matching useragent and return.
+#if VER4
+            foreach (DeviceInfo device in devices.Where(device => device.UserAgent.EndsWith(closestTail)))
+            {
+                return device;
+            }
+#elif VER2
             foreach (DeviceInfo device in devices)
             {
                 if (device.UserAgent.EndsWith(closestTail))
                     return device;
             }
-
+#endif
             // Give up and return the 1st element!
             return devices[0];
         }

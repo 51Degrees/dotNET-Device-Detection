@@ -28,25 +28,32 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
         private const byte EXTRA_CONFIDENCE = 1;
 
         private static readonly string[] PATTERNS = {
-            // Details about the device.
-            @"(?<=Mozilla/\d.\d \()[^)]+",
-            // Android version.
-            @"Android [\d.]+"};
+                                                        // Details about the device.
+                                                        @"(?<=Mozilla/\d.\d \()[^)]+",
+                                                        // Android version.
+                                                        @"Android [\d.]+"
+                                                    };
 
-        internal AndriodHandler() : base(PATTERNS, new int[] { 3, 1 }) { _firstMatchOnly = true; }
+        internal AndriodHandler() : base(PATTERNS, new[] {3, 1})
+        {
+            _firstMatchOnly = true;
+        }
 
         /// <summary>
         /// Provides a higher degree of confidence because only devices in the "firefox"
         /// branch of the device tree are available for matching.
         /// </summary>
-        internal override byte Confidence { get { return (byte)(base.Confidence + EXTRA_CONFIDENCE); } }
+        internal override byte Confidence
+        {
+            get { return (byte) (base.Confidence + EXTRA_CONFIDENCE); }
+        }
 
 
         // Checks given UA containts with "Android"
-        internal protected override bool CanHandle(string userAgent)
+        protected internal override bool CanHandle(string userAgent)
         {
             return (userAgent.Contains("Android")) &&
-                base.CanHandle(userAgent);
+                   base.CanHandle(userAgent);
         }
     }
 }

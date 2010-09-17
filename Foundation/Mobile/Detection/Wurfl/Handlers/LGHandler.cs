@@ -21,20 +21,23 @@
  * 
  * ********************************************************************* */
 
-namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers 
+namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
     internal class LGHandler : RegexSegmentHandler
     {
         private static readonly string PATTERN = "[^ /]+";
 
         // Checks given UA starts with "LG"
-        internal protected override bool CanHandle(string userAgent)
+
+        internal LGHandler() : base(PATTERN, new[] {1000})
         {
-            return (userAgent.StartsWith("LG")) &&
-                base.CanHandle(userAgent);
         }
 
-        internal LGHandler() : base(PATTERN, new int[] { 1000 } ) { }
+        protected internal override bool CanHandle(string userAgent)
+        {
+            return (userAgent.StartsWith("LG")) &&
+                   base.CanHandle(userAgent);
+        }
 
         internal override int GetSegmentWeight(int index, int numberOfSegments)
         {

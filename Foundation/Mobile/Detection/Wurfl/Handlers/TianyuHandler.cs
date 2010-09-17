@@ -26,7 +26,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
     internal class TianyuHandler : EditDistanceHandler
     {
         // Checks the given UA starts with "TIANYU-KTOUCH"
-        internal protected override bool CanHandle(string userAgent)
+        protected internal override bool CanHandle(string userAgent)
         {
             return userAgent.StartsWith("TIANYU-KTOUCH");
         }

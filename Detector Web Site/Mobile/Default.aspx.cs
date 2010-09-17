@@ -22,7 +22,7 @@
  * ********************************************************************* */
 
 using System;
-using FiftyOne.Foundation.Mobile.Detection;
+using System.Collections.Generic;
 
 namespace Detector.Mobile
 {
@@ -40,20 +40,21 @@ namespace Detector.Mobile
             Response.AddHeader("MobileDeviceModel", Request.Browser.MobileDeviceModel);
             Response.AddHeader("ScreenPixelsHeight", Request.Browser.ScreenPixelsHeight.ToString());
             Response.AddHeader("ScreenPixelsWidth", Request.Browser.ScreenPixelsWidth.ToString());
+            Response.AddHeader("Version", Request.Browser.Version);
             
-            if (Request.Browser is FiftyOne.Foundation.Mobile.Detection.Wurfl.MobileCapabilities)
+            // Get the Wurfl capabilities from the browser capabilities collection if it's present.
+            var wurfl = Request.Browser.Capabilities["WurflCapabilities"] as SortedList<string, string>;
+            if (wurfl != null)
             {
-                string deviceId = ((FiftyOne.Foundation.Mobile.Detection.Wurfl.MobileCapabilities)Request.Browser).DeviceId;
+                // Set the response headers for testing purposes.
+                string deviceId = wurfl["deviceid"];
                 if (deviceId != null)
                     Response.AddHeader("deviceid", deviceId);
-                Response.AddHeader("ActualDeviceRoot", ((FiftyOne.Foundation.Mobile.Detection.Wurfl.MobileCapabilities)Request.Browser).ActualDeviceRoot.ToString());
-            }
-
-            if (Request.Browser is MobileCapabilities)
-            {
-                Response.AddHeader("PointingMethod", ((MobileCapabilities) Request.Browser).PointingMethod.ToString());
-                Response.AddHeader("PhysicalScreenWidth", ((MobileCapabilities)Request.Browser).PhysicalScreenWidth.ToString());
-                Response.AddHeader("PhysicalScreenHeight", ((MobileCapabilities)Request.Browser).PhysicalScreenHeight.ToString());
+                Response.AddHeader("ActualDeviceRoot", wurfl["actual_device_root"]);
+                Response.AddHeader("PointingMethod", wurfl["pointing_method"]);
+                Response.AddHeader("PhysicalScreenWidth", wurfl["physical_screen_width"]);
+                Response.AddHeader("PhysicalScreenHeight", wurfl["physical_screen_height"]);
+                Response.AddHeader("IsTabletDevice", wurfl["is_tablet"]);
             }
 
             // Ensure the page is never cached.

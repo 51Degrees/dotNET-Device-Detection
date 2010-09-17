@@ -26,22 +26,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
     internal class OperaHandler : RegexSegmentHandler
     {
         private const string DEFAULT_DEVICE = "generic_xhtml";
-        
+
         // The Opera version
         private static readonly string PATTERN = @"(?<=Opera/)[\d+.]+|(?<=Opera )[\d+.]+";
 
-        public OperaHandler() : base(PATTERN) { }
+        public OperaHandler() : base(PATTERN)
+        {
+        }
 
         // Checks the given UA contains "Opera" indicating the browser
         // is almost certainly of the Opera family.
-        internal protected override bool CanHandle(string userAgent)
-        {
-            return userAgent.StartsWith("Opera") == true &&
-                OperaDesktopHandler.InternalCanHandle(userAgent) == false &&
-                OperaMiniHandler.InternalCanHandle(userAgent) == false &&
-                OperaMobiHandler.InternalCanHandle(userAgent) == false &&
-                base.CanHandle(userAgent);
-        }
 
         internal override DeviceInfo DefaultDevice
         {
@@ -52,6 +46,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
                     return device;
                 return base.DefaultDevice;
             }
+        }
+
+        protected internal override bool CanHandle(string userAgent)
+        {
+            return userAgent.StartsWith("Opera") &&
+                   OperaDesktopHandler.InternalCanHandle(userAgent) == false &&
+                   OperaMiniHandler.InternalCanHandle(userAgent) == false &&
+                   OperaMobiHandler.InternalCanHandle(userAgent) == false &&
+                   base.CanHandle(userAgent);
         }
     }
 
@@ -59,38 +62,31 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
     {
         private const string DEFAULT_DEVICE = "opera";
         private const byte EXTRA_CONFIDENCE = 1;
-        private static readonly string[] SUPPORTED_ROOT_DEVICES = new string[] { DEFAULT_DEVICE };
 
         // Opera version string.
         private static readonly string PATTERN = @"(?<=$Opera/)[\d+.]+|(?<=Opera )[\d+.]+";
+        private static readonly string[] SUPPORTED_ROOT_DEVICES = new[] {DEFAULT_DEVICE};
 
-        public OperaDesktopHandler() : base(PATTERN) { }
+        public OperaDesktopHandler() : base(PATTERN)
+        {
+        }
 
         /// <summary>
         /// Provides a higher degree of confidence because only devices in the "opera"
         /// branch of the device tree are available for matching.
         /// </summary>
-        internal override byte Confidence { get { return (byte)(base.Confidence + EXTRA_CONFIDENCE); } }
+        internal override byte Confidence
+        {
+            get { return (byte) (base.Confidence + EXTRA_CONFIDENCE); }
+        }
 
         /// <summary>
         /// An array of supported root devices that devices from the WURFL
         /// data file need to be children of to be valid for this handler.
         /// </summary>
-        protected override string[] SupportedRootDeviceIds { get { return SUPPORTED_ROOT_DEVICES; } }
-
-        // Checks given UA contains "Safari" as well as "Windows"
-        // or "Macintosh" and does not have a "Mobile" version.
-        internal protected override bool CanHandle(string userAgent)
+        protected override string[] SupportedRootDeviceIds
         {
-            return OperaDesktopHandler.InternalCanHandle(userAgent) &&
-                OperaMiniHandler.InternalCanHandle(userAgent) == false &&
-                OperaMobiHandler.InternalCanHandle(userAgent) == false &&
-                base.CanHandle(userAgent);
-        }
-
-        internal static bool InternalCanHandle(string userAgent)
-        {
-            return userAgent.StartsWith("Opera") == true;
+            get { return SUPPORTED_ROOT_DEVICES; }
         }
 
         internal override DeviceInfo DefaultDevice
@@ -102,6 +98,21 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
                     return device;
                 return base.DefaultDevice;
             }
+        }
+
+        // Checks given UA contains "Safari" as well as "Windows"
+        // or "Macintosh" and does not have a "Mobile" version.
+        protected internal override bool CanHandle(string userAgent)
+        {
+            return InternalCanHandle(userAgent) &&
+                   OperaMiniHandler.InternalCanHandle(userAgent) == false &&
+                   OperaMobiHandler.InternalCanHandle(userAgent) == false &&
+                   base.CanHandle(userAgent);
+        }
+
+        internal static bool InternalCanHandle(string userAgent)
+        {
+            return userAgent.StartsWith("Opera");
         }
     }
 
@@ -109,40 +120,38 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
     {
         private const string DEFAULT_DEVICE = "opera_mini_ver1";
         private const byte EXTRA_CONFIDENCE = 1;
-        private static readonly string[] SUPPORTED_ROOT_DEVICES = new string[] { DEFAULT_DEVICE };
 
         // The Opera Mini version
         private static readonly string[] PATTERNS = {
-            // Opera mini version.
-            @"(?<=Opera Mini/)\d.\d",
-            // Opera version
-            @"(?<=Opera/)[\d.]+" };
+                                                        // Opera mini version.
+                                                        @"(?<=Opera Mini/)\d.\d",
+                                                        // Opera version
+                                                        @"(?<=Opera/)[\d.]+"
+                                                    };
 
-        public OperaMiniHandler() : base(PATTERNS, new int[] { 1, 1 }) { _firstMatchOnly = true; }
+        private static readonly string[] SUPPORTED_ROOT_DEVICES = new[] {DEFAULT_DEVICE};
+
+        public OperaMiniHandler() : base(PATTERNS, new[] {1, 1})
+        {
+            _firstMatchOnly = true;
+        }
 
         /// <summary>
         /// Provides a higher degree of confidence because only devices in the "opera_mini_ver1"
         /// branch of the device tree are available for matching.
         /// </summary>
-        internal override byte Confidence { get { return (byte)(base.Confidence + EXTRA_CONFIDENCE); } }
+        internal override byte Confidence
+        {
+            get { return (byte) (base.Confidence + EXTRA_CONFIDENCE); }
+        }
 
         /// <summary>
         /// An array of supported root devices that devices from the WURFL
         /// data file need to be children of to be valid for this handler.
         /// </summary>
-        protected override string[] SupportedRootDeviceIds { get { return SUPPORTED_ROOT_DEVICES; } }
-
-        // Checks the given UA contains "Opera Mini" indicating the browser
-        // is almost certainly of the Opera family.
-        internal protected override bool CanHandle(string userAgent)
+        protected override string[] SupportedRootDeviceIds
         {
-            return OperaMiniHandler.InternalCanHandle(userAgent) &&
-                base.CanHandle(userAgent);
-        }
-
-        internal static bool InternalCanHandle(string userAgent)
-        {
-            return userAgent.Contains("Opera Mini");
+            get { return SUPPORTED_ROOT_DEVICES; }
         }
 
         internal override DeviceInfo DefaultDevice
@@ -155,17 +164,28 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
                 return base.DefaultDevice;
             }
         }
+
+        // Checks the given UA contains "Opera Mini" indicating the browser
+        // is almost certainly of the Opera family.
+        protected internal override bool CanHandle(string userAgent)
+        {
+            return InternalCanHandle(userAgent) &&
+                   base.CanHandle(userAgent);
+        }
+
+        internal static bool InternalCanHandle(string userAgent)
+        {
+            return userAgent.Contains("Opera Mini");
+        }
     }
 
     internal class OperaMobiHandler : EditDistanceHandler
     {
-        public OperaMobiHandler() : base() { }
-
         // Checks the given UA contains "Opera Mobi/" indicating the browser
         // is almost certainly of the Opera family.
-        internal protected override bool CanHandle(string userAgent)
+        protected internal override bool CanHandle(string userAgent)
         {
-            return OperaMobiHandler.InternalCanHandle(userAgent);
+            return InternalCanHandle(userAgent);
         }
 
         internal static bool InternalCanHandle(string userAgent)

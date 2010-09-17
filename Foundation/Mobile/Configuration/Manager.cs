@@ -21,14 +21,15 @@
  * 
  * ********************************************************************* */
 
-using System;
+#region
+
 using System.Web.Configuration;
-using System.Web;
-using System.Security.Permissions;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Configuration
 {
-    internal class Manager
+    internal static class Manager
     {
         #region Fields
 
@@ -41,8 +42,8 @@ namespace FiftyOne.Foundation.Mobile.Configuration
 
         static Manager()
         {
-            Log = (LogSection)WebConfigurationManager.GetWebApplicationSection("fiftyOne/log");
-            Redirect = (RedirectSection)WebConfigurationManager.GetWebApplicationSection("fiftyOne/redirect");
+            Log = (LogSection) WebConfigurationManager.GetWebApplicationSection("fiftyOne/log");
+            Redirect = (RedirectSection) WebConfigurationManager.GetWebApplicationSection("fiftyOne/redirect");
         }
 
         #endregion

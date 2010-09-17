@@ -21,26 +21,36 @@
  * 
  * ********************************************************************* */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
+#region
+
 using System.Text.RegularExpressions;
+using FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers;
+using Matcher=FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Version.Matcher;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
     internal abstract class VersionHandler : EditDistanceHandler
     {
-        private Regex[] _versionRegexes = null;
-
         // This is a very precise method of matching a useragent to a device and
         // we can therefore assign a very high level of confidence.
         private const int CONFIDENCE = 9;
-                
+        private readonly Regex[] _versionRegexes;
+
         internal VersionHandler(string[] patterns)
         {
             _versionRegexes = new Regex[patterns.Length];
-            for(int i = 0; i < _versionRegexes.Length; i++)
+            for (int i = 0; i < _versionRegexes.Length; i++)
                 _versionRegexes[i] = new Regex(patterns[i], RegexOptions.Compiled);
+        }
+
+        internal VersionHandler(string pattern)
+        {
+            _versionRegexes = new[]
+                                  {
+                                      new Regex(pattern, RegexOptions.Compiled)
+                                  };
         }
 
         internal override byte Confidence
@@ -48,20 +58,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
             get { return CONFIDENCE; }
         }
 
-        internal VersionHandler(string pattern)
-        {
-            _versionRegexes = new Regex[] {
-                new Regex(pattern, RegexOptions.Compiled) };
-        }
-
         internal Regex[] VersionRegexes
         {
             get { return _versionRegexes; }
         }
 
-        internal protected override Matchers.Results Match(string userAgent)
+        protected internal override Results Match(string userAgent)
         {
-            Matchers.Results results = FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Version.Matcher.Match(userAgent, this);
+            Results results = Matcher.Match(userAgent, this);
             if (results == null)
                 return base.Match(userAgent);
             return results;

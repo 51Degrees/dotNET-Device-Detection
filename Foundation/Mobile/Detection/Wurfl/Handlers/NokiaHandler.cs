@@ -21,49 +21,30 @@
  * 
  * ********************************************************************* */
 
+#region
+
 using FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers;
 
-namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers 
+#endregion
+
+namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
     internal class NokiaHandler : RegexSegmentHandler
     {
         private const string DEFAULT_DEVICE = "nokia_generic_series60";
-        
+
         private static readonly string[] PATTERNS = {
-            // Nokia model name
-            @"(?:(?<=[Nokia|NOKIA])[^/]+)",
-            // Major model version
-            @"(?<=(?:[Nokia|NOKIA][^/]+)/)[\d.]+",
-            // Minor version
-            @"\([\d.]+\)" };
+                                                        // Nokia model name
+                                                        @"(?:(?<=[Nokia|NOKIA])[^/]+)",
+                                                        // Major model version
+                                                        @"(?<=(?:[Nokia|NOKIA][^/]+)/)[\d.]+",
+                                                        // Minor version
+                                                        @"\([\d.]+\)"
+                                                    };
 
         public NokiaHandler()
-            : base(PATTERNS, new int[] { 100, 1, 1 }, true)
-        { }
-
-        // Checks UA contains "Nokia".
-        internal protected override bool CanHandle(string userAgent)
+            : base(PATTERNS, new[] {100, 1, 1}, true)
         {
-            return (userAgent.Contains("Nokia") ||
-                userAgent.Contains("Symbian OS") ||
-                userAgent.Contains("NOKIA")) &&
-                base.CanHandle(userAgent); 
-        }
-
-        internal protected override Results Match(string userAgent)
-        {
-            Results results = base.Match(userAgent); ;
-            if (results == null)
-            {
-                DeviceInfo device = null;
-                if (userAgent.Contains("Series60"))
-                    device = Provider.Instance.GetDeviceInfoFromID("nokia_generic_series60");
-                else if (userAgent.Contains("Series80"))
-                    device = Provider.Instance.GetDeviceInfoFromID("nokia_generic_series80");
-                if (device != null)
-                    results = new Results(device);
-            }
-            return results;
         }
 
         internal override DeviceInfo DefaultDevice
@@ -75,6 +56,32 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
                     return device;
                 return base.DefaultDevice;
             }
+        }
+
+        // Checks UA contains "Nokia".
+        protected internal override bool CanHandle(string userAgent)
+        {
+            return (userAgent.Contains("Nokia") ||
+                    userAgent.Contains("Symbian OS") ||
+                    userAgent.Contains("NOKIA")) &&
+                   base.CanHandle(userAgent);
+        }
+
+        protected internal override Results Match(string userAgent)
+        {
+            Results results = base.Match(userAgent);
+            ;
+            if (results == null)
+            {
+                DeviceInfo device = null;
+                if (userAgent.Contains("Series60"))
+                    device = Provider.Instance.GetDeviceInfoFromID("nokia_generic_series60");
+                else if (userAgent.Contains("Series80"))
+                    device = Provider.Instance.GetDeviceInfoFromID("nokia_generic_series80");
+                if (device != null)
+                    results = new Results(device);
+            }
+            return results;
         }
     }
 }

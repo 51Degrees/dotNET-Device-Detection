@@ -22,12 +22,22 @@
  * 
  * ********************************************************************* */
 
+#if VER4
+using System.Linq;
+#endif
+
+#region
+
 using System;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
 using System.Web;
+using FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration;
 using FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers;
 using FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers;
+using Matcher=FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Final.Matcher;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 {
@@ -39,34 +49,35 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         #region Fields
 
         /// <summary>
+        /// Lock used to ensure only one thread can load the data.
+        /// </summary>
+        private static readonly object StaticLock = new object();
+
+        /// <summary>
+        /// Stores the default device for the WURFL provider.
+        /// </summary>
+        private static DeviceInfo _defaultDevice;
+
+        /// <summary>
         /// The singleton instance of the Devices class.
         /// </summary>
         private static Provider _instance;
-        /// <summary>
-        /// True if all data has been loaded and handlers initialised.
-        /// </summary>
-        private bool _isLoaded = false;
-        /// <summary>
-        /// Lock used to ensure only one thread can load the data.
-        /// </summary>
-        private static object _staticLock = new object();
-        /// <summary>
-        /// An array of handlers used to match devices.
-        /// </summary>
-        private Handler[] _handlers = null;
-        /// <summary>
-        /// Hashtable of all devices.
-        /// </summary>
-        private Hashtable _deviceIDs = new Hashtable(Constants.EstimateNumberOfDevices);
+
         /// <summary>
         /// Cache for devices found via this class. Devices not used within 60 minutes will be
         /// removed from the cache.
         /// </summary>
-        private Cache<DeviceInfo> _cache = new Cache<DeviceInfo>(60);
+        private readonly Cache<DeviceInfo> _cache = new Cache<DeviceInfo>(60);
+
         /// <summary>
-        /// Stores the default device for the WURFL provider.
+        /// Hashtable of all devices.
         /// </summary>
-        private static DeviceInfo _defaultDevice = null;
+        private readonly Hashtable _deviceIDs = new Hashtable(Constants.EstimateNumberOfDevices);
+
+        /// <summary>
+        /// An array of handlers used to match devices.
+        /// </summary>
+        private Handler[] _handlers;
 
         #endregion
 
@@ -97,7 +108,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             {
                 if (_instance == null)
                 {
-                    lock (_staticLock)
+                    lock (StaticLock)
                     {
                         // Check the instance is still null now we have a lock.
                         if (_instance == null)
@@ -120,36 +131,36 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                 long startTicks = DateTime.Now.Ticks;
 
                 // Load data from all available sources.
-                WurflProcessor.ParseWurflFiles(newInstance);
+                Processor.ParseWurflFiles(newInstance);
 
                 long duration = TimeSpan.FromTicks(DateTime.Now.Ticks - startTicks + 1).Milliseconds;
 
                 // Log the length of time taken to load the device data.
                 EventLog.Info(String.Format("Loaded {0} devices using {1} strings in {2}ms",
-                    newInstance._deviceIDs.Count,
-                    Strings.Count,
-                    duration));
+                                            newInstance._deviceIDs.Count,
+                                            Strings.Count,
+                                            duration));
 
                 // Log the number of devices assigned to each handler if debugging is enabled.
-                #if DEBUG
+#if DEBUG
                 // Display the handler results.
-                if (newInstance._handlers != null && EventLog.IsDebug == true)
+                if (newInstance._handlers != null && EventLog.IsDebug)
                 {
                     for (int i = 0; i < newInstance._handlers.Length; i++)
                     {
                         EventLog.Debug(String.Format("Handler '{0}' loaded with {1} devices.",
-                            newInstance._handlers[i].GetType().Name,
-                            newInstance._handlers[i].UserAgents.Count));
+                                                     newInstance._handlers[i].GetType().Name,
+                                                     newInstance._handlers[i].UserAgents.Count));
                     }
                 }
-                #endif
+#endif
 
                 // Store the single instance and change the status to show the
                 // data has finished loading.
-                newInstance._isLoaded = true;
+                newInstance.IsLoaded = true;
                 _instance = newInstance;
             }
-            catch (Wurfl.WurflException ex)
+            catch (WurflException ex)
             {
                 // Record the exception.
                 EventLog.Fatal(ex);
@@ -173,14 +184,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             {
                 if (_defaultDevice == null)
                 {
-                    lock (_staticLock)
+                    lock (StaticLock)
                     {
                         if (_defaultDevice == null)
                         {
                             foreach (string current in Constants.DefaultDeviceId)
                             {
                                 _defaultDevice = Instance.GetDeviceInfoFromID(current);
-                                if (_defaultDevice != null) { break; }
+                                if (_defaultDevice != null)
+                                {
+                                    break;
+                                }
                             }
                         }
                     }
@@ -190,13 +204,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         }
 
         /// <summary>
-        /// Indicates if this instance of <seealso cref="Devices"/> 
+        /// Indicates if this instance of <see cref="Factory"/> 
         /// has finished loading data.
         /// </summary>
-        internal bool IsLoaded
-        {
-            get { return _isLoaded; }
-        }
+        internal bool IsLoaded { get; private set; }
 
         /// <summary>
         /// The number of unique devices available following the loading of the
@@ -211,94 +222,79 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 
         #region Methods
 
-        private static bool IsHandler(Type type)
-        {
-            if (type == typeof(Handler))
-                return true;
-            if (type.BaseType != null)
-                return IsHandler(type.BaseType);
-            return false;
-        }
-
         /// <summary>
         /// Loads all the handlers ready for future reference when
         /// matching requests.
         /// </summary>
         private void InitHandlers()
         {
-            List<Handler> handlers = new List<Handler>();
+            _handlers = new Handler[] {
+                 new AlcatelHandler(),
+                 new AlphaHandlerAtoF(),
+                 new AlphaHandlerGtoN(),
+                 new AlphaHandlerOtoS(),
+                 new AlphaHandlerTtoZ(),
+                 new AmoiHandler(),
+                 new AndriodHandler(),
+                 new AOLHandler(),
+                 new AppleHandler(),
+                 new AppleCoreMediaHandler(),
+                 new AvantHandler(),
+                 new BenQHandler(),
+                 new BlackBerryHandler(),
+                 new BirdHandler(),
+                 new BoltHandler(),
+                 new BrewHandler(),
+                 new CatchAllHandler(),
+                 new DoCoMoHandler(),
+                 new FirefoxHandler(),
+                 new GrundigHandler(),
+                 new HTCHandler(),
+                 new iTunesHandler(),
+                 new KDDIHandler(),
+                 new KyoceraHandler(),
+                 new LCTHandler(),
+                 new LGHandler(),
+                 new MaxonHandler(),
+                 new MitsubishiHandler(),
+                 new MobileCatchAllHandler(),
+                 new MobileSafariHandler(),
+                 new MotorolaHandler(),
+                 new MSIEHandler(),
+                 new NecHandler(),
+                 new NokiaHandler(),
+                 new NumericHandler(),
+                 new OperaHandler(),
+                 new OperaMiniHandler(),
+                 new OperaMobiHandler(),
+                 new PalmHandler(),
+                 new PanasonicHandler(),
+                 new PantechHandler(),
+                 new PhilipsHandler(),
+                 new PortalmmmHandler(),
+                 new QtekHandler(),
+                 new SafariHandler(),
+                 new SagemHandler(),
+                 new SamsungHandler(),
+                 new SanyoHandler(),
+                 new SendoHandler(),
+                 new SharpHandler(),
+                 new SiemensHandler(),
+                 new SoftBankHandler(),
+                 new SonyEricssonHandler(),
+                 new SPVHandler(),
+                 new TianyuHandler(),
+                 new ToshibaHandler(),
+                 new VodafoneHandler(),
+                 new WindowsCEHandler(),
+                 new ZuneHandler(),
 
-            // Add the handler first to ensure both activity gets handled
-            // with a generic browser device.
-            handlers.Add(new Handlers.AlcatelHandler());
-            handlers.Add(new Handlers.AlphaHandlerAtoF());
-            handlers.Add(new Handlers.AlphaHandlerGtoN());
-            handlers.Add(new Handlers.AlphaHandlerOtoS());
-            handlers.Add(new Handlers.AlphaHandlerTtoZ());
-            handlers.Add(new Handlers.AmoiHandler());
-            handlers.Add(new Handlers.AndriodHandler());
-            handlers.Add(new Handlers.AOLHandler());
-            handlers.Add(new Handlers.AppleHandler());
-            handlers.Add(new Handlers.AppleCoreMediaHandler());
-            handlers.Add(new Handlers.AvantHandler());
-            handlers.Add(new Handlers.BenQHandler());
-            handlers.Add(new Handlers.BlackBerryHandler());
-            handlers.Add(new Handlers.BirdHandler());
-            handlers.Add(new Handlers.BoltHandler());
-            handlers.Add(new Handlers.BrewHandler());
-            handlers.Add(new Handlers.CatchAllHandler());
-            handlers.Add(new Handlers.DoCoMoHandler());
-            handlers.Add(new Handlers.FirefoxHandler());
-            handlers.Add(new Handlers.GrundigHandler());
-            handlers.Add(new Handlers.HTCHandler());
-            handlers.Add(new Handlers.iTunesHandler());
-            handlers.Add(new Handlers.KDDIHandler());
-            handlers.Add(new Handlers.KyoceraHandler());
-            handlers.Add(new Handlers.LCTHandler());
-            handlers.Add(new Handlers.LGHandler());
-            handlers.Add(new Handlers.MaxonHandler());
-            handlers.Add(new Handlers.MitsubishiHandler());
-            handlers.Add(new Handlers.MobileCatchAllHandler());
-            handlers.Add(new Handlers.MobileSafariHandler());
-            handlers.Add(new Handlers.MotorolaHandler());
-            handlers.Add(new Handlers.MSIEHandler());
-            handlers.Add(new Handlers.NecHandler());
-            handlers.Add(new Handlers.NokiaHandler());
-            handlers.Add(new Handlers.NumericHandler());
-            handlers.Add(new Handlers.OperaHandler());
-            handlers.Add(new Handlers.OperaMiniHandler());
-            handlers.Add(new Handlers.OperaMobiHandler());
-            handlers.Add(new Handlers.PalmHandler());
-            handlers.Add(new Handlers.PanasonicHandler());
-            handlers.Add(new Handlers.PantechHandler());
-            handlers.Add(new Handlers.PhilipsHandler());
-            handlers.Add(new Handlers.PortalmmmHandler());
-            handlers.Add(new Handlers.QtekHandler());
-            handlers.Add(new Handlers.SafariHandler());
-            handlers.Add(new Handlers.SagemHandler());
-            handlers.Add(new Handlers.SamsungHandler());
-            handlers.Add(new Handlers.SanyoHandler());
-            handlers.Add(new Handlers.SendoHandler());
-            handlers.Add(new Handlers.SharpHandler());
-            handlers.Add(new Handlers.SiemensHandler());
-            handlers.Add(new Handlers.SoftBankHandler());
-            handlers.Add(new Handlers.SonyEricssonHandler());
-            handlers.Add(new Handlers.SPVHandler());
-            handlers.Add(new Handlers.TianyuHandler());
-            handlers.Add(new Handlers.ToshibaHandler());
-            handlers.Add(new Handlers.VodafoneHandler());
-            handlers.Add(new Handlers.WindowsCEHandler());
-            handlers.Add(new Handlers.ZuneHandler());
-
-            // Add handlers for desktop browsers
-            handlers.Add(new Handlers.ChromeHandler());
-            handlers.Add(new Handlers.FirefoxDesktopHandler());
-            handlers.Add(new Handlers.MSIEDesktopHandler());
-            handlers.Add(new Handlers.OperaDesktopHandler());
-            handlers.Add(new Handlers.SafariDesktopHandler());
-
-
-            _handlers = handlers.ToArray();
+                 // Add handlers for desktop browsers
+                 new ChromeHandler(),
+                 new FirefoxDesktopHandler(),
+                 new MSIEDesktopHandler(),
+                 new OperaDesktopHandler(),
+                 new SafariDesktopHandler()};
         }
 
         /// <summary>
@@ -313,15 +309,22 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             byte highestConfidence = 0;
             List<Handler> handlers = new List<Handler>();
 
-            #if DEBUG
+#if DEBUG
             EventLog.Debug(String.Format("Getting handlers for DeviceId '{0}'.", device.DeviceId));
-            #endif
+#endif
 
+#if VER4
+            foreach (Handler handler in _handlers.Where(handler => handler.CanHandle(device)))
+            {
+                GetHandlers(ref highestConfidence, handlers, handler);
+            }
+#elif VER2
             foreach (Handler handler in _handlers)
             {
-                if (handler.CanHandle(device) == true)
+                if (handler.CanHandle(device))
                     GetHandlers(ref highestConfidence, handlers, handler);
             }
+#endif
             return handlers.ToArray();
         }
 
@@ -335,14 +338,21 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             byte highestConfidence = 0;
             List<Handler> handlers = new List<Handler>();
 
-            if (EventLog.IsDebug == true)
+            if (EventLog.IsDebug)
                 EventLog.Debug(String.Format("Getting handlers for useragent '{0}'.", userAgent));
 
+#if VER4
+            foreach (Handler handler in _handlers.Where(handler => handler.CanHandle(userAgent)))
+            {
+                GetHandlers(ref highestConfidence, handlers, handler);
+            }
+#elif VER2
             foreach (Handler handler in _handlers)
             {
-                if (handler.CanHandle(userAgent) == true)
+                if (handler.CanHandle(userAgent))
                     GetHandlers(ref highestConfidence, handlers, handler);
             }
+#endif
             return handlers.ToArray();
         }
 
@@ -359,16 +369,23 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             byte highestConfidence = 0;
             List<Handler> handlers = new List<Handler>();
 
-            if (EventLog.IsDebug == true)
+            if (EventLog.IsDebug)
                 EventLog.Debug(String.Format("Getting handlers for HttpRequest '{0}'.", GetUserAgent(request)));
 
+#if VER4
+            foreach (Handler handler in _handlers.Where(handler => handler.CanHandle(request)))
+            {
+                GetHandlers(ref highestConfidence, handlers, handler);
+            }
+#elif VER2
             foreach (Handler handler in _handlers)
             {
                 // If the handler can support the request and it's not the
                 // catch all handler add it to the list we'll use for matching.
-                if (handler.CanHandle(request) == true)
+                if (handler.CanHandle(request))
                     GetHandlers(ref highestConfidence, handlers, handler);
             }
+#endif
 
             return handlers.ToArray();
         }
@@ -405,7 +422,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             // Does the device already exist?
             lock (_deviceIDs)
             {
-                if (_deviceIDs.ContainsKey(device.DeviceId) == true)
+                if (_deviceIDs.ContainsKey(device.DeviceId))
                 {
                     // Yes. Replace the previous device as it's likely this new
                     // one is coming from a more current source.
@@ -421,9 +438,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             // Add the new device to handlers that can support it.
             if (String.IsNullOrEmpty(device.UserAgent) == false)
             {
+#if VER4
+            foreach (Handler handler in GetHandlers(device).Where(handler => handler != null))
+            {
+                handler.Set(device);
+            }
+#elif VER2
                 foreach (Handler handler in GetHandlers(device))
                     if (handler != null)
                         handler.Set(device);
+#endif
             }
         }
 
@@ -433,7 +457,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// </summary>
         /// <param name="deviceID">Unique internal ID of the device.</param>
         /// <returns>DeviceInfo object.</returns>
-        internal protected DeviceInfo GetDeviceInfoFromID(string deviceID)
+        protected internal DeviceInfo GetDeviceInfoFromID(string deviceID)
         {
             if (_deviceIDs.ContainsKey(deviceID))
             {
@@ -448,9 +472,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// </summary>
         /// <param name="request">Contains details of the request.</param>
         /// <returns>The useragent string to use for matching purposes.</returns>
-        internal protected static string GetUserAgent(HttpRequest request)
+        protected internal static string GetUserAgent(HttpRequest request)
         {
             string userAgent = request.UserAgent;
+#if VER4
+            foreach (string current in
+                Detection.Constants.TRANSCODER_USERAGENT_HEADERS.Where(current => request.Headers[current] != null))
+            {
+                userAgent = request.Headers[current];
+                break;
+            }
+#elif VER2
             foreach (string current in Detection.Constants.TRANSCODER_USERAGENT_HEADERS)
             {
                 if (request.Headers[current] != null)
@@ -459,6 +491,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                     break;
                 }
             }
+#endif
             if (userAgent == null)
                 userAgent = string.Empty;
             else
@@ -476,7 +509,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         {
             long startTicks = EventLog.IsDebug ? DateTime.Now.Ticks : 0;
             DeviceInfo device = null;
-            if (String.IsNullOrEmpty(userAgent) == false && 
+            if (String.IsNullOrEmpty(userAgent) == false &&
                 _cache.GetTryParse(userAgent, out device) == false)
             {
                 // Using the handler for this userAgent find the device.
@@ -489,7 +522,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                     // If we're only looking for devices marked with 
                     // "actual_device_root" then look back throught the
                     // fallback devices until one is found.
-                    if (Wurfl.Configuration.Manager.UseActualDeviceRoot == true && device.IsActualDeviceRoot == false)
+                    if (Manager.UseActualDeviceRoot && device.IsActualDeviceRoot == false)
                         device = GetActualDeviceRootDeviceInfo(device);
 
                     // Add to the cache to improve performance.
@@ -514,7 +547,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             DeviceInfo fallback = device.FallbackDevice;
             if (fallback != null)
             {
-                if (fallback.IsActualDeviceRoot == true)
+                if (fallback.IsActualDeviceRoot)
                     return fallback;
                 else
                     return GetActualDeviceRootDeviceInfo(fallback);
@@ -529,12 +562,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// </summary>
         /// <param name="context">Context associated with the requesting device.</param>
         /// <returns>The closest matching device.</returns>
-        internal protected DeviceInfo GetDeviceInfo(HttpContext context)
+        protected internal DeviceInfo GetDeviceInfo(HttpContext context)
         {
             long startTicks = EventLog.IsDebug ? DateTime.Now.Ticks : 0;
             string userAgent = GetUserAgent(context.Request);
             DeviceInfo device = null;
-            if (String.IsNullOrEmpty(userAgent) == false && 
+            if (String.IsNullOrEmpty(userAgent) == false &&
                 _cache.GetTryParse(userAgent, out device) == false)
             {
                 // Using the handler for this userAgent find the device.
@@ -547,7 +580,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                     // If we're only looking for devices marked with 
                     // "actual_device_root" then look back throught the
                     // fallback devices until one is found.
-                    if (Wurfl.Configuration.Manager.UseActualDeviceRoot == true && 
+                    if (Manager.UseActualDeviceRoot &&
                         device.IsActualDeviceRoot == false)
                         device = GetActualDeviceRootDeviceInfo(device);
 
@@ -577,9 +610,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             DeviceInfo device = null;
             Results results = new Results();
 
-            if (EventLog.IsDebug == true)
+            if (EventLog.IsDebug)
                 EventLog.Debug(String.Format("Getting device info for useragent '{0}'.", userAgent));
 
+#if VER4
+            foreach (Results temp in handlers.Select(t => t.Match(userAgent)).Where(temp => temp != null))
+            {
+                results.AddRange(temp);
+            }
+#elif VER2
             for (int i = 0; i < handlers.Length; i++)
             {
                 // Find the closest matching devices.
@@ -590,6 +629,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                     // handlers.
                     results.AddRange(temp);
             }
+#endif
             if (results.Count == 1)
             {
                 // Use the only result provided.
@@ -598,7 +638,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             else if (results.Count > 1)
             {
                 // Uses the matcher to narrow down the results.
-                device = Matchers.Final.Matcher.Match(userAgent, results);
+                device = Matcher.Match(userAgent, results);
             }
             if (device == null)
                 // No device was found so use the default device for the first 
@@ -619,9 +659,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             DeviceInfo device = null;
             Results results = new Results();
 
-            if (EventLog.IsDebug == true)
+            if (EventLog.IsDebug)
                 EventLog.Debug(String.Format("Getting device info for HttpRequest '{0}'.", GetUserAgent(request)));
 
+#if VER4
+            foreach (Results temp in handlers.Select(t => t.Match(request)).Where(temp => temp != null))
+            {
+                results.AddRange(temp);
+            }
+#elif VER2
             for (int i = 0; i < handlers.Length; i++)
             {
                 // Find the closest matching devices.
@@ -632,6 +678,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                     // handlers.
                     results.AddRange(temp);
             }
+#endif
             if (results.Count == 1)
             {
                 // Use the only result provided.
@@ -640,7 +687,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             else if (results.Count > 1)
             {
                 // Uses the matcher to narrow down the results.
-                device = Matchers.Final.Matcher.Match(GetUserAgent(request), results);
+                device = Matcher.Match(GetUserAgent(request), results);
             }
             if (device == null)
                 // No device was found so use the default device for the first 
@@ -660,27 +707,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// <param name="device">Device found with the closest match to the useragent string.</param>
         private void RecordNewDevice(HttpRequest request, DeviceInfo device)
         {
-            if (device.UserAgent != GetUserAgent(request) && device != DefaultDevice && WurflNewDevice.Enabled == true)
+            if (device.UserAgent != GetUserAgent(request) && device != DefaultDevice && WurflNewDevice.Enabled)
             {
                 // Now that we've found a device add it to the list using
                 // the useragent string as the device identifier.
-                DeviceInfo newDevice = new DeviceInfo(this, GetUserAgent(request), GetUserAgent(request), device);
                 WurflNewDevice.RecordNewDevice(request);
             }
-        }
-
-        /// <summary>
-        /// Returns true if the requesting device appears to WURFL as a
-        /// mobile device.
-        /// </summary>
-        /// <param name="context">Context associated with the requesting device.</param>
-        /// <returns>True if the requesting device is a mobile device.</returns>
-        internal protected static bool IsMobileDevice(HttpContext context)
-        {
-            DeviceInfo device = Instance.GetDeviceInfo(context);
-            if (device != null)
-                return device.IsMobileDevice;
-            return false;
         }
 
         #endregion

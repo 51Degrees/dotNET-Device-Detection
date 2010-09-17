@@ -21,38 +21,44 @@
  * 
  * ********************************************************************* */
 
+#region
+
 using FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers;
-namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers 
+using Matcher=FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.EditDistance.Matcher;
+
+#endregion
+
+namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
     internal class CatchAllHandler : ReducedInitialStringHandler
     {
         // This is the least precise handler.
         private const int CONFIDENCE = 1;
-                
+
         internal override byte Confidence
         {
             get { return CONFIDENCE; }
         }
 
-        internal protected override bool CanHandle(string userAgent)
+        protected internal override bool CanHandle(string userAgent)
         {
             return true;
         }
 
-        internal protected override Results Match(string userAgent)
+        protected internal override Results Match(string userAgent)
         {
             bool isMobile = false;
 
             // Use RIS to find a match first.
             Results results = base.Match(userAgent);
-            
+
             // If no match with RIS then try edit distance.
             if (results == null || results.Count == 0)
-                results = FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.EditDistance.Matcher.Match(userAgent, this);
+                results = Matcher.Match(userAgent, this);
 
             // If a match other than edit distance was used then we'll have more confidence
             // and return the mobile version of the device.
-            if (results.GetType() == typeof(Results))
+            if (results.GetType() == typeof (Results))
                 isMobile = true;
 
             Results newResults = new Results();

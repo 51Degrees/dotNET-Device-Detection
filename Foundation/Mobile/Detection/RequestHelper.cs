@@ -21,37 +21,155 @@
  * 
  * ********************************************************************* */
 
+#region
+
 using System;
-using System.Collections.Generic;
-using System.Web;
-using System.Xml;
-using System.Text;
-using System.Reflection;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Permissions;
+using System.Reflection;
+using System.Text;
+using System.Web;
+using System.Xml;
+
+#endregion
+
+#if VER4
+using System.Linq;
+#endif
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
-    internal class RequestHelper
+    internal static class RequestHelper
     {
-        private static readonly IPAddress[] LOCALHOSTS = new IPAddress[] {
-            IPAddress.Parse("127.0.0.1"),
-            IPAddress.Parse("::1") };
+        #region Constants
 
+        /// <summary>
+        /// IP Addresses of local host device.
+        /// </summary>
+        private static readonly IPAddress[] LOCALHOSTS = new[]
+                                                             {
+                                                                 IPAddress.Parse("127.0.0.1"),
+                                                                 IPAddress.Parse("::1")
+                                                             };
+
+        /// <summary>
+        /// The content of fields in this array should not be included in the request information
+        /// information sent to 51degrees.
+        /// </summary>
+        private static readonly string[] IgnoreHeaderFieldValues = new string[] { "Referer", "cookie", "AspFilterSessionId" };
+
+        #endregion
+
+        #region Internal Static Methods
+
+        /// <summary>
+        /// Provides the content as XML for the http request.
+        /// </summary>
+        /// <param name="request">HttpRequest containing the required information.</param>
+        /// <param name="maximumDetail">The amount of detail to provided.</param>
+        /// <returns>XML string of request content.</returns>
+        internal static string GetContent(HttpRequest request, bool maximumDetail)
+        {
+            StringBuilder content = new StringBuilder();
+            XmlWriter writer = XmlWriter.Create(content, GetXmlSettings());
+            try
+            {
+                writer.WriteStartElement("Device");
+                writer.WriteElementString("DateSent", DateTime.UtcNow.ToString("s"));
+
+                // Record details about the assembly for diagnosis purposes.
+                WriteAssembly(writer);
+
+                // Record either the IP address of the client if not local or the IP
+                // address of the machine.
+                if (request.IsLocal == false ||
+                    IsLocalHost(IPAddress.Parse(request.UserHostAddress)) == false)
+                {
+                    writer.WriteElementString("ClientIP", request.UserHostAddress);
+                }
+                else
+                {
+                    WriteHostIP(writer);
+                }
+
+                foreach (string key in request.Headers.AllKeys)
+                {
+                    // Determine if the field should be treated as a blank.
+                    bool blank = IsBlankField(key);
+
+                    // Include all header values if maximumDetail is enabled, or
+                    // header values related to the useragent or any header
+                    // key containing profile.
+                    if (maximumDetail ||
+                        key == "User-Agent" ||
+                        key.Contains("profile") ||
+                        blank)
+                    {
+                        // Record the header content if it's not a cookie header.
+                        if (blank)
+                            WriteHeader(writer, key);
+                        else
+                            WriteHeaderValue(writer, key, request.Headers[key]);
+                    }
+                }
+                writer.WriteEndElement();
+                writer.Flush();
+            }
+            finally
+            {
+                if (writer != null)
+                {
+                    writer.Close();
+                }
+            }
+            writer.Close();
+            return content.ToString();
+        }
+
+        #endregion
+
+        #region Private Static Methods
+
+        /// <summary>
+        /// Returns true if the request is from the local host IP address.
+        /// </summary>
+        /// <param name="address">The IP address to be checked.</param>
+        /// <returns>True if from the local host IP address.</returns>
         private static bool IsLocalHost(IPAddress address)
         {
-            foreach(IPAddress host in LOCALHOSTS)
+#if VER4
+            return LOCALHOSTS.Any(host => host.Equals(address));
+#elif VER2
+            foreach (IPAddress host in LOCALHOSTS)
             {
-                if (host.Equals(address) == true)
+                if (host.Equals(address))
                     return true;
             }
             return false;
+#endif
         }
-        
+
+        /// <summary>
+        /// Writes details about the host IP address.
+        /// </summary>
+        /// <param name="writer"></param>
         private static void WriteHostIP(XmlWriter writer)
         {
             IPAddress[] addresses = Dns.GetHostAddresses(Dns.GetHostName());
+#if VER4
+            foreach (IPAddress address in
+                addresses.Where(address => !IsLocalHost(address) && address.AddressFamily == AddressFamily.InterNetwork))
+            {
+                writer.WriteElementString("ClientIP", address.ToString());
+                return;
+            }
+
+            foreach (IPAddress address in addresses.Where(address => !IsLocalHost(address)))
+            {
+                writer.WriteElementString("ClientIP", address.ToString());
+                return;
+            }
+#elif VER2
             foreach (IPAddress address in addresses)
             {
                 if (IsLocalHost(address) == false && address.AddressFamily == AddressFamily.InterNetwork)
@@ -68,64 +186,29 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     return;
                 }
             }
+#endif
         }
 
-        internal static string GetContent(HttpRequest request, bool maximumDetail)
+        /// <summary>
+        /// Returns true if the field provided is one that should not have it's contents
+        /// sent to 51degrees for consideration a device matching piece of information.
+        /// </summary>
+        /// <param name="field">The name of the Http header field.</param>
+        /// <returns>True if the field should be passed as blank.</returns>
+        private static bool IsBlankField(string field)
         {
-            StringBuilder content = new StringBuilder();
-            XmlWriter writer = XmlWriter.Create(content, GetXmlSettings());
-            try
+            foreach (string key in IgnoreHeaderFieldValues)
             {
-                writer.WriteStartElement("Device");
-                writer.WriteElementString("DateSent", DateTime.UtcNow.ToString("s"));
-
-                // Record details about the assembly for diagnosis purposes.
-                WriteAssembly(writer);
-                
-                // Record either the IP address of the client if not local or the IP
-                // address of the machine.
-                if (request.IsLocal == false ||
-                    IsLocalHost(IPAddress.Parse(request.UserHostAddress)) == false)
-                {
-                    writer.WriteElementString("ClientIP", request.UserHostAddress);
-                }
-                else
-                {
-                    WriteHostIP(writer);
-                }
-
-                foreach (string key in request.Headers.AllKeys)
-                {
-                    bool blank = 
-                        (key.IndexOf("cookie", 0, 
-                            StringComparison.InvariantCultureIgnoreCase) >= 0) ||
-                        key == "Referer";
-                    // Include all header values if maximumDetail is enabled, or
-                    // header values related to the useragent or any header
-                    // key containing profile.
-                    if (maximumDetail == true ||
-                        key == "User-Agent" ||
-                        key.Contains("profile") == true ||
-                        blank == true)
-                    {
-                        // Record the header content if it's not a cookie header.
-                        if (blank == true)
-                            WriteHeader(writer, key);
-                        else
-                            WriteHeaderValue(writer, key, request.Headers[key]);
-                    }
-                }
-                writer.WriteEndElement();
-                writer.Flush();
+                if (field.IndexOf(key, 0, StringComparison.InvariantCultureIgnoreCase) >= 0)
+                    return true;
             }
-            finally
-            {
-                if (writer != null) { writer.Close(); }
-            }
-            writer.Close();
-            return content.ToString();
+            return false;
         }
 
+        /// <summary>
+        /// Writes details about the assembly to the output stream.
+        /// </summary>
+        /// <param name="writer"></param>
         private static void WriteAssembly(XmlWriter writer)
         {
             Assembly assembly = Assembly.GetExecutingAssembly();
@@ -135,13 +218,18 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 foreach (object attribute in attributes)
                 {
                     if (attribute is AssemblyFileVersionAttribute)
-                        writer.WriteElementString("Version", ((AssemblyFileVersionAttribute)attribute).Version.ToString());
+                        writer.WriteElementString("Version", ((AssemblyFileVersionAttribute) attribute).Version);
                     if (attribute is AssemblyTitleAttribute)
-                        writer.WriteElementString("Product", ((AssemblyTitleAttribute)attribute).Title);
+                        writer.WriteElementString("Product", ((AssemblyTitleAttribute) attribute).Title);
                 }
             }
         }
 
+        /// <summary>
+        /// Writer an XML header element with no value content.
+        /// </summary>
+        /// <param name="writer">Writer for the output stream.</param>
+        /// <param name="key">Name of the header.</param>
         private static void WriteHeader(XmlWriter writer, string key)
         {
             writer.WriteStartElement("Header");
@@ -149,6 +237,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
             writer.WriteEndElement();
         }
 
+        /// <summary>
+        /// Writes an XML header element with a value using CData.
+        /// </summary>
+        /// <param name="writer">Writer for the output stream.</param>
+        /// <param name="key">Name of the header.</param>
+        /// <param name="value">Value of the header.</param>
         private static void WriteHeaderValue(XmlWriter writer, string key, string value)
         {
             writer.WriteStartElement("Header");
@@ -157,6 +251,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
             writer.WriteEndElement();
         }
 
+        /// <summary>
+        /// Provides the xml writer settings.
+        /// </summary>
+        /// <returns></returns>
         private static XmlWriterSettings GetXmlSettings()
         {
             XmlWriterSettings settings = new XmlWriterSettings();
@@ -168,5 +266,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             settings.CloseOutput = true;
             return settings;
         }
+
+        #endregion
     }
 }

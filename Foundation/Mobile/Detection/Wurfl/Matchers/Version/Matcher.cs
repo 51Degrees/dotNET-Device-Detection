@@ -21,25 +21,30 @@
  * 
  * ********************************************************************* */
 
+#region
+
 using System;
-using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers;
 
+#endregion
+
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Version
 {
-    internal class Matcher
+    /// <summary>
+    /// Finds the devices that's version segments are closest to the string being sought.
+    /// </summary>
+    internal static class Matcher
     {
-        private struct SegmentScore
-        {
-            internal int CharactersMatched;
-            internal int Difference;
-        }
+        #region Nested type: DeviceResult
 
+        /// <summary>
+        /// The score for each segment associated with the device being matched.
+        /// </summary>
         private class DeviceResult
         {
-            internal SegmentScore[] Scores = null;
-            internal DeviceInfo Device = null;
+            internal readonly DeviceInfo Device;
+            internal readonly SegmentScore[] Scores;
 
             internal DeviceResult(SegmentScore[] scores, DeviceInfo device)
             {
@@ -48,47 +53,53 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Version
             }
         }
 
+        #endregion
+
+        #region Nested type: SegmentScore
+
+        /// <summary>
+        /// Stores the score for each segment found.
+        /// </summary>
+        private struct SegmentScore
+        {
+            internal int CharactersMatched;
+            internal int Difference;
+        }
+
+        #endregion
+
+        #region Static Methods
+
         internal static Results Match(string userAgent, VersionHandler handler)
         {
-            string compare, target = null;
             int[] maxCharacters = new int[handler.VersionRegexes.Length];
             List<DeviceResult> initialResults = new List<DeviceResult>(handler.UserAgents.Count);
             Results results = new Results();
-            int lowestScore = int.MaxValue;
             
             // The 1st pass calculates the scores for every segment of every device
             // available against the target useragent.
-            foreach (DeviceInfo[] devices in handler.UserAgents)
-            {
-                foreach (DeviceInfo device in devices)
-                {
-                    SegmentScore[] scores = new SegmentScore[handler.VersionRegexes.Length];
-                    for(int segment = 0; segment < handler.VersionRegexes.Length; segment++)
-                    {
-                        target = handler.VersionRegexes[segment].Match(userAgent).Value;
-                        compare = handler.VersionRegexes[segment].Match(device.UserAgent).Value;
-                        for (int i = 0; i < target.Length && i < compare.Length; i++)
-                        {
-                            scores[segment].Difference += Math.Abs((target[i] - compare[i]));
-                            scores[segment].CharactersMatched++;
-                        }
-                        if (scores[segment].CharactersMatched > maxCharacters[segment])
-                            maxCharacters[segment] = scores[segment].CharactersMatched;
-                    }
-                    initialResults.Add(new DeviceResult(scores, device));
-                }
-            }
+            FirstPass(handler, userAgent, maxCharacters, initialResults);
 
             // The 2nd pass returns the devices with the lowest difference across all the
             // versions available.
+            SecondPass(handler, maxCharacters, initialResults, results);
+
+            // Return the best device matches.
+            return results;
+        }
+
+        private static void SecondPass(VersionHandler handler, int[] maxCharacters, List<DeviceResult> initialResults, Results results)
+        {
+            int lowestScore = int.MaxValue;
             foreach (DeviceResult current in initialResults)
             {
                 // Calculate the score for this device.
                 int deviceScore = 0;
                 for (int segment = 0; segment < handler.VersionRegexes.Length; segment++)
                 {
-                    deviceScore += (maxCharacters[segment] - current.Scores[segment].CharactersMatched + 1) *
-                                   (current.Scores[segment].Difference + maxCharacters[segment] - current.Scores[segment].CharactersMatched);
+                    deviceScore += (maxCharacters[segment] - current.Scores[segment].CharactersMatched + 1)*
+                                   (current.Scores[segment].Difference + maxCharacters[segment] -
+                                    current.Scores[segment].CharactersMatched);
                 }
                 // If the score is lower than the lowest so far then reset the list
                 // of best matching devices.
@@ -104,9 +115,33 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Version
                     results.Add(current.Device);
                 }
             }
-
-            // Return the best device matches.
-            return results;
         }
+
+        private static void FirstPass(VersionHandler handler, string userAgent, int[] maxCharacters, List<DeviceResult> initialResults)
+        {
+            string compare, target;
+            foreach (var devices in handler.UserAgents)
+            {
+                foreach (DeviceInfo device in devices)
+                {
+                    SegmentScore[] scores = new SegmentScore[handler.VersionRegexes.Length];
+                    for (int segment = 0; segment < handler.VersionRegexes.Length; segment++)
+                    {
+                        target = handler.VersionRegexes[segment].Match(userAgent).Value;
+                        compare = handler.VersionRegexes[segment].Match(device.UserAgent).Value;
+                        for (int i = 0; i < target.Length && i < compare.Length; i++)
+                        {
+                            scores[segment].Difference += Math.Abs((target[i] - compare[i]));
+                            scores[segment].CharactersMatched++;
+                        }
+                        if (scores[segment].CharactersMatched > maxCharacters[segment])
+                            maxCharacters[segment] = scores[segment].CharactersMatched;
+                    }
+                    initialResults.Add(new DeviceResult(scores, device));
+                }
+            }
+        }
+
+        #endregion
     }
 }

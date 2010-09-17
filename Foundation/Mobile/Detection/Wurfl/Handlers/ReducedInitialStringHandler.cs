@@ -21,7 +21,12 @@
  * 
  * ********************************************************************* */
 
+#region
+
 using FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers;
+using Matcher=FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.ReducedInitialString.Matcher;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
@@ -32,12 +37,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
             return FirstSlash(userAgent);
         }
 
-        internal protected override Results Match(string userAgent)
+        protected internal override Results Match(string userAgent)
         {
             int tolerance = CalculateTolerance(userAgent);
             // Only perform this check if a tolerance is returned.
             if (tolerance > 0)
-                return FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.ReducedInitialString.Matcher.Match(userAgent, this, tolerance);
+                return Matcher.Match(userAgent, this, tolerance);
             return null;
         }
 

@@ -22,9 +22,6 @@
  * 
  * ********************************************************************* */
 
-using System;
-using System.Text;
-
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 {
     /// <summary>
@@ -33,19 +30,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
     internal static class Constants
     {
         /// <summary>
-        /// Contains the default device ids to be searched for.
+        /// The attribute used to determine if the device is a root.
         /// </summary>
-        internal readonly static string[] DefaultDeviceId = new string[] { "generic_web_browser", "generic" };
-
-        /// <summary>
-        /// Node name used to specify a device inside the WURFL xml file.
-        /// </summary>
-        internal const string CreatedDate = "Created";
-
-        /// <summary>
-        /// Node name used to specify a device inside the WURFL xml file.
-        /// </summary>
-        internal const string DeviceNodeName = "device";
+        internal const string ActualDeviceRoot = "actual_device_root";
 
         /// <summary>
         /// Node name used to especify a capability inside the WURFL xml file.
@@ -53,24 +40,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         internal const string CapabilityNodeName = "capability";
 
         /// <summary>
-        /// Attribute name used to especify an id inside the WURFL xml file.
+        /// Node name used to specify a device inside the WURFL xml file.
         /// </summary>
-        internal const string IdAttributeName = "id";
+        internal const string DeviceNodeName = "device";
 
         /// <summary>
-        /// Attribute name used to especify a user agent inside the WURFL xml file.
+        /// Holds an estimative of how many devices we'll need to store,
+        /// use this value when creating collections to store devices.
         /// </summary>
-        internal const string UserAgentAttributeName = "user_agent";
-
-        /// <summary>
-        /// Attribute name used to especify a name inside the WURFL xml file.
-        /// </summary>
-        internal const string NameAttributeName = "name";
-
-        /// <summary>
-        /// Attribute name used to especify a value inside the WURFL xml file.
-        /// </summary>
-        internal const string ValueAttributeName = "value";
+        internal const int EstimateNumberOfDevices = 14000;
 
         /// <summary>
         /// Node name used to especify a fall back inside the WURFL xml file.
@@ -78,9 +56,36 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         internal const string FallbackAttributeName = "fall_back";
 
         /// <summary>
-        /// The attribute used to determine if the device is a root.
+        /// Attribute name used to especify an id inside the WURFL xml file.
         /// </summary>
-        internal const string ActualDeviceRoot = "actual_device_root";
+        internal const string IdAttributeName = "id";
+
+        /// <summary>
+        /// Attribute name used to especify a name inside the WURFL xml file.
+        /// </summary>
+        internal const string NameAttributeName = "name";
+
+        /// <summary>
+        /// Length of time in ms the new devices thread should wait for a response from the
+        /// web server used to record new device information.
+        /// </summary>
+        internal const int NewUrlTimeOut = 5000;
+
+        /// <summary>
+        /// Attribute name used to especify a user agent inside the WURFL xml file.
+        /// </summary>
+        internal const string UserAgentAttributeName = "user_agent";
+
+        /// <summary>
+        /// Attribute name used to especify a value inside the WURFL xml file.
+        /// </summary>
+        internal const string ValueAttributeName = "value";
+
+        /// <summary>
+        /// The name of the key used to retrieve the SortedList object from
+        /// the HttpBrowserCapabilities collection.
+        /// </summary>
+        internal const string WurflCapabilities = "WurflCapabilities";
 
         /// <summary>
         /// Message used to throw an exception when the wurfl xml file is not found.
@@ -90,106 +95,50 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// <summary>
         /// Exception message used if the XML can not be created for a new device.
         /// </summary>
-        internal const string WurflNewDeviceXMLException = "The device '{0}' could not be written to '{1}'.";
+        internal const string WurflNewDeviceXmlException = "The device '{0}' could not be written to '{1}'.";
 
         /// <summary>
-        /// Holds an estimative of how many devices we'll need to store,
-        /// use this value when creating collections to store devices.
+        /// Contains the default device ids to be searched for.
         /// </summary>
-        internal const int EstimateNumberOfDevices = 14000;
- 
+        internal static readonly string[] DefaultDeviceId = new[] {"generic_web_browser", "generic"};
+
         /// <summary>
         /// Holds the minimum set of capabilities to be loaded.
         /// These are the capabilities used to override the ASP.Net Browser Capabilities.
         /// </summary>
-        internal static readonly string[] DefaultUsedCapabilities = new string[] {
-            "is_wireless_device", 
-            "max_image_height", 
-            "max_image_width", 
-            "resolution_height",
-            "resolution_width",
-            "colors", 
-            "cookie_support",
-            "built_in_back_button_support", 
-            "table_support", 
-            "access_key_support", 
-            "model_name", 
-            "brand_name", 
-            "marketing_name",
-            "xhtmlmp_preferred_mime_type", 
-            "html_wi_oma_xhtmlmp_1_0", 
-            "html_wi_w3_xhtmlbasic", 
-            "html_web_3_2", 
-            "html_wi_imode_compact_generic", 
-            "wml_1_2",
-            "has_pointing_device",
-            "pointing_method",
-            "chtml_table_support",
-            "xhtml_table_support",
-            "device_os",
-            "mobile_browser_version",
-            "uaprof",
-            "uaprof2",
-            "uaprof3",
-            "physical_screen_width",
-            "physical_screen_height",
-            "viewport_supported",
-            "mobileoptimized",
-            "handheldfriendly",
-            "css_supports_width_as_percentage",
-            "css_spriting",
-            "css_gradient",
-            "css_border_image",
-            "css_rounded_corners",
-
-            // Audio properties.
-            "rmf",
-            "qcelp",
-            "awb",
-            "smf",
-            "wav",
-            "nokia_ringtone",
-            "aac",
-            "digiplug",
-            "sp_midi",
-            "compactmidi",
-            "mp3",
-            "mld",
-            "evrc",
-            "amr",
-            "xmf",
-            "mmf",
-            "imelody",
-            "midi_monophonic",
-            "au",
-            "midi_polyphonic"};
-
-        internal static readonly string[] Audio_Formats = new string[] {
-            "rmf",
-            "qcelp",
-            "awb",
-            "smf",
-            "wav",
-            "nokia_ringtone",
-            "aac",
-            "digiplug",
-            "sp_midi",
-            "compactmidi",
-            "mp3",
-            "mld",
-            "evrc",
-            "amr",
-            "xmf",
-            "mmf",
-            "imelody",
-            "midi_monophonic",
-            "au",
-            "midi_polyphonic"};
-
-        /// <summary>
-        /// Length of time in ms the new devices thread should wait for a response from the
-        /// web server used to record new device information.
-        /// </summary>
-        internal const int NewURLTimeOut = 5000;
+        internal static readonly string[] DefaultUsedCapabilities = new[]
+                                                                        {
+                                                                            // The following capabilities are always needed.
+                                                                            "adapters",
+                                                                            "is_wireless_device",
+                                                                            "is_tablet",
+                                                                            "resolution_height",
+                                                                            "resolution_width",
+                                                                            "uaprof",
+                                                                            "uaprof2",
+                                                                            "uaprof3",
+                                                                            "marketing_name",
+                                                                            "model_name",
+                                                                            "brand_name",
+                                                                            "device_os",
+                                                                            "access_key_support",
+                                                                            "built_in_back_button_support",
+                                                                            "colors",
+                                                                            "png",
+                                                                            "gif",
+                                                                            "jpg",
+                                                                            "mobile_browser_version",
+                                                                            "ajax_support_javascript",
+                                                                            "xhtml_support_level",
+                                                                            "cookie_support",
+                                                                            "preferred_markup",
+                                                                            "xhtmlmp_preferred_mime_type",
+                                                                            // The following capabilities are almost always used and are 
+                                                                            // included by default.
+                                                                            "physical_screen_width",
+                                                                            "physical_screen_height",
+                                                                            "max_image_width",
+                                                                            "max_image_height"
+                                                                        };
     }
 }

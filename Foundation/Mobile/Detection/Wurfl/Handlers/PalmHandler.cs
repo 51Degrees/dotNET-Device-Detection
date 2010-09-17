@@ -28,14 +28,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
         // This handler will only handle specific strings used by Palm devices
         // and will therefore be more accurate than more general handlers.
         private const int CONFIDENCE = 7;
-                
+
         internal override byte Confidence
         {
             get { return CONFIDENCE; }
         }
 
         // Checks given UA starts with "Palm" and "webOS"
-        internal protected override bool CanHandle(string userAgent)
+        protected internal override bool CanHandle(string userAgent)
         {
             return (userAgent.Contains("Palm") && userAgent.Contains("webOS"));
         }

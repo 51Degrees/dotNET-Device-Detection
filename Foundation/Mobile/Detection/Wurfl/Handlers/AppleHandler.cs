@@ -25,40 +25,36 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
     internal class AppleHandler : RegexSegmentHandler
     {
+        private new const int CONFIDENCE = 6;
         private const string DEFAULT_DEVICE = "apple_iphone_ver1";
 
         private static readonly string[] PATTERNS = {
-            // Device type.
-            @"iPhone|iPod|iPad",
-            // Apple Apple Web Kit verion
-            @"(?<=AppleWebKit/)[\d.]+",
-            // Major version
-            @"(?<=Version/)[\d.]+",
-            // Mobile version
-            @"(?<=Mobile/)[\d\w]+",
-            // Safari version
-            @"(?<=Safari/)[\d.]+" };
-        
+                                                        // Device type.
+                                                        @"iPhone|iPod|iPad",
+                                                        // Apple Apple Web Kit verion
+                                                        @"(?<=AppleWebKit/)[\d.]+",
+                                                        // Major version
+                                                        @"(?<=Version/)[\d.]+",
+                                                        // Mobile version
+                                                        @"(?<=Mobile/)[\d\w]+",
+                                                        // Safari version
+                                                        @"(?<=Safari/)[\d.]+"
+                                                    };
+
         // This handler will only handle specific strings used by Apple devices.
         // However there may be manufacturer handlers than will be more accurate.
-        private const int CONFIDENCE = 6;
+
+        public AppleHandler()
+            : base(PATTERNS, new[] {100, 1, 1, 1, 1})
+        {
+        }
 
         internal override byte Confidence
         {
             get { return CONFIDENCE; }
         }
 
-        public AppleHandler()
-            : base(PATTERNS, new int[] { 100, 1, 1, 1, 1 })
-        { }
-
         // Checks given UA contains "iPhone", "iPad" or "iPod"
-        internal protected override bool CanHandle(string userAgent)
-        {
-            return userAgent.Contains("iPhone") ||
-                userAgent.Contains("iPod") ||
-                userAgent.Contains("iPad");
-        }
 
         internal override DeviceInfo DefaultDevice
         {
@@ -69,6 +65,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
                     return device;
                 return base.DefaultDevice;
             }
+        }
+
+        protected internal override bool CanHandle(string userAgent)
+        {
+            return userAgent.Contains("iPhone") ||
+                   userAgent.Contains("iPod") ||
+                   userAgent.Contains("iPad");
         }
     }
 }

@@ -7,10 +7,10 @@ using System.Resources;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Detector")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Mobile Device Detector Example")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("51 Degrees Mobile Experts Limited")]
-[assembly: AssemblyProduct("Detector")]
+[assembly: AssemblyProduct("Mobile Device Detector Example")]
 [assembly: AssemblyCopyright("Copyright © 51 Degrees Mobile Experts Limited 2009 - 2010")]
 [assembly: AssemblyTrademark("51degrees.mobi")]
 [assembly: AssemblyCulture("")]
@@ -32,6 +32,6 @@ using System.Resources;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("0.1.10.4")]
-[assembly: AssemblyFileVersion("0.1.10.4")]
+[assembly: AssemblyVersion("0.1.11.1")]
+[assembly: AssemblyFileVersion("0.1.11.1")]
 [assembly: NeutralResourcesLanguageAttribute("en-GB")]

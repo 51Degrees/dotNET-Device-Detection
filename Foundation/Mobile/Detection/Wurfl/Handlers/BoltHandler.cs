@@ -21,7 +21,11 @@
  * 
  * ********************************************************************* */
 
+#region
+
 using System;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
@@ -29,44 +33,54 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
     {
         private const string DEFAULT_DEVICE = "generic_bolt_ver1";
         private const byte EXTRA_CONFIDENCE = 1;
-        private static readonly string[] SUPPORTED_ROOT_DEVICES = new string[] { DEFAULT_DEVICE };
-        
-        private static readonly string[] PATTERNS = {
-            // Details about the device.
-            @"(?<=Mozilla/\d.\d \()[^)]+",
-            // Apple Apple Web Kit verion
-            @"(?<=AppleWebKit/)[\d.]+",
-            // Major version
-            @"(?<=Version/)[\d.]+",
-            // Safari version
-            @"(?<=Safari/)[\d.]+",
-            // Bolt version
-            @"(?i)(?<=bolt/)[\d.]+"};
 
-        public BoltHandler() : base(PATTERNS, new int[] { 3, 1, 1, 1, 1 } ) { }
+        private static readonly string[] PATTERNS = {
+                                                        // Details about the device.
+                                                        @"(?<=Mozilla/\d.\d \()[^)]+",
+                                                        // Apple Apple Web Kit verion
+                                                        @"(?<=AppleWebKit/)[\d.]+",
+                                                        // Major version
+                                                        @"(?<=Version/)[\d.]+",
+                                                        // Safari version
+                                                        @"(?<=Safari/)[\d.]+",
+                                                        // Bolt version
+                                                        @"(?i)(?<=bolt/)[\d.]+"
+                                                    };
+
+        private static readonly string[] SUPPORTED_ROOT_DEVICES = new[] {DEFAULT_DEVICE};
+
+        public BoltHandler() : base(PATTERNS, new[] {3, 1, 1, 1, 1})
+        {
+        }
 
         /// <summary>
         /// Provides a higher degree of confidence because only devices in the "generic_bolt_ver1"
         /// branch of the device tree are available for matching and checks are performed for
         /// version of the bolt browser.
         /// </summary>
-        internal override byte Confidence { get { return (byte)(base.Confidence + EXTRA_CONFIDENCE); } }
-        
+        internal override byte Confidence
+        {
+            get { return (byte) (base.Confidence + EXTRA_CONFIDENCE); }
+        }
+
         /// <summary>
         /// An array of supported root devices that devices from the WURFL
         /// data file need to be children of to be valid for this handler.
         /// </summary>
-        protected override string[] SupportedRootDeviceIds { get { return SUPPORTED_ROOT_DEVICES; } }
+        protected override string[] SupportedRootDeviceIds
+        {
+            get { return SUPPORTED_ROOT_DEVICES; }
+        }
 
         /// <summary>
         /// Check for the presence of bolt in addition to the base safari checks.
         /// </summary>
         /// <param name="userAgent"></param>
         /// <returns></returns>
-        internal protected override bool CanHandle(string userAgent)
+        protected internal override bool CanHandle(string userAgent)
         {
             return base.CanHandle(userAgent) &&
-                userAgent.IndexOf("bolt", StringComparison.InvariantCultureIgnoreCase) >= 0;
+                   userAgent.IndexOf("bolt", StringComparison.InvariantCultureIgnoreCase) >= 0;
         }
     }
 }
