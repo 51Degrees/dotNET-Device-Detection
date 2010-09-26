@@ -171,13 +171,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             SetValue(capabilities, "requiresUrlEncodedPostfieldValues", "true");
             SetValue(capabilities, "requiresOutputOptimization", "true");
             SetValue(capabilities, "requiresControlStateInSession", "true");
-
-            // Ensure version numbers are not null to prevent exceptions in some
-            // .NET control adapters.
-            if (capabilities["majorversion"] == null)
-                SetValue(capabilities, "majorversion", "1");
-            if (capabilities["minorversion"] == null)
-                SetValue(capabilities, "minorversion", "0");
         }
 
         /// <summary>
@@ -260,7 +253,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                 {
                     Version version = new Version(versionString);
                     SetValue(capabilities, "majorversion", version.Major);
-                    SetValue(capabilities, "minorversion", version.Minor);
+                    SetValue(capabilities, "minorversion", "." + version.Minor.ToString());
                     SetValue(capabilities, "version", version.ToString());
                 }
                 catch (FormatException)
@@ -271,6 +264,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                 {
                     SetVersion(capabilities, versionString);
                 }
+            }
+            else
+            {
+                // Ensure the version values are not null to prevent null arguement exceptions
+                // with some controls.
+                versionString = currentCapabilities != null ? currentCapabilities["version"] as string : "0.0";
+                SetVersion(capabilities, versionString);
             }
 
             SetValue(capabilities, "supportsImageSubmit", GetSupportsImageSubmit(device));
@@ -285,30 +285,40 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                                                   : bool.TrueString);
             SetJavaScript(capabilities, javaScript);
             SetValue(capabilities, "ecmascriptversion",
-                     javaScript ? "3.0.0.0" : "0.0.0.0");
+                     javaScript ? "3.0" : "0.0");
             SetValue(capabilities, "jscriptversion",
-                     javaScript ? "5.7.0.0" : "0.0.0.0");
+                     javaScript ? "5.7" : "0.0");
 
             SetValue(capabilities, "w3cdomversion",
                      GetW3CDOMVersion(device,
                                       currentCapabilities != null
                                           ? (string) currentCapabilities["w3cdomversion"]
                                           : String.Empty));
+            
             SetValue(capabilities, "cookies",
-                     GetCookieSupport(device,
-                                      currentCapabilities != null
-                                          ? (string) currentCapabilities["cookies"]
-                                          : String.Empty));
+                    GetCookieSupport(device,
+                                     currentCapabilities != null
+                                         ? (string)currentCapabilities["cookies"]
+                                         : String.Empty));
 
-            // Set the rendering type for the response.
-            string renderingType = GetPreferredRenderingTypeFromWURFL(device);
-            if (String.IsNullOrEmpty(renderingType) == false)
-                SetValue(capabilities, "preferredRenderingType", renderingType);
+            // Only set these values from WURFL if they've not already been set from
+            // the Http request header.
+            if (capabilities.Contains("preferredRenderingType") == false)
+            {
+                // Set the rendering type for the response.
+                string renderingType = GetPreferredRenderingTypeFromWURFL(device);
+                if (String.IsNullOrEmpty(renderingType) == false)
+                    SetValue(capabilities, "preferredRenderingType", renderingType);
 
-            // Set the Mime type of the response.
-            string renderingMime = GetPreferredRenderingMimeFromWURFL(device, renderingType);
-            if (String.IsNullOrEmpty(renderingMime) == false)
-                SetValue(capabilities, "preferredRenderingMime", renderingMime);
+                // Set the Mime type of the response.
+                if (capabilities.Contains("preferredRenderingMime") == false)
+                {
+                    string renderingMime = GetPreferredRenderingMimeFromWURFL(device, renderingType);
+                    if (String.IsNullOrEmpty(renderingMime) == false)
+                        SetValue(capabilities, "preferredRenderingMime", renderingMime);
+                }
+            }
+
         }
 
         /// <summary>
@@ -355,10 +365,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                 }
                 catch (ArgumentException)
                 {
-                    // To nothing and let the default value be returned.
+                    // Do nothing and let the default value be returned.
                 }
             }
-            return version.ToString();
+            return version.ToString(2);
         }
 
         private static string GetCookieSupport(DeviceInfo device, string current)

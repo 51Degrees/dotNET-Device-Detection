@@ -164,7 +164,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                                                     _newDeviceDetail == NewDeviceDetail.Maximum);
                 _userAgent = Provider.GetUserAgent(request);
                 _isLocal = request.IsLocal;
-                _ignore = request.Headers["51D"] != null;
+
+                // If the headers contain 51D as a setting or the request is to a ]
+                // web service then do not send the data.
+                _ignore = request.Headers["51D"] != null ||
+                    request.Url.Segments[request.Url.Segments.Length - 1].EndsWith("asmx");
             }
 
             /// <summary>

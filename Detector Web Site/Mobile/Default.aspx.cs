@@ -34,29 +34,6 @@ namespace Detector.Mobile
             LabelModel.Text = Request.Browser.MobileDeviceModel;
             LabelUserAgent.Text = Request.UserAgent;
 
-            // Add headers for use by the CheckUA.aspx page and accuracy tester.
-            Response.AddHeader("IsMobileDevice", Request.Browser.IsMobileDevice.ToString());
-            Response.AddHeader("MobileDeviceManufacturer", Request.Browser.MobileDeviceManufacturer);
-            Response.AddHeader("MobileDeviceModel", Request.Browser.MobileDeviceModel);
-            Response.AddHeader("ScreenPixelsHeight", Request.Browser.ScreenPixelsHeight.ToString());
-            Response.AddHeader("ScreenPixelsWidth", Request.Browser.ScreenPixelsWidth.ToString());
-            Response.AddHeader("Version", Request.Browser.Version);
-            
-            // Get the Wurfl capabilities from the browser capabilities collection if it's present.
-            var wurfl = Request.Browser.Capabilities["WurflCapabilities"] as SortedList<string, string>;
-            if (wurfl != null)
-            {
-                // Set the response headers for testing purposes.
-                string deviceId = wurfl["deviceid"];
-                if (deviceId != null)
-                    Response.AddHeader("deviceid", deviceId);
-                Response.AddHeader("ActualDeviceRoot", wurfl["actual_device_root"]);
-                Response.AddHeader("PointingMethod", wurfl["pointing_method"]);
-                Response.AddHeader("PhysicalScreenWidth", wurfl["physical_screen_width"]);
-                Response.AddHeader("PhysicalScreenHeight", wurfl["physical_screen_height"]);
-                Response.AddHeader("IsTabletDevice", wurfl["is_tablet"]);
-            }
-
             // Ensure the page is never cached.
             Response.Cache.SetCacheability(System.Web.HttpCacheability.NoCache);
         }

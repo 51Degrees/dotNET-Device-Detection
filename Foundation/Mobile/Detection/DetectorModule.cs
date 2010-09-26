@@ -171,7 +171,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             if (sender is HttpApplication)
             {
-                HttpContext context = ((HttpApplication) sender).Context;
+                HttpContext context = ((HttpApplication)sender).Context;
 
                 // Check to see if the handler is a mobile page. If so then the preferred markup
                 // needs to change as the legacy mobile controls do not work with html4 specified.
@@ -195,14 +195,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             if (sender is HttpApplication)
             {
-                HttpContext context = ((HttpApplication) sender).Context;
+                HttpContext context = ((HttpApplication)sender).Context;
 
                 // If this handler relates to a page use the preinit event of the page
                 // to set the capabilities providing time for the page to set the 
                 // clienttarget property if required.
                 if (context != null &&
                     context.Handler is Page)
-                    ((Page) context.Handler).PreInit += OnPreInitPage;
+                    ((Page)context.Handler).PreInit += OnPreInitPage;
             }
         }
 
@@ -215,7 +215,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             if (sender is HttpApplication)
             {
-                HttpContext context = ((HttpApplication) sender).Context;
+                HttpContext context = ((HttpApplication)sender).Context;
                 if (context != null)
                 {
                     try
@@ -253,7 +253,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             if (sender is HttpApplication)
             {
-                HttpContext context = ((HttpApplication) sender).Context;
+                HttpContext context = ((HttpApplication)sender).Context;
 
                 if (context != null)
                 {
@@ -360,7 +360,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
             var capabilities = new System.Web.Mobile.MobileCapabilities();
             capabilities.Capabilities = new Hashtable();
-            
+
             // Copy the keys from both the original and new capabilities.
             foreach (object key in currentCapabilities.Capabilities.Keys)
                 capabilities.Capabilities[key] = currentCapabilities.Capabilities[key];
