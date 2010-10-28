@@ -226,6 +226,7 @@
     <Compile Include="Mobile\Detection\Wurfl\Processor.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Licence.txt" />
     <Content Include="PDA.ico" />
   </ItemGroup>
   <ItemGroup>
