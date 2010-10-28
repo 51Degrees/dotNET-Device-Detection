@@ -50,6 +50,133 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// </summary>
     public class DetectorModule : IHttpModule
     {
+        #region Private Classes
+
+        private class Filter
+        {
+            #region Fields
+
+            private readonly string _capability;
+            private readonly Regex _expression;
+
+            #endregion
+
+            #region Constructor
+
+            internal Filter(string capability, string expression)
+            {
+                _capability = capability;
+                _expression = new Regex(expression, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            }
+
+            #endregion
+
+            #region Internal Methods
+            
+            /// <summary>
+            /// Determines if this filter matches the requesting device.
+            /// </summary>
+            /// <param name="context">Context of the requesting device.</param>
+            /// <returns>True if the capability matches, otherwise false.</returns>
+            internal bool GetIsMatch(HttpContext context)
+            {
+                string value = GetPropertyValue(context, _capability);
+                if (String.IsNullOrEmpty(value))
+                    return false;
+                return _expression.IsMatch(value);
+            }
+
+            #endregion
+
+            #region Private Members
+
+            /// <summary>
+            /// Returns the value for the property requested.
+            /// </summary>
+            /// <param name="property"></param>
+            /// <returns></returns>
+            private static string GetPropertyValue(HttpContext context, string property)
+            {
+                string value;
+     
+                // Try the standard properties of the browser object.
+                Type controlType = context.Request.Browser.GetType();
+                System.Reflection.PropertyInfo propertyInfo = controlType.GetProperty(property);
+                if (propertyInfo != null && propertyInfo.CanRead)
+                    return propertyInfo.GetValue(context.Request.Browser, null).ToString();
+     
+                // Try wurfl capabilities next.
+                var wurflCapabilities = context.Request.Browser.Capabilities["WurflCapabilities"] as SortedList<string, string>;
+                if (wurflCapabilities != null && wurflCapabilities.TryGetValue(property, out value))
+                    return value;
+
+                // Try the properties of the request.
+                controlType = context.Request.GetType();
+                propertyInfo = controlType.GetProperty(property);
+                if (propertyInfo != null && propertyInfo.CanRead)
+                    return propertyInfo.GetValue(context.Request, null).ToString();
+
+                // If not then try and return the value for the collection.
+                return context.Request.Browser[property];
+            }
+
+            #endregion
+
+        }
+
+        private class HomePage
+        {
+            #region Fields
+            
+            internal readonly string _url;
+            internal readonly List<Filter> _filters = new List<Filter>();
+            internal readonly Regex _replaceRegex;
+
+            #endregion
+
+            #region Constructors
+
+            internal HomePage(string url, string expression)
+            {
+                _url = url;
+                if (String.IsNullOrEmpty(expression) == false)
+                    _replaceRegex = new Regex(expression, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            }
+
+            #endregion
+
+            #region Properties
+
+            internal List<Filter> Filters
+            {
+                get { return _filters; }   
+            }
+
+            internal string Url
+            {
+                get
+                {
+                    if (_replaceRegex != null)
+                        return _replaceRegex.Replace(HttpContext.Current.Request.Url.ToString(), _url);
+                    return _url;
+                }
+            }
+
+            internal bool GetIsMatch(HttpContext context)
+            {
+                foreach(Filter filter in _filters)
+                {
+                    if (filter.GetIsMatch(context) == false)
+                        return false;
+                }
+                return true;
+            }
+
+            #endregion
+        }
+
+        #endregion
+
         #region Constants
 
         /// <summary>
@@ -66,8 +193,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         private static readonly string[] PAGES = new[]
                                                      {
-                                                         "System.Web.UI.MobileControls.MobilePage",
-                                                         "System.Web.UI.Page"
+                                                         "System.Web.UI.Page",
+                                                         "System.Web.UI.MobileControls.MobilePage"
                                                      };
 
         #endregion
@@ -93,6 +220,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
         private string _formsLoginUrl;
 
         /// <summary>
+        /// A collection of homepages that could be used for redirection. 
+        /// Evaluated before the _mobileHomePageUrl value is used.
+        /// Initialised from the <c>web.config</c> file when the module 
+        /// is created.
+        /// </summary>
+        private List<HomePage> _homePages = new List<HomePage>();
+
+        /// <summary>
         /// The URL to use to redirect a mobile device accessing
         /// a non mobile web page to. Initialised from the <c>web.config</c> file
         /// when the module is created.
@@ -111,6 +246,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         private Regex _mobilePageRegex;
 
+        /// <summary>
+        /// If set to true the original URL of the request is added to the redirected
+        /// querystring in a paramter called origUrl.
+        /// </summary>
         private bool _originalUrlAsQueryString;
 
         #endregion
@@ -137,6 +276,20 @@ namespace FiftyOne.Foundation.Mobile.Detection
                                                  RegexOptions.Compiled | RegexOptions.IgnoreCase);
                 _formsLoginUrl = FormsAuthentication.LoginUrl;
                 _originalUrlAsQueryString = Manager.Redirect.OriginalUrlAsQueryString;
+
+                foreach (LocationElement homePage in Manager.Redirect.Locations)
+                {
+                    if (homePage.Enabled)
+                    {
+                        HomePage current = new HomePage(homePage.Url, homePage.ReplaceExpression);
+                        foreach (FilterElement filter in homePage)
+                        {
+                            if (filter.Enabled)
+                                current.Filters.Add(new Filter(filter.Property, filter.MatchExpression));
+                        }
+                        _homePages.Add(current);
+                    }
+                }
             }
 
             // Get a list of the client target names.
@@ -260,22 +413,15 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     // Check to see if the request should be redirected.
                     if (ShouldRequestRedirect(context))
                     {
-                        string newUrl = null;
+                        string newUrl = GetHomePageUrl(context);
                         if (_originalUrlAsQueryString)
                             // Use an encoded version of the requesting Url
                             // as the query string.
                             newUrl = String.Format("{0}?origUrl={1}",
-                                                   _mobileHomePageUrl,
+                                                   newUrl,
                                                    HttpUtility.UrlEncode(context.Request.Url.ToString()));
-                        else if (String.IsNullOrEmpty(context.Request.QueryString.ToString()) == false)
-                            // Use the current query string.
-                            newUrl = String.Format("{0}?{1}",
-                                                   _mobileHomePageUrl,
-                                                   context.Request.QueryString);
-                        else
-                            // Use the raw redirect Url without a query string.
-                            newUrl = _mobileHomePageUrl;
 
+                        EventLog.Debug(String.Format("Redirecting '{0}' to '{1}'.", context.Request.Url, newUrl));
                         context.Response.Redirect(newUrl, true);
                     }
                 }
@@ -410,6 +556,26 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
 
         /// <summary>
+        /// Evaluates the home page that should be used when redirecting 
+        /// the requesting context. If the locations collection does
+        /// not provide a home page then the mobile home page url will
+        /// be used only if the device is a mobile.
+        /// </summary>
+        /// <param name="context">Context of the request.</param>
+        /// <returns>The url to redirect the request to, if any.</returns>
+        private string GetHomePageUrl(HttpContext context)
+        {
+            foreach(HomePage homePage in _homePages)
+            {
+                if (homePage.GetIsMatch(context))
+                    return homePage.Url;
+            }
+            if (context.Request.Browser.IsMobileDevice)
+                return _mobileHomePageUrl;
+            return null;
+        }
+
+        /// <summary>
         /// Returns true if the request should be redirected.
         /// </summary>
         /// <param name="context">The HttpContext of the request.</param>
@@ -417,11 +583,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
         private bool ShouldRequestRedirect(HttpContext context)
         {
             return context.Handler != null &&
-                   String.IsNullOrEmpty(_mobileHomePageUrl) == false &&
-                   IsRedirectPage(context) == false &&
+                   String.IsNullOrEmpty(GetHomePageUrl(context)) == false &&
                    IsPage(context) &&
                    IsMobilePage(context) == false &&
-                   Factory.IsRedirectDevice(context) &&
                    IsFirstTime(context, _firstRequestOnly) &&
                    IsRestrictedPageForRedirect(context) == false;
         }
@@ -429,21 +593,29 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Checks the page being requested to determine if it is eligable
         /// for redirection. The mobile home page and the forms authentication
-        /// login page are restricted from redirection.
+        /// login page are restricted from redirection. If the response
+        /// is already being redirected it should be ignored.
         /// </summary>
         /// <param name="context">The context of the request.</param>
         /// <returns>True if the page is restricted from being redirected.</returns>
         private bool IsRestrictedPageForRedirect(HttpContext context)
         {
             Page page = context.Handler as Page;
-            if (page != null)
-            {
-                string currentPage = page.ResolveUrl(context.Request.AppRelativeCurrentExecutionFilePath);
-                return
-                    page.ResolveUrl(_mobileHomePageUrl) == currentPage ||
-                    page.ResolveUrl(_formsLoginUrl) == currentPage;
-            }
-            return false;
+
+            string currentPage = page.ResolveUrl(context.Request.AppRelativeCurrentExecutionFilePath);
+            
+            bool value =
+                context.Response.IsRequestBeingRedirected ||
+                String.IsNullOrEmpty(context.Response.RedirectLocation) == false ||
+                page.ResolveUrl(GetHomePageUrl(context)) == currentPage ||
+                page.ResolveUrl(_formsLoginUrl) == currentPage;
+            
+            EventLog.Debug(String.Format("Request '{0}' with handler type '{1}' is {2} restricted page for redirect.", 
+                context.Request.Url,
+                context.Handler.GetType().FullName,
+                value ? "a" : "not a" ));
+
+            return value;
         }
 
         internal static bool IsFirstTime(HttpContext context, bool firstRequestOnly)
@@ -542,7 +714,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             {
                 if (IsInArray(type.FullName, PAGES))
                     return true;
-                else if (type.BaseType != null)
+                if (type.BaseType != null)
                     return IsPageType(type.BaseType);
             }
             return false;
@@ -570,7 +742,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             {
                 if (IsInArray(type.FullName, MOBILE_PAGES))
                     return true;
-                else if (type.BaseType != null)
+                if (type.BaseType != null)
                     return IsMobileType(type.BaseType);
             }
             return false;
@@ -599,19 +771,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             return IsMobileType(context.Handler.GetType()) ||
                    IsMobileRegexPage(context.Request);
-        }
-
-        /// <summary>
-        /// Returns true if the page being accessed is the same as the mobile landing page.
-        /// Used to prevent continued redirects to the mobile landing page if it's not
-        /// been created as a mobile page.
-        /// </summary>
-        /// <param name="context">The context associated with the Http request.</param>
-        private bool IsRedirectPage(HttpContext context)
-        {
-            return _mobileHomePageUrl.Equals(
-                context.Request.AppRelativeCurrentExecutionFilePath,
-                StringComparison.InvariantCultureIgnoreCase);
         }
 
         #endregion

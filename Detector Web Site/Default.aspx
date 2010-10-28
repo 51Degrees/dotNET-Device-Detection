@@ -14,10 +14,13 @@
         <asp:Label runat="server" Text="Desktop / Laptop" Font-Size="Large" Font-Bold="true" />
     </asp:Panel>
     <asp:Panel runat="server" HorizontalAlign="Center">
-        <asp:Image runat="server" ImageUrl="~/Desktop PC.gif" AlternateText="Desktop / Laptop" ImageAlign="Middle" />
+        <asp:Image runat="server" ImageUrl="~/Desktop.png" AlternateText="Desktop / Laptop" ImageAlign="Middle" />
     </asp:Panel>
     <asp:Panel runat="server" HorizontalAlign="Center">
         <asp:HyperLink runat="server" NavigateUrl="~/Mobile/Default.aspx" Text="Mobile Site" />
+    </asp:Panel>
+    <asp:Panel runat="server" HorizontalAlign="Center">
+        <asp:HyperLink runat="server" NavigateUrl="~/Tablet/Default.aspx" Text="Tablet Site" />
     </asp:Panel>
     <asp:Panel runat="server" HorizontalAlign="Center">
         <asp:HyperLink runat="server" NavigateUrl="~/CheckUA.aspx" Text="Check a UserAgent" />

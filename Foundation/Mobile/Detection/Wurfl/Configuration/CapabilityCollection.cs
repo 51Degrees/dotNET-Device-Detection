@@ -145,7 +145,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         #region Properties
 
         /// <summary>
-        /// Gets or sets the <typeparamref name="WurflCapabilityElement"/>.
+        /// Gets or sets the <typeparamref name="CapabilityElement"/>.
         /// </summary>
         public CapabilityElement this[int index]
         {
@@ -161,7 +161,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         }
 
         /// <summary>
-        /// Gets or sets the <typeparamref name="WurflCapabilityElement"/>.
+        /// Gets or sets the <typeparamref name="CapabilityElement"/>.
         /// </summary>        
         public new CapabilityElement this[string capabilityName]
         {

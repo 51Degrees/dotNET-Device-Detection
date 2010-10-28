@@ -84,17 +84,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Static Methods
 
         /// <summary>
-        /// Checks to determine if the device is one that should be redirected
-        /// by making a direct call to the device detection layer.
-        /// </summary>
-        /// <param name="context">The context of the request.</param>
-        /// <returns>True if the device is a device that should be redirected.</returns>
-        internal static bool IsRedirectDevice(HttpContext context)
-        {
-            return MobileCapabilities.IsRedirectDevice(context);
-        }
-
-        /// <summary>
         /// Creates a new <see cref="MobileCapabilities"/> class based on the useragent
         /// string provided.
         /// </summary>

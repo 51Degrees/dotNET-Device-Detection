@@ -18,6 +18,7 @@
  * 
  * Contributor(s):
  *     James Rosewell <james@51degrees.mobi>
+ *     Thomas Holmes <thomasholmes_5@hotmail.com>
  * 
  * ********************************************************************* */
 
@@ -86,17 +87,6 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         }
 
         /// <summary>
-        /// When set to true tablet devices will be treated as mobile devices for
-        /// the purposes of redirection.
-        /// (Optional – defaults to true)
-        /// </summary>
-        [ConfigurationProperty("treatTabletAsMobile", IsRequired = false, DefaultValue = "true")]
-        public bool TreatTabletAsMobile
-        {
-            get { return (bool) this["treatTabletAsMobile"]; }
-        }
-
-        /// <summary>
         /// This attribute is used when redirecting to a mobile home page.
         /// If set to true the original URL will be encoded and set
         /// as the query string for the <see cref="MobileHomePageUrl"/>.
@@ -110,9 +100,9 @@ namespace FiftyOne.Foundation.Mobile.Configuration
 
         /// <summary>
         /// Previously mobileRedirectUrl under the mobile/toolkit element. A url to direct 
-        /// mobile devices to instead of the normal web sites landing page. (Mandatory)
+        /// mobile devices to instead of the normal web sites landing page. (Optional)
         /// </summary>
-        [ConfigurationProperty("mobileHomePageUrl", IsRequired = true, DefaultValue = "")]
+        [ConfigurationProperty("mobileHomePageUrl", IsRequired = false, DefaultValue = "")]
         [StringValidator(MaxLength = 255)]
         public string MobileHomePageUrl
         {
@@ -136,6 +126,20 @@ namespace FiftyOne.Foundation.Mobile.Configuration
             get { return (string) this["mobilePagesRegex"]; }
         }
 
+        /// <summary>
+        /// An optional collection of homepages that uses regular expressions to see if a mobile 
+        /// device should be redirected to one of these pages. A device is defined in terms of 
+        /// the manufacturer and model.
+        /// </summary>
+        [ConfigurationProperty("locations", IsRequired = false, IsDefaultCollection = true)]
+        [ConfigurationCollection(typeof(LocationsCollection), AddItemName = "location")]
+        public LocationsCollection Locations
+        {
+            get
+            {
+                return (LocationsCollection)this["locations"];
+            }
+        }
         #endregion
     }
 }

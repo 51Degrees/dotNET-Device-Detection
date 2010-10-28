@@ -118,6 +118,9 @@
     <Compile Include="Mobile\Detection\Factory.cs" />
     <Compile Include="Mobile\Detection\RequestHistory.cs" />
     <Compile Include="Mobile\Configuration\RedirectSection.cs" />
+    <Compile Include="Mobile\Configuration\LocationsCollection.cs" />
+    <Compile Include="Mobile\Configuration\LocationElement.cs" />
+    <Compile Include="Mobile\Configuration\FilterElement.cs" />
     <Compile Include="Mobile\Configuration\Support.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Handlers\AmoiHandler.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Handlers\AndriodHandler.cs" />

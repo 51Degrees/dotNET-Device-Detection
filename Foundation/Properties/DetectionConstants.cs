@@ -43,22 +43,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
         internal const string IsFirstRequest = "51dIsFirstRequest";
 
         /// <summary>
-        /// An array of accept types that indicate javascript support.
-        /// </summary>
-        internal static readonly string[] JAVASCRIPT_ACCEPTS = new[]
-                                                                   {
-                                                                       "application/x-javascript",
-                                                                       "text/javascript",
-                                                                       "text/x-javascript",
-                                                                       "text/js",
-                                                                       "text/x-js",
-                                                                       "text/jscript",
-                                                                       "text/ecmascript",
-                                                                       "*/*",
-                                                                       "application/vnd.rim.jscriptc"
-                                                                   };
-
-        /// <summary>
         /// Array of transcoder HTTP headers that represent the useragent string of the
         /// mobile device rather than the desktop browser.
         /// </summary>

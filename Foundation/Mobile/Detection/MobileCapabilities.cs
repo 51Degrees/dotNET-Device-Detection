@@ -41,30 +41,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// </summary>
     internal abstract class MobileCapabilities
     {
-        #region Configuration Values
-
-        /// <summary>
-        /// When set to true tablet devices will be treated as mobile devices for
-        /// the purposes of redirection.
-        /// </summary>
-        protected bool _treatTabletAsMobile = true;
-
-        #endregion
-
-        #region Constructors
-
-        /// <summary>
-        /// Constructs MobileCapabilities setting the treat tablet as mobile 
-        /// configuration field if redirect is enabled.
-        /// </summary>
-        internal MobileCapabilities()
-        {
-            if (Configuration.Manager.Redirect != null)
-                _treatTabletAsMobile = Configuration.Manager.Redirect.TreatTabletAsMobile;
-        }
-
-        #endregion
-
         #region Create Methods
 
         /// <summary>
@@ -77,9 +53,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
             // Create the mobile capabilities hashtable.
             IDictionary capabilities = new Hashtable();
 
-            // Get support for javascript from the Accept header.
-            SetJavaScript(capabilities, GetJavascriptSupport(context));
-
             return capabilities;
         }
 
@@ -91,20 +64,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
         internal virtual IDictionary Create(string userAgent)
         {
             // Create the mobile capabilities hashtable.
-            return new Hashtable();
+            IDictionary capabilities = new Hashtable();
+
+            // As we can't tell from the headers if javascript is supported assume
+            // it can be and that the inheriting class will provide the additional details.
+            SetJavaScript(capabilities, true);
+
+            return capabilities;
         }
-
-        #endregion
-
-        #region Abstract Methods
-
-        /// <summary>
-        /// Returns true if the requesting context is associated with a device
-        /// that should be redirected.
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        internal abstract bool IsRedirectDevice(HttpContext context);
 
         #endregion
 
@@ -132,32 +99,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             SetValue(capabilities, "javascript", javaScript.ToString().ToLowerInvariant());
             SetValue(capabilities, "Javascript", javaScript.ToString().ToLowerInvariant());
-        }
-
-        /// <summary>
-        /// Checks the Accepts header of the request to determine if javascript is supported.
-        /// </summary>
-        /// <param name="context">Context of the request.</param>
-        /// <returns></returns>
-        private static bool GetJavascriptSupport(HttpContext context)
-        {
-            // Check the headers to see if javascript is supported.
-            if (context.Request.AcceptTypes != null)
-            {
-                List<string> acceptTypes = new List<string>(context.Request.AcceptTypes);
-#if VER2
-                foreach (string checkType in Constants.JAVASCRIPT_ACCEPTS)
-                    foreach (string acceptType in acceptTypes)
-                        if (acceptType.StartsWith(checkType, StringComparison.InvariantCultureIgnoreCase))
-                            return true;
-#elif VER4
-                return (from checkType in Constants.JAVASCRIPT_ACCEPTS
-                    from acceptType in acceptTypes
-                    where acceptType.StartsWith(checkType, StringComparison.InvariantCultureIgnoreCase) == true
-                    select checkType).Any();
-#endif
-            }
-            return false;
         }
 
         /// <summary>

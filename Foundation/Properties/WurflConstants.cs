@@ -108,8 +108,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// </summary>
         internal static readonly string[] DefaultUsedCapabilities = new[]
                                                                         {
-                                                                            // The following capabilities are always needed.
-                                                                            "adapters",
+                                                                            // These capabilities are always needed.
                                                                             "is_wireless_device",
                                                                             "is_tablet",
                                                                             "resolution_height",
@@ -133,7 +132,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                                                                             "cookie_support",
                                                                             "preferred_markup",
                                                                             "xhtmlmp_preferred_mime_type",
-                                                                            // The following capabilities are almost always used and are 
+                                                                            
+                                                                            // These capabilities are almost always used and are 
                                                                             // included by default.
                                                                             "physical_screen_width",
                                                                             "physical_screen_height",

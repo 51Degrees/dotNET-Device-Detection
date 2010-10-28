@@ -80,29 +80,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 
         #endregion
 
-        #region Override Properties
-
-        /// <summary>
-        /// Returns true if the requesting device appears to WURFL as a
-        /// device that should be redirected. Result depends on how the
-        /// system is configured to handle tablets.
-        /// </summary>
-        /// <param name="context">Context associated with the requesting device.</param>
-        /// <returns>True if the requesting device is a mobile device.</returns>
-        internal override bool IsRedirectDevice(HttpContext context)
-        {
-            DeviceInfo device = Provider.Instance.GetDeviceInfo(context);
-            if (device != null)
-            {
-                if (device.IsTabletDevice)
-                    return _treatTabletAsMobile;
-                return device.IsMobileDevice;
-            }
-            return false;
-        }
-
-        #endregion
-
         #region Override Methods
 
         internal override IDictionary Create(HttpContext context)
@@ -123,7 +100,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         internal override IDictionary Create(string userAgent)
         {
             // Use the base class to create the initial list of capabilities.
-            IDictionary capabilities = new Hashtable();
+            IDictionary capabilities = base.Create(userAgent);
 
             // Use the device for the request to set the capabilities.
             Create(Provider.Instance.GetDeviceInfo(userAgent), capabilities, null);
@@ -278,11 +255,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             // All we can determine from WURFL is if javascript is supported as a boolean.
             // Use this value to set a version number that is the same for all devices that
             // indicate javascript support.
-            bool javaScript = false;
-            javaScript = GetJavascriptSupport(device,
-                                              currentCapabilities != null
-                                                  ? (string) currentCapabilities["javascript"]
-                                                  : bool.TrueString);
+            bool javaScript = GetJavascriptSupport(device);
             SetJavaScript(capabilities, javaScript);
             SetValue(capabilities, "ecmascriptversion",
                      javaScript ? "3.0" : "0.0");
@@ -381,18 +354,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         }
 
         /// <summary>
-        /// If the current capability already indicates javascript is supported and the
-        /// wurfl database indicates javascript support then return true.
+        /// If the wurfl database indicates javascript support then return true.
         /// </summary>
         /// <param name="device">The device to be checked.</param>
-        /// <param name="current">The current setting from the headers.</param>
         /// <returns>True if javascript is supported.</returns>
-        private static bool GetJavascriptSupport(DeviceInfo device, string current)
+        private static bool GetJavascriptSupport(DeviceInfo device)
         {
             bool java = false;
-            if (bool.TryParse(current, out java) &&
-                java &&
-                bool.TryParse(Strings.Get(device.GetCapability(AjaxSupportJavascript)), out java) &&
+            if (bool.TryParse(Strings.Get(device.GetCapability(AjaxSupportJavascript)), out java) &&
                 java)
             {
                 return true;
@@ -471,6 +440,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 
         private static string GetPreferredImageMime(DeviceInfo device, IDictionary capabilities)
         {
+
+
             // Look at the database and return the 1st one that matches in order
             // of preference.
             if (bool.TrueString.Equals(Strings.Get(device.GetCapability(Png)), StringComparison.InvariantCultureIgnoreCase))

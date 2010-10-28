@@ -38,6 +38,37 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
         }
     }
 
+    internal class WindowsPhoneHandler : MSIEHandler
+    {
+        private const string DEFAULT_DEVICE = "generic_mobile_browser_ver1_winmo7";
+        private const byte EXTRA_CONFIDENCE = 2;
+        private static readonly string[] SUPPORTED_ROOT_DEVICES = new[] { DEFAULT_DEVICE };
+
+        /// <summary>
+        /// Provides a higher degree of confidence because only devices in the "generic_mobile_browser_ver1_winmo7"
+        /// branch of the device tree are available for matching.
+        /// </summary>
+        internal override byte Confidence
+        {
+            get { return (byte)(base.Confidence + EXTRA_CONFIDENCE); }
+        }
+        
+        /// <summary>
+        /// An array of supported root devices that devices from the WURFL
+        /// data file need to be children of to be valid for this handler.
+        /// </summary>
+        protected override string[] SupportedRootDeviceIds
+        {
+            get { return SUPPORTED_ROOT_DEVICES; }
+        }
+
+        // Check given UA contains "Windows Phone OS".
+        protected internal override bool CanHandle(string userAgent)
+        {
+            return base.CanHandle(userAgent) && userAgent.Contains("Windows Phone OS");
+        }
+    }
+
     internal class MSIEDesktopHandler : MSIEHandler
     {
         private const string DEFAULT_DEVICE = "msie";
@@ -63,7 +94,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
         }
 
         // Checks the US does not contain mobile strings and does contain desktop strings.
-
         internal override DeviceInfo DefaultDevice
         {
             get
@@ -77,9 +107,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 
         protected internal override bool CanHandle(string userAgent)
         {
-            return userAgent.Contains("MSIE") &&
+            return base.CanHandle(userAgent) &&
                    userAgent.Contains("IEMobile") == false &&
                    userAgent.Contains("Windows CE") == false &&
+                   userAgent.Contains("Windows Phone OS") == false &&
                    (userAgent.Contains("Windows XP") ||
                     userAgent.Contains("Windows NT") ||
                     userAgent.Contains("Windows ME") ||

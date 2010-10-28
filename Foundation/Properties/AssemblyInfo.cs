@@ -39,7 +39,6 @@ using System.Security;
 //      Revision
 //
 
-[assembly: AssemblyVersion("0.1.11.2")]
-[assembly: AssemblyFileVersion("0.1.11.2")]
+[assembly: AssemblyVersion("0.1.11.4")]
+[assembly: AssemblyFileVersion("0.1.11.4")]
 [assembly: NeutralResourcesLanguage("en-GB")]
-[assembly: AllowPartiallyTrustedCallers]

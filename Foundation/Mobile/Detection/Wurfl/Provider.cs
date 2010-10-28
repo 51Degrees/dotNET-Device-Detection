@@ -287,6 +287,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                  new ToshibaHandler(),
                  new VodafoneHandler(),
                  new WindowsCEHandler(),
+                 new WindowsPhoneHandler(),
                  new ZuneHandler(),
 
                  // Add handlers for desktop browsers
@@ -707,7 +708,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// <param name="device">Device found with the closest match to the useragent string.</param>
         private void RecordNewDevice(HttpRequest request, DeviceInfo device)
         {
-            if (device.UserAgent != GetUserAgent(request) && device != DefaultDevice && WurflNewDevice.Enabled)
+            if (device.UserAgent != GetUserAgent(request) && WurflNewDevice.Enabled)
             {
                 // Now that we've found a device add it to the list using
                 // the useragent string as the device identifier.

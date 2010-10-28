@@ -165,6 +165,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             {
                 byte[] buffer = new byte[8];
                 byte[] address = IPAddress.Parse(request.UserHostAddress).GetAddressBytes();
+                
                 // If 4 bytes use these as the high order bytes and a hashcode from the
                 // HTTP header as the low order bytes.
                 if (address.Length == 4)
@@ -174,18 +175,26 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     SetHashCode(buffer, request);
                     _key = BitConverter.ToInt64(buffer, 0);
                 }
-                    // Use the value unaltered as a 64 bit value.
+                
                 else if (address.Length == 8)
                 {
+                    // Use the value unaltered as a 64 bit value.
                     _key = BitConverter.ToInt64(address, 0);
                 }
-                    // Another value so use the hashcode.
+
                 else
                 {
-                    byte[] hashcode = BitConverter.GetBytes(address.GetHashCode());
+                    // Create hashcode from the address.
+                    int hashcode = 0;
+                    foreach(byte current in address)
+                        hashcode += current;
+                    
+                    // Merge the address hashcode and the request hashcode.
+                    byte[] hashcodeArray = BitConverter.GetBytes(hashcode);
                     for (int i = 0; i < 4; i++)
-                        buffer[4 + i] = hashcode[i];
+                        buffer[4 + i] = hashcodeArray[i];
                     SetHashCode(buffer, request);
+
                     _key = BitConverter.ToInt64(buffer, 0);
                 }
 
@@ -326,7 +335,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         // The last time this process serviced the cache file.
 
         // The last time the sync file was modified.
-        private static DateTime _lastAccessedTime = DateTime.MinValue;
+        private static DateTime _lastWriteTime = DateTime.MinValue;
         private static DateTime _nextServiceTime = DateTime.MinValue;
 
         #endregion
@@ -395,10 +404,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
         private static void RefreshSyncFile()
         {
             FileInfo info = new FileInfo(_syncFilePath);
-            if (info != null && info.LastAccessTimeUtc > _lastAccessedTime)
+            if (info != null && info.LastWriteTimeUtc > _lastWriteTime)
             {
                 ProcessSyncFile();
-                _lastAccessedTime = info.LastAccessTimeUtc;
+                _lastWriteTime = info.LastAccessTimeUtc;
             }
         }
 

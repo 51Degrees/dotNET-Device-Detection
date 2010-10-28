@@ -12,10 +12,10 @@
     <form id="form1" runat="server">
     <div>
         <asp:Panel runat="server" HorizontalAlign="Center">
-            <asp:Label Runat="server" Alignment="Center" Font-Size="Large" Text="Mobile Device" />
+            <asp:Label Runat="server" Alignment="Center" Font-Size="Large" Font-Bold="true" Text="Mobile" />
         </asp:Panel>
         <asp:Panel runat="server" HorizontalAlign="Center">
-            <asp:Image Runat="server" Alignment="Center" ImageUrl="~/PDA.gif" AlternateText="Mobile Device" />
+            <asp:Image Runat="server" Alignment="Center" ImageUrl="~/Mobile.png" AlternateText="Mobile Device" />
         </asp:Panel>
         <asp:Panel runat="server" HorizontalAlign="Center">
             <asp:Label ID="LabelManufacturer" Runat="server" Alignment="Center"/>
