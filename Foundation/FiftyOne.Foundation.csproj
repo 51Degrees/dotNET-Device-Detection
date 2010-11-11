@@ -106,7 +106,6 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Web" />
-    <Reference Include="System.Web.Mobile" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -226,7 +225,6 @@
     <Compile Include="Mobile\Detection\Wurfl\Processor.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Licence.txt" />
     <Content Include="PDA.ico" />
   </ItemGroup>
   <ItemGroup>
