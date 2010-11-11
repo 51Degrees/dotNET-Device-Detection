@@ -21,7 +21,7 @@
  * 
  * ********************************************************************* */
 
-#region
+#region Usings
 
 using System;
 using System.Collections.Generic;
@@ -129,7 +129,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
             // The date and time the device was last active.
             private long _lastActiveDate;
-
+            
             #endregion
 
             #region Constructors
@@ -329,14 +329,21 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         #region Fields
 
-        // Stores the path for the devices cache file.
+        // Stores the path for the devices synchronisation file.
         private static readonly string _syncFilePath;
 
-        // The last time this process serviced the cache file.
+        // The next time this process should service the sync file.
+        private static DateTime _nextServiceTime = DateTime.MinValue;
 
         // The last time the sync file was modified.
         private static DateTime _lastWriteTime = DateTime.MinValue;
-        private static DateTime _nextServiceTime = DateTime.MinValue;
+        
+        /// <summary>
+        /// The number of minutes that should elapse before the record of 
+        /// previous access for the device should be removed from all
+        /// possible storage mechanisims.
+        /// </summary>
+        private static readonly int _redirectTimeout = 0;
 
         #endregion
 
@@ -346,6 +353,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             if (Manager.Redirect.Enabled)
             {
+                // Get the timeout used to remove devices.
+                _redirectTimeout = Manager.Redirect.Timeout;
+
                 // Get the request history file and set to null it
                 // it's empty.
                 _syncFilePath = Support.GetFilePath(Manager.Redirect.DevicesFile);
@@ -378,19 +388,67 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 // Check to see if new request data needs to be loaded.
                 RefreshSyncFile();
 
-                // Does the device exist in the cache?
-                bool isPresent = PreviousDevices.Devices.ContainsKey(record.Key);
+                long expiryDateTime;
+                if (PreviousDevices.Devices.TryGetValue(record.Key, out expiryDateTime))
+                {
+                    // If redirect timeout is zero then simply check to see if the
+                    // device is present in the list of previous devices.
+                    if (_redirectTimeout == 0)
+                        return true;
 
-                // Use a thread to add the new record to the cache.
-                // ThreadPool.QueueUserWorkItem(AddToCache, record);
-                AddToCache(record);
-
-                CheckIfServiceRequired();
-
-                // Return the result.
-                return isPresent;
+                    // Is it still valid?
+                    return (new DateTime(expiryDateTime).AddMinutes(_redirectTimeout)).Ticks >=
+                        record.LastActiveDate;
+                }
             }
             return false;
+        }
+
+        /// <summary>
+        /// Adds this device request to the previous devices list.
+        /// </summary>
+        /// <param name="request">HttpRequest of the device.</param>
+        internal static void Add(HttpRequest request)
+        {
+            if (_syncFilePath != null)
+            {
+                RequestRecord record = new RequestRecord(request);
+
+                // Get the latest data.
+                RefreshSyncFile();
+
+                // Add this most recent request to the sync file.
+                Add(record);
+
+                // Check if the sync file needs to be serviced.
+                CheckIfServiceRequired();
+            }
+        }
+
+        /// <summary>
+        /// Removes this device request from the previous devices list.
+        /// </summary>
+        /// <param name="request">HttpRequest of the device.</param>
+        internal static void Remove(HttpRequest request)
+        {
+            if (_syncFilePath != null)
+            {
+                RequestRecord record = new RequestRecord(request);
+
+                // Get the latest data.
+                RefreshSyncFile();
+
+                // Does the device exist in the previous devices list?
+                if (PreviousDevices.Devices.ContainsKey(record.Key))
+                {
+                    // Set the last active date to zero so that it will be 
+                    // removed when the sync file is serviced.
+                    record.LastActiveDate = 0;
+
+                    // Add this most recent request to the sync file.
+                    Add(record);
+                }
+            }
         }
 
         #endregion
@@ -416,7 +474,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// all the available requests.
         /// </summary>
         /// <param name="record">Record of the request to be added.</param>
-        private static void AddToCache(object record)
+        private static void Add(object record)
         {
             if (record is RequestRecord)
             {
@@ -436,18 +494,20 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             if (File.Exists(_syncFilePath))
             {
+                bool repeatProcess = false;
+
                 // Lock the list of devices we're about to update to ensure they can't be
                 // changed by subsequent requests to this callback.
                 lock (PreviousDevices.Devices)
                 {
-                    // Open the cache file for read access ensuring it's disposed 
+                    // Open the sync file for read access ensuring it's disposed 
                     // as soon as possible.
                     using (FileStream stream = OpenSyncFilePath(FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                     {
                         if (stream != null)
                         {
                             // Record the length of the file so that if it changes we can abandon this
-                            // update and rely on a subsequent call to this callback to complete 
+                            // update and rely on a subsequent call to this methd to complete 
                             // processing.
                             long length = stream.Length;
                             BinaryReader reader = new BinaryReader(stream);
@@ -473,15 +533,24 @@ namespace FiftyOne.Foundation.Mobile.Detection
                                 }
 
                                 // If the current record is the same as the last one we got last time
-                                // this call back occured then stop processing more records.
+                                // this method was called then stop processing more records.
                                 if (record.CompareTo(PreviousDevices.lastDevice) == 0)
                                     break;
 
-                                // Update the memory cache.
-                                if (PreviousDevices.Devices.ContainsKey(record.Key))
-                                    PreviousDevices.Devices[record.Key] = record.LastActiveDate;
+                                // Update the memory version.
+                                if (record.LastActiveDate == 0)
+                                {
+                                    // Remove from the device as the last active date is zero.
+                                    PreviousDevices.Devices.Remove(record.Key);
+                                }
                                 else
-                                    PreviousDevices.Devices.Add(record.Key, record.LastActiveDate);
+                                {
+                                    // Update or insert a new record.
+                                    if (PreviousDevices.Devices.ContainsKey(record.Key))
+                                        PreviousDevices.Devices[record.Key] = record.LastActiveDate;
+                                    else
+                                        PreviousDevices.Devices.Add(record.Key, record.LastActiveDate);
+                                }
 
                                 if (firstDevice == null)
                                     firstDevice = new RequestRecord(record);
@@ -491,11 +560,20 @@ namespace FiftyOne.Foundation.Mobile.Detection
                             // examined in future file changes.
                             if (length == stream.Length && firstDevice != null)
                                 PreviousDevices.lastDevice = firstDevice;
+
+                            // Signal to all the method again if the length of the file
+                            // has changed during processing.
+                            repeatProcess = length != stream.Length;
+
                             reader.Close();
                             stream.Close();
                         }
                     }
                 }
+                // If the file was altered during the processing then call the method
+                // again to capture any new records.
+                if (repeatProcess)
+                    ProcessSyncFile();
             }
         }
 
@@ -507,6 +585,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         private static FileStream OpenSyncFilePath(FileMode mode, FileAccess access, FileShare share)
         {
             FileStream stream = null;
+            Random rnd = null;
             if (_syncFilePath != null)
             {
                 DateTime timeout = DateTime.UtcNow.AddMilliseconds(TIMEOUT);
@@ -519,10 +598,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     {
                         EventLog.Info(ex);
                         stream = null;
-                        Thread.Sleep(new Random().Next(200));
+                        if (rnd == null)
+                            rnd = new Random(_lastWriteTime.GetHashCode());
+                        Thread.Sleep(rnd.Next(5));
                     }
                 }
-                while (stream == null && DateTime.UtcNow < timeout) ;
+                while (stream == null && DateTime.UtcNow < timeout);
                 if (stream == null)
                     throw new MobileException(
                         String.Format(
@@ -535,18 +616,23 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// If the last time the devices file was serviced to remove old entries
         /// is older than 1 minute start a thread to service the devices file and 
-        /// remove old entries.
+        /// remove old entries. If the redirect timeout is 0 indicating infinite
+        /// then nothing should be purged.
         /// </summary>
         private static void CheckIfServiceRequired()
         {
             if (_nextServiceTime < DateTime.UtcNow)
             {
-                long purgeDate =
-                    (PreviousDevices.lastDevice.LastActiveDate == DateTime.MinValue.Ticks
-                         ?
-                             DateTime.UtcNow.Ticks
-                         : PreviousDevices.lastDevice.LastActiveDate) -
-                    (TimeSpan.TicksPerMinute*Manager.Redirect.Timeout);
+                long purgeDate;
+
+                // If the last device has no active date use the current time for the purge date.
+                if (PreviousDevices.lastDevice.LastActiveDate == DateTime.MinValue.Ticks)
+                    purgeDate = DateTime.UtcNow.Ticks - (TimeSpan.TicksPerMinute*_redirectTimeout);
+                    // Otherwise use the last active devices active date for the purge date.
+                else
+                    purgeDate = PreviousDevices.lastDevice.LastActiveDate -
+                                (TimeSpan.TicksPerMinute*_redirectTimeout);
+
                 ThreadPool.QueueUserWorkItem(
                     ServiceRequestHistory,
                     purgeDate);
@@ -554,7 +640,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
 
         /// <summary>
-        /// Removes entries from the memory cache and request history file that
+        /// Removes entries from the memory version and sync file that
         /// are older than the purgeDate specified.
         /// </summary>
         /// <param name="purgeDate">
@@ -567,7 +653,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             {
                 if (stream != null)
                 {
-                    // Trim the cache file if it needs trimming and it has not
+                    // Trim the sync file if it needs trimming and it has not
                     // been changed since the service routine started.
                     long originalLength = stream.Length;
                     byte[] buffer = ReadRecords(stream, (long) purgeDate);
@@ -585,26 +671,32 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 }
             }
 
-            // Remove old records from the memory cache.
+            // Remove old records from the memory version.
             lock (PreviousDevices.Devices)
             {
                 int index = 0;
                 while (index < PreviousDevices.Devices.Count)
                 {
-                    if (PreviousDevices.Devices.Values[index] < (long) purgeDate)
+                    if (PreviousDevices.Devices.Values[index] <= (long)purgeDate)
                         PreviousDevices.Devices.RemoveAt(index);
                     else
                         index++;
                 }
             }
 
-            // Set the next time to service the cache file using a random offset to 
+            // Set the next time to service the sync file using a random offset to 
             // attempt to avoid conflicts with other processes.
             _nextServiceTime = DateTime.UtcNow.AddMinutes(1).AddSeconds(new Random().Next(30));
 
             GC.Collect();
         }
 
+        /// <summary>
+        /// Read the records that should be retained in the sync file.
+        /// </summary>
+        /// <param name="stream">Stream for the sync file.</param>
+        /// <param name="purgeDate">Date before which records should be removed.</param>
+        /// <returns></returns>
         private static byte[] ReadRecords(FileStream stream, long purgeDate)
         {
             byte[] buffer = null;
@@ -615,8 +707,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
             for (offset = 0; offset < stream.Length; offset += RECORD_LENGTH)
             {
                 record.Read(reader);
-                // Check to see if the current record is newer than the purgeDate.
-                if (record.LastActiveDate > purgeDate)
+                // Check to see if the current record is newer than the purgeDate
+                // and isn't equal to zero. Zero date indicates the record should be
+                // removed from the history.
+                if (record.LastActiveDate > purgeDate && record.LastActiveDate != 0)
                     break;
             }
 

@@ -22,7 +22,7 @@
  * 
  * ********************************************************************* */
 
-#region
+#region Usings
 
 using System;
 using FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers;

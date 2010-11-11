@@ -37,10 +37,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
         internal const bool ForceSingleProcessor = false;
 
         /// <summary>
-        /// When set to true indicates the request being processed is the 1st
-        /// one from that device. False if a subsequent request.
+        /// Set the UTC date and time that details of the device should be removed
+        /// from all storage mechanisims.
         /// </summary>
-        internal const string IsFirstRequest = "51dIsFirstRequest";
+        internal const string ExpiryTime = "51dExpiryTime";
 
         /// <summary>
         /// Array of transcoder HTTP headers that represent the useragent string of the

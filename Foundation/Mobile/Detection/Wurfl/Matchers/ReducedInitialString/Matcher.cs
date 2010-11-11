@@ -21,7 +21,7 @@
  * 
  * ********************************************************************* */
 
-#region
+#region Usings
 
 using FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers;
 

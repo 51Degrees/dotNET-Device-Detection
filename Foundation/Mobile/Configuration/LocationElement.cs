@@ -22,8 +22,11 @@
  * 
  * ********************************************************************* */
 
+#region Usings
+
 using System.Configuration;
-using System.Web;
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Configuration
 {
@@ -47,14 +50,15 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         }
 
         /// <summary>
-        /// Gets the url of the webpage
+        /// A regular expression used to find macthing elements of the 
+        /// original URL associated with the request.
         /// </summary>
-        [ConfigurationProperty("replaceExpression", IsRequired = false)]
-        public string ReplaceExpression
+        [ConfigurationProperty("matchExpression", IsRequired = false)]
+        public string MatchExpression
         {
             get
             {
-                return (string)this["replaceExpression"];
+                return (string)this["matchExpression"];
             }
         }
 
@@ -71,11 +75,17 @@ namespace FiftyOne.Foundation.Mobile.Configuration
 
         #region ConfigurationElementCollection Members
 
+        /// <summary>
+        /// Creates a new instance of <see cref="FilterElement"/>.
+        /// </summary>
         protected override ConfigurationElement CreateNewElement()
         {
             return new FilterElement();
         }
 
+        /// <summary>
+        /// Add element to the base collection.
+        /// </summary>
         protected override object GetElementKey(ConfigurationElement element)
         {
             return ((FilterElement)element).Property;

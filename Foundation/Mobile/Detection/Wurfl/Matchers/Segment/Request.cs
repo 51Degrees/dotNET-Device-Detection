@@ -21,7 +21,7 @@
  * 
  * ********************************************************************* */
 
-#region
+#region Usings
 
 using System.Threading;
 using FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers;

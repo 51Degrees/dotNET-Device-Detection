@@ -25,7 +25,7 @@
 using System.Linq;
 #endif
 
-#region
+#region Usings
 
 using System;
 using System.Collections;
@@ -37,7 +37,6 @@ using System.Web;
 using System.Web.Configuration;
 using System.Web.Security;
 using System.Web.UI;
-using System.Web.UI.MobileControls;
 using FiftyOne.Foundation.Mobile.Configuration;
 
 #endregion
@@ -93,7 +92,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
             /// <summary>
             /// Returns the value for the property requested.
             /// </summary>
-            /// <param name="property"></param>
+            /// <param name="property">The property name to be returned.</param>
+            /// <param name="context">The context associated with the request.</param>
             /// <returns></returns>
             private static string GetPropertyValue(HttpContext context, string property)
             {
@@ -124,23 +124,23 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         }
 
-        private class HomePage
+        private class Location
         {
             #region Fields
             
             internal readonly string _url;
             internal readonly List<Filter> _filters = new List<Filter>();
-            internal readonly Regex _replaceRegex;
+            internal readonly Regex _matchRegex;
 
             #endregion
 
             #region Constructors
 
-            internal HomePage(string url, string expression)
+            internal Location(string url, string expression)
             {
                 _url = url;
                 if (String.IsNullOrEmpty(expression) == false)
-                    _replaceRegex = new Regex(expression, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                    _matchRegex = new Regex(expression, RegexOptions.Compiled | RegexOptions.IgnoreCase);
             }
 
             #endregion
@@ -152,14 +152,29 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 get { return _filters; }   
             }
 
-            internal string Url
+            #endregion
+
+            #region Methods
+
+            internal string GetUrl(HttpContext context)
             {
-                get
+                if (_matchRegex != null)
                 {
-                    if (_replaceRegex != null)
-                        return _replaceRegex.Replace(HttpContext.Current.Request.Url.ToString(), _url);
-                    return _url;
+                    // A match regular expression has been found that should be used to
+                    // extract all the items of interest from the original URL and place
+                    // them and the positions contains in {} brackets in the URL property
+                    // of the location.
+                    MatchCollection matches = _matchRegex.Matches(GetOriginalUrl(context));
+                    if (matches.Count > 0)
+                    {
+                        string[] values = new string[matches.Count];
+                        for (int i = 0; i < matches.Count; i++)
+                            values[i] = matches[i].Value;
+                        return String.Format(_url, values);
+                    }
                 }
+                // Return the URL unformatted.
+                return _url;
             }
 
             internal bool GetIsMatch(HttpContext context)
@@ -197,27 +212,56 @@ namespace FiftyOne.Foundation.Mobile.Detection
                                                          "System.Web.UI.MobileControls.MobilePage"
                                                      };
 
+        /// <summary>
+        /// The key in the Items collection of the requesting context used to
+        /// store the Url originally requested by the browser.
+        /// </summary>
+        private const string ORIGINAL_URL_KEY = "51D_Original_Url";
+
+        /// <summary>
+        /// The key in the Items collection of the requesting context used to
+        /// store the home page Url for a possible redirection.
+        /// </summary>
+        private const string LOCATION_URL_KEY = "51D_Location_Url";
+
         #endregion
 
         #region Fields
 
         /// <summary>
+        /// Used to lock the initialisation of static fields.
+        /// </summary>
+        private static readonly object _lock = new object();
+
+        /// <summary>
+        /// Indicates if static initialisation has been completed.
+        /// </summary>
+        private static bool _initialised;
+
+        /// <summary>
         /// Collection of client targets used by the application with the key
         /// field representing the alias and the value the useragent.
         /// </summary>
-        private SortedList<string, string> _clientTargets;
+        private static SortedList<string, string> _clientTargets;
 
         /// <summary>
         /// If set to true only the first eligable request received by the web
         /// site will be redirected to the mobile landing page contained in
         /// _mobileRedirectUrl.
         /// </summary>
-        private bool _firstRequestOnly = true;
+        private static bool _firstRequestOnly = true;
+
+        /// <summary>
+        /// The number of minutes that should elapse before the record of 
+        /// previous access for the device should be removed from all
+        /// possible storage mechanisims.
+        /// </summary>
+        private static int _redirectTimeout = 0;
 
         /// <summary>
         /// The login url for forms authentication.
         /// </summary>
-        private string _formsLoginUrl;
+        private static string _formsLoginUrl;
 
         /// <summary>
         /// A collection of homepages that could be used for redirection. 
@@ -225,14 +269,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Initialised from the <c>web.config</c> file when the module 
         /// is created.
         /// </summary>
-        private List<HomePage> _homePages = new List<HomePage>();
+        private static readonly List<Location> _locations = new List<Location>();
 
         /// <summary>
         /// The URL to use to redirect a mobile device accessing
         /// a non mobile web page to. Initialised from the <c>web.config</c> file
         /// when the module is created.
         /// </summary>
-        private string _mobileHomePageUrl;
+        private static string _mobileHomePageUrl;
 
         /// <summary>
         /// A regular expression that when applied to the current request Path
@@ -244,13 +288,18 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// System.Web.UI.MobileControls.MobilePage will automatically be treated 
         /// as a mobile page irrespective of this attribute. (Optional)
         /// </summary>
-        private Regex _mobilePageRegex;
+        private static Regex _mobilePageRegex;
 
         /// <summary>
         /// If set to true the original URL of the request is added to the redirected
         /// querystring in a paramter called origUrl.
         /// </summary>
-        private bool _originalUrlAsQueryString;
+        private static bool _originalUrlAsQueryString;
+
+        /// <summary>
+        /// If set to true redirection is enabled.
+        /// </summary>
+        private static bool _redirectEnabled;
 
         #endregion
 
@@ -263,44 +312,16 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="application">HttpApplication object for the web application.</param>
         public void Init(HttpApplication application)
         {
-            EventLog.Debug("Initialising Detector Module");
-
-            // Fetch the redirect url, first time redirect indicator and wire up the
-            // events if a url has been provided.
-            if (Manager.Redirect != null && Manager.Redirect.Enabled)
-            {
-                _mobileHomePageUrl = Manager.Redirect.MobileHomePageUrl;
-                _firstRequestOnly = Manager.Redirect.FirstRequestOnly;
-                if (String.IsNullOrEmpty(Manager.Redirect.MobilePagesRegex) == false)
-                    _mobilePageRegex = new Regex(Manager.Redirect.MobilePagesRegex,
-                                                 RegexOptions.Compiled | RegexOptions.IgnoreCase);
-                _formsLoginUrl = FormsAuthentication.LoginUrl;
-                _originalUrlAsQueryString = Manager.Redirect.OriginalUrlAsQueryString;
-
-                foreach (LocationElement homePage in Manager.Redirect.Locations)
-                {
-                    if (homePage.Enabled)
-                    {
-                        HomePage current = new HomePage(homePage.Url, homePage.ReplaceExpression);
-                        foreach (FilterElement filter in homePage)
-                        {
-                            if (filter.Enabled)
-                                current.Filters.Add(new Filter(filter.Property, filter.MatchExpression));
-                        }
-                        _homePages.Add(current);
-                    }
-                }
-            }
-
-            // Get a list of the client target names.
-            _clientTargets = GetClientTargets();
+            // Initialise the static fields if required.
+            StaticFieldInit();
 
             // Intercept the beginning of the request to override the capabilities.
             application.BeginRequest += OnBeginRequest;
 
             // Intercept request event after the hander and the state have been assigned
-            // to redirect the page.
-            application.PostAcquireRequestState += OnPostAcquireRequestState;
+            // to redirect the page if redirect is enabled.
+            if (_redirectEnabled)
+                application.PostAcquireRequestState += OnPostAcquireRequestState;
 
             // Check for a MobilePage handler being used.
             application.PreRequestHandlerExecute += SetPreferredRenderingType;
@@ -309,6 +330,58 @@ namespace FiftyOne.Foundation.Mobile.Detection
             // and override the requesting device information.
             if (_clientTargets != null)
                 application.PreRequestHandlerExecute += SetPagePreIntClientTargets;
+        }
+
+        /// <summary>
+        /// Initialises the static fields.
+        /// </summary>
+        private static void StaticFieldInit()
+        {
+            if (_initialised == false)
+            {
+                lock (_lock)
+                {
+                    if (_initialised == false)
+                    {
+                        EventLog.Debug("Initialising Detector Module");
+
+                        // Fetch the redirect url, first time redirect indicator and wire up the
+                        // events if a url has been provided.
+                        if (Manager.Redirect != null && Manager.Redirect.Enabled)
+                        {
+                            _redirectEnabled = true;
+                            _mobileHomePageUrl = Manager.Redirect.MobileHomePageUrl;
+                            _firstRequestOnly = Manager.Redirect.FirstRequestOnly;
+                            _redirectTimeout = Manager.Redirect.Timeout;
+                            if (String.IsNullOrEmpty(Manager.Redirect.MobilePagesRegex) == false)
+                                _mobilePageRegex = new Regex(Manager.Redirect.MobilePagesRegex,
+                                                             RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                            _formsLoginUrl = FormsAuthentication.LoginUrl;
+                            _originalUrlAsQueryString = Manager.Redirect.OriginalUrlAsQueryString;
+
+                            foreach (LocationElement homePage in Manager.Redirect.Locations)
+                            {
+                                if (homePage.Enabled)
+                                {
+                                    Location current = new Location(homePage.Url, homePage.MatchExpression);
+                                    foreach (FilterElement filter in homePage)
+                                    {
+                                        if (filter.Enabled)
+                                            current.Filters.Add(new Filter(filter.Property, filter.MatchExpression));
+                                    }
+                                    _locations.Add(current);
+                                }
+                            }
+                        }
+
+                        // Get a list of the client target names.
+                        _clientTargets = GetClientTargets();
+
+                        // Indicate initialisation is complete.
+                        _initialised = true;
+                    }
+                }
+            }
         }
 
         #endregion
@@ -330,7 +403,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 // needs to change as the legacy mobile controls do not work with html4 specified.
                 // If these lines are removed a "No mobile controls device configuration was registered 
                 // for the requesting device" exception is likely to occur.
-                if (context.Handler is MobilePage &&
+                if (context.Handler != null &&
+                    IsMobileType(context.Handler.GetType()) &&
                     "html4" == context.Request.Browser.Capabilities["preferredRenderingType"] as string)
                 {
                     context.Request.Browser.Capabilities["preferredRenderingType"] = "html32";
@@ -390,6 +464,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         // Create new exception with the additional information and record to the log file.
                         EventLog.Fatal(new MobileException(builder.ToString(), ex));
                     }
+
+                    // If redirect is enabled store the source URL incase a redirect
+                    // is performed by another module.
+                    if (_redirectEnabled)
+                        context.Items[ORIGINAL_URL_KEY] = context.Request.Url.ToString();
                 }
             }
         }
@@ -413,7 +492,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     // Check to see if the request should be redirected.
                     if (ShouldRequestRedirect(context))
                     {
-                        string newUrl = GetHomePageUrl(context);
+                        string newUrl = GetLocationUrl(context);
                         if (_originalUrlAsQueryString)
                             // Use an encoded version of the requesting Url
                             // as the query string.
@@ -504,7 +583,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             if (overrideCapabilities == null)
                 return currentCapabilities;
 
-            var capabilities = new System.Web.Mobile.MobileCapabilities();
+            var capabilities = new System.Web.HttpBrowserCapabilities();
             capabilities.Capabilities = new Hashtable();
 
             // Copy the keys from both the original and new capabilities.
@@ -556,23 +635,52 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
 
         /// <summary>
-        /// Evaluates the home page that should be used when redirecting 
+        /// Returns the Url stored in the context when the request first began before 
+        /// other modules may have changed it. If not available returns the Url
+        /// using the current request value.
+        /// </summary>
+        /// <param name="context">The Context of the request.</param>
+        /// <returns>The original Url of the request.</returns>
+        private static string GetOriginalUrl(HttpContext context)
+        {
+            string originalUrl = context.Items[ORIGINAL_URL_KEY] as string;
+            if (String.IsNullOrEmpty(originalUrl) == false)
+                return originalUrl;
+            return context.Request.Url.ToString();
+        }
+
+        /// <summary>
+        /// Evaluates the location that should be used when redirecting 
         /// the requesting context. If the locations collection does
-        /// not provide a home page then the mobile home page url will
+        /// not provide a location then the mobile home page url will
         /// be used only if the device is a mobile.
         /// </summary>
         /// <param name="context">Context of the request.</param>
         /// <returns>The url to redirect the request to, if any.</returns>
-        private string GetHomePageUrl(HttpContext context)
+        private static string GetLocationUrl(HttpContext context)
         {
-            foreach(HomePage homePage in _homePages)
+            string locationUrl = context.Items[LOCATION_URL_KEY] as string;
+            if (locationUrl == null)
             {
-                if (homePage.GetIsMatch(context))
-                    return homePage.Url;
+                // Use the mobileHomePageUrl setting as the default if this is a
+                // mobile device.
+                if (context.Request.Browser.IsMobileDevice)
+                    locationUrl = _mobileHomePageUrl;
+
+                // Try the locations collection first.
+                foreach (Location location in _locations)
+                {
+                    if (location.GetIsMatch(context))
+                    {
+                        locationUrl = location.GetUrl(context);
+                        break;
+                    }
+                }
+                
+                // Store so that the value does not need to be calculated next time.
+                context.Items[LOCATION_URL_KEY] = locationUrl;
             }
-            if (context.Request.Browser.IsMobileDevice)
-                return _mobileHomePageUrl;
-            return null;
+            return locationUrl;
         }
 
         /// <summary>
@@ -580,13 +688,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="context">The HttpContext of the request.</param>
         /// <returns>True if the request should be redirected.</returns>
-        private bool ShouldRequestRedirect(HttpContext context)
+        private static bool ShouldRequestRedirect(HttpContext context)
         {
             return context.Handler != null &&
-                   String.IsNullOrEmpty(GetHomePageUrl(context)) == false &&
+                   String.IsNullOrEmpty(GetLocationUrl(context)) == false &&
                    IsPage(context) &&
                    IsMobilePage(context) == false &&
-                   IsFirstTime(context, _firstRequestOnly) &&
+                   IsFirstTime(context) &&
                    IsRestrictedPageForRedirect(context) == false;
         }
 
@@ -598,17 +706,20 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="context">The context of the request.</param>
         /// <returns>True if the page is restricted from being redirected.</returns>
-        private bool IsRestrictedPageForRedirect(HttpContext context)
+        private static bool IsRestrictedPageForRedirect(HttpContext context)
         {
             Page page = context.Handler as Page;
 
+            string originalUrl = GetOriginalUrl(context);
             string currentPage = page.ResolveUrl(context.Request.AppRelativeCurrentExecutionFilePath);
             
             bool value =
                 context.Response.IsRequestBeingRedirected ||
                 String.IsNullOrEmpty(context.Response.RedirectLocation) == false ||
-                page.ResolveUrl(GetHomePageUrl(context)) == currentPage ||
-                page.ResolveUrl(_formsLoginUrl) == currentPage;
+                page.ResolveUrl(GetLocationUrl(context)) == currentPage ||
+                page.ResolveUrl(_formsLoginUrl) == currentPage ||
+                page.ResolveUrl(GetLocationUrl(context)) == originalUrl ||
+                page.ResolveUrl(_formsLoginUrl) == originalUrl; ;
             
             EventLog.Debug(String.Format("Request '{0}' with handler type '{1}' is {2} restricted page for redirect.", 
                 context.Request.Url,
@@ -618,68 +729,160 @@ namespace FiftyOne.Foundation.Mobile.Detection
             return value;
         }
 
-        internal static bool IsFirstTime(HttpContext context, bool firstRequestOnly)
+        /// <summary>
+        /// Determines if this is the first request received from the device.
+        /// </summary>
+        /// <param name="context">Context of the request.</param>
+        /// <returns>True if this request is the first from the device. Otherwise false.</returns>
+        public static bool IsFirstTime(HttpContext context)
         {
             // If the parameter indicating only the first request should be redirect
             // is false then return true as the implication is all requests should
             // be redirected.
-            if (firstRequestOnly == false)
+            if (_firstRequestOnly == false)
                 return true;
 
             // Check to see if the Referrer URL contains the same host name
             // as the current page request. If there is a match this request has
             // come from another web page on the same host and is not the 1st request.
-            if (context.Request.UrlReferrer != null &&
+            // The logic is only applied if an infinite timeout value is provided
+            // because using this method there is no way of knowing when the referrer
+            // url details were populated.
+            if (_redirectTimeout == 0 &&
+                context.Request.UrlReferrer != null &&
                 context.Request.UrlReferrer.Host == context.Request.Url.Host)
-                return false;
-
-            // Check to see if we have a session parameter indicating a request has 
-            // already been processed.
-            if (context.Session != null &&
-                context.Session[Constants.IsFirstRequest] != null)
             {
-                // Update the parameter to indicate this is nolonger
-                // the first request.
-                context.Session[Constants.IsFirstRequest] = false;
-                // Remove our own cookie from the response as it's not 
-                // needed because the session is working.
-                if (context.Request.Cookies[Constants.AlreadyAccessedCookieName] != null)
-                    context.Response.Cookies.Remove(Constants.AlreadyAccessedCookieName);
+                // In some situations the same web application may be split across
+                // different host names. Record the first time details using other
+                // methods to ensure this method returns the correct value when
+                // used with subsequent requests from the same device.
+                RecordFirstTime(context);
                 return false;
             }
 
-            // Check to see if our cookie is present from a previous request.
-            if (context.Request.Cookies[Constants.AlreadyAccessedCookieName] != null)
+            // If the session is available and it's timeout is greater then or equal to
+            // the timeout to be used for redirection check to see if we have a 
+            // session parameter indicating an expiry time for the current device. 
+            // If the expiry time has not elpased then reset it and return a value 
+            // indicating this is not the first time the device has been seen.
+            if (_redirectTimeout != 0 &&
+                context.Session != null &&
+                context.Session.Timeout >= _redirectTimeout &&
+                context.Session[Constants.ExpiryTime] != null &&
+                (long)context.Session[Constants.ExpiryTime] >= DateTime.UtcNow.Ticks)
+            {
+                // Update the session key to indicate a new expiry time.
+                SetSession(context);
+
+                // Remove our own cookie from the response as it's not 
+                // needed because the session is working.
+                if (context.Request.Cookies[Constants.AlreadyAccessedCookieName] != null)
+                    WipeResponseCookie(context, context.Request.Cookies[Constants.AlreadyAccessedCookieName]);
+
+                // Remove from the devices cache file as session can be used.
+                RequestHistory.Remove(context.Request);
+
                 return false;
+            }
+
+            // Check to see if our cookie is present from a previous request and that 
+            // the expiry time is not passed. If it is present ensure it's expiry time
+            // is updated in the response.
+            HttpCookie alreadyAccessed = context.Request.Cookies[Constants.AlreadyAccessedCookieName];
+            if (alreadyAccessed != null &&
+                long.Parse(alreadyAccessed.Value) >= DateTime.UtcNow.Ticks)
+            {
+                SetResponseCookie(context, alreadyAccessed);
+                
+                // Remove from the devices cache file as cookie can be used.
+                RequestHistory.Remove(context.Request);
+
+                return false;
+            }
 
             // Check to see if the requested IP address and HTTP headers hashcode is
             // on record as having been seen before.
             if (RequestHistory.IsPresent(context.Request))
-                return false;
-
-            // The 4 checks have all failed so we're now certain this is the 1st request
-            // to the web site. Record this information using the session if available
-            // a cookie and the DevicesFile.
-            if (context.Session != null)
-                // Add a parameter to the session indicating this is the first
-                // request. It will be updated later if available during subsequent
-                // requests.
-                context.Session[Constants.IsFirstRequest] = true;
-
-            // Add a cookie to the response setting the expiry time to the session timeout
-            // or if not available the redirection timeout.
-            // Modified to check for existance of cookie to avoid recreating.
-            if (new List<string>(context.Response.Cookies.AllKeys).Contains(Constants.AlreadyAccessedCookieName) ==
-                false)
             {
-                HttpCookie alreadyAccessed = new HttpCookie(Constants.AlreadyAccessedCookieName);
-                if (context.Session != null)
-                    alreadyAccessed.Expires = DateTime.UtcNow.AddMinutes(context.Session.Timeout);
-                else if (Manager.Redirect != null)
-                    alreadyAccessed.Expires = DateTime.UtcNow.AddMinutes(Manager.Redirect.Timeout);
-                context.Response.Cookies.Add(alreadyAccessed);
+                // Update the cache and other methods in case they can
+                // be used in the future.
+                RecordFirstTime(context);
+                return false;
             }
+
+            // The url referrer, session and cookie checks have all failed.
+            // Record the device information using the session if available, a cookie and the
+            // request history cache file.
+            RecordFirstTime(context);
+
             return true;
+        }
+
+        /// <summary>
+        /// Returns a long value representing the expiry date time to be used
+        /// for the current request.
+        /// </summary>
+        /// <returns></returns>
+        private static long GetExpiryDateTime()
+        {
+            if (_redirectTimeout == 0)
+                return DateTime.MaxValue.Ticks;
+            return DateTime.UtcNow.AddMinutes(_redirectTimeout).Ticks;
+        }
+
+        /// <summary>
+        /// Sets the session key to the expiry time for the current device.
+        /// </summary>
+        /// <param name="context"></param>
+        private static void SetSession(HttpContext context)
+        {
+            context.Session[Constants.ExpiryTime] = GetExpiryDateTime();
+        }
+
+        /// <summary>
+        /// Removes the cookie from the browser by setting it's expiry time to a date
+        /// in the past.
+        /// </summary>
+        /// <param name="context">The context of the request.</param>
+        /// <param name="alreadyAccessed">The already accessed cookie.</param>
+        private static void WipeResponseCookie(HttpContext context, HttpCookie alreadyAccessed)
+        {
+            alreadyAccessed.Expires = DateTime.MinValue;
+            context.Response.Cookies.Add(alreadyAccessed);
+        }
+
+        /// <summary>
+        /// Sets the response cookie expiry time.
+        /// </summary>
+        /// <param name="context">The context of the request.</param>
+        /// <param name="alreadyAccessed">The already accessed cookie.</param>
+        private static void SetResponseCookie(HttpContext context, HttpCookie alreadyAccessed)
+        {
+            alreadyAccessed.Expires = DateTime.MaxValue;
+            alreadyAccessed.Value = GetExpiryDateTime().ToString();
+            context.Response.Cookies.Add(alreadyAccessed);
+        }
+
+        /// <summary>
+        /// Records in the session (if present) and in a cookie
+        /// the requesting devices first request. This ensures subsequent calls
+        /// to IsFirstTime return the correct value.
+        /// </summary>
+        /// <param name="context">The context of the request.</param>
+        private static void RecordFirstTime(HttpContext context)
+        {
+            // Add a parameter to the session if available indicating the time that 
+            // the device date should be remvoed from the session.
+            if (context.Session != null)
+                SetSession(context);
+
+            // Add a cookie to the response setting the expiry time to the 
+            // redirection timeout.
+            // Modified to check for existance of cookie to avoid recreating.
+            SetResponseCookie(context, new HttpCookie(Constants.AlreadyAccessedCookieName));
+
+            // Add to the request history cache.
+            RequestHistory.Add(context.Request);
         }
 
         /// <summary>
@@ -755,7 +958,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="request">The HttpRequest to be checked.</param>
         /// <returns>True if this request should be considered associated with
         /// a page designed for mobile.</returns>
-        private bool IsMobileRegexPage(HttpRequest request)
+        private static bool IsMobileRegexPage(HttpRequest request)
         {
             if (_mobilePageRegex != null)
                 return _mobilePageRegex.IsMatch(request.AppRelativeCurrentExecutionFilePath) ||
@@ -767,7 +970,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Returns true if the current handler relates to a mobile web page.
         /// </summary>
         /// <param name="context">The context associated with the Http request.</param>
-        private bool IsMobilePage(HttpContext context)
+        public static bool IsMobilePage(HttpContext context)
         {
             return IsMobileType(context.Handler.GetType()) ||
                    IsMobileRegexPage(context.Request);

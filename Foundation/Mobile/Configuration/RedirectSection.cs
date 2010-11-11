@@ -22,7 +22,7 @@
  * 
  * ********************************************************************* */
 
-#region
+#region Usings
 
 using System.Configuration;
 

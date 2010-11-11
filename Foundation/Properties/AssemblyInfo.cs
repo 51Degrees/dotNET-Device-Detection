@@ -1,10 +1,8 @@
-﻿#region
+#region Usings
 
 using System.Reflection;
 using System.Resources;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Security;
 
 #endregion
 
@@ -39,6 +37,6 @@ using System.Security;
 //      Revision
 //
 
-[assembly: AssemblyVersion("0.1.11.4")]
-[assembly: AssemblyFileVersion("0.1.11.4")]
+[assembly: AssemblyVersion("0.1.11.6")]
+[assembly: AssemblyFileVersion("0.1.11.6")]
 [assembly: NeutralResourcesLanguage("en-GB")]

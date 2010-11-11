@@ -21,7 +21,7 @@
  * 
  * ********************************************************************* */
 
-#region
+#region Usings
 
 using FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Segment;
 using Results=FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Results;

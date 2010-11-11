@@ -4,7 +4,7 @@ using System.Web.Services;
 namespace Detector
 {
     ///
-    /// Example web server for returning WURFL capabilities.
+    /// Example web server for returning WURFL capabilities. Session is disabled.
     ///
 
     [WebService(Namespace = "http://mobiledevice.51degrees.mobi/")]
@@ -12,7 +12,7 @@ namespace Detector
     [System.ComponentModel.ToolboxItem(false)]
     public class MobileDevice : System.Web.Services.WebService
     {
-        [WebMethod]
+        [WebMethod(false)]
         public string GetCapability(string capability)
         {
             // Get the sorted list of wurfl capabilities.

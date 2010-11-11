@@ -21,13 +21,12 @@
  * 
  * ********************************************************************* */
 
-#region
+#region Usings
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using FiftyOne.Foundation.Image;
@@ -492,11 +491,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             if (bool.TryParse(Strings.Get(device.GetCapability(HtmlWiW3Xhtmlbasic)), out value) && value)
                 return "xhtml-basic";
             if (bool.TryParse(Strings.Get(device.GetCapability(HtmlWiImodeCompactGeneric)), out value) && value)
-                return System.Web.Mobile.MobileCapabilities.PreferredRenderingTypeChtml10;
+                return "chtml10";
             if (bool.TryParse(Strings.Get(device.GetCapability(HtmlWeb40)), out value) && value)
-                return System.Web.Mobile.MobileCapabilities.PreferredRenderingTypeHtml32;
+                return "html32";
             if (bool.TryParse(Strings.Get(device.GetCapability(HtmlWeb32)), out value) && value)
-                return System.Web.Mobile.MobileCapabilities.PreferredRenderingTypeHtml32;
+                return "html32";
                 return null;
         }
 
@@ -505,7 +504,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             switch (Strings.Get(device.GetCapability(PreferredMarkup)))
             {
                 case "html_web_3_2":
-                    return System.Web.Mobile.MobileCapabilities.PreferredRenderingTypeHtml32;
+                    return "html32";
                 case "html_web_4_0":
                     return "html4";
                 case "html_wi_oma_xhtmlmp_1_0":
@@ -521,7 +520,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                 case "html_wi_imode_html_6":
                 case "html_wi_imode_htmlx_1_1":
                 case "html_wi_imode_compact_generic":
-                    return System.Web.Mobile.MobileCapabilities.PreferredRenderingTypeChtml10;
+                    return "chtml10";
                 default:
                     return GetFirstRenderingTypeFromWURFL(device);
             }

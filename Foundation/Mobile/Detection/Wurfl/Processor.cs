@@ -26,7 +26,7 @@
 using System.Linq;
 #endif
 
-#region
+#region Usings
 
 using System;
 using System.Collections.Specialized;
