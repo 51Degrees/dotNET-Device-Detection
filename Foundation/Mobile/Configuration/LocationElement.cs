@@ -18,7 +18,7 @@
  * 
  * Contributor(s):
  *     James Rosewell <james@51degrees.mobi>
- *     Thomas Holmes <thomasholmes_5@hotmail.com>
+ *     Thomas Holmes <tom@51degrees.mobi>
  * 
  * ********************************************************************* */
 
@@ -36,6 +36,18 @@ namespace FiftyOne.Foundation.Mobile.Configuration
     public sealed class LocationElement : ConfigurationElementCollection
     {
         # region Properties
+
+        /// <summary>
+        /// Sets the name of redirection
+        /// </summary>
+        [ConfigurationProperty("name", IsRequired = true, IsKey = true)]
+        public string Name
+        {
+            get
+            {
+                return (string) this["name"];
+            }
+        }
 
         /// <summary>
         /// Gets the url of the webpage

@@ -127,7 +127,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
         private class Location
         {
             #region Fields
-            
+
+            internal readonly string _name;
             internal readonly string _url;
             internal readonly List<Filter> _filters = new List<Filter>();
             internal readonly Regex _matchRegex;
@@ -136,8 +137,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
             #region Constructors
 
-            internal Location(string url, string expression)
+            internal Location(string name, string url, string expression)
             {
+                _name = name;
                 _url = url;
                 if (String.IsNullOrEmpty(expression) == false)
                     _matchRegex = new Regex(expression, RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -155,6 +157,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             #endregion
 
             #region Methods
+
 
             internal string GetUrl(HttpContext context)
             {
@@ -186,6 +189,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 }
                 return true;
             }
+
+            
 
             #endregion
         }
@@ -363,7 +368,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                             {
                                 if (homePage.Enabled)
                                 {
-                                    Location current = new Location(homePage.Url, homePage.MatchExpression);
+                                    Location current = new Location(homePage.Name, homePage.Url, homePage.MatchExpression);
                                     foreach (FilterElement filter in homePage)
                                     {
                                         if (filter.Enabled)
@@ -500,7 +505,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
                                                    newUrl,
                                                    HttpUtility.UrlEncode(context.Request.Url.ToString()));
 
-                        EventLog.Debug(String.Format("Redirecting '{0}' to '{1}'.", context.Request.Url, newUrl));
+                        if (EventLog.IsDebug)
+                            EventLog.Debug(String.Format("Redirecting device with useragent '{0}' from url '{1}' to '{2}' due to '{3}'.",
+                                              context.Request.UserAgent,
+                                              context.Items[ORIGINAL_URL_KEY],
+                                              newUrl,
+                                              GetLocationName(context)));
+
                         context.Response.Redirect(newUrl, true);
                     }
                 }
@@ -668,19 +679,43 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     locationUrl = _mobileHomePageUrl;
 
                 // Try the locations collection first.
-                foreach (Location location in _locations)
-                {
-                    if (location.GetIsMatch(context))
-                    {
-                        locationUrl = location.GetUrl(context);
-                        break;
-                    }
-                }
+                Location current = GetLocation(context);
+                if (current != null)
+                    locationUrl = current._url;
                 
                 // Store so that the value does not need to be calculated next time.
                 context.Items[LOCATION_URL_KEY] = locationUrl;
             }
             return locationUrl;
+        }
+
+        /// <summary>
+        /// Gets the name of the currently active location if one is being used. Only
+        /// used for debugging.
+        /// </summary>
+        /// <param name="context">Context of the request.</param>
+        /// <returns>The name of the location.</returns>
+        private static string GetLocationName(HttpContext context)
+        {
+            Location current = GetLocation(context);
+            if (current != null)
+                return current._name;
+            return "default";
+        }
+
+        /// <summary>
+        /// Returns the location object to be used for the request if any.
+        /// </summary>
+        /// <param name="context">Context of the request.</param>
+        /// <returns>Null if no location available, or the location object.</returns>
+        private static Location GetLocation(HttpContext context)
+        {
+            foreach (Location location in _locations)
+            {
+                if (location.GetIsMatch(context))
+                    return location;
+            }
+            return null;
         }
 
         /// <summary>

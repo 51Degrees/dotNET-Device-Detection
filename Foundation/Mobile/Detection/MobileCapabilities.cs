@@ -123,10 +123,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
             {
                 capabilities[key] = value;
             }
-
-#if DEBUG
-            EventLog.Debug(String.Format("Setting '{0}' to '{1}'.", key, value != null ? value.ToString() : "null"));
-#endif
         }
 
         /// <summary>

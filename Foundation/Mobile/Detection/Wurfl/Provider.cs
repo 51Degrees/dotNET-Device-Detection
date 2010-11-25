@@ -144,7 +144,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                 // Log the number of devices assigned to each handler if debugging is enabled.
 #if DEBUG
                 // Display the handler results.
-                if (newInstance._handlers != null && EventLog.IsDebug)
+                //tomquery
+                /*if (newInstance._handlers != null && EventLog.IsDebug)
                 {
                     for (int i = 0; i < newInstance._handlers.Length; i++)
                     {
@@ -152,7 +153,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                                                      newInstance._handlers[i].GetType().Name,
                                                      newInstance._handlers[i].UserAgents.Count));
                     }
-                }
+                }*/
 #endif
 
                 // Store the single instance and change the status to show the
@@ -310,10 +311,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             byte highestConfidence = 0;
             List<Handler> handlers = new List<Handler>();
 
-#if DEBUG
-            EventLog.Debug(String.Format("Getting handlers for DeviceId '{0}'.", device.DeviceId));
-#endif
-
 #if VER4
             foreach (Handler handler in _handlers.Where(handler => handler.CanHandle(device)))
             {
@@ -338,9 +335,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         {
             byte highestConfidence = 0;
             List<Handler> handlers = new List<Handler>();
-
-            if (EventLog.IsDebug)
-                EventLog.Debug(String.Format("Getting handlers for useragent '{0}'.", userAgent));
 
 #if VER4
             foreach (Handler handler in _handlers.Where(handler => handler.CanHandle(userAgent)))
@@ -369,9 +363,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         {
             byte highestConfidence = 0;
             List<Handler> handlers = new List<Handler>();
-
-            if (EventLog.IsDebug)
-                EventLog.Debug(String.Format("Getting handlers for HttpRequest '{0}'.", GetUserAgent(request)));
 
 #if VER4
             foreach (Handler handler in _handlers.Where(handler => handler.CanHandle(request)))
@@ -611,8 +602,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             DeviceInfo device = null;
             Results results = new Results();
 
-            if (EventLog.IsDebug)
-                EventLog.Debug(String.Format("Getting device info for useragent '{0}'.", userAgent));
 
 #if VER4
             foreach (Results temp in handlers.Select(t => t.Match(userAgent)).Where(temp => temp != null))
@@ -659,9 +648,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         {
             DeviceInfo device = null;
             Results results = new Results();
-
-            if (EventLog.IsDebug)
-                EventLog.Debug(String.Format("Getting device info for HttpRequest '{0}'.", GetUserAgent(request)));
 
 #if VER4
             foreach (Results temp in handlers.Select(t => t.Match(request)).Where(temp => temp != null))

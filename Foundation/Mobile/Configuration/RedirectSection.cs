@@ -18,7 +18,7 @@
  * 
  * Contributor(s):
  *     James Rosewell <james@51degrees.mobi>
- *     Thomas Holmes <thomasholmes_5@hotmail.com>
+ *     Thomas Holmes <tom@51degrees.mobi>
  * 
  * ********************************************************************* */
 
