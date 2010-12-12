@@ -37,14 +37,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
     public class WurflException : Exception
     {
         /// <summary>
-        /// Initializes a new instance of <typeparamref name="WurflException"/>
+        /// Initializes a new instance of <see cref="WurflException"/>
         /// </summary>
         public WurflException()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of <typeparamref name="WurflException"/>
+        /// Initializes a new instance of <see cref="WurflException"/>
         /// </summary>
         /// <param name="message">The human readable message explaining the exception.</param>
         public WurflException(string message)
@@ -53,7 +53,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         }
 
         /// <summary>
-        /// Initializes a new instance of <typeparamref name="WurflException"/>
+        /// Initializes a new instance of <see cref="WurflException"/>
         /// </summary>
         /// <param name="message">The human readable message explaining the exception.</param>
         /// <param name="innerException">The exception that caused the new one.</param>
@@ -63,7 +63,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         }
 
         /// <summary>
-        /// Initializes a new instance of <typeparamref name="WurflException"/>
+        /// Initializes a new instance of <see cref="WurflException"/>
         /// </summary>
         protected WurflException(SerializationInfo info, StreamingContext context)
             : base(info, context)

@@ -45,9 +45,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Creates a new set of capabilities based on the context provided.
         /// </summary>
-        /// <param name="context">HttpContext of the device.</param>
+        /// <param name="request">HttpRequest from the device.</param>
+        /// <param name="currentCapabilities">Capabilities already determined by other sources.</param>
         /// <returns>A dictionary of capabilities.</returns>
-        internal virtual IDictionary Create(HttpContext context)
+        internal virtual IDictionary Create(HttpRequest request, IDictionary currentCapabilities)
         {
             // Create the mobile capabilities hashtable.
             IDictionary capabilities = new Hashtable();

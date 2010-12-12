@@ -26,21 +26,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
     internal static class Constants
     {
         /// <summary>
-        /// Used to indicate the device has already accessed the web site.
-        /// </summary>
-        internal const string AlreadyAccessedCookieName = "51D";
-
-        /// <summary>
         /// Forces the useragent matcher to use a single thread if 
         /// multiple processors are available.
         /// </summary>
         internal const bool ForceSingleProcessor = false;
-
-        /// <summary>
-        /// Set the UTC date and time that details of the device should be removed
-        /// from all storage mechanisims.
-        /// </summary>
-        internal const string ExpiryTime = "51dExpiryTime";
 
         /// <summary>
         /// Array of transcoder HTTP headers that represent the useragent string of the

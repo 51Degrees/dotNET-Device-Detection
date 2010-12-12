@@ -64,46 +64,6 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\FiftyOne.Foundation.XML</DocumentationFile>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Bank|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\Bank\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Live Tests|AnyCPU' ">
-    <OutputPath>bin\Live Tests\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
-    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
-    <ErrorReport>prompt</ErrorReport>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'VER2|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\VER2\</OutputPath>
-    <DefineConstants>VER2</DefineConstants>
-    <DocumentationFile>bin\Debug\FiftyOne.Foundation.XML</DocumentationFile>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
-    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
-    <ErrorReport>prompt</ErrorReport>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'VER4|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\VER4\</OutputPath>
-    <DefineConstants>VER4</DefineConstants>
-    <DocumentationFile>bin\Debug\FiftyOne.Foundation.XML</DocumentationFile>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
-    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
-    <ErrorReport>prompt</ErrorReport>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -113,13 +73,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Mobile\Redirection\RedirectModule.cs" />
+    <Compile Include="Mobile\Redirection\RequestHistory.cs" />
+    <Compile Include="Mobile\Redirection\Filter.cs" />
+    <Compile Include="Mobile\Redirection\Location.cs" />
+    <Compile Include="Properties\RedirectionConstants.cs" />
     <Compile Include="Cache.cs" />
     <Compile Include="Image\Support.cs" />
     <Compile Include="Mobile\Configuration\UrlCollection.cs" />
     <Compile Include="Mobile\Configuration\UrlElement.cs" />
     <Compile Include="Mobile\Detection\DetectorModule.cs" />
     <Compile Include="Mobile\Detection\Factory.cs" />
-    <Compile Include="Mobile\Detection\RequestHistory.cs" />
     <Compile Include="Mobile\Configuration\RedirectSection.cs" />
     <Compile Include="Mobile\Configuration\LocationsCollection.cs" />
     <Compile Include="Mobile\Configuration\LocationElement.cs" />
@@ -178,6 +142,7 @@
     <Compile Include="Mobile\Detection\Wurfl\Configuration\PatchConfigElement.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Configuration\PatchesCollection.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Configuration\WurflSection.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\FiftyOneBrowserCapabilities.cs" />
     <Compile Include="Mobile\Detection\Collection.cs" />
     <Compile Include="Mobile\Detection\Wurfl\DeviceInfo.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Handlers\AlcatelHandler.cs" />

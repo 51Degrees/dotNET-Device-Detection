@@ -7,38 +7,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FiftyOne.Foundation", "Foun
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Bank|Any CPU = Bank|Any CPU
 		Debug|Any CPU = Debug|Any CPU
-		Live Tests|Any CPU = Live Tests|Any CPU
 		Release|Any CPU = Release|Any CPU
-		VER2|Any CPU = VER2|Any CPU
-		VER4|Any CPU = VER4|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}.Bank|Any CPU.ActiveCfg = Bank|Any CPU
-		{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}.Bank|Any CPU.Build.0 = Bank|Any CPU
 		{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}.Live Tests|Any CPU.ActiveCfg = Live Tests|Any CPU
-		{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}.Live Tests|Any CPU.Build.0 = Live Tests|Any CPU
 		{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}.VER2|Any CPU.ActiveCfg = VER2|Any CPU
-		{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}.VER2|Any CPU.Build.0 = VER2|Any CPU
-		{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}.VER4|Any CPU.ActiveCfg = VER4|Any CPU
-		{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}.VER4|Any CPU.Build.0 = VER4|Any CPU
-		{2C9B0E11-2654-49AF-855A-BFA629F302E8}.Bank|Any CPU.ActiveCfg = Bank|Any CPU
-		{2C9B0E11-2654-49AF-855A-BFA629F302E8}.Bank|Any CPU.Build.0 = Bank|Any CPU
 		{2C9B0E11-2654-49AF-855A-BFA629F302E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2C9B0E11-2654-49AF-855A-BFA629F302E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2C9B0E11-2654-49AF-855A-BFA629F302E8}.Live Tests|Any CPU.ActiveCfg = Live Tests|Any CPU
-		{2C9B0E11-2654-49AF-855A-BFA629F302E8}.Live Tests|Any CPU.Build.0 = Live Tests|Any CPU
 		{2C9B0E11-2654-49AF-855A-BFA629F302E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2C9B0E11-2654-49AF-855A-BFA629F302E8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2C9B0E11-2654-49AF-855A-BFA629F302E8}.VER2|Any CPU.ActiveCfg = VER2|Any CPU
-		{2C9B0E11-2654-49AF-855A-BFA629F302E8}.VER2|Any CPU.Build.0 = VER2|Any CPU
-		{2C9B0E11-2654-49AF-855A-BFA629F302E8}.VER4|Any CPU.ActiveCfg = VER4|Any CPU
-		{2C9B0E11-2654-49AF-855A-BFA629F302E8}.VER4|Any CPU.Build.0 = VER4|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

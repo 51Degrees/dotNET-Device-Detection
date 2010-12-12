@@ -15,14 +15,7 @@ namespace Detector
         [WebMethod(false)]
         public string GetCapability(string capability)
         {
-            // Get the sorted list of wurfl capabilities.
-            var wurfl = Context.Request.Browser.Capabilities["WurflCapabilities"] as SortedList<string, string>;
-            string value;
-            // If the list exists find the capability requested.
-            if (wurfl != null &&
-                wurfl.TryGetValue(capability, out value))
-                return value;
-            return null;
+            return Context.Request.Browser[capability];
         }
     }
 }

@@ -93,7 +93,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         }
 
         /// <summary>
-        /// Removes a <typeparamref name="System.Configuration.ConfigurationElement"/> from the collection.
+        /// Removes a <see cref="System.Configuration.ConfigurationElement"/> from the collection.
         /// </summary>
         /// <param name="wurflPatch">The patch to be removed from the collection.</param>
         /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="wurflPatch"/> equals null.</exception>
@@ -107,7 +107,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         }
 
         /// <summary>
-        /// Removes a <typeparamref name="System.Configuration.ConfigurationElement"/> at the specified index location.
+        /// Removes a <see cref="System.Configuration.ConfigurationElement"/> at the specified index location.
         /// </summary>
         /// <param name="index">The index of the patch to remove from the collection.</param>
         /// <exception cref="System.ArgumentOutOfRangeException">Thrown if <paramref name="index"/> is less than zero or bigger than the number of indexes on the collections.</exception>
@@ -120,7 +120,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         }
 
         /// <summary>
-        /// Removes a <typeparamref name="System.Configuration.ConfigurationElement"/> from the collection.
+        /// Removes a <see cref="System.Configuration.ConfigurationElement"/> from the collection.
         /// </summary>
         /// <param name="name">The name of the patch to remove from the collection.</param>
         /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="name"/> equals null.</exception>
@@ -145,7 +145,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         #region Properties
 
         /// <summary>
-        /// Gets or sets the <typeparamref name="Mobile.Wurfl.Configurations.WurflPatchConfigElement"/>.
+        /// Gets or sets the <see cref="PatchConfigElement"/>.
         /// </summary>
         public PatchConfigElement this[int index]
         {
@@ -161,7 +161,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         }
 
         /// <summary>
-        /// Gets or sets the <typeparamref name="PatchConfigElement"/>.
+        /// Gets or sets the <see cref="PatchConfigElement"/>.
         /// </summary>        
         public new PatchConfigElement this[string name]
         {

@@ -52,7 +52,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         /// <summary>
         /// Gets the url of the webpage
         /// </summary>
-        [ConfigurationProperty("url", IsRequired = true, IsKey = true)]
+        [ConfigurationProperty("url", IsRequired = true, IsKey = false)]
         public string Url
         {
             get

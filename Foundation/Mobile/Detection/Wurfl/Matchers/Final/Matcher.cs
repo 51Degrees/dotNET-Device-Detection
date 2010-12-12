@@ -132,19 +132,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Final
                 }
             }
 
-            // Find the matching useragent and return.
-#if VER4
-            foreach (DeviceInfo device in devices.Where(device => device.UserAgent.EndsWith(closestTail)))
-            {
-                return device;
-            }
-#elif VER2
-            foreach (DeviceInfo device in devices)
-            {
-                if (device.UserAgent.EndsWith(closestTail))
-                    return device;
-            }
-#endif
+            // Find the 1st matching useragent and return.
+            DeviceInfo result = devices.Find(device => device.UserAgent.EndsWith(closestTail));
+            if (result != null)
+                return result;
+
             // Give up and return the 1st element!
             return devices[0];
         }

@@ -81,13 +81,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 
         #region Override Methods
 
-        internal override IDictionary Create(HttpContext context)
+        internal override IDictionary Create(HttpRequest request, IDictionary currentCapabilities)
         {
             // Use the base class to create the initial list of capabilities.
-            IDictionary capabilities = base.Create(context);
+            IDictionary capabilities = base.Create(request, currentCapabilities);
 
             // Use the device for the request to set the capabilities.
-            Create(Provider.Instance.GetDeviceInfo(context), capabilities, context.Request.Browser.Capabilities);
+            Create(Provider.Instance.GetDeviceInfo(request), capabilities, currentCapabilities);
 
             // Initialise any capability values that rely on the settings
             // from the device data source.
@@ -194,7 +194,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// <summary>
         /// Updates the capabilities used by Microsoft's implementation of the
         /// HttpBrowserCapabilities class to control the property values it
-        /// returns. Only properties exposed by HttpBrowserCapabilities are overriden
+        /// returns. Only properties exposed by FiftyOneBrowserCapabilities are overriden
         /// by this method.
         /// </summary>
         /// <param name="capabilities">Dictionary of capabilities to be enhanced.</param>

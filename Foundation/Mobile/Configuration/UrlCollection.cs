@@ -91,7 +91,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         }
 
         /// <summary>
-        /// Removes a <typeparamref name="UrlElement"/> from the collection.
+        /// Removes a <see cref="UrlElement"/> from the collection.
         /// </summary>
         /// <param name="element">a <see cref="UrlElement"/> to remove from the collection.</param>
         /// <exception cref="System.ArgumentNullException"> thrown if <paramref name="element"/> equals null.</exception>
@@ -105,7 +105,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         }
 
         /// <summary>
-        /// Removes a <typeparamref name="UrlElement"/> at the specified index location.
+        /// Removes a <see cref="UrlElement"/> at the specified index location.
         /// </summary>
         /// <param name="index">Index of the element to remove in the collection.</param>
         /// <exception cref="System.ArgumentOutOfRangeException">Thrown if <paramref name="index"/> is less than zero or bigger than the number of indexes on the collections.</exception>
@@ -117,7 +117,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         }
 
         /// <summary>
-        /// Removes a <typeparamref name="System.Configuration.ConfigurationElement"/> from the collection.
+        /// Removes a <see cref="System.Configuration.ConfigurationElement"/> from the collection.
         /// </summary>
         /// <param name="url">Url of the element in the collection to remove.</param>
         /// <exception cref="System.ArgumentNullException"> thrown if <paramref name="url"/> equals null.</exception>
@@ -142,7 +142,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         #region Properties
 
         /// <summary>
-        /// Gets or sets the <typeparamref name="UrlElement"/>.
+        /// Gets or sets the <see cref="UrlElement"/>.
         /// </summary>
         public UrlElement this[int index]
         {
@@ -158,7 +158,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         }
 
         /// <summary>
-        /// Gets or sets the <typeparamref name="UrlElement"/>.
+        /// Gets or sets the <see cref="UrlElement"/>.
         /// </summary>        
         public new UrlElement this[string name]
         {

@@ -468,12 +468,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         {
             string userAgent = request.UserAgent;
 #if VER4
-            foreach (string current in
-                Detection.Constants.TRANSCODER_USERAGENT_HEADERS.Where(current => request.Headers[current] != null))
-            {
-                userAgent = request.Headers[current];
-                break;
-            }
+            string transcodeUserAgent =
+                Detection.Constants.TRANSCODER_USERAGENT_HEADERS.FirstOrDefault(e => request.Headers[e] != null);
+            if (transcodeUserAgent != null)
+                userAgent = transcodeUserAgent;
 #elif VER2
             foreach (string current in Detection.Constants.TRANSCODER_USERAGENT_HEADERS)
             {
@@ -552,22 +550,22 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// closed device if an exact match is not available. Uses fields
         /// other than than useragent string to perform the match.
         /// </summary>
-        /// <param name="context">Context associated with the requesting device.</param>
+        /// <param name="request">HttpRequest associated with the requesting device.</param>
         /// <returns>The closest matching device.</returns>
-        protected internal DeviceInfo GetDeviceInfo(HttpContext context)
+        protected internal DeviceInfo GetDeviceInfo(HttpRequest request)
         {
             long startTicks = EventLog.IsDebug ? DateTime.Now.Ticks : 0;
-            string userAgent = GetUserAgent(context.Request);
+            string userAgent = GetUserAgent(request);
             DeviceInfo device = null;
             if (String.IsNullOrEmpty(userAgent) == false &&
                 _cache.GetTryParse(userAgent, out device) == false)
             {
                 // Using the handler for this userAgent find the device.
-                Handler[] handlers = GetHandlers(context.Request);
+                Handler[] handlers = GetHandlers(request);
                 if (handlers != null && handlers.Length > 0)
                 {
                     // Get the device from the handlers found.
-                    device = GetDeviceInfo(context.Request, handlers);
+                    device = GetDeviceInfo(request, handlers);
 
                     // If we're only looking for devices marked with 
                     // "actual_device_root" then look back throught the
@@ -578,7 +576,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 
                     if (device != null)
                     {
-                        RecordNewDevice(context.Request, device);
+                        RecordNewDevice(request, device);
                         _cache[userAgent] = device;
                     }
                 }

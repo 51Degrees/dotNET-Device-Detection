@@ -58,7 +58,7 @@ namespace FiftyOne
     {
         #region Fields
 
-        private static DateTime _nextServiceTime = DateTime.MinValue;
+        private DateTime _nextServiceTime = DateTime.MinValue;
         private readonly Dictionary<Key, Value> _internalCache;
         private readonly Dictionary<Key, DateTime> _lastAccessed;
 

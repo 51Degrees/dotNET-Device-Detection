@@ -114,17 +114,18 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Creates a new <see cref="MobileCapabilities"/> class based on the context
         /// of the requesting device.
         /// </summary>
-        /// <param name="context"><see cref="HttpContext"/> of the requesting device.</param>
+        /// <param name="request">HttpRequest from the device.</param>
+        /// <param name="currentCapabilities">Capabilities already determined by other sources.</param>
         /// <returns>A new mobile capabilities</returns>
-        internal static IDictionary Create(HttpContext context)
+        internal static IDictionary Create(HttpRequest request, IDictionary currentCapabilities)
         {
             IDictionary caps;
 
             // We can't do anything with empty user agent strings.
-            if (context.Request.UserAgent == null)
+            if (request.UserAgent == null)
                 return null;
 
-            if (_cache.GetTryParse(context.Request.UserAgent, out caps))
+            if (_cache.GetTryParse(request.UserAgent, out caps))
             {
                 // Return these capabilities for adding to the existing ones.
                 return caps;
@@ -132,9 +133,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
             // Create the new mobile capabilities and record the collection of
             // capabilities for quick creation in future requests.
-            caps = MobileCapabilities.Create(context);
-            _cache[context.Request.UserAgent] = caps;
-            return caps;
+            caps = MobileCapabilities.Create(request, currentCapabilities);
+            _cache[request.UserAgent] = caps;
+            return caps;            
         }
 
         #endregion
