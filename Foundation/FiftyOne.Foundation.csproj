@@ -12,14 +12,10 @@
     <AssemblyName>FiftyOne.Foundation</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SccProjectName>
-    </SccProjectName>
-    <SccLocalPath>
-    </SccLocalPath>
-    <SccAuxPath>
-    </SccAuxPath>
-    <SccProvider>
-    </SccProvider>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
     <ApplicationIcon>PDA.ico</ApplicationIcon>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>
@@ -84,6 +80,7 @@
     <Compile Include="Mobile\Configuration\UrlElement.cs" />
     <Compile Include="Mobile\Detection\DetectorModule.cs" />
     <Compile Include="Mobile\Detection\Factory.cs" />
+    <Compile Include="Mobile\Detection\FiftyOneBrowserCapabilities.cs" />
     <Compile Include="Mobile\Configuration\RedirectSection.cs" />
     <Compile Include="Mobile\Configuration\LocationsCollection.cs" />
     <Compile Include="Mobile\Configuration\LocationElement.cs" />
@@ -142,7 +139,6 @@
     <Compile Include="Mobile\Detection\Wurfl\Configuration\PatchConfigElement.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Configuration\PatchesCollection.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Configuration\WurflSection.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\FiftyOneBrowserCapabilities.cs" />
     <Compile Include="Mobile\Detection\Collection.cs" />
     <Compile Include="Mobile\Detection\Wurfl\DeviceInfo.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Handlers\AlcatelHandler.cs" />
