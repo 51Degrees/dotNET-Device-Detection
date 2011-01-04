@@ -12,10 +12,14 @@
     <AssemblyName>FiftyOne.Foundation</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
     <ApplicationIcon>PDA.ico</ApplicationIcon>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>
@@ -80,7 +84,7 @@
     <Compile Include="Mobile\Configuration\UrlElement.cs" />
     <Compile Include="Mobile\Detection\DetectorModule.cs" />
     <Compile Include="Mobile\Detection\Factory.cs" />
-    <Compile Include="Mobile\Detection\FiftyOneBrowserCapabilities.cs" />
+<Compile Include="Mobile\Detection\FiftyOneBrowserCapabilities.cs" />
     <Compile Include="Mobile\Configuration\RedirectSection.cs" />
     <Compile Include="Mobile\Configuration\LocationsCollection.cs" />
     <Compile Include="Mobile\Configuration\LocationElement.cs" />
@@ -105,6 +109,7 @@
     <Compile Include="Mobile\Detection\Wurfl\Handlers\SendoHandler.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Handlers\TianyuHandler.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Handlers\VersionHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\MaemoNokiaHandler.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Matchers\Algorithms.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Matchers\Final\Matcher.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Matchers\Result.cs" />

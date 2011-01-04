@@ -37,7 +37,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
         // Checks given UA starts with "Palm" and "webOS"
         protected internal override bool CanHandle(string userAgent)
         {
-            return (userAgent.Contains("Palm") && userAgent.Contains("webOS")) || userAgent.Contains("PalmSource");
+            return (userAgent.Contains("Palm") && userAgent.Contains("webOS")) ||
+                userAgent.Contains("PalmSource") || userAgent.Contains("Palmsource");
         }
     }
 }

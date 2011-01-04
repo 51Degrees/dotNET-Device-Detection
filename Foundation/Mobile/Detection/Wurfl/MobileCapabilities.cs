@@ -228,7 +228,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                 try
                 {
                     Version version = new Version(versionString);
-                    SetValue(capabilities, "majorversion", version.Major);
+                    SetValue(capabilities, "majorversion", version.Major.ToString());
                     SetValue(capabilities, "minorversion", "." + version.Minor.ToString());
                     SetValue(capabilities, "version", version.ToString());
                 }

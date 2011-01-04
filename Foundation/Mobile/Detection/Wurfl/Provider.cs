@@ -264,6 +264,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                  new MSIEHandler(),
                  new NecHandler(),
                  new NokiaHandler(),
+                 new MaemoNokiaHandler(),
                  new NumericHandler(),
                  new OperaHandler(),
                  new OperaMiniHandler(),

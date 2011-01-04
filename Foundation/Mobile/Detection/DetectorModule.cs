@@ -54,7 +54,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Indicates if static initialisation has been completed.
         /// </summary>
-        private static bool _initialised;
+        private static bool _initialised = false;
 
         /// <summary>
         /// Collection of client targets used by the application with the key
@@ -75,7 +75,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="application">HttpApplication object for the web application.</param>
         public override void Init(HttpApplication application)
         {
-            EventLog.Debug("Initialising Detector Module");
+            EventLog.Debug("Initialising Detector Module 233");
 #if VER4
             // Replace the .NET v4 BrowserCapabilitiesProvider if it's not ours.
             if (HttpCapabilitiesBase.BrowserCapabilitiesProvider is MobileCapabilitiesProvider == false)
@@ -84,7 +84,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 {
                     if (HttpCapabilitiesBase.BrowserCapabilitiesProvider is MobileCapabilitiesProvider == false)
                     {
-                        HttpCapabilitiesBase.BrowserCapabilitiesProvider = new MobileCapabilitiesProvider();
+                        // Use the existing provider as the parent if it's not null. 
+                        if (HttpCapabilitiesBase.BrowserCapabilitiesProvider != null)
+                            HttpCapabilitiesBase.BrowserCapabilitiesProvider = 
+                                new MobileCapabilitiesProvider((HttpCapabilitiesDefaultProvider)HttpCapabilitiesBase.BrowserCapabilitiesProvider);
+                        else
+                            HttpCapabilitiesBase.BrowserCapabilitiesProvider = 
+                                new MobileCapabilitiesProvider();
                     }
                 }
             }

@@ -40,9 +40,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 
     internal class WindowsPhoneHandler : MSIEHandler
     {
-        private const string DEFAULT_DEVICE = "generic_mobile_browser_ver1_winmo7";
+        private const string DEFAULT_DEVICE = "generic_ms_phone_os7";
         private const byte EXTRA_CONFIDENCE = 2;
-        private static readonly string[] SUPPORTED_ROOT_DEVICES = new[] { DEFAULT_DEVICE };
+        private static readonly string[] SUPPORTED_ROOT_DEVICES = new[] { DEFAULT_DEVICE, "generic_windows_phone_os_7" };
 
         /// <summary>
         /// Provides a higher degree of confidence because only devices in the "generic_mobile_browser_ver1_winmo7"
