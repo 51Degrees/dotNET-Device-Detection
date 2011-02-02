@@ -14,7 +14,7 @@
  * 
  * The Initial Developer of the Original Code is owned by 
  * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees
- * Mobile Experts Limited are Copyright (C) 2009 - 2010. All Rights Reserved.
+ * Mobile Experts Limited are Copyright (C) 2009 - 2011. All Rights Reserved.
  * 
  * Contributor(s):
  *     James Rosewell <james@51degrees.mobi>
@@ -79,6 +79,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// </summary>
         private Handler[] _handlers;
 
+        /// <summary>
+        /// Set to true if use actual device root is set in the configuration.
+        /// </summary>
+        private bool _useActualDeviceRoot;
+
         #endregion
 
         #region Constructors
@@ -89,6 +94,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         internal Provider()
         {
             InitHandlers();
+            _useActualDeviceRoot = Manager.UseActualDeviceRoot;
         }
 
         #endregion
@@ -243,6 +249,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                  new AvantHandler(),
                  new BenQHandler(),
                  new BlackBerryHandler(),
+                 new BlackBerryVersion6Handler(),
                  new BirdHandler(),
                  new BoltHandler(),
                  new BrewHandler(),
@@ -498,7 +505,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// <returns>The closest matching device.</returns>
         internal DeviceInfo GetDeviceInfo(string userAgent)
         {
-            long startTicks = EventLog.IsDebug ? DateTime.Now.Ticks : 0;
             DeviceInfo device = null;
             if (String.IsNullOrEmpty(userAgent) == false &&
                 _cache.GetTryParse(userAgent, out device) == false)
@@ -513,7 +519,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                     // If we're only looking for devices marked with 
                     // "actual_device_root" then look back throught the
                     // fallback devices until one is found.
-                    if (Manager.UseActualDeviceRoot && device.IsActualDeviceRoot == false)
+                    if (_useActualDeviceRoot && 
+                        device.IsActualDeviceRoot == false)
                         device = GetActualDeviceRootDeviceInfo(device);
 
                     // Add to the cache to improve performance.
@@ -555,9 +562,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// <returns>The closest matching device.</returns>
         protected internal DeviceInfo GetDeviceInfo(HttpRequest request)
         {
-            long startTicks = EventLog.IsDebug ? DateTime.Now.Ticks : 0;
-            string userAgent = GetUserAgent(request);
             DeviceInfo device = null;
+
+            // Get a user agent string with common issues removed.
+            string userAgent = GetUserAgent(request);
+            
+            // Send the header details to 51Degrees.mobi.
+            RecordNewDevice(request);
+            
             if (String.IsNullOrEmpty(userAgent) == false &&
                 _cache.GetTryParse(userAgent, out device) == false)
             {
@@ -571,15 +583,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                     // If we're only looking for devices marked with 
                     // "actual_device_root" then look back throught the
                     // fallback devices until one is found.
-                    if (Manager.UseActualDeviceRoot &&
+                    if (_useActualDeviceRoot &&
                         device.IsActualDeviceRoot == false)
                         device = GetActualDeviceRootDeviceInfo(device);
 
+                    // Add the device to the cache.
                     if (device != null)
-                    {
-                        RecordNewDevice(request, device);
                         _cache[userAgent] = device;
-                    }
                 }
             }
             if (device == null)
@@ -683,22 +693,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         }
 
         /// <summary>
-        /// If the device is new record it in the local new device log and 
-        /// remote server depending on the configuration in the web.config
-        /// file.
-        /// Also places the newly found device into the cache so future page
-        /// requests are serviced more rapidly.
+        /// Send the header details to 51Degrees.mobi if the configuration is enabled.
         /// </summary>
         /// <param name="request">Details about the request that was used to create the new device.</param>
-        /// <param name="device">Device found with the closest match to the useragent string.</param>
-        private void RecordNewDevice(HttpRequest request, DeviceInfo device)
+        private static void RecordNewDevice(HttpRequest request)
         {
-            if (device.UserAgent != GetUserAgent(request) && WurflNewDevice.Enabled)
-            {
-                // Now that we've found a device add it to the list using
-                // the useragent string as the device identifier.
+            if (WurflNewDevice.Enabled)
                 WurflNewDevice.RecordNewDevice(request);
-            }
         }
 
         #endregion

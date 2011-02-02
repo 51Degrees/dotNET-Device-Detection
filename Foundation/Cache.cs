@@ -14,7 +14,7 @@
  * 
  * The Initial Developer of the Original Code is owned by 
  * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees 
- * Mobile Experts Limited are Copyright (C) 2009 - 2010. All Rights Reserved.
+ * Mobile Experts Limited are Copyright (C) 2009 - 2011. All Rights Reserved.
  * 
  * Contributor(s):
  *     James Rosewell <james@51degrees.mobi>
@@ -244,7 +244,6 @@ namespace FiftyOne
                         }
                     }
                 }
-                GC.Collect();
             }
 
             // Set the next service time to one minute from now.

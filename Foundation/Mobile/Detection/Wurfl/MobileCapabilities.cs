@@ -14,7 +14,7 @@
  * 
  * The Initial Developer of the Original Code is owned by 
  * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees
- * Mobile Experts Limited are Copyright (C) 2009 - 2010. All Rights Reserved.
+ * Mobile Experts Limited are Copyright (C) 2009 - 2011. All Rights Reserved.
  * 
  * Contributor(s):
  *     James Rosewell <james@51degrees.mobi>
@@ -44,6 +44,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 
         // Gets the indexes of all the key capability strings as static readonly
         // values during static construction to avoid needing to look them up every time.
+        private static readonly int AjaxXhrType = Strings.Add("ajax_xhr_type");
         private static readonly int XhtmlSupportLevel = Strings.Add("xhtml_support_level");
         private static readonly int CookieSupport = Strings.Add("cookie_support");
         private static readonly int AjaxSupportJavascript = Strings.Add("ajax_support_javascript");
@@ -219,6 +220,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             SetValue(capabilities, "screenBitDepth", GetScreenBitDepth(device));
             SetValue(capabilities, "preferredImageMime", GetPreferredImageMime(device, capabilities));
             SetValue(capabilities, "isColor", GetIsColor(device));
+            SetValue(capabilities, "SupportsCallback", GetSupportsCallback(device));
 
             // Use the Version class to find the version. If this fails use the 1st two
             // decimal segments of the string.
@@ -290,7 +292,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                         SetValue(capabilities, "preferredRenderingMime", renderingMime);
                 }
             }
-
         }
 
         /// <summary>
@@ -350,6 +351,21 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             if (bool.TryParse(Strings.Get(device.GetCapability(CookieSupport)), out value) == false)
                 bool.TryParse(current, out value);
             return value.ToString();
+        }
+
+        /// <summary>
+        /// Returns true if the device supports callbacks from the browser
+        /// using XMLHttpRequest using any type of method.
+        /// </summary>
+        /// <param name="device">The device to be checked.</param>
+        /// <returns>True if XMLHttpRequest is supported.</returns>
+        private static string GetSupportsCallback(DeviceInfo device)
+        {
+            string value = Strings.Get(device.GetCapability(AjaxXhrType));
+            if (String.IsNullOrEmpty(value) || 
+                value.Equals("none", StringComparison.InvariantCultureIgnoreCase))
+                return bool.FalseString.ToLowerInvariant();
+            return bool.TrueString.ToLowerInvariant();
         }
 
         /// <summary>

@@ -17,6 +17,7 @@ namespace Detector
             lbl.Text = String.Format("{0}: {1}", capability, value);
             pnl.Controls.Add(lbl);
             return pnl;
+            
         }
 
         protected void Page_Load(object sender, EventArgs e)

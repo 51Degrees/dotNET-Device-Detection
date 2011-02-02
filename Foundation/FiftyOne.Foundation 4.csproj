@@ -80,6 +80,8 @@
     <Compile Include="Mobile\Detection\DetectorModule.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Mobile\Detection\FiftyOneBrowserCapabilities.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\BlackBerryVersion6Handler.cs" />
     <Compile Include="Properties\RedirectionConstants.cs" />
     <Compile Include="Image\Support.cs" />
     <Compile Include="Mobile\Configuration\FilterElement.cs" />
@@ -102,7 +104,6 @@
     <Compile Include="Mobile\Detection\Wurfl\Handlers\ChromeHandler.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Handlers\BrewHandler.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Handlers\MaxonHandler.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Handlers\MaemoNokiaHandler.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Handlers\SoftBankHandler.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Handlers\ZuneHandler.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Handlers\iTunesHandler.cs" />
@@ -113,6 +114,7 @@
     <Compile Include="Mobile\Detection\Wurfl\Handlers\SendoHandler.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Handlers\TianyuHandler.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Handlers\VersionHandler.cs" />
+    <Compile Include="Mobile\Detection\Wurfl\Handlers\MaemoNokiaHandler.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Matchers\Algorithms.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Matchers\Final\Matcher.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Matchers\Result.cs" />
@@ -120,7 +122,6 @@
     <Compile Include="Mobile\Detection\RequestHelper.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Configuration\NewDeviceDetail.cs" />
     <Compile Include="Mobile\Detection\Wurfl\MobileCapabilities.cs" />
-    <Compile Include="Mobile\Detection\FiftyOneBrowserCapabilities.cs" />
     <Compile Include="Mobile\Configuration\Manager.cs" />
     <Compile Include="Mobile\Configuration\LogSection.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Handlers\AlphaNumericHandlers.cs" />

@@ -14,13 +14,15 @@
  * 
  * The Initial Developer of the Original Code is owned by 
  * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees 
- * Mobile Experts Limited are Copyright (C) 2009 - 2010. All Rights Reserved.
+ * Mobile Experts Limited are Copyright (C) 2009 - 2011. All Rights Reserved.
  * 
  * Contributor(s):
  *     James Rosewell <james@51degrees.mobi>
  *     Tom Holmes <tom@51degrees.mobi>
  * 
  * ********************************************************************* */
+
+#if VER4
 
 using System;
 using System.Collections;
@@ -31,6 +33,7 @@ using System.Text;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
+
     /// <summary>
     /// Used to add additional WURFL based properties to the browser capabilities.
     /// </summary>
@@ -106,5 +109,4 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
     }
 }
-
-
+#endif

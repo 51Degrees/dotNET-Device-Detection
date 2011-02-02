@@ -14,7 +14,7 @@
  * 
  * The Initial Developer of the Original Code is owned by 
  * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees 
- * Mobile Experts Limited are Copyright (C) 2009 - 2010. All Rights Reserved.
+ * Mobile Experts Limited are Copyright (C) 2009 - 2011. All Rights Reserved.
  * 
  * Contributor(s):
  *     James Rosewell <james@51degrees.mobi>
@@ -687,9 +687,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
             // Set the next time to service the sync file using a random offset to 
             // attempt to avoid conflicts with other processes.
             _nextServiceTime = DateTime.UtcNow.AddMinutes(1).AddSeconds(new Random().Next(30));
-
-            GC.Collect();
-        }
+         }
 
         /// <summary>
         /// Read the records that should be retained in the sync file.

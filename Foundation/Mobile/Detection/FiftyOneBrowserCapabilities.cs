@@ -14,7 +14,7 @@
  * 
  * The Initial Developer of the Original Code is owned by 
  * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees
- * Mobile Experts Limited are Copyright (C) 2009 - 2010. All Rights Reserved.
+ * Mobile Experts Limited are Copyright (C) 2009 - 2011. All Rights Reserved.
  * 
  * Contributor(s):
  *     James Rosewell <james@51degrees.mobi>
@@ -61,6 +61,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
             // Copy the adapters from the original.
             foreach (object key in currentCapabilities.Adapters.Keys)
                 Adapters.Add(key, currentCapabilities.Adapters[key]);
+
+            // Copy the browsers from the original to prevent the Browsers
+            // property returning null.
+            if (currentCapabilities.Browsers != null)
+                foreach (string browser in currentCapabilities.Browsers)
+                    AddBrowser(browser);
         }
 
         #endregion
