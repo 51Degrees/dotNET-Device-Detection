@@ -6,6 +6,18 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FiftyOne.Foundation 4", "Foundation\FiftyOne.Foundation 4.csproj", "{2C9B0E11-2654-49AF-855A-BFA629F302E8}"
 EndProject
 Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 3
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs06
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = Detector\u0020Web\u0020Site\\Detector\u0020Web\u0020Site\u00204.csproj
+		SccProjectName1 = Detector\u0020Web\u0020Site
+		SccLocalPath1 = Detector\u0020Web\u0020Site
+		SccProjectUniqueName2 = Foundation\\FiftyOne.Foundation\u00204.csproj
+		SccProjectName2 = Foundation
+		SccLocalPath2 = Foundation
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
