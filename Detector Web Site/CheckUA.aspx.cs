@@ -55,6 +55,7 @@ namespace Detector
                 PanelAdvanced.Controls.Add(CreateResultLabel("Actual Device Root", service.GetCapability("actual_device_root")));
                 PanelAdvanced.Controls.Add(CreateResultLabel("Tablet", service.GetCapability("is_tablet")));
                 PanelAdvanced.Controls.Add(CreateResultLabel("Version", service.GetCapability("mobile_browser_version")));
+                PanelAdvanced.Controls.Add(CreateResultLabel("Device OS", service.GetCapability("device_os")));
 
                 PanelBasic.Visible = true;
                 PanelAdvanced.Visible = true;

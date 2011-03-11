@@ -69,7 +69,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         private static readonly int HtmlWeb40 = Strings.Add("html_web_4_0");
         private static readonly int HtmlWeb32 = Strings.Add("html_web_3_2");
         private static readonly int PreferredMarkup = Strings.Add("preferred_markup");
+        private static readonly int MaxDeckSize = Strings.Add("max_deck_size");
+        private static readonly int BreakListOfLinksWithBrElementRecommended = Strings.Add("break_list_of_links_with_br_element_recommended");
+        private static readonly int InsertBrElementAfterWidgetRecommended = Strings.Add("insert_br_element_after_widget_recommended");
+        private static readonly int Rows = Strings.Add("rows");
+        private static readonly int Columns = Strings.Add("columns");
+        private static readonly int Utf8Support = Strings.Add("utf8_support");
+        private static readonly int XhtmlTableSupport = Strings.Add("xhtml_table_support");
+        private static readonly int XhtmlNoWrapMode = Strings.Add("xhtml_nowrap_mode");
+        private static readonly int SoftkeySupport = Strings.Add("softkey_support");
 
+        
         #endregion
 
         #region Constructor
@@ -221,6 +231,18 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             SetValue(capabilities, "preferredImageMime", GetPreferredImageMime(device, capabilities));
             SetValue(capabilities, "isColor", GetIsColor(device));
             SetValue(capabilities, "SupportsCallback", GetSupportsCallback(device));
+            SetValue(capabilities, "maximumRenderedPageSize", GetMaximumRenderedPageSize(device));
+            SetValue(capabilities, "rendersBreaksAfterWmlAnchor", GetRendersBreaksAfterWmlAnchor(device));
+            SetValue(capabilities, "rendersBreaksAfterWmlInput", GetRendersBreaksAfterWmlInput(device));
+            SetValue(capabilities, "screenCharactersHeight", GetScreenCharactersHeight(device));
+            SetValue(capabilities, "screenCharactersWidth", GetScreenCharactersWidth(device));
+            SetValue(capabilities, "requiresUTF8ContentEncoding", GetRequiresUTF8ContentEncoding(device));
+            SetValue(capabilities, "tables", GetTables(device));
+            SetValue(capabilities, "canInitiateVoiceCall", GetIsMobileDevice(device));
+            SetValue(capabilities, "javascript", GetJavascriptSupport(device));
+            SetValue(capabilities, "supportsNoWrapStyle", GetSupportsNoWrapStyle(device));
+            SetValue(capabilities, "supportsStyleElement", GetPreferredRenderingTypeFromWURFL(device));
+            SetValue(capabilities, "maximumSoftKeyLabelLength", GetMaximumSoftKeyLabelLength(device));
 
             // Use the Version class to find the version. If this fails use the 1st two
             // decimal segments of the string.
@@ -293,6 +315,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                 }
             }
         }
+
+       
 
         /// <summary>
         /// Sets the version using a regular expression to find numeric segments of
@@ -540,6 +564,71 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                 default:
                     return GetFirstRenderingTypeFromWURFL(device);
             }
+        }
+
+
+        //The following methods and bindings were suggested by forum member 'fravelgue'
+        private static string GetMaximumSoftKeyLabelLength(DeviceInfo device)
+        {
+            string value = Strings.Get(device.GetCapability(SoftkeySupport));
+            if (String.IsNullOrEmpty(value) || value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
+                return bool.FalseString.ToLowerInvariant();
+            return bool.TrueString.ToLowerInvariant();
+        }
+
+        private static string GetSupportsNoWrapStyle(DeviceInfo device)
+        {
+            string value = Strings.Get(device.GetCapability(XhtmlNoWrapMode));
+            if (String.IsNullOrEmpty(value) || value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
+                return bool.FalseString.ToLowerInvariant();
+            return bool.TrueString.ToLowerInvariant();
+        }
+
+        private static string GetTables(DeviceInfo device)
+        {
+            string value = Strings.Get(device.GetCapability(XhtmlTableSupport));
+            if(String.IsNullOrEmpty(value) || value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
+                return bool.FalseString.ToLowerInvariant();
+            return bool.TrueString.ToLowerInvariant();
+        }
+
+        private static string GetRequiresUTF8ContentEncoding(DeviceInfo device)
+        {
+            string value = Strings.Get(device.GetCapability(Utf8Support));
+            if (String.IsNullOrEmpty(value) || value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
+                return bool.FalseString.ToLowerInvariant();
+            return bool.TrueString.ToLowerInvariant();
+        }
+
+        private static string GetScreenCharactersWidth(DeviceInfo device)
+        {
+            return Strings.Get(device.GetCapability(Columns));
+        }
+
+        private static string GetScreenCharactersHeight(DeviceInfo device)
+        {
+            return Strings.Get(device.GetCapability(Rows));
+        }
+
+        private static string GetRendersBreaksAfterWmlInput(DeviceInfo device)
+        {
+            string value = Strings.Get(device.GetCapability(InsertBrElementAfterWidgetRecommended));
+            if (String.IsNullOrEmpty(value) || value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
+                return bool.FalseString.ToLowerInvariant();
+            return bool.TrueString.ToLowerInvariant();
+        }
+
+        private static string GetRendersBreaksAfterWmlAnchor(DeviceInfo device)
+        {
+            string value = Strings.Get(device.GetCapability(BreakListOfLinksWithBrElementRecommended));
+            if (String.IsNullOrEmpty(value) || value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
+                return bool.FalseString.ToLowerInvariant();
+            return bool.TrueString.ToLowerInvariant();
+        }
+
+        private static string GetMaximumRenderedPageSize(DeviceInfo device)
+        {
+            return Strings.Get(device.GetCapability(MaxDeckSize));
         }
 
         #endregion

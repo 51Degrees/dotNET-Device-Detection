@@ -34,7 +34,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
                                                         @"VendorID/\d+"
                                                     };
 
-        internal BlackBerryHandler() : base(PATTERNS, new[] {10, 2, 1})
+        internal BlackBerryHandler() : base(PATTERNS, new[] {10, 2, 11})
         {
         }
 
