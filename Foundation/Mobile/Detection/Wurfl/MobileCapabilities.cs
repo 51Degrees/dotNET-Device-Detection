@@ -237,7 +237,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             SetValue(capabilities, "screenCharactersHeight", GetScreenCharactersHeight(device));
             SetValue(capabilities, "screenCharactersWidth", GetScreenCharactersWidth(device));
             SetValue(capabilities, "requiresUTF8ContentEncoding", GetRequiresUTF8ContentEncoding(device));
-            SetValue(capabilities, "tables", GetTables(device));
+            
             SetValue(capabilities, "canInitiateVoiceCall", GetIsMobileDevice(device));
             SetValue(capabilities, "javascript", GetJavascriptSupport(device));
             SetValue(capabilities, "supportsNoWrapStyle", GetSupportsNoWrapStyle(device));
@@ -314,6 +314,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                         SetValue(capabilities, "preferredRenderingMime", renderingMime);
                 }
             }
+
+            SetValue(capabilities, "tables",
+                    GetTables(device,
+                                     currentCapabilities != null
+                                         ? (string)currentCapabilities["tables"]
+                                         : String.Empty));
         }
 
        
@@ -584,12 +590,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             return bool.TrueString.ToLowerInvariant();
         }
 
-        private static string GetTables(DeviceInfo device)
+        private static string GetTables(DeviceInfo device, string current)
         {
-            string value = Strings.Get(device.GetCapability(XhtmlTableSupport));
-            if(String.IsNullOrEmpty(value) || value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
-                return bool.FalseString.ToLowerInvariant();
-            return bool.TrueString.ToLowerInvariant();
+            if (Strings.Get(device.GetCapability(PreferredMarkup)).Contains("xhtml"))
+            {
+                bool value =  false;
+                if(bool.TryParse(Strings.Get(device.GetCapability(XhtmlTableSupport)), out value) == false)
+                    bool.TryParse(current, out value);
+                return value.ToString();
+            }
+            return current;
         }
 
         private static string GetRequiresUTF8ContentEncoding(DeviceInfo device)

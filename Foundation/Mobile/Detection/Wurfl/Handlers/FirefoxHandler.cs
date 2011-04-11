@@ -64,8 +64,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
             get { return SUPPORTED_ROOT_DEVICES; }
         }
 
-        // Checks the US does not contain mobile strings and does contain desktop strings.
-
+        // Checks the UA does not contain mobile strings and does contain desktop strings.
         internal override DeviceInfo DefaultDevice
         {
             get
@@ -77,17 +76,24 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
             }
         }
 
+        /// <summary>
+        /// Either the userAgent starts with Firefox in which case it's from the patch file,
+        /// or it contains both the keyword and the operating system.
+        /// </summary>
+        /// <param name="userAgent"></param>
+        /// <returns></returns>
         protected internal override bool CanHandle(string userAgent)
         {
             return
-                (userAgent.Contains("Firefox") ||
+                userAgent.StartsWith("Firefox") ||
+                ((userAgent.Contains("Firefox") ||
                  userAgent.Contains("Iceweasel") ||
                  userAgent.Contains("Thunderbird") ||
                  userAgent.Contains("Gecko/"))
                 &&
                 (userAgent.Contains("(Macintosh;") ||
                  userAgent.Contains("(Windows") ||
-                 userAgent.Contains("(X11;"));
+                 userAgent.Contains("(X11;")));
         }
     }
 }

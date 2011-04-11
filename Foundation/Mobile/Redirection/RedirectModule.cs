@@ -48,10 +48,10 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         private static readonly object _lock = new object();
 
         /// <summary>
-        /// Indicates if static initialisation has been completed.
+        /// Indicates if static field initialisation has been completed.
         /// </summary>
-        private static bool _initialised;
-
+        private static bool _staticFieldsInitialised;
+        
         /// <summary>
         /// If set to true only the first eligable request received by the web
         /// site will be redirected to the mobile landing page contained in
@@ -120,10 +120,20 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// <param name="application">HttpApplication object for the web application.</param>
         public virtual void Init(HttpApplication application)
         {
-            EventLog.Debug("Initialising Redirection Module");
-
+            EventLog.Debug("Initialising redirection module");
             StaticFieldInit();
+            StaticRegisterEventHandlersInit(application);
+        }
 
+        /// <summary>
+        /// Registers the event handlers if they've not done so already.
+        /// </summary>
+        /// <param name="application">HttpApplication object for the web application.</param>
+        private static void StaticRegisterEventHandlersInit(HttpApplication application)
+        {
+            EventLog.Debug("Initialising redirection module event handlers");
+
+            // Record the original requesting URL.
             application.BeginRequest += OnBeginRequest;
 
             // Intercept request event after the hander and the state have been assigned
@@ -136,12 +146,14 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// </summary>
         private static void StaticFieldInit()
         {
-            if (_initialised == false)
+            if (_staticFieldsInitialised == false)
             {
                 lock (_lock)
                 {
-                    if (_initialised == false)
+                    if (_staticFieldsInitialised == false)
                     {
+                        EventLog.Debug("Initialising redirection module static fields.");
+
                         // Fetch the redirect url, first time redirect indicator and wire up the
                         // events if a url has been provided.
                         if (Manager.Redirect != null && Manager.Redirect.Enabled)
@@ -172,7 +184,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                         }
 
                         // Indicate initialisation is complete.
-                        _initialised = true;
+                        _staticFieldsInitialised = true;
                     }
                 }
             }
@@ -218,8 +230,6 @@ namespace FiftyOne.Foundation.Mobile.Redirection
 
                 if (context != null)
                 {
-
-
                     // Check to see if the request should be redirected.
                     if (ShouldRequestRedirect(context))
                     {
@@ -358,11 +368,13 @@ namespace FiftyOne.Foundation.Mobile.Redirection
             string originalUrl = GetOriginalUrl(context);
             bool value = context.Response.IsRequestBeingRedirected ||
                 String.IsNullOrEmpty(context.Response.RedirectLocation) == false;
+            
+            string currentPage = null;
 
             if (page != null)
             {
                 // Process a standard page derived from System.Web.UI.Page.
-                string currentPage = page.ResolveUrl(context.Request.AppRelativeCurrentExecutionFilePath);
+                currentPage = page.ResolveUrl(context.Request.AppRelativeCurrentExecutionFilePath);
                 value = value ||
                     page.ResolveUrl(GetLocationUrl(context)) == currentPage ||
                     page.ResolveUrl(_formsLoginUrl) == currentPage ||
@@ -370,9 +382,10 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                     page.ResolveUrl(_formsLoginUrl) == originalUrl;
             }
 
-            EventLog.Debug(String.Format("Request '{0}' with handler type '{1}' is {2} restricted page for redirect.",
-                context.Request.Url,
+            EventLog.Debug(String.Format("Request for '{0}' with handler type '{1}' and current page '{2}' is {3} restricted page for redirect.",
+                originalUrl,
                 context.Handler.GetType().FullName,
+                currentPage,
                 value ? "a" : "not a"));
 
             return value;
@@ -604,14 +617,17 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// Checks to see if the regular expression provided matches either the
         /// relative executing path or the Url of the request.
         /// </summary>
-        /// <param name="request">The HttpRequest to be checked.</param>
+        /// <param name="context">The HttpContext to be checked.</param>
         /// <returns>True if this request should be considered associated with
         /// a page designed for mobile.</returns>
-        private static bool IsMobileRegexPage(HttpRequest request)
+        private static bool IsMobileRegexPage(HttpContext context)
         {
             if (_mobilePageRegex != null)
-                return _mobilePageRegex.IsMatch(request.AppRelativeCurrentExecutionFilePath) ||
-                       _mobilePageRegex.IsMatch(request.Url.ToString());
+            {
+                string originalUrl = GetOriginalUrl(context);
+                return _mobilePageRegex.IsMatch(context.Request.AppRelativeCurrentExecutionFilePath) ||
+                       _mobilePageRegex.IsMatch(originalUrl);
+            }
             return false;
         }
 
@@ -622,7 +638,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         public static bool IsMobilePage(HttpContext context)
         {
             return IsMobileType(context.Handler.GetType()) ||
-                   IsMobileRegexPage(context.Request);
+                   IsMobileRegexPage(context);
         }
 
         #endregion

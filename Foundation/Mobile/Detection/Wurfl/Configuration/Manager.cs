@@ -27,7 +27,10 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Configuration;
+using System.IO;
 using System.Web.Configuration;
+using System.Web.Hosting;
 using FiftyOne.Foundation.Mobile.Configuration;
 
 #endregion
@@ -53,7 +56,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
 
         static Manager()
         {
-            _configurationSection = (WurflSection) WebConfigurationManager.GetWebApplicationSection("fiftyOne/wurfl");
+            _configurationSection = (WurflSection)Support.GetWebApplicationSection("fiftyOne/wurfl", true);
         }
 
         #endregion

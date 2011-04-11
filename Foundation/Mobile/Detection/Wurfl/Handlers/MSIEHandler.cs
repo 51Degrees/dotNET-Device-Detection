@@ -111,7 +111,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
                    userAgent.Contains("IEMobile") == false &&
                    userAgent.Contains("Windows CE") == false &&
                    userAgent.Contains("Windows Phone OS") == false &&
-                   (userAgent.Contains("Windows XP") ||
+                   (userAgent.Contains("compatible") ||
+                    userAgent.Contains("Windows XP") ||
                     userAgent.Contains("Windows NT") ||
                     userAgent.Contains("Windows ME") ||
                     userAgent.Contains("Win32") ||

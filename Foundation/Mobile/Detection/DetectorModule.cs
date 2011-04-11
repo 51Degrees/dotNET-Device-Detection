@@ -75,7 +75,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="application">HttpApplication object for the web application.</param>
         public override void Init(HttpApplication application)
         {
-            EventLog.Debug("Initialising Detector Module 233");
+            EventLog.Debug("Initialising Detector Module");
 #if VER4
             // Replace the .NET v4 BrowserCapabilitiesProvider if it's not ours.
             if (HttpCapabilitiesBase.BrowserCapabilitiesProvider is MobileCapabilitiesProvider == false)

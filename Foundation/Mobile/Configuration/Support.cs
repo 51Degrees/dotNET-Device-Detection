@@ -24,8 +24,14 @@
 #region Usings
 
 using System;
+using System.Configuration;
 using System.IO;
 using System.Security;
+using System.Web;
+using System.Web.Configuration;
+using System.Web.Hosting;
+using FiftyOne.Foundation.Mobile.Detection.Wurfl;
+using FiftyOne.Foundation.Mobile;
 
 #endregion
 
@@ -85,6 +91,54 @@ namespace FiftyOne.Foundation.Mobile.Configuration
                 partialPath = partialPath.Substring(1, partialPath.Length - 1);
             // Combing with the application root.
             return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, partialPath).Replace("/", "\\");
+        }
+
+        internal static ConfigurationSection GetWebApplicationSection(string sectionName, bool isManadatory)
+        {
+            ConfigurationSection configurationSection = WebConfigurationManager.GetWebApplicationSection(sectionName) as ConfigurationSection;
+
+            // If section is not present in default web.config try to get it from the 51Degrees.mobi.config file.
+            if (configurationSection == null || configurationSection.ElementInformation.IsPresent == false)
+                configurationSection = GetConfigurationSectionFromAltConfig(sectionName, isManadatory);
+            
+            else
+                EventLog.Debug(string.Format("Getting '{0}' configuration from the web.config file.", sectionName));
+
+            return configurationSection;
+        }
+
+        private static ConfigurationSection GetConfigurationSectionFromAltConfig(string sectionName, bool isMandatory)
+        {
+            string configFileName = GetFilePath(Constants.CONFIG_FILENAME);
+            System.Configuration.Configuration fiftyOneConfig = null;
+
+            // Checking for the existence of the configured alternate config file
+            if (File.Exists(configFileName))
+            {
+                // Define cofniguration file(s) mapping for loading the alternate configuration.
+                ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
+                configFileMap.ExeConfigFilename = configFileName;
+                configFileMap.MachineConfigFilename = GetFilePath("~/Web.config");
+
+                // Load the alternate configuration file using the configuration file map definition.
+                fiftyOneConfig = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
+
+                // If alternate configuration file loaded successfully go ahead and retrieve requested 
+                // confguration section.
+                if (fiftyOneConfig != null && fiftyOneConfig.HasFile == true)
+                {
+                    EventLog.Debug(string.Format("Getting '{0}' configuration from file '{1}'.", sectionName, configFileName));
+                    ConfigurationSection section = fiftyOneConfig.GetSection(sectionName);
+                    if (section != null)
+                        return section;
+                }
+            }
+
+            // If the configuration section is mandatory and failed to load the alternate configuration throw the exception.
+            if (isMandatory)
+                throw new MobileException(string.Format("Could not retrieve '{0}' section from configuration file '{1}'.", sectionName, configFileName));
+
+            return null;
         }
 
         #endregion

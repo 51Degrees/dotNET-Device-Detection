@@ -95,6 +95,7 @@
     <Compile Include="Mobile\Redirection\RequestHistory.cs" />
     <Compile Include="Mobile\Configuration\RedirectSection.cs" />
     <Compile Include="Mobile\Configuration\Support.cs" />
+<Compile Include="Properties\Constants.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Handlers\AmoiHandler.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Handlers\AndriodHandler.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Handlers\AppleCoreMediaHandler.cs" />

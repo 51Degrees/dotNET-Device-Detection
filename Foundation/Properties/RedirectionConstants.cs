@@ -44,7 +44,8 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                                                          "System.Web.UI.Page",
                                                          "System.Web.Mvc.MvcHandler",
                                                          "System.Web.Mvc.MvcHttpHandler",
-                                                         "System.Web.UI.MobileControls.MobilePage"
+                                                         "System.Web.UI.MobileControls.MobilePage",
+                                                         "System.Web.WebPages.WebPageHttpHandler"
                                                      };
 
         /// <summary>

@@ -146,6 +146,7 @@
     <Compile Include="Mobile\Detection\Wurfl\Configuration\PatchesCollection.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Configuration\WurflSection.cs" />
     <Compile Include="Mobile\Detection\Collection.cs" />
+<Compile Include="Properties\Constants.cs" />
     <Compile Include="Mobile\Detection\Wurfl\DeviceInfo.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Handlers\AlcatelHandler.cs" />
     <Compile Include="Mobile\Detection\Wurfl\Handlers\AOLHandler.cs" />

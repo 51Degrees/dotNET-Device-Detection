@@ -15,7 +15,11 @@ namespace Detector
         [WebMethod(false)]
         public string GetCapability(string capability)
         {
-            return Context.Request.Browser[capability];
+            if(Context.Request.Browser[capability] != null)
+            {
+                return Context.Request.Browser[capability];
+            }
+            return Context.Request.Browser.Capabilities[capability].ToString();
         }
     }
 }

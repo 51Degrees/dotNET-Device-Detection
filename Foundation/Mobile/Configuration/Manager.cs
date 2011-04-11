@@ -42,8 +42,8 @@ namespace FiftyOne.Foundation.Mobile.Configuration
 
         static Manager()
         {
-            Log = (LogSection) WebConfigurationManager.GetWebApplicationSection("fiftyOne/log");
-            Redirect = (RedirectSection) WebConfigurationManager.GetWebApplicationSection("fiftyOne/redirect");
+            Log = (LogSection)Support.GetWebApplicationSection("fiftyOne/log", false);
+            Redirect = (RedirectSection)Support.GetWebApplicationSection("fiftyOne/redirect", false);
         }
 
         #endregion
