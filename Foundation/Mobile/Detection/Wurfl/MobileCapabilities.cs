@@ -26,9 +26,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Web;
+using System.Web.Configuration;
 using FiftyOne.Foundation.Image;
 
 #endregion
@@ -253,7 +255,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                 {
                     Version version = new Version(versionString);
                     SetValue(capabilities, "majorversion", version.Major.ToString());
-                    SetValue(capabilities, "minorversion", "." + version.Minor.ToString());
+                    SetValue(capabilities, "minorversion", String.Format(".{0}", version.Minor));
                     SetValue(capabilities, "version", version.ToString());
                 }
                 catch (FormatException)
@@ -267,6 +269,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             }
             else
             {
+                // Transfer the current version capabilities to the new capabilities.
+                SetValue(capabilities, "majorversion", currentCapabilities != null ? currentCapabilities["majorversion"] : null);
+                SetValue(capabilities, "minorversion", currentCapabilities != null ? currentCapabilities["minorversion"] : null);
+                SetValue(capabilities, "version", currentCapabilities != null ? currentCapabilities["version"] : null);
+
                 // Ensure the version values are not null to prevent null arguement exceptions
                 // with some controls.
                 versionString = currentCapabilities != null ? currentCapabilities["version"] as string : "0.0";
@@ -326,7 +333,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 
         /// <summary>
         /// Sets the version using a regular expression to find numeric segments of
-        /// the provided version string.
+        /// the provided version string. If the version already exists in the
+        /// new dictionary of capabilities a new value will not be written.
         /// </summary>
         /// <param name="capabilities"></param>
         /// <param name="version"></param>
@@ -337,9 +345,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                 MatchCollection segments = Regex.Matches(version, @"\d+");
                 string majorVersion = segments.Count > 0 ? segments[0].Value : "0";
                 string minorVersion = segments.Count > 1 ? segments[1].Value : "0";
-                SetValue(capabilities, "majorversion", majorVersion);
-                SetValue(capabilities, "minorversion", minorVersion);
-                SetValue(capabilities, "version", majorVersion + "." + minorVersion);
+                if (String.IsNullOrEmpty(capabilities["majorversion"] as string))
+                    SetValue(capabilities, "majorversion", majorVersion);
+                if (String.IsNullOrEmpty(capabilities["minorversion"] as string))
+                    SetValue(capabilities, "minorversion", minorVersion);
+                if (String.IsNullOrEmpty(capabilities["version"] as string))
+                    SetValue(capabilities, "version", String.Format("{0}.{1}", majorVersion, minorVersion));
             }
         }
 

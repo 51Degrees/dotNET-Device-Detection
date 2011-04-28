@@ -44,6 +44,9 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         {
             Log = (LogSection)Support.GetWebApplicationSection("fiftyOne/log", false);
             Redirect = (RedirectSection)Support.GetWebApplicationSection("fiftyOne/redirect", false);
+
+            if (Redirect == null)
+                Redirect = new RedirectSection();
         }
 
         #endregion
