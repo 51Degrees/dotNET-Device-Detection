@@ -31,7 +31,10 @@ using FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
-    internal static class Factory
+    /// <summary>
+    /// Used to create the Capabilities collection based on the input like user agent string.
+    /// </summary>
+    public static class Factory
     {
         #region Fields
 
@@ -89,7 +92,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="userAgent">The useragent for the device.</param>
         /// <returns></returns>
-        internal static IDictionary Create(string userAgent)
+        public static IDictionary Create(string userAgent)
         {
             IDictionary caps;
 

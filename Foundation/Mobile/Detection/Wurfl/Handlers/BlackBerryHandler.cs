@@ -34,6 +34,18 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
                                                         @"VendorID/\d+"
                                                     };
 
+        // Has to be higher than Safari to avoid conflicts. Must be the same as BlackBerryVersion6.
+        internal new const byte CONFIDENCE = 10;
+
+        /// <summary>
+        /// Provides a higher degree of confidence because only devices in the "blackberry_generic_ver6"
+        /// branch of the device tree are available for matching.
+        /// </summary>
+        internal override byte Confidence
+        {
+            get { return CONFIDENCE; }
+        }
+
         internal BlackBerryHandler() : base(PATTERNS, new[] {10, 2, 11})
         {
         }

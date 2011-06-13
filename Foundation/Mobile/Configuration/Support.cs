@@ -37,7 +37,14 @@ using FiftyOne.Foundation.Mobile;
 
 namespace FiftyOne.Foundation.Mobile.Configuration
 {
-    internal static class Support
+    /// <summary>
+    /// Utility methods for handling common configuration tasks such as converting virutal
+    /// to physical paths, or retrieving configuration sections.
+    /// </summary>
+    /// <remarks>
+    /// This class should not be used in developers code.
+    /// </remarks>
+    public static class Support
     {
         #region Methods
 
@@ -93,7 +100,16 @@ namespace FiftyOne.Foundation.Mobile.Configuration
             return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, partialPath).Replace("/", "\\");
         }
 
-        internal static ConfigurationSection GetWebApplicationSection(string sectionName, bool isManadatory)
+        /// <summary>
+        /// Returns the configuration section relating to the name provided. If the section
+        /// is present in the web.config file this location is used. If it's present in the
+        /// alternative configuration file then it will be return from there.
+        /// </summary>
+        /// <param name="sectionName">The name of the section to be returned.</param>
+        /// <param name="isManadatory">True if the section is mandatary.</param>
+        /// <exception cref="MobileException">Thrown if the section does not exist and the section is mandatory.</exception>
+        /// <returns>The configuration section requested.</returns>
+        public static ConfigurationSection GetWebApplicationSection(string sectionName, bool isManadatory)
         {
             ConfigurationSection configurationSection = WebConfigurationManager.GetWebApplicationSection(sectionName) as ConfigurationSection;
 

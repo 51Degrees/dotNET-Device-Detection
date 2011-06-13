@@ -27,18 +27,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
     {
         private const string DEFAULT_DEVICE = "blackberry_generic_ver6";
 
-        // Has to be higher than safari to avoid conflicts.
-        private const byte EXTRA_CONFIDENCE = 3;
-
         private static readonly string[] SUPPORTED_ROOT_DEVICES = new[] { DEFAULT_DEVICE };
 
         /// <summary>
-        /// Provides a higher degree of confidence because only devices in the "blackberry_generic_ver6"
-        /// branch of the device tree are available for matching.
+        /// Has to be the same as BlackBerry handler as both handlers use UAProfs from
+        /// the same domain. If there was a difference one may be incorrectly favoured
+        /// over another.
         /// </summary>
         internal override byte Confidence
         {
-            get { return (byte)(base.Confidence + EXTRA_CONFIDENCE); }
+            get { return BlackBerryHandler.CONFIDENCE; }
         }
 
         /// <summary>

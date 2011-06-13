@@ -50,7 +50,7 @@ namespace FiftyOne.Foundation.Mobile
         /// Initializes a new instance of <see cref="MobileException"/>.
         /// </summary>
         /// <param name="message">The human readable message explaining the exception.</param>
-        internal MobileException(string message)
+        public MobileException(string message)
             : base(message)
         {
         }
@@ -60,7 +60,7 @@ namespace FiftyOne.Foundation.Mobile
         /// </summary>
         /// <param name="message">The human readable message explaining the exception.</param>
         /// <param name="innerException">The exception that caused the new one.</param>
-        internal MobileException(string message, Exception innerException)
+        public MobileException(string message, Exception innerException)
             : base(message, innerException)
         {
         }

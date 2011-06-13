@@ -14,7 +14,7 @@
  * 
  * The Initial Developer of the Original Code is owned by 
  * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees
- * Mobile Experts Limited are Copyright (C) 2009 - 2011. All Rights Reserved.
+ * Mobile Experts Limited are Copyright (C) 2009 - 2010. All Rights Reserved.
  * 
  * Contributor(s):
  *     James Rosewell <james@51degrees.mobi>
@@ -83,7 +83,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 
         /// <summary>
         /// The name of the key used to retrieve the SortedList object from
-        /// the HttpBrowserCapabilities collection.
+        /// the FiftyOneBrowserCapabilities collection.
         /// </summary>
         internal const string WurflCapabilities = "WurflCapabilities";
 
@@ -138,7 +138,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                                                                             "physical_screen_width",
                                                                             "physical_screen_height",
                                                                             "max_image_width",
-                                                                            "max_image_height"
+                                                                            "max_image_height",
+
+                                                                            // These capabilities are used internally by 51degrees.
+                                                                            "adapters",
+                                                                            "adapters_js",
+                                                                            "default_image_button_height_mms",
+                                                                            "default_image_button_height_pixels",
+                                                                            "default_selectable_font_size_points",
+                                                                            "xhtml_file_upload"
                                                                         };
     }
 }

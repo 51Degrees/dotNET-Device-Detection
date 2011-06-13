@@ -36,17 +36,51 @@ using System.Threading.Tasks;
 
 namespace FiftyOne
 {
-    internal abstract class Log
+    /// <summary>
+    /// This is the base class for recording messages in text files. The write operation to
+    /// file occurs outside of the current thread ensuring minimal impact on performance.
+    /// If the process completes before the thread has finished writing it is possible that
+    /// some messages will not be written. This is by design.
+    /// </summary>
+    /// <remarks>
+    /// This class should not be used in developers code.
+    /// </remarks>
+    public abstract class Log
     {
-        protected static object _syncQueue = new object();
-        protected static object _syncWait = new object();
+        #region Fields
+
+        /// <summary>
+        /// An internal object used for synchronising access to the message queue.
+        /// </summary>
+        protected internal static object _syncQueue = new object();
+
+        /// <summary>
+        /// An internal object used to synchronising access to the log file.
+        /// </summary>
+        protected internal static object _syncWait = new object();
+
+        /// <summary>
+        /// The message queue to use to record log entries.
+        /// </summary>
         private readonly Queue<string> _queue = new Queue<string>();
+
+        /// <summary>
+        /// Set to true if the message writing thread is running.
+        /// </summary>
         private bool _running;
+
+        #endregion
+
+        #region Abstract Methods
 
         /// <summary>
         /// Returns the full path to the file to be written to.
         /// </summary>
         protected abstract string LogFile { get; }
+
+        #endregion
+
+        #region Methods
 
         /// <summary>
         /// The main loop for the log file thread.
@@ -170,5 +204,7 @@ namespace FiftyOne
                 }
             }
         }
+
+        #endregion
     }
 }

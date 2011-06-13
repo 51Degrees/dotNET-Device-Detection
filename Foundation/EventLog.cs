@@ -32,7 +32,13 @@ using FiftyOne.Foundation.Mobile.Configuration;
 
 namespace FiftyOne
 {
-    internal class EventLog : Log
+    /// <summary>
+    /// Utility class, contains implementation for logging support.
+    /// </summary>
+    /// <remarks>
+    /// This class should not be used in developers code.
+    /// </remarks>
+    public class EventLog : Log
     {
         /// <summary>
         /// Used to lock during the creation of the log level parameter and instance.
@@ -60,6 +66,9 @@ namespace FiftyOne
         /// </summary>
         private string _logFile;
 
+        /// <summary>
+        /// An internal reference to the current static instance of the class.
+        /// </summary>
         protected internal static EventLog Instance
         {
             get
@@ -178,7 +187,11 @@ namespace FiftyOne
             }
         }
 
-        internal static void Debug(Exception ex)
+        /// <summary>
+        /// Records a debug exception in the log file if debug logging is enabled.
+        /// </summary>
+        /// <param name="ex">The exception to be recorded in the log file.</param>
+        public static void Debug(Exception ex)
         {
             if (IsDebug)
             {
@@ -189,7 +202,11 @@ namespace FiftyOne
             }
         }
 
-        internal static void Info(Exception ex)
+        /// <summary>
+        /// Records an info exception in the log file if info logging is enabled.
+        /// </summary>
+        /// <param name="ex">The exception to be recorded in the log file.</param>
+        public static void Info(Exception ex)
         {
             if (IsInfo)
             {
@@ -199,8 +216,12 @@ namespace FiftyOne
                     Info(ex.InnerException);
             }
         }
-
-        internal static void Warn(Exception ex)
+        
+        /// <summary>
+        /// Records a warn exception in the log file if warn logging is enabled.
+        /// </summary>
+        /// <param name="ex">The exception to be recorded in the log file.</param>
+        public static void Warn(Exception ex)
         {
             if (IsWarn)
             {
@@ -211,7 +232,11 @@ namespace FiftyOne
             }
         }
 
-        internal static void Fatal(Exception ex)
+        /// <summary>
+        /// Records a fatal exception in the log file if fatal logging is enabled.
+        /// </summary>
+        /// <param name="ex">The exception to be recorded in the log file.</param>
+        public static void Fatal(Exception ex)
         {
             if (IsFatal)
             {
@@ -222,25 +247,41 @@ namespace FiftyOne
             }
         }
 
-        internal static void Debug(string message)
+        /// <summary>
+        /// Records the message in the log file if debug logging is enabled.
+        /// </summary>
+        /// <param name="message">The text message to record in the log file.</param>
+        public static void Debug(string message)
         {
             if (IsDebug)
                 Write("Debug", message);
         }
 
-        internal static void Info(string message)
+        /// <summary>
+        /// Records the message in the log file if info logging is enabled.
+        /// </summary>
+        /// <param name="message">The text message to record in the log file.</param>
+        public static void Info(string message)
         {
             if (IsInfo)
                 Write("Info", message);
         }
 
-        internal static void Warn(string message)
+        /// <summary>
+        /// Records the message in the log file if warn logging is enabled.
+        /// </summary>
+        /// <param name="message">The text message to record in the log file.</param>
+        public static void Warn(string message)
         {
             if (IsWarn)
                 Write("Warn", message);
         }
 
-        internal static void Fatal(string message)
+        /// <summary>
+        /// Records the message in the log file if fatal logging is enabled.
+        /// </summary>
+        /// <param name="message">The text message to record in the log file.</param>
+        public static void Fatal(string message)
         {
             if (IsFatal)
                 Write("Fatal", message);
@@ -251,6 +292,11 @@ namespace FiftyOne
             return Process.GetCurrentProcess().Id;
         }
 
+        /// <summary>
+        /// Writes the level and message to the log file including the current time and process id.
+        /// </summary>
+        /// <param name="level">The level of the message. Values include debug, info, warn and fatal.</param>
+        /// <param name="message">The message string to be written.</param>
         protected internal static void Write(string level, string message)
         {
             Instance.Write(String.Format("{0:o} - {1} - {2} - {3}",

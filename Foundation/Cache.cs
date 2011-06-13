@@ -42,9 +42,14 @@ namespace FiftyOne
     /// Used to create a cache object of type Value with a string key.
     /// </summary>
     /// <typeparam name="Value">Type of object to hold in the cache.</typeparam>
-    internal class Cache<Value> : Cache<string, Value>
+    public class Cache<Value> : Cache<string, Value>
     {
-        internal Cache(int timeout) : base(timeout)
+        /// <summary>
+        /// Constructs a class of the type Cache&lt;Value&gt; using the
+        /// timeout value in minutes provided.
+        /// </summary>
+        /// <param name="timeout">Minimum number of minutes to hold items in the cache for.</param>
+        public Cache(int timeout) : base(timeout)
         {
         }
     }
@@ -54,7 +59,7 @@ namespace FiftyOne
     /// </summary>
     /// <typeparam name="Key">Type of the key for the class.</typeparam>
     /// <typeparam name="Value">Type of the value for the class.</typeparam>
-    internal class Cache<Key, Value>
+    public class Cache<Key, Value>
     {
         #region Fields
 
@@ -74,7 +79,7 @@ namespace FiftyOne
         /// specified in minutes.
         /// </summary>
         /// <param name="timeout">Number of minutes to hold items in the cache for.</param>
-        internal Cache(int timeout)
+        public Cache(int timeout)
         {
             _internalCache = new Dictionary<Key, Value>();
             _lastAccessed = new Dictionary<Key, DateTime>();
@@ -100,7 +105,7 @@ namespace FiftyOne
         /// </summary>
         /// <param name="key">Key of the value being requested.</param>
         /// <returns>Value or null if not found.</returns>
-        protected internal Value this[Key key]
+        public Value this[Key key]
         {
             get
             {
@@ -137,7 +142,7 @@ namespace FiftyOne
         /// <param name="key">Key of the value to be retrieved.</param>
         /// <param name="value">Set to the associated value if found.</param>
         /// <returns>True if the key was found in the list, otherwise false.</returns>
-        protected internal bool GetTryParse(Key key, out Value value)
+        public bool GetTryParse(Key key, out Value value)
         {
             bool result = false;
             if (key != null)

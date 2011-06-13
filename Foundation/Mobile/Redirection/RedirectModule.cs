@@ -237,9 +237,20 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                         if (_originalUrlAsQueryString)
                             // Use an encoded version of the requesting Url
                             // as the query string.
-                            newUrl = String.Format("{0}?origUrl={1}",
-                                                   newUrl,
-                                                   HttpUtility.UrlEncode(context.Request.Url.ToString()));
+                            if (newUrl.Contains("?"))
+                            {
+                                // Url already has a query string, so add requesting Url to it with a '&'.
+                                newUrl = String.Format("{0}&origUrl={1}",
+                                    newUrl,
+                                    HttpUtility.UrlEncode(context.Request.Url.ToString()));
+                            }
+                            else
+                            {
+                                // Url has no query string so create one now.
+                                newUrl = String.Format("{0}?origUrl={1}",
+                                    newUrl,
+                                    HttpUtility.UrlEncode(context.Request.Url.ToString()));
+                            }
 
                         if (EventLog.IsDebug)
                             EventLog.Debug(String.Format("Redirecting device with useragent '{0}' from url '{1}' to '{2}' due to '{3}'.",
