@@ -19,7 +19,9 @@ namespace Detector
             {
                 return Context.Request.Browser[capability];
             }
-            return Context.Request.Browser.Capabilities[capability].ToString();
+            if (Context.Request.Browser.Capabilities[capability] != null)
+                return Context.Request.Browser.Capabilities[capability].ToString();
+            return null;
         }
     }
 }

@@ -296,9 +296,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// <returns>Returns an instance of WurflFile. 
         /// <remarks>If none file is found a null value will be returned.</remarks>
         /// </returns>
-        /// <exception cref="System.IO.FileNotFoundException">Thrown if the parameter <paramref name="wurflFilePath"/> 
+        /// <exception cref="System.IO.FileNotFoundException">Thrown if the parameter <paramref name="wurflFilePaths"/> 
         /// referes to a file that does not exists.</exception>
-        /// <exception cref="System.ArgumentNullException">Thrown if the parameter <paramref name="wurflFilePath"/> 
+        /// <exception cref="System.ArgumentNullException">Thrown if the parameter <paramref name="wurflFilePaths"/> 
         /// is an empty string or a null value.</exception>
         internal static void ParseWurflFiles(
             Provider devices,

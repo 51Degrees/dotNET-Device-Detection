@@ -54,8 +54,10 @@ namespace Detector
                 PanelAdvanced.Controls.Add(CreateResultLabel("Pointing Method", service.GetCapability("pointing_method")));
                 PanelAdvanced.Controls.Add(CreateResultLabel("Actual Device Root", service.GetCapability("actual_device_root")));
                 PanelAdvanced.Controls.Add(CreateResultLabel("Tablet", service.GetCapability("is_tablet")));
-                PanelAdvanced.Controls.Add(CreateResultLabel("Version", service.GetCapability("mobile_browser_version")));
+                PanelAdvanced.Controls.Add(CreateResultLabel("Browser", service.GetCapability("mobile_browser")));
+                PanelAdvanced.Controls.Add(CreateResultLabel("Browser Version", service.GetCapability("mobile_browser_version")));
                 PanelAdvanced.Controls.Add(CreateResultLabel("Device OS", service.GetCapability("device_os")));
+                PanelAdvanced.Controls.Add(CreateResultLabel("Device OS Version", service.GetCapability("device_os_version")));
 
                 PanelBasic.Visible = true;
                 PanelAdvanced.Visible = true;
