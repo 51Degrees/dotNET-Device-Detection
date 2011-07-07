@@ -1,5 +1,5 @@
 /* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
+ * The contents of this file are subject to the Mozilla internal License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -62,7 +62,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
     /// </code>
     /// </example>
     /// </remarks>
-    public sealed class WurflSection : ConfigurationSection
+    internal sealed class WurflSection : ConfigurationSection
     {
         #region Constructors
 
@@ -77,7 +77,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// feature for those familar with WURFL. (Optional)
         /// </summary>
         [ConfigurationProperty("useActualDeviceRoot", IsRequired = false, DefaultValue = "false")]
-        public bool UseActualDeviceRoot
+        internal bool UseActualDeviceRoot
         {
             get { return (bool) this["useActualDeviceRoot"]; }
         }
@@ -87,7 +87,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// </summary>
         [ConfigurationProperty("wurflFilePath", IsRequired = false, DefaultValue = "~/bin/wurfl.xml.gz")]
         [StringValidator(InvalidCharacters = "!@#$%^&*()[]{};'\"|", MaxLength = 255)]
-        public string WurflFilePath
+        internal string WurflFilePath
         {
             get { return (string) this["wurflFilePath"]; }
         }
@@ -96,7 +96,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// Gets the collection of URLs to be used to find updates to the wurfl data file.
         /// </summary>
         [ConfigurationProperty("wurflUpdateUrls", IsRequired = false)]
-        public UrlCollection WurflUpdateUrls
+        internal UrlCollection WurflUpdateUrls
         {
             get { return (UrlCollection) this["wurflUpdateUrls"]; }
         }
@@ -105,7 +105,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// Gets the collection of patches to be applied to the original WurflFile.
         /// </summary>
         [ConfigurationProperty("wurflPatches", IsRequired = false)]
-        public PatchesCollection WurflPatches
+        internal PatchesCollection WurflPatches
         {
             get { return (PatchesCollection) this["wurflPatches"]; }
         }
@@ -116,9 +116,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// <remarks>
         /// If provided new device information will be sent to the URL.
         /// </remarks>
-        [ConfigurationProperty("newDevicesURL", IsRequired = false)]
+        [ConfigurationProperty("newDevicesURL", IsRequired = false, DefaultValue = "http://devices.51degrees.mobi/new.ashx")]
         [StringValidator(InvalidCharacters = "!@#$%^&*()[]{};'\"|", MaxLength = 255)]
-        public string NewDevicesURL
+        internal string NewDevicesURL
         {
             get { return (string) this["newDevicesURL"]; }
         }
@@ -134,7 +134,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// </remarks>
         [ConfigurationProperty("newDeviceDetail", IsRequired = false, DefaultValue = "minimum")]
         [StringValidator(InvalidCharacters = "!@#$%^&*()[]{};'\"|", MaxLength = 7)]
-        public string NewDeviceDetail
+        internal string NewDeviceDetail
         {
             get { return (string) this["newDeviceDetail"]; }
         }
@@ -145,7 +145,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// a significant cost in server memory.
         /// </summary>
         [ConfigurationProperty("capabilitiesWhiteList", IsRequired = false)]
-        public CapabilityCollection CapabilitiesWhiteList
+        internal CapabilityCollection CapabilitiesWhiteList
         {
             get { return (CapabilityCollection) this["capabilitiesWhiteList"]; }
         }

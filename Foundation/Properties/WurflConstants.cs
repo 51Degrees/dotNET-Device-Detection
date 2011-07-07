@@ -30,6 +30,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
     internal static class Constants
     {
         /// <summary>
+        /// Name of the handler XML resource.
+        /// </summary>
+        internal const string HandlerResourceName = "FiftyOne.Foundation.Properties.Handlers.xml";
+
+        /// <summary>
+        /// Name of the handler DTD resource.
+        /// </summary>
+        internal const string HandlerResourceDTDName = "FiftyOne.Foundation.Properties.Handlers.dtd";
+
+        /// <summary>
         /// The attribute used to determine if the device is a root.
         /// </summary>
         internal const string ActualDeviceRoot = "actual_device_root";
@@ -45,12 +55,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         internal const string DeviceNodeName = "device";
 
         /// <summary>
-        /// Holds an estimative of how many devices we'll need to store,
-        /// use this value when creating collections to store devices.
-        /// </summary>
-        internal const int EstimateNumberOfDevices = 14000;
-
-        /// <summary>
         /// Node name used to especify a fall back inside the WURFL xml file.
         /// </summary>
         internal const string FallbackAttributeName = "fall_back";
@@ -64,12 +68,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// Attribute name used to especify a name inside the WURFL xml file.
         /// </summary>
         internal const string NameAttributeName = "name";
-
-        /// <summary>
-        /// Length of time in ms the new devices thread should wait for a response from the
-        /// web server used to record new device information.
-        /// </summary>
-        internal const int NewUrlTimeOut = 5000;
 
         /// <summary>
         /// Attribute name used to especify a user agent inside the WURFL xml file.

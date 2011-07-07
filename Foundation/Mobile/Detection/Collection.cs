@@ -1,5 +1,5 @@
 /* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
+ * The contents of this file are subject to the Mozilla internal License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -30,18 +30,39 @@ using System.Collections.Generic;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
+    /// <summary>
+    /// A collection of string indexes.
+    /// </summary>
     internal class Collection : Dictionary<int, int>
     {
-        internal Collection() : base()
+        #region Fields
+
+        private readonly Strings _strings;
+
+        #endregion
+
+        #region Constructor
+
+        internal Collection(Strings strings) : base()
         {
+            _strings = strings;
         }
 
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Sets the capabilityName and Value in the collection.
+        /// </summary>
+        /// <param name="capabilityName">Name of the capability being set.</param>
+        /// <param name="value">Value of the capability being set.</param>
         internal void Set(string capabilityName, string value)
         {
             if (capabilityName == null)
                 throw new ArgumentNullException("capabilityName");
 
-            int id = Strings.Add(capabilityName);
+            int id = _strings.Add(capabilityName);
             if (id >= 0)
             {
                 lock (this)
@@ -50,15 +71,31 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     if (ContainsKey(id) == false)
                     {
                         // No. Create a new value and add it to the list.
-                        base.Add(id, Strings.Add(value ?? String.Empty));
+                        base.Add(id, _strings.Add(value ?? String.Empty));
                     }
                     else
                     {
                         // Yes. Replace it's value with the current one.
-                        base[id] = Strings.Add(value ?? String.Empty);
+                        base[id] = _strings.Add(value ?? String.Empty);
                     }
                 }
             }
         }
+
+        /// <summary>
+        /// Checks the other Collection object instance contains identical keys and values
+        /// as this one.
+        /// </summary>
+        /// <param name="other">Other Collection object.</param>
+        /// <returns>True if the object instances contain the same values.</returns>
+        internal bool Equals(Collection other)
+        {
+            foreach(var key in Keys)
+                if (other[key] != this[key])
+                    return false;
+            return true;
+        }
+
+        #endregion
     }
 }

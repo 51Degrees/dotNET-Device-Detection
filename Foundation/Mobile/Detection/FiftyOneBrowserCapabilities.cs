@@ -1,5 +1,5 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
+ * The contents of this file are subject to the Mozilla internal License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -32,7 +32,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// before returning a value if the capability has not been found in the 
     /// standard collection.
     /// </summary>
-    public class FiftyOneBrowserCapabilities : HttpBrowserCapabilities
+    internal class FiftyOneBrowserCapabilities : HttpBrowserCapabilities
     {
         #region Fields
 
@@ -47,7 +47,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="currentCapabilities">Capabilities provided by Microsoft.</param>
         /// <param name="overrideCapabilities">New capabilities provided by 51Degrees.mobi. Can not be null.</param>
-        public FiftyOneBrowserCapabilities(HttpBrowserCapabilities currentCapabilities, IDictionary overrideCapabilities)
+        internal FiftyOneBrowserCapabilities(HttpBrowserCapabilities currentCapabilities, IDictionary overrideCapabilities)
         {
             // Initialise the hashtable for capabilities.
             Capabilities = new Hashtable();

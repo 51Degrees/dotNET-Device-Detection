@@ -1,5 +1,5 @@
 /* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
+ * The contents of this file are subject to the Mozilla internal License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -23,6 +23,7 @@
 
 #region Usings
 
+using System;
 using System.Collections.Generic;
 
 #endregion
@@ -37,6 +38,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// Rather than store a unique copy of every string held in the Wurfl file a list of strings
     /// is used and the index of the string is held in the data classes.
     /// </summary>
+    [Serializable]
     internal class Strings
     {
         #region Fields
@@ -46,12 +48,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// list as the value or a list of values that match the hashcode. It is possible for several 
         /// different values to share the same hashcode.
         /// </summary>
-        private static readonly Dictionary<int, object> _index = new Dictionary<int, object>();
+        private readonly Dictionary<int, object> _index = new Dictionary<int, object>();
 
         /// <summary>
         /// All the strings used in the Wurfl file are held in this stack.
         /// </summary>
-        private static readonly List<string> _values = new List<string>();
+        internal readonly List<string> _values = new List<string>();
 
         #endregion
 
@@ -60,22 +62,22 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// The number of items in the list.
         /// </summary>
-        internal static int Count
+        internal int Count
         {
             get { return _values.Count; }
         }
 
         #endregion
 
-        #region Internal Methods
+        #region internal Methods
 
         /// <summary>
-        /// Adds a new string value to the list of Wurfl strings. If the value already exists
+        /// Adds a new string value to the list of strings. If the value already exists
         /// then it's index is returned. If it doesn't then a new entry is added.
         /// </summary>
         /// <param name="value">String value to add.</param>
         /// <returns>Index of the string in the _values list. Used the Get method to retrieve the string value later.</returns>
-        internal static int Add(string value)
+        internal int Add(string value)
         {
             int hashcode = value.GetHashCode();
             int result = IndexOf(value, hashcode);
@@ -123,13 +125,17 @@ namespace FiftyOne.Foundation.Mobile.Detection
             return result;
         }
 
+        #endregion
+
+        #region Internal Methods
+
         /// <summary>
         /// Returns the string at the index position provided. If the index is
         /// invalid then return null.
         /// </summary>
         /// <param name="index">Index of string required.</param>
         /// <returns>String value at the specified index.</returns>
-        internal static string Get(int index)
+        internal string Get(int index)
         {
             if (index == -1) return null;
             return _values[index];
@@ -144,7 +150,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        private static int AddValue(string value)
+        private int AddValue(string value)
         {
             int result;
             lock (_values)
@@ -162,7 +168,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="value">The value who's index is required from the list.</param>
         /// <param name="hashcode">The hashcode of the value.</param>
         /// <returns>The integer index of the string value in the list, otherwise -1.</returns>
-        private static int IndexOf(string value, int hashcode)
+        private int IndexOf(string value, int hashcode)
         {
             object obj = null;
             // Does the hashcode exist in the list.

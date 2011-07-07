@@ -1,5 +1,5 @@
 /* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
+ * The contents of this file are subject to the Mozilla internal License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -32,7 +32,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
     /// <summary>
     /// Defines configuration settings for capabilities. This class cannot be inherited.
     /// </summary>
-    public sealed class CapabilityElement : ConfigurationElement
+    internal sealed class CapabilityElement : ConfigurationElement
     {
         #region Constructors
 
@@ -45,7 +45,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// </summary>
         [ConfigurationProperty("capabilityName", DefaultValue = "model_name", IsRequired = true, IsKey = true)]
         [StringValidator(InvalidCharacters = ".!@#$%^&*()[]{};'\"|\\", MinLength = 1, MaxLength = 255)]
-        public string CapabilityName
+        internal string CapabilityName
         {
             get { return (string) this["capabilityName"]; }
             set { this["capabilityName"] = value; }

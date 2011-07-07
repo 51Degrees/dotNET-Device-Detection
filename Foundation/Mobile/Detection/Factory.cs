@@ -1,5 +1,5 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
+ * The contents of this file are subject to the Mozilla internal License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -24,7 +24,9 @@
 #region Usings
 
 using System.Collections;
+using System.Collections.Generic;
 using System.Web;
+using FiftyOne.Foundation.Mobile.Detection.Wurfl;
 using FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration;
 
 #endregion
@@ -34,7 +36,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// <summary>
     /// Used to create the Capabilities collection based on the input like user agent string.
     /// </summary>
-    public static class Factory
+    internal static class Factory
     {
         #region Fields
 
@@ -55,6 +57,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         private static MobileCapabilities _mobileCapabilities;
 
+        /// <summary>
+        /// Class used to record new devices.
+        /// </summary>
+        private static NewDevice _newDevice = new NewDevice(Manager.NewDevicesURL, Manager.NewDeviceDetail);
+
         #endregion
 
         #region Private Properties
@@ -74,7 +81,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         if (_mobileCapabilities == null)
                         {
                             if (Manager.Enabled)
-                                _mobileCapabilities = new Wurfl.MobileCapabilities();
+                            {
+                                List<string> wurflFiles = new List<string>();
+                                wurflFiles.Add(Manager.WurflFilePath);
+                                wurflFiles.AddRange(Manager.WurflPatchFiles);
+
+                                _mobileCapabilities = new Wurfl.MobileCapabilities(
+                                    new Provider(wurflFiles.ToArray(), Manager.CapabilitiesWhiteList, Manager.UseActualDeviceRoot));
+                            }
                         }
                     }
                 }
@@ -92,7 +106,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="userAgent">The useragent for the device.</param>
         /// <returns></returns>
-        public static IDictionary Create(string userAgent)
+        internal static IDictionary Create(string userAgent)
         {
             IDictionary caps;
 
@@ -138,7 +152,21 @@ namespace FiftyOne.Foundation.Mobile.Detection
             // capabilities for quick creation in future requests.
             caps = MobileCapabilities.Create(request, currentCapabilities);
             _cache[request.UserAgent] = caps;
+
+            // Send the header details to 51Degrees.mobi.
+            RecordNewDevice(request);
+
             return caps;            
+        }
+
+        /// <summary>
+        /// Send the header details to 51Degrees.mobi if the configuration is enabled.
+        /// </summary>
+        /// <param name="request">Details about the request that was used to create the new device.</param>
+        private static void RecordNewDevice(HttpRequest request)
+        {
+            if (_newDevice.Enabled)
+                _newDevice.RecordNewDevice(request);
         }
 
         #endregion

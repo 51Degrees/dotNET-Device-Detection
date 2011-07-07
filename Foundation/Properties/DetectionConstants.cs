@@ -26,6 +26,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
     internal static class Constants
     {
         /// <summary>
+        /// Length of time in ms the new devices thread should wait for a response from the
+        /// web server used to record new device information.
+        /// </summary>
+        internal const int NewUrlTimeOut = 5000;
+
+        /// <summary>
         /// Forces the useragent matcher to use a single thread if 
         /// multiple processors are available.
         /// </summary>

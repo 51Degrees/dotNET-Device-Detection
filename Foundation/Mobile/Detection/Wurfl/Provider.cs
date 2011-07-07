@@ -1,5 +1,5 @@
 /* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
+ * The contents of this file are subject to the Mozilla internal License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -31,11 +31,17 @@ using System.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
 using System.Web;
+using System.Xml;
+using System.Xml.Schema;
 using FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration;
+using FiftyOne.Foundation.Mobile.Detection.Handlers;
+using FiftyOne.Foundation.Mobile.Detection.Matchers;
 using FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers;
-using FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers;
-using Matcher=FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Final.Matcher;
+using Matcher=FiftyOne.Foundation.Mobile.Detection.Matchers.Final.Matcher;
+using RegexSegmentHandler = FiftyOne.Foundation.Mobile.Detection.Handlers.RegexSegmentHandler;
 
 #endregion
 
@@ -44,185 +50,245 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
     /// <summary>
     /// Represents all device data and capabilities.
     /// </summary>
-    internal class Provider
+    public class Provider : BaseProvider
     {
         #region Fields
 
         /// <summary>
-        /// Lock used to ensure only one thread can load the data.
+        /// If set to true only the device roots will be returned.
         /// </summary>
-        private static readonly object StaticLock = new object();
-
-        /// <summary>
-        /// Stores the default device for the WURFL provider.
-        /// </summary>
-        private static DeviceInfo _defaultDevice;
-
-        /// <summary>
-        /// The singleton instance of the Devices class.
-        /// </summary>
-        private static Provider _instance;
-
-        /// <summary>
-        /// Cache for devices found via this class. Devices not used within 60 minutes will be
-        /// removed from the cache.
-        /// </summary>
-        private readonly Cache<DeviceInfo> _cache = new Cache<DeviceInfo>(60);
-
-        /// <summary>
-        /// Hashtable of all devices.
-        /// </summary>
-        private readonly Hashtable _deviceIDs = new Hashtable(Constants.EstimateNumberOfDevices);
-
-        /// <summary>
-        /// An array of handlers used to match devices.
-        /// </summary>
-        private Handler[] _handlers;
-
-        /// <summary>
-        /// Set to true if use actual device root is set in the configuration.
-        /// </summary>
-        private bool _useActualDeviceRoot;
-
-        #endregion
-
-        #region Constructors
-
-        /// <summary>
-        /// Creates an instance of Devices.
-        /// </summary>
-        internal Provider()
-        {
-            InitHandlers();
-            _useActualDeviceRoot = Manager.UseActualDeviceRoot;
-        }
-
-        #endregion
-
-        #region Singleton
-
-        /// <summary>
-        /// Gets an instance of Provider.
-        /// </summary>
-        /// <remarks>
-        /// If none instance was yet created, tries to create a new one based on
-        /// the fiftyone.wurfl section on <c>web.config</c>.
-        /// </remarks>
-        internal static Provider Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    lock (StaticLock)
-                    {
-                        // Check the instance is still null now we have a lock.
-                        if (_instance == null)
-                            LoadSingleton();
-                    }
-                }
-                return _instance;
-            }
-        }
-
-        /// <summary>
-        /// Creates a single instance of this class to be used by all
-        /// clients within the AppDomain.
-        /// </summary>
-        private static void LoadSingleton()
-        {
-            Provider newInstance = new Provider();
-            try
-            {
-                long startTicks = DateTime.Now.Ticks;
-
-                // Load data from all available sources.
-                Processor.ParseWurflFiles(newInstance);
-
-                long duration = TimeSpan.FromTicks(DateTime.Now.Ticks - startTicks + 1).Milliseconds;
-
-                // Log the length of time taken to load the device data.
-                EventLog.Info(String.Format("Loaded {0} devices using {1} strings in {2}ms",
-                                            newInstance._deviceIDs.Count,
-                                            Strings.Count,
-                                            duration));
-
-                // Log the number of devices assigned to each handler if debugging is enabled.
-#if DEBUG
-                // Display the handler results.
-                //tomquery
-                /*if (newInstance._handlers != null && EventLog.IsDebug)
-                {
-                    for (int i = 0; i < newInstance._handlers.Length; i++)
-                    {
-                        EventLog.Debug(String.Format("Handler '{0}' loaded with {1} devices.",
-                                                     newInstance._handlers[i].GetType().Name,
-                                                     newInstance._handlers[i].UserAgents.Count));
-                    }
-                }*/
-#endif
-
-                // Store the single instance and change the status to show the
-                // data has finished loading.
-                newInstance.IsLoaded = true;
-                _instance = newInstance;
-            }
-            catch (WurflException ex)
-            {
-                // Record the exception.
-                EventLog.Fatal(ex);
-                // Set an empty Devices instance as it's not possible
-                // to reliably load the data files specified.
-                _instance = new Provider();
-            }
-        }
+        private readonly bool _useActualDeviceRoot;
 
         #endregion
 
         #region Properties
 
         /// <summary>
-        /// Returns the default device for the API. Used if all other options
-        /// to identify the device has failed.
+        /// The index of the "is_wireless_device" string in the Strings static collection.
         /// </summary>
-        internal static DeviceInfo DefaultDevice
+        internal readonly int IsWirelessDeviceIndex ;
+
+        /// <summary>
+        /// The index of the "is_tablet" string in the Strings static collection.
+        /// </summary>
+        internal readonly int IsTabletDeviceIndex;
+
+        #endregion
+        
+        #region Public Constructors
+
+        /// <summary>
+        /// Creates an instance of the WURFL provider class.
+        /// </summary>
+        public Provider(string[] wurflFilePaths, string[] capabilitiesWhiteList, bool useActualDeviceRoot)
+            : this(useActualDeviceRoot)
         {
-            get
+            InitHandlers();
+            InitWurflFiles(wurflFilePaths, capabilitiesWhiteList);
+        }
+
+        #endregion
+
+        #region Internal Constructors
+
+        /// <summary>
+        /// Constructs a new instance of <see cref="BaseProvider"/>.
+        /// </summary>
+        internal Provider()
+        {
+            // Set common string index values.
+            IsWirelessDeviceIndex = Strings.Add("is_wireless_device");
+            IsTabletDeviceIndex = Strings.Add("is_tablet");
+        }
+
+        /// <summary>
+        /// Constructs a new instance of <see cref="BaseProvider"/>.
+        /// </summary>
+        /// <param name="useActualDeviceRoot">True if only root devices should be returned.</param>
+        internal Provider(bool useActualDeviceRoot)
+            : this()
+        {
+            _useActualDeviceRoot = useActualDeviceRoot;
+        }
+
+        #endregion
+
+        #region Initialise Methods
+
+        /// <summary>
+        /// Creates a single instance of this class to be used by all
+        /// clients within the AppDomain.
+        /// </summary>
+        private void InitWurflFiles(string[] wurflFilePaths, string[] capabilitiesWhiteList)
+        {
+            try
             {
-                if (_defaultDevice == null)
-                {
-                    lock (StaticLock)
-                    {
-                        if (_defaultDevice == null)
-                        {
-                            foreach (string current in Constants.DefaultDeviceId)
-                            {
-                                _defaultDevice = Instance.GetDeviceInfoFromID(current);
-                                if (_defaultDevice != null)
-                                {
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                return _defaultDevice;
+                // Record the start time for the log file.
+                long startTicks = DateTime.Now.Ticks;
+
+                // Load data from all available sources.
+                Processor.ParseWurflFiles(this, wurflFilePaths, capabilitiesWhiteList);
+
+                long duration = (long) TimeSpan.FromTicks(DateTime.Now.Ticks - startTicks + 1).TotalMilliseconds;
+
+                // Log the length of time taken to load the device data.
+                EventLog.Info(String.Format("Loaded {0} devices using {1} strings in {2}ms",
+                                            AllDevices.Count,
+                                            Strings.Count,
+                                            duration));
+            }
+            catch (WurflException ex)
+            {
+                // Record the exception.
+                EventLog.Fatal(ex);
             }
         }
 
         /// <summary>
-        /// Indicates if this instance of <see cref="Factory"/> 
-        /// has finished loading data.
+        /// Loads the handlers based on the configuration resource included in the
+        /// Foundation project.
         /// </summary>
-        internal bool IsLoaded { get; private set; }
+        private void InitHandlers()
+        {
+            using (StreamReader streamReader = new StreamReader(GetType().Assembly.GetManifestResourceStream(Constants.HandlerResourceName)))
+            {
+                string xml = Regex.Replace(streamReader.ReadToEnd(), "<!DOCTYPE.+>", "");
+                using (StringReader textReader = new StringReader(xml))
+                {
+                    using (XmlReader reader = XmlReader.Create(textReader))
+                    {
+                        while (reader.Read())
+                        {
+                            if (reader.IsStartElement("handler"))
+                            {
+                                ProcessHandler(CreateHandler(reader, null, this), reader.ReadSubtree());
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         /// <summary>
-        /// The number of unique devices available following the loading of the
-        /// device data.
+        /// Processes the current handler and adds it to the list of handlers.
         /// </summary>
-        internal int Count
+        /// <param name="handler">The current handler object.</param>
+        /// <param name="reader">The XML stream reader.</param>
+        private void ProcessHandler(Handler handler, XmlReader reader)
         {
-            get { return _deviceIDs.Count; }
+            while (reader.Read())
+            {
+                if (reader.Depth > 0 && reader.IsStartElement())
+                {
+                    switch (reader.Name)
+                    {
+                        case "supportedRootDevices":
+                            ((IHandler)handler).SupportedRootDeviceIds.AddRange(ProcessDevices(reader.ReadSubtree()));
+                            break;
+                        case "unSupportedRootDevices":
+                            ((IHandler)handler).UnSupportedRootDeviceIds.AddRange(ProcessDevices(reader.ReadSubtree()));
+                            break;
+                        case "canHandle":
+                            handler.CanHandleRegex.AddRange(ProcessRegex(reader.ReadSubtree()));
+                            break;
+                        case "cantHandle":
+                            handler.CantHandleRegex.AddRange(ProcessRegex(reader.ReadSubtree()));
+                            break;
+                        case "regexSegments":
+                            if (handler is RegexSegmentHandler)
+                                ProcessRegexSegments((RegexSegmentHandler)handler, reader.ReadSubtree());
+                            break;
+                    }
+                }
+            }
+            Handlers.Add(handler);
+        }
+
+        /// <summary>
+        /// Adds the segments to the regular expression handler.
+        /// </summary>
+        /// <param name="handler">Regular expression handler.</param>
+        /// <param name="reader">The XML stream reader.</param>
+        private void ProcessRegexSegments(RegexSegmentHandler handler, XmlReader reader)
+        {
+            while (reader.Read())
+            {
+                if (reader.Depth > 0)
+                {
+                    string pattern = reader.GetAttribute("pattern");
+                    int weight = 0;
+                    if (String.IsNullOrEmpty(pattern) == false &&
+                        int.TryParse(reader.GetAttribute("weight"), out weight))
+                        handler.AddSegment(pattern, weight);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns a list of regexs used to evaluate the handler to see if it can
+        /// be used to handle the requested useragent.
+        /// </summary>
+        /// <param name="reader">The XML stream reader.</param>
+        /// <returns>A list of regexes.</returns>
+        private List<HandleRegex> ProcessRegex(XmlReader reader)
+        {
+            List<HandleRegex> regexs = new List<HandleRegex>();
+            while (reader.Read())
+            {
+                if (reader.Depth > 0 && reader.IsStartElement("regex"))
+                {
+                    HandleRegex regex = new HandleRegex(reader.GetAttribute("pattern"));
+                    regex.Children.AddRange(ProcessRegex(reader.ReadSubtree()));
+                    regexs.Add(regex);
+                }
+            }
+            return regexs;
+        }
+
+        /// <summary>
+        /// Returns a list of device IDs.
+        /// </summary>
+        /// <param name="reader">The XML stream reader.</param>
+        /// <returns>A list of device IDs.</returns>
+        private List<string> ProcessDevices(XmlReader reader)
+        {
+            List<string> devices = new List<string>();
+            while (reader.Read())
+            {
+                if (reader.IsStartElement("device"))
+                    devices.Add(reader.GetAttribute("id"));
+            }
+            return devices;
+        }
+
+        /// <summary>
+        /// Creates a new handler based on the attributes of the current element.
+        /// </summary>
+        /// <param name="reader">The XML stream reader.</param>
+        /// <param name="parent">The parent handler, or null if it does not exist.</param>
+        /// <param name="provider">The provider the handler will be associated with.</param>
+        /// <returns>A new handler object.</returns>
+        private Handler CreateHandler(XmlReader reader, Handler parent, Provider provider)
+        {
+            bool checkUAProf;
+            byte confidence;
+            string name = reader.GetAttribute("name");
+            string defaultDeviceId = reader.GetAttribute("defaultDevice");
+            string type = reader.GetAttribute("type");
+            bool.TryParse(reader.GetAttribute("checkUAProf"), out checkUAProf);
+            byte.TryParse(reader.GetAttribute("confidence"), out confidence);
+
+            switch (type)
+            {
+                case "editDistance":
+                    return new Handlers.EditDistanceHandler(provider, name, defaultDeviceId, confidence, checkUAProf);
+                case "reducedInitialString":
+                    return new Handlers.ReducedInitialStringHandler(provider, name, defaultDeviceId, confidence, checkUAProf, reader.GetAttribute("tolerance"));
+                case "regexSegment":
+                    return new Handlers.RegexSegmentHandler(provider, name, defaultDeviceId, confidence, checkUAProf);
+            }
+
+            throw new WurflException(String.Format("Type '{0}' is invalid.", type));
         }
 
         #endregion
@@ -230,308 +296,134 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         #region Methods
 
         /// <summary>
-        /// Loads all the handlers ready for future reference when
-        /// matching requests.
+        /// Returns the closest matching device from the result set to the target userAgent.
         /// </summary>
-        private void InitHandlers()
+        /// <param name="results">The result set to find a device from.</param>
+        /// <param name="userAgent">Target useragent.</param>
+        /// <returns>The closest matching device.</returns>
+        private DeviceInfo GetDeviceInfoClosestMatch(Results results, string userAgent)
         {
-            _handlers = new Handler[] {
-                 new AlcatelHandler(),
-                 new AlphaHandlerAtoF(),
-                 new AlphaHandlerGtoN(),
-                 new AlphaHandlerOtoS(),
-                 new AlphaHandlerTtoZ(),
-                 new AmoiHandler(),
-                 new AndriodHandler(),
-                 new AOLHandler(),
-                 new AppleHandler(),
-                 new AppleCoreMediaHandler(),
-                 new AvantHandler(),
-                 new BenQHandler(),
-                 new BlackBerryHandler(),
-                 new BlackBerryVersion6Handler(),
-                 new BirdHandler(),
-                 new BoltHandler(),
-                 new BrewHandler(),
-                 new CatchAllHandler(),
-                 new DoCoMoHandler(),
-                 new FirefoxHandler(),
-                 new GrundigHandler(),
-                 new HTCHandler(),
-                 new iTunesHandler(),
-                 new KDDIHandler(),
-                 new KyoceraHandler(),
-                 new LCTHandler(),
-                 new LGHandler(),
-                 new MaxonHandler(),
-                 new MitsubishiHandler(),
-                 new MobileCatchAllHandler(),
-                 new MobileSafariHandler(),
-                 new MotorolaHandler(),
-                 new MSIEHandler(),
-                 new NecHandler(),
-                 new NokiaHandler(),
-                 new MaemoNokiaHandler(),
-                 new NumericHandler(),
-                 new OperaHandler(),
-                 new OperaMiniHandler(),
-                 new OperaMobiHandler(),
-                 new PalmHandler(),
-                 new PanasonicHandler(),
-                 new PantechHandler(),
-                 new PhilipsHandler(),
-                 new PortalmmmHandler(),
-                 new QtekHandler(),
-                 new SafariHandler(),
-                 new SagemHandler(),
-                 new SamsungHandler(),
-                 new SanyoHandler(),
-                 new SendoHandler(),
-                 new SharpHandler(),
-                 new SiemensHandler(),
-                 new SoftBankHandler(),
-                 new SonyEricssonHandler(),
-                 new SPVHandler(),
-                 new TianyuHandler(),
-                 new ToshibaHandler(),
-                 new VodafoneHandler(),
-                 new WindowsCEHandler(),
-                 new WindowsPhoneHandler(),
-                 new ZuneHandler(),
+            if (results.Count == 1)
+                return results[0].Device as DeviceInfo;
+            
+            results.Sort();
+            DeviceInfo device = Matcher.Match(userAgent, results) as DeviceInfo;
+            if (device != null)
+                return device;
 
-                 // Add handlers for desktop browsers
-                 new ChromeHandler(),
-                 new FirefoxDesktopHandler(),
-                 new MSIEDesktopHandler(),
-                 new OperaDesktopHandler(),
-                 new SafariDesktopHandler()};
-        }
-
-        /// <summary>
-        /// Gets an array of handlers that will support the device information.
-        /// Device ids are used to determine if the handler supports the device
-        /// tree the requested device is within.
-        /// </summary>
-        /// <param name="device">Device information to find supporting handlers.</param>
-        /// <returns>A list of all handlers that can handle this device.</returns>
-        private Handler[] GetHandlers(DeviceInfo device)
-        {
-            byte highestConfidence = 0;
-            List<Handler> handlers = new List<Handler>();
-
-#if VER4
-            foreach (Handler handler in _handlers.Where(handler => handler.CanHandle(device)))
+            foreach (string deviceId in Constants.DefaultDeviceId)
             {
-                GetHandlers(ref highestConfidence, handlers, handler);
-            }
-#elif VER2
-            foreach (Handler handler in _handlers)
-            {
-                if (handler.CanHandle(device))
-                    GetHandlers(ref highestConfidence, handlers, handler);
-            }
-#endif
-            return handlers.ToArray();
-        }
-
-        /// <summary>
-        /// Gets an array of handlers that will support the useragent string.
-        /// </summary>
-        /// <param name="userAgent">Useragent string associated with the HTTP request.</param>
-        /// <returns>A list of all handlers that can handle this device.</returns>
-        private Handler[] GetHandlers(string userAgent)
-        {
-            byte highestConfidence = 0;
-            List<Handler> handlers = new List<Handler>();
-
-#if VER4
-            foreach (Handler handler in _handlers.Where(handler => handler.CanHandle(userAgent)))
-            {
-                GetHandlers(ref highestConfidence, handlers, handler);
-            }
-#elif VER2
-            foreach (Handler handler in _handlers)
-            {
-                if (handler.CanHandle(userAgent))
-                    GetHandlers(ref highestConfidence, handlers, handler);
-            }
-#endif
-            return handlers.ToArray();
-        }
-
-        /// <summary>
-        /// Returns an array of handlers that will be supported by the request.
-        /// Is used when a request is available so that header fields other
-        /// than Useragent can also be used in matching. For example; the
-        /// Useragent Profile fields.
-        /// </summary>
-        /// <param name="request">HttpRequest object.</param>
-        /// <returns>An array of handlers able to match the request.</returns>
-        private Handler[] GetHandlers(HttpRequest request)
-        {
-            byte highestConfidence = 0;
-            List<Handler> handlers = new List<Handler>();
-
-#if VER4
-            foreach (Handler handler in _handlers.Where(handler => handler.CanHandle(request)))
-            {
-                GetHandlers(ref highestConfidence, handlers, handler);
-            }
-#elif VER2
-            foreach (Handler handler in _handlers)
-            {
-                // If the handler can support the request and it's not the
-                // catch all handler add it to the list we'll use for matching.
-                if (handler.CanHandle(request))
-                    GetHandlers(ref highestConfidence, handlers, handler);
-            }
-#endif
-
-            return handlers.ToArray();
-        }
-
-        /// <summary>
-        /// Adds the handler to the list of handlers if the handler's confidence
-        /// is higher than or equal to the current highest handler confidence.
-        /// </summary>
-        /// <param name="highestConfidence">Highest confidence value to far.</param>
-        /// <param name="handlers">List of handlers.</param>
-        /// <param name="handler">Handler to be considered for adding.</param>
-        /// <returns>The new highest confidence value.</returns>
-        private static void GetHandlers(ref byte highestConfidence, List<Handler> handlers, Handler handler)
-        {
-            if (handler.Confidence > highestConfidence)
-            {
-                handlers.Clear();
-                handlers.Add(handler);
-                highestConfidence = handler.Confidence;
-            }
-            else if (handler.Confidence == highestConfidence)
-                handlers.Add(handler);
-        }
-
-        /// <summary>
-        /// Records the device in the indexes used by the API. If a device
-        /// with the same ID already exists the previous one is overwritten.
-        /// The device is also assigned to a handler based on the useragent,
-        /// and supported root devices of the handler.
-        /// </summary>
-        /// <param name="device">The new device being added.</param>
-        internal void Set(DeviceInfo device)
-        {
-            // Does the device already exist?
-            lock (_deviceIDs)
-            {
-                if (_deviceIDs.ContainsKey(device.DeviceId))
-                {
-                    // Yes. Replace the previous device as it's likely this new
-                    // one is coming from a more current source.
-                    _deviceIDs[device.DeviceId] = device;
-                }
-                else
-                {
-                    // No. So add the new device.
-                    _deviceIDs.Add(device.DeviceId, device);
-                }
+                DeviceInfo defaultDevice = GetDeviceInfoFromID(deviceId) as DeviceInfo;
+                if (defaultDevice != null)
+                    return defaultDevice;
             }
 
-            // Add the new device to handlers that can support it.
-            if (String.IsNullOrEmpty(device.UserAgent) == false)
-            {
-#if VER4
-            foreach (Handler handler in GetHandlers(device).Where(handler => handler != null))
-            {
-                handler.Set(device);
-            }
-#elif VER2
-                foreach (Handler handler in GetHandlers(device))
-                    if (handler != null)
-                        handler.Set(device);
-#endif
-            }
-        }
-
-        /// <summary>
-        /// Using the unique device id returns the device. Very quick return
-        /// when the device id is known.
-        /// </summary>
-        /// <param name="deviceID">Unique internal ID of the device.</param>
-        /// <returns>DeviceInfo object.</returns>
-        protected internal DeviceInfo GetDeviceInfoFromID(string deviceID)
-        {
-            if (_deviceIDs.ContainsKey(deviceID))
-            {
-                return (DeviceInfo)_deviceIDs[deviceID];
-            }
             return null;
         }
 
         /// <summary>
-        /// Used to check other header fields in case a transcoder is being used
-        /// and returns the true useragent string.
+        /// Returns the most common shared device across the results set.
+        /// If only one result is available this is returned.
         /// </summary>
-        /// <param name="request">Contains details of the request.</param>
-        /// <returns>The useragent string to use for matching purposes.</returns>
-        protected internal static string GetUserAgent(HttpRequest request)
+        /// <param name="results">The result set to find a device from.</param>
+        /// <returns>The most likely single device.</returns>
+        private DeviceInfo GetDeviceInfoSharedParent(Results results)
         {
-            string userAgent = request.UserAgent;
-#if VER4
-            string transcodeUserAgent =
-                Detection.Constants.TRANSCODER_USERAGENT_HEADERS.FirstOrDefault(e => request.Headers[e] != null);
-            if (transcodeUserAgent != null)
-                userAgent = transcodeUserAgent;
-#elif VER2
-            foreach (string current in Detection.Constants.TRANSCODER_USERAGENT_HEADERS)
+            if (results.Count == 1)
+                return results[0].Device as DeviceInfo;
+
+            foreach(Result result in results)
             {
-                if (request.Headers[current] != null)
-                {
-                    userAgent = request.Headers[current];
-                    break;
-                }
+                DeviceInfo sharedDevice = FindSharedParent(results, (DeviceInfo)result.Device);
+                if (sharedDevice != null)
+                    return sharedDevice;
             }
-#endif
-            if (userAgent == null)
-                userAgent = string.Empty;
-            else
-                userAgent = userAgent.Trim();
-            return userAgent;
+
+            foreach (string deviceId in Constants.DefaultDeviceId)
+            {
+                DeviceInfo defaultDevice = GetDeviceInfoFromID(deviceId) as DeviceInfo;
+                if (defaultDevice != null)
+                    return defaultDevice;
+            }
+
+            return null;
         }
 
         /// <summary>
-        /// Based on all the useragent string provided finds the
-        /// closed device if an exact match is not available.
+        /// Returns the shared parent if one exists.
+        /// </summary>
+        /// <param name="results"></param>
+        /// <param name="device"></param>
+        /// <returns></returns>
+        private static DeviceInfo FindSharedParent(Results results, DeviceInfo device)
+        {
+            if (IsShared(results, device))
+                return device;
+            if (device.FallbackDevice != null)
+                return FindSharedParent(results, device.FallbackDevice);
+            return null;
+        }
+
+        /// <summary>
+        /// Returns true if the device is shared in the parent hierarchy of 
+        /// all the others devices in the resultset. 
+        /// </summary>
+        /// <param name="results"></param>
+        /// <param name="device"></param>
+        /// <returns></returns>
+        private static bool IsShared(Results results, DeviceInfo device)
+        {
+            foreach(Result result in results)
+            {
+                if (((DeviceInfo)result.Device).GetIsParent(device.DeviceId) == false)
+                    return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Enhances the base implementation to check for devices marked with 
+        /// "actual_device_root" and only return these.
+        /// </summary>
+        /// <param name="request">HttpRequest associated with the requesting device.</param>
+        /// <returns>The closest matching device.</returns>
+        internal BaseDeviceInfo GetDeviceInfo(HttpRequest request)
+        {
+            DeviceInfo device = GetDeviceInfoClosestMatch(GetMatches(request), GetUserAgent(request));
+
+            if (device != null)
+            {
+                // If we're only looking for devices marked with 
+                // "actual_device_root" then look back throught the
+                // fallback devices until one is found.
+                if (_useActualDeviceRoot &&
+                    device.IsActualDeviceRoot == false)
+                    device = GetActualDeviceRootDeviceInfo(device);
+            }
+
+            return device;
+        }
+
+        /// <summary>
+        /// Enhances the base implementation to check for devices marked with 
+        /// "actual_device_root" and only return these.
         /// </summary>
         /// <param name="userAgent">Useragent string associated with the mobile device.</param>
         /// <returns>The closest matching device.</returns>
-        internal DeviceInfo GetDeviceInfo(string userAgent)
+        public DeviceInfo GetDeviceInfo(string userAgent)
         {
-            DeviceInfo device = null;
-            if (String.IsNullOrEmpty(userAgent) == false &&
-                _cache.GetTryParse(userAgent, out device) == false)
-            {
-                // Using the handler for this userAgent find the device.
-                Handler[] handlers = GetHandlers(userAgent);
-                if (handlers != null && handlers.Length > 0)
-                {
-                    // Get the device from the handlers found.
-                    device = GetDeviceInfo(userAgent, handlers);
+            DeviceInfo device = GetDeviceInfoClosestMatch(GetMatches(userAgent), userAgent);
 
-                    // If we're only looking for devices marked with 
-                    // "actual_device_root" then look back throught the
-                    // fallback devices until one is found.
-                    if (_useActualDeviceRoot && 
-                        device.IsActualDeviceRoot == false)
-                        device = GetActualDeviceRootDeviceInfo(device);
-
-                    // Add to the cache to improve performance.
-                    if (device != null)
-                        _cache[userAgent] = device;
-                }
-            }
-            if (device == null)
+            if (device != null)
             {
-                device = DefaultDevice;
+                // If we're only looking for devices marked with 
+                // "actual_device_root" then look back throught the
+                // fallback devices until one is found.
+                if (_useActualDeviceRoot &&
+                    device.IsActualDeviceRoot == false)
+                    device = GetActualDeviceRootDeviceInfo(device);
             }
+
             return device;
         }
 
@@ -551,155 +443,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                     return GetActualDeviceRootDeviceInfo(fallback);
             }
             return null;
-        }
-
-        /// <summary>
-        /// Based on all the HTTP request information available finds the
-        /// closed device if an exact match is not available. Uses fields
-        /// other than than useragent string to perform the match.
-        /// </summary>
-        /// <param name="request">HttpRequest associated with the requesting device.</param>
-        /// <returns>The closest matching device.</returns>
-        protected internal DeviceInfo GetDeviceInfo(HttpRequest request)
-        {
-            DeviceInfo device = null;
-
-            // Get a user agent string with common issues removed.
-            string userAgent = GetUserAgent(request);
-            
-            // Send the header details to 51Degrees.mobi.
-            RecordNewDevice(request);
-            
-            if (String.IsNullOrEmpty(userAgent) == false &&
-                _cache.GetTryParse(userAgent, out device) == false)
-            {
-                // Using the handler for this userAgent find the device.
-                Handler[] handlers = GetHandlers(request);
-                if (handlers != null && handlers.Length > 0)
-                {
-                    // Get the device from the handlers found.
-                    device = GetDeviceInfo(request, handlers);
-
-                    // If we're only looking for devices marked with 
-                    // "actual_device_root" then look back throught the
-                    // fallback devices until one is found.
-                    if (_useActualDeviceRoot &&
-                        device.IsActualDeviceRoot == false)
-                        device = GetActualDeviceRootDeviceInfo(device);
-
-                    // Add the device to the cache.
-                    if (device != null)
-                        _cache[userAgent] = device;
-                }
-            }
-            if (device == null)
-            {
-                device = DefaultDevice;
-            }
-            return device;
-        }
-
-        /// <summary>
-        /// Use the useragent to determine the closest matching device
-        /// from the handlers provided.
-        /// </summary>
-        /// <param name="userAgent">Useragent to be found.</param>
-        /// <param name="handlers">Handlers capable of finding devices for the request.</param>
-        /// <returns>The closest matching device or null if one can't be found.</returns>
-        private static DeviceInfo GetDeviceInfo(string userAgent, Handler[] handlers)
-        {
-            DeviceInfo device = null;
-            Results results = new Results();
-
-
-#if VER4
-            foreach (Results temp in handlers.Select(t => t.Match(userAgent)).Where(temp => temp != null))
-            {
-                results.AddRange(temp);
-            }
-#elif VER2
-            for (int i = 0; i < handlers.Length; i++)
-            {
-                // Find the closest matching devices.
-                Results temp = handlers[i].Match(userAgent);
-                // If some results have been found.
-                if (temp != null)
-                    // Combine the results with results from previous
-                    // handlers.
-                    results.AddRange(temp);
-            }
-#endif
-            if (results.Count == 1)
-            {
-                // Use the only result provided.
-                device = results[0].Device;
-            }
-            else if (results.Count > 1)
-            {
-                // Uses the matcher to narrow down the results.
-                device = Matcher.Match(userAgent, results);
-            }
-            if (device == null)
-                // No device was found so use the default device for the first 
-                // handler provided.
-                device = handlers[0].DefaultDevice;
-            return device;
-        }
-
-        /// <summary>
-        /// Use the HttpRequest fields to determine the closest matching device
-        /// from the handlers provided.
-        /// </summary>
-        /// <param name="request">HttpRequest object.</param>
-        /// <param name="handlers">Handlers capable of finding devices for the request.</param>
-        /// <returns>The closest matching device or null if one can't be found.</returns>
-        private static DeviceInfo GetDeviceInfo(HttpRequest request, Handler[] handlers)
-        {
-            DeviceInfo device = null;
-            Results results = new Results();
-
-#if VER4
-            foreach (Results temp in handlers.Select(t => t.Match(request)).Where(temp => temp != null))
-            {
-                results.AddRange(temp);
-            }
-#elif VER2
-            for (int i = 0; i < handlers.Length; i++)
-            {
-                // Find the closest matching devices.
-                Results temp = handlers[i].Match(request);
-                // If some results have been found.
-                if (temp != null)
-                    // Combine the results with results from previous
-                    // handlers.
-                    results.AddRange(temp);
-            }
-#endif
-            if (results.Count == 1)
-            {
-                // Use the only result provided.
-                device = results[0].Device;
-            }
-            else if (results.Count > 1)
-            {
-                // Uses the matcher to narrow down the results.
-                device = Matcher.Match(GetUserAgent(request), results);
-            }
-            if (device == null)
-                // No device was found so use the default device for the first 
-                // handler provided.
-                device = handlers[0].DefaultDevice;
-            return device;
-        }
-
-        /// <summary>
-        /// Send the header details to 51Degrees.mobi if the configuration is enabled.
-        /// </summary>
-        /// <param name="request">Details about the request that was used to create the new device.</param>
-        private static void RecordNewDevice(HttpRequest request)
-        {
-            if (WurflNewDevice.Enabled)
-                WurflNewDevice.RecordNewDevice(request);
         }
 
         #endregion

@@ -1,5 +1,5 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
+ * The contents of this file are subject to the Mozilla internal License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -69,35 +69,49 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Initialisers
 
         /// <summary>
-        /// Initiliases the HttpMobile registering this modules interest in
-        /// all new requests and handler mappings.
+        /// If the Wurfl configuration is enabled initialises the module.
         /// </summary>
         /// <param name="application">HttpApplication object for the web application.</param>
         public override void Init(HttpApplication application)
         {
+            if (Wurfl.Configuration.Manager.Enabled)
+            {
+                Initialise(application);
+            }
+            base.Init(application);
+        }
+
+        /// <summary>
+        /// Initiliases the HttpMobile registering this modules interest in
+        /// all new requests and handler mappings if the fiftyOne/wurfl 
+        /// element is present in the configuration.
+        /// </summary>
+        /// <param name="application">HttpApplication object for the web application.</param>
+        protected void Initialise(HttpApplication application)
+        {
             EventLog.Debug("Initialising Detector Module");
 #if VER4
-            // Replace the .NET v4 BrowserCapabilitiesProvider if it's not ours.
-            if (HttpCapabilitiesBase.BrowserCapabilitiesProvider is MobileCapabilitiesProvider == false)
-            {
-                lock (_lock)
+                // Replace the .NET v4 BrowserCapabilitiesProvider if it's not ours.
+                if (HttpCapabilitiesBase.BrowserCapabilitiesProvider is MobileCapabilitiesProvider == false)
                 {
-                    if (HttpCapabilitiesBase.BrowserCapabilitiesProvider is MobileCapabilitiesProvider == false)
+                    lock (_lock)
                     {
-                        // Use the existing provider as the parent if it's not null. 
-                        if (HttpCapabilitiesBase.BrowserCapabilitiesProvider != null)
-                            HttpCapabilitiesBase.BrowserCapabilitiesProvider = 
-                                new MobileCapabilitiesProvider((HttpCapabilitiesDefaultProvider)HttpCapabilitiesBase.BrowserCapabilitiesProvider);
-                        else
-                            HttpCapabilitiesBase.BrowserCapabilitiesProvider = 
-                                new MobileCapabilitiesProvider();
+                        if (HttpCapabilitiesBase.BrowserCapabilitiesProvider is MobileCapabilitiesProvider == false)
+                        {
+                            // Use the existing provider as the parent if it's not null. 
+                            if (HttpCapabilitiesBase.BrowserCapabilitiesProvider != null)
+                                HttpCapabilitiesBase.BrowserCapabilitiesProvider = 
+                                    new MobileCapabilitiesProvider((HttpCapabilitiesDefaultProvider)HttpCapabilitiesBase.BrowserCapabilitiesProvider);
+                            else
+                                HttpCapabilitiesBase.BrowserCapabilitiesProvider = 
+                                    new MobileCapabilitiesProvider();
+                        }
                     }
                 }
-            }
 
-            // The new BrowserCapabilitiesProvider functionality in .NET v4 negates the need to 
-            // override browser properties in the following way. The rest of the module is redundent
-            // in .NET v4.
+                // The new BrowserCapabilitiesProvider functionality in .NET v4 negates the need to 
+                // override browser properties in the following way. The rest of the module is redundent
+                // in .NET v4.
 #elif VER2
             StaticFieldInit();
 
@@ -112,8 +126,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
             if (_clientTargets != null)
                 application.PreRequestHandlerExecute += SetPagePreIntClientTargets;
 #endif
-
-            base.Init(application);
         }
 
 #if VER2
@@ -178,7 +190,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="sender">HttpApplication related to the request.</param>
         /// <param name="e">EventArgs related to the event. Not used.</param>
-        private static void SetPagePreIntClientTargets(object sender, EventArgs e)
+        private void SetPagePreIntClientTargets(object sender, EventArgs e)
         {
             if (sender is HttpApplication)
             {
@@ -198,7 +210,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="sender">HttpApplication related to the request.</param>
         /// <param name="e">EventArgs related to the event. Not used.</param>
-        private static void OnBeginRequest(object sender, EventArgs e)
+        private void OnBeginRequest(object sender, EventArgs e)
         {
             if (sender is HttpApplication)
             {
@@ -234,7 +246,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="sender">Page associated with the request.</param>
         /// <param name="e">Event arguements.</param>
-        private static void OnPreInitPage(object sender, EventArgs e)
+        private void OnPreInitPage(object sender, EventArgs e)
         {
             Page page = sender as Page;
 
@@ -298,7 +310,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="currentCapabilities"></param>
         /// <param name="overrideCapabilities"></param>
-        private static HttpBrowserCapabilities AddNewCapabilities(HttpBrowserCapabilities currentCapabilities, IDictionary overrideCapabilities)
+        protected static HttpBrowserCapabilities AddNewCapabilities(HttpBrowserCapabilities currentCapabilities, IDictionary overrideCapabilities)
         {
             // We can't do anything with null capabilities. Return the current ones.
             if (overrideCapabilities == null)
@@ -308,6 +320,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
             return new FiftyOneBrowserCapabilities(currentCapabilities, overrideCapabilities);
         }
 
+        #endregion
+
+        #region Virtual Methods
+
         /// <summary>
         /// If this device is not already using our mobile capabilities
         /// then check to see if it's a mobile. If we think it's a mobile
@@ -315,7 +331,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// the current capabilities.
         /// </summary>
         /// <param name="context"><see cref="HttpContext"/> to be tested and overridden.</param>
-        private static void OverrideCapabilities(HttpContext context)
+        protected virtual void OverrideCapabilities(HttpContext context)
         {
             context.Request.Browser = AddNewCapabilities(context.Request.Browser, 
                 Factory.Create(context.Request, context.Request.Browser.Capabilities));
@@ -327,7 +343,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="request">The request who's capabilities collection should be updated.</param>
         /// <param name="userAgent">The useragent string of the device requiring capabilities to be added.</param>
-        private static void OverrideCapabilities(HttpRequest request, string userAgent)
+        protected virtual void OverrideCapabilities(HttpRequest request, string userAgent)
         {
             request.Browser = AddNewCapabilities(request.Browser, Factory.Create(userAgent));
         }

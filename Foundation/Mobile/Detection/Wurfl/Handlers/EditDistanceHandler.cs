@@ -1,5 +1,5 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
+ * The contents of this file are subject to the Mozilla internal License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -21,20 +21,85 @@
  * 
  * ********************************************************************* */
 
-#region Usings
-
-using FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers;
-using Matcher=FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.EditDistance.Matcher;
-
-#endregion
+using System.Collections.Generic;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
-    internal abstract class EditDistanceHandler : Handler
+    /// <summary>
+    /// Device detection handler using the EditDistance method of matching devices.
+    /// </summary>
+    internal class EditDistanceHandler : Detection.Handlers.EditDistanceHandler, IHandler
     {
-        protected internal override Results Match(string userAgent)
+        #region Fields
+
+        /// <summary>
+        /// A list of device ids that must be in the device hierarchy
+        /// to enable the handler to support the device.
+        /// </summary>
+        private List<string> _supportedRootDeviceIds = new List<string>();
+
+        /// <summary>
+        /// A list of device ids that must NOT be in the device hierarchy
+        /// to enable the handler to support the device.
+        /// </summary>
+        private List<string> _unSupportedRootDeviceIds = new List<string>();
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// A list of device ids that must be in the device hierarchy
+        /// to enable the handler to support the device.
+        /// </summary>
+        List<string> IHandler.SupportedRootDeviceIds
         {
-            return Matcher.Match(userAgent, this);
+            get { return _supportedRootDeviceIds; }
         }
+
+        /// <summary>
+        /// A list of device ids that must NOT be in the device hierarchy
+        /// to enable the handler to support the device.
+        /// </summary>
+        List<string> IHandler.UnSupportedRootDeviceIds
+        {
+            get { return _unSupportedRootDeviceIds; }
+        }
+
+        #endregion
+
+        #region Constructor
+
+        /// <summary>
+        /// Constucts an instance of <see cref="EditDistanceHandler"/>.
+        /// </summary>
+        /// <param name="provider">Reference to the provider instance the handler will be associated with.</param>
+        /// <param name="name">Name of the handler for debugging purposes.</param>
+        /// <param name="defaultDeviceId">The default device ID to return if no match is possible.</param>
+        /// <param name="confidence">The confidence this handler should be given compared to others.</param>
+        /// <param name="checkUAProfs">True if UAProfs should be checked.</param>
+        internal EditDistanceHandler(BaseProvider provider, string name, string defaultDeviceId, byte confidence, bool checkUAProfs)
+            : base(provider, name, defaultDeviceId ?? Constants.DefaultDeviceId[0], confidence, checkUAProfs)
+        {
+        }
+
+        #endregion
+
+        #region Overriden Methods
+
+        /// <summary>
+        /// Checks to see if the handler can support this device. The 
+        /// supported and unsupported device lists are checked along
+        /// with the devices hierarchy to ensure the handler supports 
+        /// the device.
+        /// </summary>
+        /// <param name="device">Device to be checked.</param>
+        /// <returns>True if the device is supported, other false.</returns>
+        protected internal override bool CanHandle(BaseDeviceInfo device)
+        {
+            return Support.CanHandle(this, (DeviceInfo)device) && base.CanHandle(device);
+        }
+
+        #endregion
     }
 }

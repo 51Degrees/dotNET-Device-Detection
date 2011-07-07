@@ -1,5 +1,5 @@
 /* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
+ * The contents of this file are subject to the Mozilla internal License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -56,7 +56,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
 
         static Manager()
         {
-            _configurationSection = (WurflSection)Support.GetWebApplicationSection("fiftyOne/wurfl", true);
+            _configurationSection = (WurflSection)Support.GetWebApplicationSection("fiftyOne/wurfl", false);
         }
 
         #endregion
@@ -104,6 +104,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
             get { return _configurationSection.NewDevicesURL; }
         }
 
+        /// <summary>
+        /// Returns the level of detail to provide.
+        /// </summary>
         internal static NewDeviceDetail NewDeviceDetail
         {
             get
@@ -122,14 +125,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// Gets a list containing the names of the capabilities to be used.
         /// If none, all capabilities will be loaded into the memory.
         /// </summary>
-        internal static StringCollection CapabilitiesWhiteList
+        internal static string[] CapabilitiesWhiteList
         {
             get
             {
-                StringCollection capabilitiesWhiteList = new StringCollection();
+                List<string> capabilitiesWhiteList = new List<string>();
                 foreach (CapabilityElement capability in _configurationSection.CapabilitiesWhiteList)
                     capabilitiesWhiteList.Add(capability.CapabilityName);
-                return capabilitiesWhiteList;
+                return capabilitiesWhiteList.ToArray();
             }
         }
 

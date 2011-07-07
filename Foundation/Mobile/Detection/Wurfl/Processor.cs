@@ -1,5 +1,5 @@
 /* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
+ * The contents of this file are subject to the Mozilla internal License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -29,6 +29,7 @@ using System.Linq;
 #region Usings
 
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.IO.Compression;
@@ -48,23 +49,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         #region Constants
 
         private static readonly string[] COMPRESSED = {".gz"};
-
-        #endregion
-
-        #region Fields
-
-        private static readonly StringCollection _capabilitiesWhiteListed = new StringCollection();
-        private static bool _loadOnlyCapabilitiesWhiteListed;
-
-        #endregion
-
-        #region Constructors
-
-        static Processor()
-        {
-            foreach (string capability in Constants.DefaultUsedCapabilities)
-                _capabilitiesWhiteListed.Add(capability);
-        }
 
         #endregion
 
@@ -94,15 +78,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         #region Parse Wurfl Methods
 
         /// <summary>
-        /// Parses the Wurfl files and updates the devices object with data found.
+        /// Load the Wurfl files and updates the devices object with data found.
         /// </summary>
         /// <param name="wurflFilePaths">Paths of the Wurfl xml and patch files.</param>
         /// <param name="devices">Collection of mobile devices.</param>
-        /// <param name="masterFileDate">If a device has a creation date element only include it in the
-        /// device database if it was created after the master file's date and time.</param>
+        /// <param name="capabilitiesWhiteList">A white list of capabilites to load, or null if everything should be loaded.</param>
         /// <remarks>If no files are found devices will remain unchanged.</remarks>
-        private static void ParseWurflFiles(Provider devices, StringCollection wurflFilePaths,
-                                            DateTime masterFileDate)
+        private static void LoadWurflFiles(Provider devices, string[] wurflFilePaths, List<string> capabilitiesWhiteList)
         {
             StringCollection availableCapabilities = new StringCollection();
 
@@ -112,7 +94,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                 LoadXmlData(availableCapabilities,
                             devices,
                             filePath,
-                            masterFileDate);
+                            capabilitiesWhiteList);
             }
         }
 
@@ -132,9 +114,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 
         private static void LoadXmlData(
             StringCollection availableCapabilities,
-            Provider devices,
+            Provider provider,
             string filePath,
-            DateTime masterFileDate)
+            List<string> capabilitiesWhiteList)
         {
             DeviceInfo device = null;
             FileInfo file = new FileInfo(filePath);
@@ -152,27 +134,27 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                         {
                             switch (reader.Name)
                             {
-                                    // Load Device Data
                                 case Constants.DeviceNodeName:
+                                    // Load Device Data
                                     if (reader.IsStartElement())
                                     {
                                         // If a device has already been created ensure it's saved.
                                         if (device != null)
-                                            devices.Set(device);
-
+                                            provider.Set(device);
                                         // Create or get the device related to the current XML element.
-                                        device = LoadDevice(devices, reader);
+                                        device = LoadDevice(provider, reader);
                                     }
                                     break;
-
-                                    // Load the device capability.
+                                    
                                 case Constants.CapabilityNodeName:
+                                    // Load the device capability.
                                     if (reader.IsStartElement())
                                     {
                                         LoadCapabilityData(
                                             reader,
                                             device,
-                                            availableCapabilities);
+                                            availableCapabilities,
+                                            capabilitiesWhiteList);
                                     }
                                     break;
                             }
@@ -180,7 +162,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 
                         // If a device has not been written ensure it's added to the device dataset.
                         if (device != null)
-                            devices.Set(device);
+                            provider.Set(device);
                     }
                     catch (XmlException ex)
                     {
@@ -207,10 +189,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// <summary>
         /// Processes the XML element containing the device attributes.
         /// </summary>
-        /// <param name="devices">A list of loaded devices.</param>
+        /// <param name="provider">A list of loaded devices.</param>
         /// <param name="reader">The XML stream readers.</param>
         /// <returns>An empty device.</returns>
-        private static DeviceInfo LoadDevice(Provider devices, XmlReader reader)
+        private static DeviceInfo LoadDevice(Provider provider, XmlReader reader)
         {
             // Create the next device using the fallback device if available.
             string deviceId = reader.GetAttribute(Constants.IdAttributeName, string.Empty);
@@ -220,16 +202,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             // If the device already exists then use the previous one. This may happen
             // when an earlier device referenced a fallback device that had not yet
             // been created.
-            DeviceInfo device = devices.GetDeviceInfoFromID(deviceId);
+            DeviceInfo device = (DeviceInfo)provider.GetDeviceInfoFromID(deviceId);
             if (device == null)
             {
                 // Create the new device.
-                device = new DeviceInfo(devices, deviceId, userAgent ?? String.Empty);
+                device = new DeviceInfo(provider, deviceId, userAgent ?? String.Empty);
             }
             else if (userAgent != null)
             {
                 // Ensure the correct UserAgent string is assigned to this device.
-                device.SetUserAgent(userAgent);
+                device.InternalUserAgent = userAgent;
+                provider.Set(device);
             }
 
             // If the Actual Device Root attribute is specified then set the value 
@@ -242,13 +225,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             if (fallbackDeviceId != null && device.DeviceId != fallbackDeviceId)
             {
                 // Does the fallback device already exist?
-                device.FallbackDevice = devices.GetDeviceInfoFromID(fallbackDeviceId);
+                device.FallbackDevice = (DeviceInfo)provider.GetDeviceInfoFromID(fallbackDeviceId);
                 if (device.FallbackDevice == null)
                 {
                     // No. So create new fallback device.
-                    device.FallbackDevice = new DeviceInfo(devices, fallbackDeviceId);
+                    device.FallbackDevice = new DeviceInfo(provider, fallbackDeviceId);
                     // Add it to the available devices.
-                    devices.Set(device.FallbackDevice);
+                    provider.Set(device.FallbackDevice);
                 }
             }
             return device;
@@ -278,14 +261,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         private static void LoadCapabilityData(
             XmlReader reader,
             DeviceInfo device,
-            StringCollection availableCapabilities)
+            StringCollection availableCapabilities,
+            List<string> capabilitiesWhiteList)
         {
             string capabilityName = reader.GetAttribute(Constants.NameAttributeName, string.Empty);
 
             // If it is not white listed, do not load into the memory.
             // This is to keep memory consumption down.
-            if (_loadOnlyCapabilitiesWhiteListed &&
-                _capabilitiesWhiteListed.Contains(capabilityName) == false)
+            if (capabilitiesWhiteList != null &&
+                capabilitiesWhiteList.Contains(capabilityName) == false)
                 return;
 
             string capabilityValue = reader.GetAttribute(Constants.ValueAttributeName, string.Empty);
@@ -301,52 +285,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 
         #endregion
 
-        #region Public Methods
-
-        internal static void ParseWurflFiles(Provider devices)
-        {
-            // Parse the wurfl files.
-            ParseWurflFiles(
-                devices,
-                Manager.WurflFilePath,
-                Manager.CapabilitiesWhiteList,
-                Manager.WurflPatchFiles);
-        }
-
-        /// <summary>
-        /// Parses the wurfl file into a instance of Devices.
-        /// </summary>
-        /// <param name="devices">Instance of Devices to store data.</param>
-        /// <param name="wurflFilePath">Wurfl file path.</param>
-        /// <param name="wurflPatchFiles">Null, string or array of strings representing the wurfl patch files
-        /// which must be applied against the main file.</param>
-        /// <returns>Returns an instance of Devices. 
-        /// <remarks>If none file is found a null value will be returned.</remarks>
-        /// </returns>
-        /// <exception cref="System.IO.FileNotFoundException">Thrown if the parameter <paramref name="wurflFilePath"/> 
-        /// referes to a file that does not exists.</exception>
-        /// <exception cref="System.ArgumentNullException">Thrown if the parameter <paramref name="wurflFilePath"/> 
-        /// is an empty string or a null value.</exception>
-        private static void ParseWurflFiles(
-            Provider devices,
-            string wurflFilePath,
-            params string[] wurflPatchFiles)
-        {
-            ParseWurflFiles(
-                devices,
-                wurflFilePath,
-                null,
-                wurflPatchFiles);
-        }
+        #region Internal Methods
 
         /// <summary>
         /// Parses the wurfl file into a instance of WurflFile.
         /// </summary>
         /// <param name="devices">Instance of Devices to store data.</param>
-        /// <param name="wurflFilePath">Wurfl file path.</param>
         /// <param name="capabilitiesWhiteList">List of capabilities to be used. If none, all capabilities will be loaded into the memory.</param>
-        /// <param name="wurflPatchFiles">Null, string or array of strings representing the wurfl patch files
-        /// which must be applied against the main file.</param>
+        /// <param name="wurflFilePaths">Array of WURFL format files to load.</param>
         /// <returns>Returns an instance of WurflFile. 
         /// <remarks>If none file is found a null value will be returned.</remarks>
         /// </returns>
@@ -354,40 +300,32 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// referes to a file that does not exists.</exception>
         /// <exception cref="System.ArgumentNullException">Thrown if the parameter <paramref name="wurflFilePath"/> 
         /// is an empty string or a null value.</exception>
-        private static void ParseWurflFiles(
+        internal static void ParseWurflFiles(
             Provider devices,
-            string wurflFilePath,
-            StringCollection capabilitiesWhiteList,
-            params string[] wurflPatchFiles)
+            string[] wurflFilePaths,
+            string[] capabilitiesWhiteList)
         {
-            if (string.IsNullOrEmpty(wurflFilePath))
-                throw new ArgumentNullException("wurflFilePath");
-
-            if (!File.Exists(wurflFilePath))
-                throw new FileNotFoundException(Constants.WurflFileNotFound, wurflFilePath);
-
-            // Load white listed capabilities
-            if (capabilitiesWhiteList != null)
+            // Check all the patch files exist.
+            foreach (string wurflFilePath in wurflFilePaths)
             {
-                _loadOnlyCapabilitiesWhiteListed = capabilitiesWhiteList.Count > 0;
-#if VER4
-                foreach (string capability in
-                    capabilitiesWhiteList.Cast<string>().Where(capability => !_capabilitiesWhiteListed.Contains(capability)))
-                {
-                    _capabilitiesWhiteListed.Add(capability);
-                }
-#elif VER2
-                foreach (string capability in capabilitiesWhiteList)
-                    if (!_capabilitiesWhiteListed.Contains(capability))
-                        _capabilitiesWhiteListed.Add(capability);
-#endif
+                if (string.IsNullOrEmpty(wurflFilePath))
+                    throw new ArgumentNullException("wurflFilePath");
+
+                if (!File.Exists(wurflFilePath))
+                    throw new FileNotFoundException(Constants.WurflFileNotFound, wurflFilePath);
             }
 
-            StringCollection wurflFilePaths = new StringCollection();
-            wurflFilePaths.Add(wurflFilePath);
-            wurflFilePaths.AddRange(wurflPatchFiles);
+            // Create the final white list of capabilites if provided.
+            List<string> finalCapabilitiesWhiteList = null;
+            if (capabilitiesWhiteList != null && capabilitiesWhiteList.Length > 0)
+            {
+                finalCapabilitiesWhiteList = new List<string>(Constants.DefaultUsedCapabilities);
+                foreach (string capability in capabilitiesWhiteList)
+                    if (finalCapabilitiesWhiteList.Contains(capability) == false)
+                        finalCapabilitiesWhiteList.Add(capability);
+            }
 
-            ParseWurflFiles(devices, wurflFilePaths, File.GetCreationTimeUtc(wurflFilePath));
+            LoadWurflFiles(devices, wurflFilePaths, finalCapabilitiesWhiteList);
         }
 
         #endregion

@@ -1,5 +1,5 @@
 /* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
+ * The contents of this file are subject to the Mozilla internal License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -34,12 +34,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
     /// Represents Wurfl exceptions.
     /// </summary>
     [Serializable]
-    public class WurflException : Exception
+    internal class WurflException : Exception
     {
         /// <summary>
         /// Initializes a new instance of <see cref="WurflException"/>
         /// </summary>
-        public WurflException()
+        internal WurflException()
         {
         }
 
@@ -47,7 +47,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// Initializes a new instance of <see cref="WurflException"/>
         /// </summary>
         /// <param name="message">The human readable message explaining the exception.</param>
-        public WurflException(string message)
+        internal WurflException(string message)
             : base(message)
         {
         }
@@ -57,7 +57,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// </summary>
         /// <param name="message">The human readable message explaining the exception.</param>
         /// <param name="innerException">The exception that caused the new one.</param>
-        public WurflException(string message, Exception innerException)
+        internal WurflException(string message, Exception innerException)
             : base(message, innerException)
         {
         }

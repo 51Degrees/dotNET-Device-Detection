@@ -1,5 +1,5 @@
-/* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
+﻿/* *********************************************************************
+ * The contents of this file are subject to the Mozilla internal License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -18,154 +18,24 @@
  * 
  * Contributor(s):
  *     James Rosewell <james@51degrees.mobi>
- *     Andy Allan <andy.allan@mobgets.com>
  * 
  * ********************************************************************* */
 
-#region Usings
-
 using System;
-using FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers;
-
-#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 {
     /// <summary>
-    /// Represents a device and holds all its settings.
+    /// Represents a WURFL device and holds all its settings.
     /// </summary>
-    public class DeviceInfo
+    public class DeviceInfo : BaseDeviceInfo
     {
         #region Fields
-
-        /// <summary>
-        /// Holds all capabilities from the current device
-        /// </summary>
-        private Collection _deviceCapabilities;
-
-        /// <summary>
-        /// The Id of the device.
-        /// </summary>
-        private string _deviceId;
-
-        /// <summary>
-        /// A reference to the collection of all devices.
-        /// </summary>
-        private Provider _devices;
-
+               
         /// <summary>
         /// The fallback device.
         /// </summary>
         private DeviceInfo _fallbackDevice;
-
-        /// <summary>
-        /// The useragent string of the device.
-        /// </summary>
-        private string _userAgent;
-
-        /// <summary>
-        /// The static index of the "is_wireless_device" string in the Strings static collection.
-        /// </summary>
-        private static readonly int IsWirelessDeviceIndex = Strings.Add("is_wireless_device");
-
-        /// <summary>
-        /// The static index of the "is_tablet" string in the Strings static collection.
-        /// </summary>
-        private static readonly int IsTabletDeviceIndex = Strings.Add("is_tablet");
-        
-        #endregion
-
-        #region Constructors
-
-        /// <summary>
-        /// Hide the default constructor.
-        /// </summary>
-        private DeviceInfo()
-        {
-        }
-
-        /// <summary>
-        /// Creates a new device using the source device as the fallback.
-        /// </summary>
-        /// <param name="source">Source device for the new device.</param>
-        /// <param name="deviceId">Id of the new device.</param>
-        internal DeviceInfo(DeviceInfo source, string deviceId)
-            : this(source._devices, deviceId, source._userAgent, source)
-        {
-        }
-
-        /// <summary>
-        /// Creates an instance of DeviceInfo.
-        /// </summary>
-        /// <param name="userAgent">User agent string used to identify this device.</param>
-        /// <param name="deviceId">A unique Identifier of the device.</param>
-        /// <param name="devices">A reference to the complete index of devices.</param>
-        internal DeviceInfo(
-            Provider devices,
-            string deviceId,
-            string userAgent)
-        {
-            Init(devices, deviceId, userAgent);
-        }
-
-        /// <summary>
-        /// Creates an instance of DeviceInfo.
-        /// </summary>
-        /// <param name="userAgent">User agent string used to identify this device.</param>
-        /// <param name="deviceId">A unique Identifier of the device.</param>
-        /// <param name="devices">A reference to the complete index of devices.</param>
-        /// <param name="fallbackDevice">The fallback device to use for this device if any.</param>
-        internal DeviceInfo(
-            Provider devices,
-            string deviceId,
-            string userAgent,
-            DeviceInfo fallbackDevice)
-        {
-            if (fallbackDevice == null)
-                throw new ArgumentNullException("fallbackDevice");
-            Init(devices, deviceId, userAgent);
-            _fallbackDevice = fallbackDevice;
-        }
-
-        /// <summary>
-        /// Creates an instance of DeviceInfo.
-        /// </summary>
-        /// <param name="deviceId">A unique Identifier of the device.</param>
-        /// <param name="devices">A reference to the complete index of devices.</param>
-        internal DeviceInfo(
-            Provider devices,
-            string deviceId)
-        {
-            Init(devices, deviceId);
-        }
-
-        private void Init(
-            Provider devices,
-            string deviceId)
-        {
-            if (string.IsNullOrEmpty(deviceId))
-                throw new ArgumentNullException("deviceId");
-
-            if (devices == null)
-                throw new ArgumentNullException("devices");
-
-            _devices = devices;
-            _deviceId = deviceId;
-            _deviceCapabilities = new Collection();
-        }
-
-        private void Init(
-            Provider devices,
-            string deviceId,
-            string userAgent)
-        {
-            if (userAgent == null)
-                throw new ArgumentNullException("userAgent");
-
-            _userAgent = UserAgentParser.Parse(userAgent);
-
-            Init(devices, deviceId);
-        }
 
         #endregion
 
@@ -179,7 +49,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             get
             {
                 return bool.TrueString.Equals(
-                    Strings.Get(GetCapability(IsTabletDeviceIndex)),
+                    _provider.Strings.Get(GetCapability(((Provider)_provider).IsTabletDeviceIndex)),
                     StringComparison.InvariantCultureIgnoreCase);
             }
         }
@@ -192,7 +62,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             get
             {
                 return bool.TrueString.Equals(
-                    Strings.Get(GetCapability(IsWirelessDeviceIndex)),
+                    _provider.Strings.Get(GetCapability(((Provider)_provider).IsWirelessDeviceIndex)),
                     StringComparison.InvariantCultureIgnoreCase);
             }
         }
@@ -203,48 +73,78 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         internal bool IsActualDeviceRoot { get; set; }
 
         /// <summary>
-        /// Gets the internal identifier of the device as specified in the WURFL.
+        /// Returns the fallback device.
         /// </summary>
-        internal string DeviceId
-        {
-            get { return _deviceId; }
-        }
-
-        /// <summary>
-        /// Contains the device user agent string.
-        /// </summary>
-        internal string UserAgent
-        {
-            get { return _userAgent; }
-        }
-
         internal DeviceInfo FallbackDevice
         {
             set { _fallbackDevice = value; }
             get { return _fallbackDevice; }
         }
 
+        #endregion
+
+        #region Constructors
+
         /// <summary>
-        /// The list of device capabilities.
+        /// Creates an instance of <cref see="DeviceInfo"/>.
         /// </summary>
-        internal Collection Capabilities
+        /// <param name="userAgent">User agent string used to identify this device.</param>
+        /// <param name="deviceId">A unique Identifier of the device.</param>
+        /// <param name="provider">A reference to the complete index of devices.</param>
+        internal DeviceInfo(
+            BaseProvider provider,
+            string deviceId,
+            string userAgent)
+            : base(provider, deviceId, userAgent)
         {
-            get { return _deviceCapabilities; }
         }
 
         /// <summary>
-        /// Set the userAgent string for this device to the value specified.
+        /// Creates an instance of <cref see="DeviceInfo"/>.
         /// </summary>
-        /// <param name="value"></param>
-        internal void SetUserAgent(string value)
+        /// <param name="deviceId">A unique Identifier of the device.</param>
+        /// <param name="provider">A reference to the complete index of devices.</param>
+        internal DeviceInfo(
+            BaseProvider provider,
+            string deviceId)
+            : base(provider, deviceId)
         {
-            if (_userAgent != value)
-            {
-                _userAgent = value;
-                // Ensure the indexes in the collection are updated to reflect
-                // the change in UserAgent string for this device.
-                _devices.Set(this);
-            }
+        }
+
+        /// <summary>
+        /// Creates an instance of DeviceInfo.
+        /// </summary>
+        /// <param name="userAgent">User agent string used to identify this device.</param>
+        /// <param name="deviceId">A unique Identifier of the device.</param>
+        /// <param name="provider">A reference to the base provider.</param>
+        /// <param name="fallbackDevice">The fallback device to use for this device if any.</param>
+        internal DeviceInfo(
+            BaseProvider provider,
+            string deviceId,
+            string userAgent,
+            DeviceInfo fallbackDevice)
+            : base(provider, deviceId, userAgent)
+        {
+            if (fallbackDevice == null)
+                throw new ArgumentNullException("fallbackDevice");
+            _fallbackDevice = fallbackDevice;
+        }
+
+        #endregion
+
+        #region Public Methods
+
+        /// <summary>
+        /// Returns the capability value.
+        /// </summary>
+        /// <param name="capabilityName">Name of the capability required.</param>
+        /// <returns>The value associated with the capability.</returns>
+        public string GetCapability(string capabilityName)
+        {
+            int index = GetCapability(_provider.Strings.Add(capabilityName));
+            if (index >= 0)
+                return _provider.Strings.Get(index);
+            return null;
         }
 
         #endregion
@@ -252,32 +152,47 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         #region Methods
 
         /// <summary>
+        /// Returns true if the deviceId is in the parent hierarchy of the 
+        /// device.
+        /// </summary>
+        /// <param name="deviceId">DeviceId being sought.</param>
+        /// <returns>True if the device is a parent.</returns>
+        internal bool GetIsParent(string deviceId)
+        {
+            if (DeviceId.Equals(deviceId))
+                return true;
+            if (FallbackDevice != null)
+                return FallbackDevice.GetIsParent(deviceId);
+            return false;
+        }
+
+        /// <summary>
         /// Gets the capability value index in the static Strings collection for this device
         /// based on the index of the capability name.
         /// </summary>
         /// <param name="index">Capability name index.</param>
         /// <returns>Capability index value in the String collection, or -1 if the capability does not exist.</returns>
-        internal int GetCapability(int index)
+        internal protected override int GetCapability(int index)
         {
-            if (_deviceCapabilities.ContainsKey(index))
-                return _deviceCapabilities[index];
+            int value = base.GetCapability(index);
+            if (value >= 0)
+                return value;
+
             if (_fallbackDevice != null)
                 return _fallbackDevice.GetCapability(index);
             return -1;
         }
 
         /// <summary>
-        /// Gets the capability value index in the static Strings collection for this device
-        /// based on the index of the capability name. The fallback device will not be checked.
+        /// Checks if another DeviceInfo is equal to this one.
         /// </summary>
-        /// <param name="index">Capability name index.</param>
-        /// <returns>Capability index value in the String collection, or -1 if the capability does not exist.</returns>
-
-        internal int GetCapabilityNoFallback(int index)
+        /// <param name="other">Other DeviceInfo.</param>
+        /// <returns>True if the object instances are the same.</returns>
+        internal bool Equals(DeviceInfo other)
         {
-            if (_deviceCapabilities.ContainsKey(index))
-                return _deviceCapabilities[index];
-            return -1;
+            return base.Equals(other) &&
+                   FallbackDevice.DeviceId.Equals(other.FallbackDevice.DeviceId) &&
+                   IsActualDeviceRoot == other.IsActualDeviceRoot;
         }
 
         #endregion

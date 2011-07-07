@@ -1,5 +1,5 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
+ * The contents of this file are subject to the Mozilla internal License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -21,49 +21,88 @@
  * 
  * ********************************************************************* */
 
-#region Usings
-
-using FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers;
-using Matcher=FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.ReducedInitialString.Matcher;
-
-#endregion
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
-    internal abstract class ReducedInitialStringHandler : Handler
+    /// <summary>
+    /// Device detection handler using the reduced initial string method. The first
+    /// part of the strings are checked to determine a match.
+    /// </summary>
+    internal sealed class ReducedInitialStringHandler : Detection.Handlers.ReducedInitialStringHandler, IHandler
     {
-        protected virtual int CalculateTolerance(string userAgent)
+        #region Fields
+
+        /// <summary>
+        /// A list of device ids that must be in the device hierarchy
+        /// to enable the handler to support the device.
+        /// </summary>
+        private List<string> _supportedRootDeviceIds = new List<string>();
+
+        /// <summary>
+        /// A list of device ids that must NOT be in the device hierarchy
+        /// to enable the handler to support the device.
+        /// </summary>
+        private List<string> _unSupportedRootDeviceIds = new List<string>();
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// A list of device ids that must be in the device hierarchy
+        /// to enable the handler to support the device.
+        /// </summary>
+        List<string> IHandler.SupportedRootDeviceIds
         {
-            return FirstSlash(userAgent);
+            get { return _supportedRootDeviceIds; }
         }
 
-        protected internal override Results Match(string userAgent)
+        /// <summary>
+        /// A list of device ids that must NOT be in the device hierarchy
+        /// to enable the handler to support the device.
+        /// </summary>
+        List<string> IHandler.UnSupportedRootDeviceIds
         {
-            int tolerance = CalculateTolerance(userAgent);
-            // Only perform this check if a tolerance is returned.
-            if (tolerance > 0)
-                return Matcher.Match(userAgent, this, tolerance);
-            return null;
+            get { return _unSupportedRootDeviceIds; }
         }
 
-        internal static int FirstSpace(string userAgent)
+        #endregion
+
+        #region Constructor
+
+        /// <summary>
+        /// Constucts an instance of <see cref="ReducedInitialStringHandler"/>.
+        /// </summary>
+        /// <param name="provider">Reference to the provider instance the handler will be associated with.</param>
+        /// <param name="name">Name of the handler for debugging purposes.</param>
+        /// <param name="defaultDeviceId">The default device ID to return if no match is possible.</param>
+        /// <param name="confidence">The confidence this handler should be given compared to others.</param>
+        /// <param name="checkUAProfs">True if UAProfs should be checked.</param>
+        /// <param name="tolerance">Regex used to calculate how many characters should be matched at the beginning of the useragent.</param>
+        internal ReducedInitialStringHandler(BaseProvider provider, string name, string defaultDeviceId, byte confidence, bool checkUAProfs, string tolerance)
+            : base(provider, name, defaultDeviceId ?? Constants.DefaultDeviceId[0], confidence, checkUAProfs, tolerance)
         {
-            int pos = userAgent.IndexOf(" ");
-            return pos > -1 ? pos : userAgent.Length;
         }
 
-        internal static int FirstSlash(string userAgent)
+        #endregion
+
+        #region Overriden Methods
+
+        /// <summary>
+        /// Checks to see if the handler can support this device. The 
+        /// supported and unsupported device lists are checked along
+        /// with the devices hierarchy to ensure the handler supports 
+        /// the device.
+        /// </summary>
+        /// <param name="device">Device to be checked.</param>
+        /// <returns>True if the device is supported, other false.</returns>
+        protected internal override bool CanHandle(BaseDeviceInfo device)
         {
-            int pos = userAgent.IndexOf("/");
-            return pos > -1 ? pos : userAgent.Length;
+            return Support.CanHandle(this, (DeviceInfo)device) && base.CanHandle(device);
         }
 
-        internal static int SecondSlash(string userAgent)
-        {
-            int pos = userAgent.IndexOf("/");
-            if (pos > -1)
-                pos = userAgent.IndexOf("/", pos + 1);
-            return pos > -1 ? pos : userAgent.Length;
-        }
+        #endregion
     }
 }

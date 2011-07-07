@@ -1,5 +1,5 @@
 /* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
+ * The contents of this file are subject to the Mozilla internal License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -32,7 +32,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
     /// <summary>
     /// Defines configuration settings for wurfl patches. This class cannot be inherited.
     /// </summary>
-    public sealed class PatchConfigElement : ConfigurationElement
+    internal sealed class PatchConfigElement : ConfigurationElement
     {
         #region Constructors
 
@@ -45,7 +45,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// </summary>
         [ConfigurationProperty("name", DefaultValue = "wurfl_patch_file", IsRequired = true, IsKey = true)]
         [StringValidator(InvalidCharacters = "!@#$%^&*()[]{};'\"|\\", MinLength = 1, MaxLength = 60)]
-        public string Name
+        internal string Name
         {
             get { return (string) this["name"]; }
             set { this["name"] = value; }
@@ -56,7 +56,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// </summary>
         [ConfigurationProperty("filePath", DefaultValue = "~/bin/wurfl_patch.xml", IsRequired = true)]
         [StringValidator(InvalidCharacters = "!@#$%^&*()[]{};'\"|", MaxLength = 255)]
-        public string FilePath
+        internal string FilePath
         {
             get { return (string) this["filePath"]; }
             set { this["filePath"] = value; }
@@ -66,7 +66,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// Gets or sets a value indicating whether this file patch should be used.
         /// </summary>
         [ConfigurationProperty("enabled", IsRequired = false, DefaultValue = true)]
-        public bool Enabled
+        internal bool Enabled
         {
             get { return (bool) this["enabled"]; }
             set { this["enabled"] = value; }

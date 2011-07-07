@@ -1,5 +1,5 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
+ * The contents of this file are subject to the Mozilla internal License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -46,61 +46,127 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 
         // Gets the indexes of all the key capability strings as static readonly
         // values during static construction to avoid needing to look them up every time.
-        private static readonly int AjaxXhrType = Strings.Add("ajax_xhr_type");
-        private static readonly int XhtmlSupportLevel = Strings.Add("xhtml_support_level");
-        private static readonly int CookieSupport = Strings.Add("cookie_support");
-        private static readonly int AjaxSupportJavascript = Strings.Add("ajax_support_javascript");
-        private static readonly int MobileBrowserVersion = Strings.Add("mobile_browser_version");
-        private static readonly int DeviceOs = Strings.Add("device_os");
-        private static readonly int Adapters = Strings.Add("adapters");
-        private static readonly int ResolutionHeight = Strings.Add("resolution_height");
-        private static readonly int ResolutionWidth = Strings.Add("resolution_width");
-        private static readonly int Colors = Strings.Add("colors");
-        private static readonly int BuiltInBackButtonSupport = Strings.Add("built_in_back_button_support");
-        private static readonly int AccessKeySupport = Strings.Add("access_key_support");
-        private static readonly int MarketingName = Strings.Add("marketing_name");
-        private static readonly int ModelName = Strings.Add("model_name");
-        private static readonly int BrandName = Strings.Add("brand_name");
-        private static readonly int Jpg = Strings.Add("jpg");
-        private static readonly int Gif = Strings.Add("gif");
-        private static readonly int Png = Strings.Add("png");
-        private static readonly int XhtmlmpPreferredMimeType = Strings.Add("xhtmlmp_preferred_mime_type");
-        private static readonly int HtmlWiOmaXhtmlmp10 = Strings.Add("html_wi_oma_xhtmlmp_1_0");
-        private static readonly int HtmlWiW3Xhtmlbasic = Strings.Add("html_wi_w3_xhtmlbasic");
-        private static readonly int HtmlWiImodeCompactGeneric = Strings.Add("html_wi_imode_compact_generic");
-        private static readonly int HtmlWeb40 = Strings.Add("html_web_4_0");
-        private static readonly int HtmlWeb32 = Strings.Add("html_web_3_2");
-        private static readonly int PreferredMarkup = Strings.Add("preferred_markup");
-        private static readonly int MaxDeckSize = Strings.Add("max_deck_size");
-        private static readonly int BreakListOfLinksWithBrElementRecommended = Strings.Add("break_list_of_links_with_br_element_recommended");
-        private static readonly int InsertBrElementAfterWidgetRecommended = Strings.Add("insert_br_element_after_widget_recommended");
-        private static readonly int Rows = Strings.Add("rows");
-        private static readonly int Columns = Strings.Add("columns");
-        private static readonly int Utf8Support = Strings.Add("utf8_support");
-        private static readonly int XhtmlTableSupport = Strings.Add("xhtml_table_support");
-        private static readonly int XhtmlNoWrapMode = Strings.Add("xhtml_nowrap_mode");
-        private static readonly int SoftkeySupport = Strings.Add("softkey_support");
-
+        private readonly int AjaxXhrType;
+        private readonly int XhtmlSupportLevel;
+        private readonly int CookieSupport;
+        private readonly int AjaxSupportJavascript;
+        private readonly int MobileBrowserVersion;
+        private readonly int DeviceOs;
+        private readonly int Adapters;
+        private readonly int ResolutionHeight;
+        private readonly int ResolutionWidth;
+        private readonly int Colors;
+        private readonly int BuiltInBackButtonSupport;
+        private readonly int AccessKeySupport;
+        private readonly int MarketingName;
+        private readonly int ModelName;
+        private readonly int BrandName;
+        private readonly int Jpg;
+        private readonly int Gif;
+        private readonly int Png;
+        private readonly int XhtmlmpPreferredMimeType;
+        private readonly int HtmlWiOmaXhtmlmp10;
+        private readonly int HtmlWiW3Xhtmlbasic;
+        private readonly int HtmlWiImodeCompactGeneric;
+        private readonly int HtmlWeb40;
+        private readonly int HtmlWeb32;
+        private readonly int PreferredMarkup;
+        private readonly int MaxDeckSize;
+        private readonly int BreakListOfLinksWithBrElementRecommended;
+        private readonly int InsertBrElementAfterWidgetRecommended;
+        private readonly int Rows;
+        private readonly int Columns;
+        private readonly int Utf8Support;
+        private readonly int XhtmlTableSupport;
+        private readonly int XhtmlNoWrapMode;
+        private readonly int SoftkeySupport;
         
+        #endregion
+
+        #region Fields
+
+        /// <summary>
+        /// Instance of the provider to use with this class.
+        /// </summary>
+        private Provider _provider = null;
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Returns the device detection provider assigned to the 
+        /// mobile capabilities.
+        /// </summary>
+        internal Provider Provider
+        {
+            get { return _provider; }
+        }
+
         #endregion
 
         #region Constructor
 
-        internal MobileCapabilities() : base()
+        /// <summary>
+        /// Constructs a new instance of <see cref="MobileCapabilities"/>.
+        /// </summary>
+        /// <param name="provider">Data provider to use with this capabilities provider.</param>
+        internal MobileCapabilities(Provider provider)
         {
+            _provider = provider;
+            AjaxXhrType = _provider.Strings.Add("ajax_xhr_type");
+            XhtmlSupportLevel = _provider.Strings.Add("xhtml_support_level");
+            CookieSupport = _provider.Strings.Add("cookie_support");
+            AjaxSupportJavascript = _provider.Strings.Add("ajax_support_javascript");
+            MobileBrowserVersion = _provider.Strings.Add("mobile_browser_version");
+            DeviceOs = _provider.Strings.Add("device_os");
+            Adapters = _provider.Strings.Add("adapters");
+            ResolutionHeight = _provider.Strings.Add("resolution_height");
+            ResolutionWidth = _provider.Strings.Add("resolution_width");
+            Colors = _provider.Strings.Add("colors");
+            BuiltInBackButtonSupport = _provider.Strings.Add("built_in_back_button_support");
+            AccessKeySupport = _provider.Strings.Add("access_key_support");
+            MarketingName = _provider.Strings.Add("marketing_name");
+            ModelName = _provider.Strings.Add("model_name");
+            BrandName = _provider.Strings.Add("brand_name");
+            Jpg = _provider.Strings.Add("jpg");
+            Gif = _provider.Strings.Add("gif");
+            Png = _provider.Strings.Add("png");
+            XhtmlmpPreferredMimeType = _provider.Strings.Add("xhtmlmp_preferred_mime_type");
+            HtmlWiOmaXhtmlmp10 = _provider.Strings.Add("html_wi_oma_xhtmlmp_1_0");
+            HtmlWiW3Xhtmlbasic = _provider.Strings.Add("html_wi_w3_xhtmlbasic");
+            HtmlWiImodeCompactGeneric = _provider.Strings.Add("html_wi_imode_compact_generic");
+            HtmlWeb40 = _provider.Strings.Add("html_web_4_0");
+            HtmlWeb32 = _provider.Strings.Add("html_web_3_2");
+            PreferredMarkup = _provider.Strings.Add("preferred_markup");
+            MaxDeckSize = _provider.Strings.Add("max_deck_size");
+            BreakListOfLinksWithBrElementRecommended = _provider.Strings.Add("break_list_of_links_with_br_element_recommended");
+            InsertBrElementAfterWidgetRecommended = _provider.Strings.Add("insert_br_element_after_widget_recommended");
+            Rows = _provider.Strings.Add("rows");
+            Columns = _provider.Strings.Add("columns");
+            Utf8Support = _provider.Strings.Add("utf8_support");
+            XhtmlTableSupport = _provider.Strings.Add("xhtml_table_support");
+            XhtmlNoWrapMode = _provider.Strings.Add("xhtml_nowrap_mode");
+            SoftkeySupport = _provider.Strings.Add("softkey_support");
         }
 
         #endregion
 
         #region Override Methods
 
+        /// <summary>
+        /// Creates a dictionary of capabilites for the requesting device.
+        /// </summary>
+        /// <param name="request">Details of the request.</param>
+        /// <param name="currentCapabilities">The current capabilities assigned by .NET.</param>
+        /// <returns>A dictionary of capabilities for the request.</returns>
         internal override IDictionary Create(HttpRequest request, IDictionary currentCapabilities)
         {
             // Use the base class to create the initial list of capabilities.
             IDictionary capabilities = base.Create(request, currentCapabilities);
 
             // Use the device for the request to set the capabilities.
-            Create(Provider.Instance.GetDeviceInfo(request), capabilities, currentCapabilities);
+            Create((DeviceInfo)_provider.GetDeviceInfo(request), capabilities, currentCapabilities);
 
             // Initialise any capability values that rely on the settings
             // from the device data source.
@@ -109,13 +175,18 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             return capabilities;
         }
 
+        /// <summary>
+        /// Creates a dictionary of capabilites for the useragent string.
+        /// </summary>
+        /// <param name="userAgent">The useragent string associated with the device.</param>
+        /// <returns>A dictionary of capabilities for the request.</returns>
         internal override IDictionary Create(string userAgent)
         {
             // Use the base class to create the initial list of capabilities.
             IDictionary capabilities = base.Create(userAgent);
 
             // Use the device for the request to set the capabilities.
-            Create(Provider.Instance.GetDeviceInfo(userAgent), capabilities, null);
+            Create((DeviceInfo)_provider.GetDeviceInfo(userAgent), capabilities, null);
 
             // Initialise any capability values that rely on the settings
             // from the device data source.
@@ -128,7 +199,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 
         #region Private Methods
 
-        private static void Create(DeviceInfo device, IDictionary capabilities, IDictionary currentCapabilities)
+        private void Create(DeviceInfo device, IDictionary capabilities, IDictionary currentCapabilities)
         {
             // Enhance with the capabilities from the device data.
             if (device != null)
@@ -167,7 +238,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// </summary>
         /// <param name="device"></param>
         /// <returns></returns>
-        private static SortedList<string, string> CreateWurflCapabilities(DeviceInfo device)
+        private SortedList<string, string> CreateWurflCapabilities(DeviceInfo device)
         {
             var capabilities = new SortedList<string, string>();
 
@@ -175,7 +246,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             List<int> names = new List<int>();
             AddWurflCapabilityNames(names, device);
 
-            // Add the device id even thought his is not a capability. It
+            // Add the device id even thought this is not a capability. It
             // may be used by some applications.
             capabilities.Add("deviceid", device.DeviceId);
 
@@ -184,7 +255,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 
             // Add all the capabilities for the device.
             foreach (int name in names)
-                capabilities[Strings.Get(name)] = Strings.Get(device.GetCapability(name));
+                capabilities[_provider.Strings.Get(name)] = _provider.Strings.Get(device.GetCapability(name));
 
             return capabilities;
         }
@@ -213,7 +284,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// <param name="capabilities">Dictionary of capabilities to be enhanced.</param>
         /// <param name="currentCapabilities">Dictionary of existing capabilities for the device.</param>
         /// <param name="device">Device to use for enhancements.</param>
-        private static void Enhance(IDictionary capabilities, IDictionary currentCapabilities, DeviceInfo device)
+        private void Enhance(IDictionary capabilities, IDictionary currentCapabilities, DeviceInfo device)
         {
             // Set base capabilities for all mobile devices.
             SetStaticValues(capabilities);
@@ -248,7 +319,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 
             // Use the Version class to find the version. If this fails use the 1st two
             // decimal segments of the string.
-            string versionString = Strings.Get(device.GetCapability(MobileBrowserVersion));
+            string versionString = _provider.Strings.Get(device.GetCapability(MobileBrowserVersion));
             if (String.IsNullOrEmpty(versionString) == false)
             {
                 try
@@ -354,21 +425,21 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             }
         }
 
-        private static string GetSupportsImageSubmit(DeviceInfo device)
+        private string GetSupportsImageSubmit(DeviceInfo device)
         {
             int value = 0;
-            if (int.TryParse(Strings.Get(device.GetCapability(XhtmlSupportLevel)), out value) &&
+            if (int.TryParse(_provider.Strings.Get(device.GetCapability(XhtmlSupportLevel)), out value) &&
                 value >= 3)
                 return bool.TrueString.ToLowerInvariant();
 
             return bool.FalseString.ToLowerInvariant();
         }
 
-        private static string GetW3CDOMVersion(DeviceInfo device, string current)
+        private string GetW3CDOMVersion(DeviceInfo device, string current)
         {
             int level = 0;
             Version version = new Version(0, 0);
-            if (int.TryParse(Strings.Get(device.GetCapability(XhtmlSupportLevel)), out level) &&
+            if (int.TryParse(_provider.Strings.Get(device.GetCapability(XhtmlSupportLevel)), out level) &&
                 level >= 4)
                 version = new Version("1.0.0.0");
             else
@@ -385,11 +456,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             return version.ToString(2);
         }
 
-        private static string GetCookieSupport(DeviceInfo device, string current)
+        private string GetCookieSupport(DeviceInfo device, string current)
         {
             bool value = false;
             // Return either the capability or the current value as a boolean string.
-            if (bool.TryParse(Strings.Get(device.GetCapability(CookieSupport)), out value) == false)
+            if (bool.TryParse(_provider.Strings.Get(device.GetCapability(CookieSupport)), out value) == false)
                 bool.TryParse(current, out value);
             return value.ToString();
         }
@@ -400,9 +471,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// </summary>
         /// <param name="device">The device to be checked.</param>
         /// <returns>True if XMLHttpRequest is supported.</returns>
-        private static string GetSupportsCallback(DeviceInfo device)
+        private string GetSupportsCallback(DeviceInfo device)
         {
-            string value = Strings.Get(device.GetCapability(AjaxXhrType));
+            string value = _provider.Strings.Get(device.GetCapability(AjaxXhrType));
             if (String.IsNullOrEmpty(value) || 
                 value.Equals("none", StringComparison.InvariantCultureIgnoreCase))
                 return bool.FalseString.ToLowerInvariant();
@@ -414,10 +485,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
         /// </summary>
         /// <param name="device">The device to be checked.</param>
         /// <returns>True if javascript is supported.</returns>
-        private static bool GetJavascriptSupport(DeviceInfo device)
+        private bool GetJavascriptSupport(DeviceInfo device)
         {
             bool java = false;
-            if (bool.TryParse(Strings.Get(device.GetCapability(AjaxSupportJavascript)), out java) &&
+            if (bool.TryParse(_provider.Strings.Get(device.GetCapability(AjaxSupportJavascript)), out java) &&
                 java)
             {
                 return true;
@@ -425,25 +496,23 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             return false;
         }
 
-        private static string GetPlatform(DeviceInfo device)
+        private string GetPlatform(DeviceInfo device)
         {
-            return Strings.Get(device.GetCapability(DeviceOs));
+            return _provider.Strings.Get(device.GetCapability(DeviceOs));
         }
 
         private static string GetIsCrawler(DeviceInfo device)
         {
             if (device.DeviceId == "generic_web_crawler" || device.DeviceId.Contains("crawler"))
                 return bool.TrueString.ToLowerInvariant();
-            ;
             if (device.FallbackDevice != null)
                 return GetIsCrawler(device.FallbackDevice);
             return bool.FalseString.ToLowerInvariant();
-            ;
         }
 
-        private static string GetAdapters(DeviceInfo device)
+        private string GetAdapters(DeviceInfo device)
         {
-            return Strings.Get(device.GetCapability(Adapters));
+            return _provider.Strings.Get(device.GetCapability(Adapters));
         }
 
         private static string GetIsMobileDevice(DeviceInfo device)
@@ -453,78 +522,76 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             return bool.FalseString.ToLowerInvariant();
         }
 
-        private static string GetScreenPixelsHeight(DeviceInfo device)
+        private string GetScreenPixelsHeight(DeviceInfo device)
         {
-            return Strings.Get(device.GetCapability(ResolutionHeight));
+            return _provider.Strings.Get(device.GetCapability(ResolutionHeight));
         }
 
-        private static string GetScreenPixelsWidth(DeviceInfo device)
+        private string GetScreenPixelsWidth(DeviceInfo device)
         {
-            return Strings.Get(device.GetCapability(ResolutionWidth));
+            return _provider.Strings.Get(device.GetCapability(ResolutionWidth));
         }
 
-        private static string GetIsColor(DeviceInfo device)
+        private string GetIsColor(DeviceInfo device)
         {
             long numberOfColors = 0;
-            long.TryParse(Strings.Get(device.GetCapability(Colors)), out numberOfColors);
+            long.TryParse(_provider.Strings.Get(device.GetCapability(Colors)), out numberOfColors);
             bool isColor = (numberOfColors >= 256);
             return isColor.ToString(CultureInfo.InvariantCulture);
         }
 
-        private static string GetHasBackButton(DeviceInfo device)
+        private string GetHasBackButton(DeviceInfo device)
         {
-            return Strings.Get(device.GetCapability(BuiltInBackButtonSupport));
+            return _provider.Strings.Get(device.GetCapability(BuiltInBackButtonSupport));
         }
 
-        private static string GetSupportsAccesskeyAttribute(DeviceInfo device)
+        private string GetSupportsAccesskeyAttribute(DeviceInfo device)
         {
-            return Strings.Get(device.GetCapability(AccessKeySupport));
+            return _provider.Strings.Get(device.GetCapability(AccessKeySupport));
         }
 
-        private static string GetMobileDeviceModel(DeviceInfo device)
+        private string GetMobileDeviceModel(DeviceInfo device)
         {
-            string value = Strings.Get(device.GetCapability(MarketingName));
+            string value = _provider.Strings.Get(device.GetCapability(MarketingName));
             if (String.IsNullOrEmpty(value))
-                value = Strings.Get(device.GetCapability(ModelName));
+                value = _provider.Strings.Get(device.GetCapability(ModelName));
             return value;
         }
 
-        private static string GetMobileDeviceManufacturer(DeviceInfo device)
+        private string GetMobileDeviceManufacturer(DeviceInfo device)
         {
-            return Strings.Get(device.GetCapability(BrandName));
+            return _provider.Strings.Get(device.GetCapability(BrandName));
         }
 
-        private static string GetPreferredImageMime(DeviceInfo device, IDictionary capabilities)
+        private string GetPreferredImageMime(DeviceInfo device, IDictionary capabilities)
         {
-
-
             // Look at the database and return the 1st one that matches in order
             // of preference.
-            if (bool.TrueString.Equals(Strings.Get(device.GetCapability(Png)), StringComparison.InvariantCultureIgnoreCase))
+            if (bool.TrueString.Equals(_provider.Strings.Get(device.GetCapability(Png)), StringComparison.InvariantCultureIgnoreCase))
                 return "image/png";
-            if (bool.TrueString.Equals(Strings.Get(device.GetCapability(Jpg)), StringComparison.InvariantCultureIgnoreCase))
+            if (bool.TrueString.Equals(_provider.Strings.Get(device.GetCapability(Jpg)), StringComparison.InvariantCultureIgnoreCase))
                 return "image/jpeg";
-            if (bool.TrueString.Equals(Strings.Get(device.GetCapability(Gif)), StringComparison.InvariantCultureIgnoreCase))
+            if (bool.TrueString.Equals(_provider.Strings.Get(device.GetCapability(Gif)), StringComparison.InvariantCultureIgnoreCase))
                 return "image/gif";
             return null;
         }
 
-        private static string GetScreenBitDepth(DeviceInfo device)
+        private string GetScreenBitDepth(DeviceInfo device)
         {
             long fScreenBitDepth = 1;
             long numberOfColors = 256;
-            long.TryParse(Strings.Get(device.GetCapability(Colors)), out numberOfColors);
+            long.TryParse(_provider.Strings.Get(device.GetCapability(Colors)), out numberOfColors);
             fScreenBitDepth = Support.GetBitsPerPixel(numberOfColors);
             return fScreenBitDepth.ToString(CultureInfo.InvariantCulture);
         }
 
-        private static string GetPreferredRenderingMimeFromWURFL(DeviceInfo device, string renderingType)
+        private string GetPreferredRenderingMimeFromWURFL(DeviceInfo device, string renderingType)
         {
             switch (renderingType)
             {
                 case "xhtml-mp":
                 case "xhtml-basic":
-                    return Strings.Get(device.GetCapability(XhtmlmpPreferredMimeType));
+                    return _provider.Strings.Get(device.GetCapability(XhtmlmpPreferredMimeType));
 
                 case "chtml10":
                 case "html4":
@@ -536,29 +603,29 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             }
         }
 
-        private static string GetFirstRenderingTypeFromWURFL(DeviceInfo device)
+        private string GetFirstRenderingTypeFromWURFL(DeviceInfo device)
         {
             // The value returned when checking the capability.
             bool value;
 
             // Look at all the possible markups that could be supported
             // and returned the 1st one found.
-            if (bool.TryParse(Strings.Get(device.GetCapability(HtmlWiOmaXhtmlmp10)), out value) && value)
+            if (bool.TryParse(_provider.Strings.Get(device.GetCapability(HtmlWiOmaXhtmlmp10)), out value) && value)
                 return "xhtml-mp";
-            if (bool.TryParse(Strings.Get(device.GetCapability(HtmlWiW3Xhtmlbasic)), out value) && value)
+            if (bool.TryParse(_provider.Strings.Get(device.GetCapability(HtmlWiW3Xhtmlbasic)), out value) && value)
                 return "xhtml-basic";
-            if (bool.TryParse(Strings.Get(device.GetCapability(HtmlWiImodeCompactGeneric)), out value) && value)
+            if (bool.TryParse(_provider.Strings.Get(device.GetCapability(HtmlWiImodeCompactGeneric)), out value) && value)
                 return "chtml10";
-            if (bool.TryParse(Strings.Get(device.GetCapability(HtmlWeb40)), out value) && value)
+            if (bool.TryParse(_provider.Strings.Get(device.GetCapability(HtmlWeb40)), out value) && value)
                 return "html32";
-            if (bool.TryParse(Strings.Get(device.GetCapability(HtmlWeb32)), out value) && value)
+            if (bool.TryParse(_provider.Strings.Get(device.GetCapability(HtmlWeb32)), out value) && value)
                 return "html32";
                 return null;
         }
 
-        private static string GetPreferredRenderingTypeFromWURFL(DeviceInfo device)
+        private string GetPreferredRenderingTypeFromWURFL(DeviceInfo device)
         {
-            switch (Strings.Get(device.GetCapability(PreferredMarkup)))
+            switch (_provider.Strings.Get(device.GetCapability(PreferredMarkup)))
             {
                 case "html_web_3_2":
                     return "html32";
@@ -585,71 +652,71 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
 
 
         //The following methods and bindings were suggested by forum member 'fravelgue'
-        private static string GetMaximumSoftKeyLabelLength(DeviceInfo device)
+        private string GetMaximumSoftKeyLabelLength(DeviceInfo device)
         {
-            string value = Strings.Get(device.GetCapability(SoftkeySupport));
+            string value = _provider.Strings.Get(device.GetCapability(SoftkeySupport));
             if (String.IsNullOrEmpty(value) || value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
                 return bool.FalseString.ToLowerInvariant();
             return bool.TrueString.ToLowerInvariant();
         }
 
-        private static string GetSupportsNoWrapStyle(DeviceInfo device)
+        private string GetSupportsNoWrapStyle(DeviceInfo device)
         {
-            string value = Strings.Get(device.GetCapability(XhtmlNoWrapMode));
+            string value = _provider.Strings.Get(device.GetCapability(XhtmlNoWrapMode));
             if (String.IsNullOrEmpty(value) || value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
                 return bool.FalseString.ToLowerInvariant();
             return bool.TrueString.ToLowerInvariant();
         }
 
-        private static string GetTables(DeviceInfo device, string current)
+        private string GetTables(DeviceInfo device, string current)
         {
-            if (Strings.Get(device.GetCapability(PreferredMarkup)).Contains("xhtml"))
+            if (_provider.Strings.Get(device.GetCapability(PreferredMarkup)).Contains("xhtml"))
             {
                 bool value =  false;
-                if(bool.TryParse(Strings.Get(device.GetCapability(XhtmlTableSupport)), out value) == false)
+                if (bool.TryParse(_provider.Strings.Get(device.GetCapability(XhtmlTableSupport)), out value) == false)
                     bool.TryParse(current, out value);
                 return value.ToString();
             }
             return current;
         }
 
-        private static string GetRequiresUTF8ContentEncoding(DeviceInfo device)
+        private string GetRequiresUTF8ContentEncoding(DeviceInfo device)
         {
-            string value = Strings.Get(device.GetCapability(Utf8Support));
+            string value = _provider.Strings.Get(device.GetCapability(Utf8Support));
             if (String.IsNullOrEmpty(value) || value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
                 return bool.FalseString.ToLowerInvariant();
             return bool.TrueString.ToLowerInvariant();
         }
 
-        private static string GetScreenCharactersWidth(DeviceInfo device)
+        private string GetScreenCharactersWidth(DeviceInfo device)
         {
-            return Strings.Get(device.GetCapability(Columns));
+            return _provider.Strings.Get(device.GetCapability(Columns));
         }
 
-        private static string GetScreenCharactersHeight(DeviceInfo device)
+        private string GetScreenCharactersHeight(DeviceInfo device)
         {
-            return Strings.Get(device.GetCapability(Rows));
+            return _provider.Strings.Get(device.GetCapability(Rows));
         }
 
-        private static string GetRendersBreaksAfterWmlInput(DeviceInfo device)
+        private string GetRendersBreaksAfterWmlInput(DeviceInfo device)
         {
-            string value = Strings.Get(device.GetCapability(InsertBrElementAfterWidgetRecommended));
+            string value = _provider.Strings.Get(device.GetCapability(InsertBrElementAfterWidgetRecommended));
             if (String.IsNullOrEmpty(value) || value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
                 return bool.FalseString.ToLowerInvariant();
             return bool.TrueString.ToLowerInvariant();
         }
 
-        private static string GetRendersBreaksAfterWmlAnchor(DeviceInfo device)
+        private string GetRendersBreaksAfterWmlAnchor(DeviceInfo device)
         {
-            string value = Strings.Get(device.GetCapability(BreakListOfLinksWithBrElementRecommended));
+            string value = _provider.Strings.Get(device.GetCapability(BreakListOfLinksWithBrElementRecommended));
             if (String.IsNullOrEmpty(value) || value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
                 return bool.FalseString.ToLowerInvariant();
             return bool.TrueString.ToLowerInvariant();
         }
 
-        private static string GetMaximumRenderedPageSize(DeviceInfo device)
+        private string GetMaximumRenderedPageSize(DeviceInfo device)
         {
-            return Strings.Get(device.GetCapability(MaxDeckSize));
+            return _provider.Strings.Get(device.GetCapability(MaxDeckSize));
         }
 
         #endregion

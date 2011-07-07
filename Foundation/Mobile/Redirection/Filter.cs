@@ -77,25 +77,99 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         {
             string value;
 
-            // Try the standard properties of the browser object.
-            Type controlType = context.Request.Browser.GetType();
-            System.Reflection.PropertyInfo propertyInfo = controlType.GetProperty(property);
-            if (propertyInfo != null && propertyInfo.CanRead)
-                return propertyInfo.GetValue(context.Request.Browser, null).ToString();
-
-            // Try browser capabilities next.
-            value = context.Request.Browser[property];
-            if (value != null)
+            // Check for special properties.
+            value = GetSpecialPropertyValue(property, context);
+            if (String.IsNullOrEmpty(value) == false)
                 return value;
 
-            // Try the properties of the request.
-            controlType = context.Request.GetType();
-            propertyInfo = controlType.GetProperty(property);
-            if (propertyInfo != null && propertyInfo.CanRead)
-                return propertyInfo.GetValue(context.Request, null).ToString();
+            // Try the standard properties of the browser object. Use a try/catch block
+            // incase there is a security exception accessing the reflection methods.
+            try
+            {
+                value = GetHttpBrowserCapabilitiesPropertyValue(property, context.Request.Browser);
+                if (String.IsNullOrEmpty(value) == false)
+                    return value;
+            }
+            catch (Exception ex)
+            {
+                EventLog.Warn(new MobileException(String.Format("Exception getting property value '{0}' from HttpBrowserCapabilities instance.", property), ex));
+            }
+
+            // Try the standard properties of the request object. Use a try/catch block
+            // incase there is a security exception accessing the reflection methods.
+            try
+            {
+                value = GetHttpRequestPropertyValue(property, context.Request);
+                if (String.IsNullOrEmpty(value) == false)
+                    return value;
+            }
+            catch (Exception ex)
+            {
+                EventLog.Warn(new MobileException(String.Format("Exception getting property value '{0}' from HttpRequest instance.", property), ex));
+            }
 
             // If not then try and return the value for the collection.
             return context.Request.Browser[property];
+        }
+
+        /// <summary>
+        /// Checks the properties of the HttpBrowserCapabilities instance passed
+        /// into the method for the property name contained in the property parameters
+        /// string value.
+        /// </summary>
+        /// <param name="property">Property name to be found.</param>
+        /// <param name="capabilities">Capabilities collection to be used.</param>
+        /// <returns>If the property exists then return the associated value, otherwise null.</returns>
+        private static string GetHttpBrowserCapabilitiesPropertyValue(string property, HttpBrowserCapabilities capabilities)
+        {
+            Type controlType = capabilities.GetType();
+            System.Reflection.PropertyInfo propertyInfo = controlType.GetProperty(property);
+            if (propertyInfo != null && propertyInfo.CanRead)
+                return propertyInfo.GetValue(capabilities, null).ToString();
+
+            // Try browser capabilities next.
+            string value = capabilities[property];
+            if (value != null)
+                return value;
+
+            return null;
+        }
+
+        /// <summary>
+        /// Checks the properties of the HttpRequest instance passed
+        /// into the method for the property name contained in the property parameters
+        /// string value.
+        /// </summary>
+        /// <param name="property">Property name to be found.</param>
+        /// <param name="request">HttpRequest to be used.</param>
+        /// <returns>If the property exists then return the associated value, otherwise null.</returns>
+        private static string GetHttpRequestPropertyValue(string property, HttpRequest request)
+        {
+            // Try the properties of the request.
+            Type controlType = request.GetType();
+            System.Reflection.PropertyInfo propertyInfo = controlType.GetProperty(property);
+            if (propertyInfo != null && propertyInfo.CanRead)
+                return propertyInfo.GetValue(request, null).ToString();
+
+            return null;
+        }
+
+        /// <summary>
+        /// Checks the items collection of the HttpContent instance passed
+        /// into the method for the property name contained in the property parameters
+        /// string value.
+        /// </summary>
+        /// <param name="property">Property name to be found.</param>
+        /// <param name="context">HttpContext to be used.</param>
+        /// <returns>If the property exists then return the associated value, otherwise null.</returns>
+        private static string GetSpecialPropertyValue(string property, HttpContext context)
+        {
+            switch(property)
+            {
+                case Constants.ORIGINAL_URL_SPECIAL_PROPERTY:
+                    return context.Items[Constants.ORIGINAL_URL_KEY] as string;
+            }
+            return null;
         }
 
         #endregion

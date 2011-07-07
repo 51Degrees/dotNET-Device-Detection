@@ -45,7 +45,8 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                                                          "System.Web.Mvc.MvcHandler",
                                                          "System.Web.Mvc.MvcHttpHandler",
                                                          "System.Web.UI.MobileControls.MobilePage",
-                                                         "System.Web.WebPages.WebPageHttpHandler"
+                                                         "System.Web.WebPages.WebPageHttpHandler",
+                                                         "Orchard.Mvc.Routes.ShellRoute.HttpAsyncHandler"                                                
                                                      };
 
         /// <summary>
@@ -53,6 +54,11 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// store the Url originally requested by the browser.
         /// </summary>
         internal const string ORIGINAL_URL_KEY = "51D_Original_Url";
+
+        /// <summary>
+        /// The property name to use to access the original Url for the request.
+        /// </summary>
+        internal const string ORIGINAL_URL_SPECIAL_PROPERTY = "origUrl";
 
         /// <summary>
         /// The key in the Items collection of the requesting context used to

@@ -1,0 +1,549 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE handlers SYSTEM "D:\Mobile Toolkit\Code\Foundation\Properties\Handlers.dtd">
+
+<!--
+The contents of this file are subject to the Mozilla Public License 
+Version 1.1 (the "License"); you may not use this file except in 
+compliance with the License. You may obtain a copy of the License at 
+http://www.mozilla.org/MPL/
+
+Software distributed under the License is distributed on an "AS IS" 
+basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. 
+See the License for the specific language governing rights and 
+limitations under the License.
+
+The Original Code is named Handlers.xml, first released under 
+this licence on 5th July 2011.
+
+The Initial Developer of the Original Code is owned by 
+51 Degrees Mobile Experts Limited. Portions created by 51 Degrees 
+Mobile Experts Limited are Copyright (C) 2009 - 2011. All Rights Reserved.
+
+Contributor(s):
+    James Rosewell <james@51degrees.mobi>
+    Thomas Holmes <tom@51degrees.mobi>
+-->
+  
+<handlers>
+  <handler name="Alcatel" type="editDistance" defaultDevice="alcatel_generic_v4" confidence="5" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="(?i)alcatel"/>
+    </canHandle>
+  </handler>
+
+  <handler name="Amoi" type="editDistance" defaultDevice="amoisonic_9201_ver1" confidence="5" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="^Amoi"/>
+    </canHandle>
+  </handler>
+
+  <handler name="Android" type="regexSegment" defaultDevice="android_dev_ver1" confidence="8" checkUAProf="true">
+    <canHandle>
+      <regex pattern="Android">
+        <regex pattern="Mozilla|Dalvik"/>
+      </regex>
+    </canHandle>
+    <regexSegments>
+      <regexSegment pattern="(?&lt;=; )[^;]+(?= Build)" weight="10"/>
+      <regexSegment pattern="(?&lt;=Android)[^;\)]+" weight="5"/>
+      <regexSegment pattern="(?&lt;=Build/)[^;\)]+" weight="3"/>
+      <regexSegment pattern="(?&lt;=AppleWebKit/)[\d.]+" weight="1"/>
+    </regexSegments>
+  </handler>
+
+  <handler name="AppleCoreMedia" type="editDistance" defaultDevice="apple_iphone_coremedia_ver1" confidence="8" checkUAProf="false" >
+    <canHandle>
+      <regex pattern="^Apple">
+        <regex pattern="CoreMedia"/>
+      </regex>
+    </canHandle>
+    <supportedRootDevices>
+      <device id="apple_iphone_coremedia_ver1"/>
+    </supportedRootDevices>    
+  </handler>
+
+  <handler name="Apple" type="regexSegment" confidence="8" defaultDevice="apple_iphone_ver1" checkUAProf="false" >
+    <canHandle>
+      <regex pattern="iPhone|iPad|iPod"/>
+    </canHandle>
+    <regexSegments>
+      <regexSegment pattern="iPhone|iPod|iPad" weight="100"/>
+      <regexSegment pattern="(?&lt;=AppleWebKit/)[\d.]+" weight="1"/>
+      <regexSegment pattern="(?&lt;=Version/)[\d.]+" weight="1"/>
+      <regexSegment pattern="(?&lt;=Mobile/)[\d\w]+" weight="1"/>
+      <regexSegment pattern="(?&lt;=Safari/)[\d.]+" weight="1"/>
+    </regexSegments>
+  </handler>
+
+  <handler name="Avant" type="editDistance" defaultDevice="msie" confidence="5" checkUAProf="false" >
+    <canHandle>
+      <regex pattern="^Avant"/>
+    </canHandle>
+  </handler>
+
+  <handler name="BenQ" type="editDistance" defaultDevice="benq_s700_ver1" confidence="5" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="BenQ"/>
+      <regex pattern="BENQ"/>
+    </canHandle>
+  </handler>
+
+  <handler name="Bolt" type="regexSegment" defaultDevice="bolt_2" confidence="8" checkUAProf="false" >
+    <canHandle>
+      <regex pattern="BOLT"/>
+    </canHandle>
+    <regexSegments>
+      <regexSegment pattern="(?&lt;=BOLT/)[\d.]+" weight="1"/>
+    </regexSegments>
+    <supportedRootDevices>
+      <device id="bolt_2"/>
+    </supportedRootDevices>
+    <unSupportedRootDevices>
+      <device id="safari"/>
+    </unSupportedRootDevices>
+  </handler>
+
+  <handler name="Bird" type="editDistance" defaultDevice="bird_d736_ver1" confidence="5" checkUAProf="false" >
+    <canHandle>
+      <regex pattern="^BIRD"/>
+    </canHandle>
+  </handler>
+
+  <handler name="BlackBerry" type="regexSegment" defaultDevice="blackberry_generic_ver4" confidence="10" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="^Black(B|b)erry"/>
+    </canHandle>
+    <regexSegments>
+      <regexSegment pattern="(?:(?&lt;=Black[B|b]erry)[^/]+)" weight="10"/>
+      <regexSegment pattern="(?&lt;=Black[B|b]erry\d+/)([\d.]+)" weight="2"/>
+      <regexSegment pattern="VendorID/\d+" weight="11"/>
+    </regexSegments>
+  </handler>
+
+  <handler name="BlackBerryVersion6" type="editDistance" defaultDevice="blackberry_generic_ver6" confidence="10" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="^Mozilla/">
+        <regex pattern="BlackBerry"/>
+      </regex>
+    </canHandle>
+    <supportedRootDevices>
+      <device id="blackberry_generic_ver6"/>
+    </supportedRootDevices>
+  </handler>
+
+  <handler name="CatchAll" type="reducedInitialString" defaultDevice="generic_web_browser" confidence="1" tolerance="^[^/]+[^/]+" checkUAProf="true" >
+  </handler>
+
+  <handler name="Chrome" type="regexSegment" defaultDevice="google_chrome" confidence="10" checkUAProf="false">
+    <canHandle>
+      <regex pattern="Chrome" />
+    </canHandle>
+    <regexSegments>
+      <regexSegment pattern="(?&lt;=Chrome/)[\d+.]+" weight="9"/>
+    </regexSegments>
+  </handler>
+
+  <handler name="DoCoMo" type="regexSegment" defaultDevice="docomo_generic" confidence="7" checkUAProf="false" >
+    <canHandle>
+      <regex pattern="^DoCoMo"/>
+    </canHandle>
+    <regexSegments>
+      <regexSegment pattern="DoCoMo\/\d\.\d[\/ ]\w+" weight="1"/>
+    </regexSegments>
+  </handler>
+
+  <handler name="FirefoxDesktop" type="regexSegment" defaultDevice="firefox" confidence="8" checkUAProf="false" >
+    <canHandle>
+      <regex pattern="Firefox|Iceweasel|Thunderbird|Gecko/">
+        <regex pattern="\(Macintosh;|\(Windows|\(X11;"/>
+      </regex>
+    </canHandle>
+    <cantHandle>
+      <regex pattern="Fennec" />
+    </cantHandle>
+    <regexSegments>
+      <regexSegment pattern="(?&lt;=Mozilla/)[\d.]+" weight="1"/>
+      <regexSegment pattern="(?&lt;=Firefox/)[\d.]+" weight="1"/>
+      <regexSegment pattern="\(Macintosh;|\(Windows|\(X11;" weight="1"/>
+    </regexSegments>
+    <supportedRootDevices>
+      <device id="firefox"/>
+    </supportedRootDevices>
+  </handler>
+
+  <handler name="FirefoxFennec" type="regexSegment" defaultDevice="browser_gecko_fennec_2_0" confidence="8" checkUAProf="false" >
+    <canHandle>
+      <regex pattern="Fennec/" />
+    </canHandle>
+    <regexSegments>
+      <regexSegment pattern="(?&lt;=Mozilla/)[\d.]+" weight="1"/>
+      <regexSegment pattern="(?&lt;=Fennec/)[\d.]+" weight="1"/>
+      <regexSegment pattern="(?&lt;=\()[^\)]+" weight="5"/>
+      <regexSegment pattern="(?&lt;=Gecko/)[\d]+" weight="5"/>
+      <regexSegment pattern="(?&lt;=Firefox/)[\d.]+" weight="5"/>
+    </regexSegments>
+    <supportedRootDevices>
+      <device id="browser_gecko_fennec_2_0"/>
+    </supportedRootDevices>    
+  </handler>
+
+  <handler name="Grundig" type="editDistance" defaultDevice="grundig_m131_ver1" confidence="5" checkUAProf="false" >
+    <canHandle>
+      <regex pattern="^Grundig|^GRUNDIG"/>
+    </canHandle>
+  </handler>
+
+  <handler name="HTC" type="editDistance" defaultDevice="htc_typhoon_ver1" confidence="7" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="^HD2|HTC" />
+    </canHandle>
+  </handler>
+
+  <handler name="KDDI" type="regexSegment" defaultDevice="kddi_wap20_generic" confidence="7" checkUAProf="false" >
+    <canHandle>
+      <regex pattern="^KDDI"/>
+    </canHandle>
+    <regexSegments>
+      <regexSegment pattern="KDDI-\w+" weight="1"/>
+    </regexSegments>
+  </handler>
+
+  <handler name="Kyocera" type="editDistance" defaultDevice="kyocera_3225_ver1" confidence="5" checkUAProf="true"  >
+    <canHandle>
+      <regex pattern="^kyocera|^QC-|^KWC-"/>
+    </canHandle>
+  </handler>
+
+  <handler name="LCT" type="editDistance" defaultDevice="lct_x901a_ver1" confidence="5" checkUAProf="false" >
+    <canHandle>
+      <regex pattern="^LCT" />
+    </canHandle>
+  </handler>
+
+  <handler name="LG" type="editDistance" defaultDevice="generic_xhtml" confidence="7" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="^LG" />
+    </canHandle>
+  </handler>
+  
+  <handler name="MaemoNokia" type="editDistance" defaultDevice="nokia_generic_maemo" confidence="8" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="Maemo Browser">
+        <regex pattern="N[\d]+"/>
+      </regex>
+    </canHandle>
+    <supportedRootDevices>
+      <device id="nokia_generic_maemo"/>
+    </supportedRootDevices>
+  </handler>
+  
+  <handler name="Maxon" type="editDistance" defaultDevice="maxon_ver1" confidence="8" checkUAProf="false" >
+    <canHandle>
+      <regex pattern="Maxon"/>
+    </canHandle>
+  </handler>
+
+  <handler name="Mitsubishi" type="editDistance" defaultDevice="mitsu_generic" confidence="5" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="Mitsu"/>
+    </canHandle>
+  </handler>
+
+  <handler name="MobileCatchAll" type="editDistance" defaultDevice="generic" confidence="4" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="WAP|MIDP|CLDC|Teleca-|Screen-|mobile"/>
+    </canHandle>
+  </handler>
+
+  <handler name="Motorola" type="editDistance" defaultDevice="mot_mib22_generic" confidence="5" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="^Mot-|MOT-|Motorola"/>
+    </canHandle>
+  </handler>
+
+  <handler name="MSIEDesktop" type="editDistance" defaultDevice="msie" confidence="6" checkUAProf="false" >
+    <canHandle>
+      <regex pattern="MSIE"/>
+      <regex pattern="compatible"/>
+      <regex pattern="Windows XP"/>
+      <regex pattern="Windows NT"/>
+      <regex pattern="Windows ME"/>
+      <regex pattern="Win32"/>
+      <regex pattern="Windows [\d.]+"/>
+      <regex pattern="Windows NT [\d.]+"/>
+      <regex pattern="Mac_PowerPC" />
+      <regex pattern="PPC Mac OS"/>
+    </canHandle>
+    <cantHandle>
+      <regex pattern="IEMobile"/>
+      <regex pattern="Windows CE"/>
+      <regex pattern="Windows Phone OS"/>
+    </cantHandle>
+    <supportedRootDevices>
+      <device id="msie"/>
+    </supportedRootDevices>
+  </handler>
+
+  <handler name="Nec" type="editDistance" defaultDevice="nec_110_ver1" confidence="5" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="^NEC|KGT"/>
+    </canHandle>
+  </handler>
+
+  <handler name="Nokia" type="regexSegment" defaultDevice="nokia_generic_series60" confidence="7" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="Nokia|Symbian OS|NOKIA"/>
+    </canHandle>
+    <regexSegments>
+      <regexSegment pattern="(?:(?&lt;=[Nokia|NOKIA])[^/]+)" weight="100"/>
+      <regexSegment pattern="(?&lt;=(?:[Nokia|NOKIA][^/]+)/)[\d.]+" weight="1"/>
+      <regexSegment pattern="\([\d.]+\)" weight="1"/>
+    </regexSegments>
+  </handler>
+
+  <handler name="Nokia_Series60" type="editDistance" defaultDevice="nokia_generic_series60" confidence="5" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="Series60">
+        <regex pattern="Nokia|Symbian OS|NOKIA"/>
+      </regex>
+    </canHandle>
+  </handler>
+
+  <handler name="OperaDesktop" type="regexSegment" defaultDevice="opera" confidence="8" checkUAProf="false" >
+    <canHandle>
+      <regex pattern="^Opera"/>
+    </canHandle>
+    <cantHandle>
+      <regex pattern="(Opera Mini)|(Opera Mobi)"/>
+    </cantHandle>
+    <regexSegments>
+      <regexSegment pattern="(?&lt;=Opera/)[\d+.]+|(?&lt;=Opera )[\d+.]+" weight="1"/>
+    </regexSegments>
+    <supportedRootDevices>
+      <device id="opera"/>
+    </supportedRootDevices>
+  </handler>
+
+  <handler name="OperaMini" type="regexSegment" defaultDevice="generic_opera_mini_version1" confidence="8" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="Opera Mini"/>
+    </canHandle>
+    <regexSegments>
+      <regexSegment pattern="(?&lt;=Opera Mini/)\d.\d" weight="1"/>
+      <regexSegment pattern="(?&lt;=Opera/)[\d.]+" weight="1"/>
+    </regexSegments>
+    <supportedRootDevices>
+      <device id="generic_opera_mini_version1"/>
+    </supportedRootDevices>
+  </handler>
+
+  <handler name="OperaMobi" type="regexSegment" defaultDevice="generic_opera_mobi" confidence="8" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="Opera Mobi/"/>
+    </canHandle>
+    <regexSegments>
+      <regexSegment pattern="(?&lt;=Opera Mobi/)\d.\d" weight="1"/>
+      <regexSegment pattern="(?&lt;=^Opera/)[\d.]+" weight="1"/>
+    </regexSegments>
+    <supportedRootDevices>
+      <device id="generic_opera_mobi"/>
+    </supportedRootDevices>    
+  </handler>
+
+  <handler name="Palm" type="editDistance" defaultDevice="palm_mt64_ver1" confidence="7" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="Palm">
+        <regex pattern="webOS"/>
+      </regex>
+      <regex pattern="Palm(S|s)ource"/>
+    </canHandle>
+  </handler>
+
+  <handler name="Panasonic" type="editDistance" defaultDevice="panasonic_g50_ver1" confidence="5" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="^Panasonic"/>
+    </canHandle>
+  </handler>
+
+  <handler name="Pantech" type="editDistance" defaultDevice="pantech_generic" confidence="5" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="^Pantech|^PT-|^PANTECH|^PG-"/>
+    </canHandle>
+  </handler>
+
+  <handler name="Philips" type="editDistance" defaultDevice="generic_html" confidence="5" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="^Philips|^PHILIPS"/>
+    </canHandle>
+  </handler>
+
+  <handler name="Portalmmm" type="editDistance" defaultDevice="portalmmm_ver2" confidence="5" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="^portalmmm"/>
+    </canHandle>
+  </handler>
+
+  <handler name="Qtek" type="editDistance" defaultDevice="qtek_s200_ver1" confidence="5" checkUAProf="false" >
+    <canHandle>
+      <regex pattern="^Qtek"/>
+    </canHandle>
+  </handler>
+
+  <handler name="Safari" type="regexSegment" defaultDevice="generic_xhtml" confidence="7" checkUAProf="false" >
+    <canHandle>
+      <regex pattern="^Mozilla">
+        <regex pattern="Safari"/>
+      </regex>
+    </canHandle>
+    <cantHandle>
+      <regex pattern="iPhone|iPod|iPad"/>
+    </cantHandle>
+    <regexSegments>
+      <regexSegment pattern="(?&lt;=Mozilla/\d.\d \()[^)]+" weight="3" />
+      <regexSegment pattern="(?&lt;=AppleWebKit/)[\d.]+" weight="1" />
+      <regexSegment pattern="(?&lt;=Version/)[\d.]+" weight="1" />
+      <regexSegment pattern="(?&lt;=Safari/)[\d.]+" weight="1" />
+    </regexSegments>
+    <unSupportedRootDevices>
+      <device id="safari"/>
+    </unSupportedRootDevices>
+  </handler>
+
+  <handler name="SafariDesktop" type="regexSegment" defaultDevice="safari" confidence="8" checkUAProf="false" >
+    <canHandle>
+      <regex pattern="^Mozilla">
+        <regex pattern="Safari">
+          <regex pattern="Windows|Macintosh|X11"/>
+        </regex>
+      </regex>
+    </canHandle>
+    <regexSegments>
+      <regexSegment pattern="(?&lt;=Mozilla/\d.\d \()[^;]+" weight="3" />
+      <regexSegment pattern="(?&lt;=Safari/)[\d.]+" weight="1" />
+    </regexSegments>
+    <supportedRootDevices>
+      <device id="safari"/>
+    </supportedRootDevices>
+  </handler>
+
+  <handler name="Sagem" type="editDistance" defaultDevice="sagem_p9521_ver1" confidence="5" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="^Sagem|^SAGEM"/>
+    </canHandle>
+  </handler>
+
+  <handler name="SamsungRegexSegment" type="regexSegment" defaultDevice="samsung_sgh_i600_ver1" confidence="8" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="((?i)samsung)|^SEC-"/>
+    </canHandle>
+    <regexSegments>
+      <regexSegment pattern="(?i)(?:(?&lt;=samsung|SEC-)[^/]+)" weight="100"/>
+      <regexSegment pattern="(?i)(?:(?&lt;=samsung|SEC-[^/]+/)[^\s]+)" weight="1"/>
+    </regexSegments>
+  </handler>
+
+  <handler name="SamsungEditDistance" type="editDistance" defaultDevice="samsung_sgh_i600_ver1" confidence="8" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="((?i)samsung)|^SEC-"/>
+    </canHandle>
+  </handler>
+
+  <handler name="Sanyo" type="editDistance" defaultDevice="sanyo_scp9000_ver1" confidence="5" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="^Sanyo|^SANYO"/>
+    </canHandle>
+  </handler>
+
+  <handler name="Sendo" type="editDistance" defaultDevice="sendo_m550_ver1" confidence="5" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="Sendo"/>
+    </canHandle>
+  </handler>
+
+  <handler name="Sharp" type="editDistance" defaultDevice="sharp_703sh_ver1" confidence="5" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="^Sharp|^SHARP"/>
+    </canHandle>
+  </handler>
+
+  <handler name="Siemens" type="editDistance" defaultDevice="sie_m55_ver1" confidence="5" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="^SIE-"/>
+    </canHandle>
+  </handler>
+
+  <handler name="Skyfire" type="regexSegment" defaultDevice="browser_webkit_skyfire_2_0" confidence="9" checkUAProf="false" >
+    <canHandle>
+      <regex pattern="Skyfire/"/>
+    </canHandle>
+    <regexSegments>
+      <regexSegment pattern="(?&lt;=Mozilla/)[\d.]+" weight="1"/>
+      <regexSegment pattern="(?&lt;=Skyfire/)[\d.]+" weight="1"/>
+      <regexSegment pattern="(?&lt;=AppleWebKit/)[\d.]+" weight="5"/>
+      <regexSegment pattern="(?&lt;=Safari/)[\d.]+" weight="5"/>
+      <regexSegment pattern="(?&lt;=Version/)[\d.]+" weight="5"/>
+    </regexSegments>
+  </handler>
+
+  <handler name="SoftBank" type="regexSegment" defaultDevice="softbank_generic" confidence="7" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="^SoftBank|^Vodafone|^J-PHONE"/>
+    </canHandle>
+    <regexSegments>
+      <regexSegment pattern="(SoftBank|Vodafone|J-PHONE)\/\d\.\d\/\w+" weight="1"/>
+    </regexSegments>
+  </handler>
+
+  <handler name="SonyEricsson" type="regexSegment" defaultDevice="sonyericsson_k550i_ver1" confidence="7" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="SonyEricsson"/>
+    </canHandle>
+    <regexSegments>
+      <regexSegment pattern="(?:(?&lt;=SonyEricsson)[^/]+)" weight="100"/>
+      <regexSegment pattern="(?:(?&lt;=SonyEricsson[^/]+/)[\w\d]+)" weight="1"/>
+      <regexSegment pattern="(?:(?&lt;= )[^ ]+)" weight="1"/>
+    </regexSegments>
+  </handler>
+
+  <handler name="Tianyu" type="editDistance" defaultDevice="tianyu_ktouchv908_ver1" confidence="5" checkUAProf="false" >
+    <canHandle>
+      <regex pattern="^TIANYU-KTOUCH"/>
+    </canHandle>
+  </handler>
+
+  <handler name="Toshiba" type="editDistance" defaultDevice="toshiba_ts608_ver1" confidence="5" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="^Toshiba"/>
+    </canHandle>
+  </handler>
+
+  <handler name="Vodafone" type="editDistance" defaultDevice="vodafone_toshiba_803_ver1" confidence="5" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="^Vodafone"/>
+    </canHandle>
+  </handler>
+
+  <handler name="WindowsCE" type="editDistance" defaultDevice="ms_mobile_browser_ver1" confidence="5" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="^Mozilla/">
+        <regex pattern="Windows CE"/>
+      </regex>
+    </canHandle>
+  </handler>
+
+  <handler name="WindowsPhone" type="editDistance" defaultDevice="generic_ms_phone_os7" confidence="7" checkUAProf="true" >
+    <canHandle>
+      <regex pattern="MSIE">
+        <regex pattern="Windows Phone OS"/>
+      </regex>
+    </canHandle>
+    <cantHandle>
+      <regex pattern="Windows NT"/>
+    </cantHandle>
+    <supportedRootDevices>
+      <device id="generic_ms_phone_os7"/>
+      <device id="generic_windows_phone_os_7"/>
+    </supportedRootDevices>
+  </handler>
+
+</handlers>

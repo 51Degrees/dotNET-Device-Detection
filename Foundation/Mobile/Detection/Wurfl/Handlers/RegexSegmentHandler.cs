@@ -1,5 +1,5 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
+ * The contents of this file are subject to the Mozilla internal License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -21,167 +21,86 @@
  * 
  * ********************************************************************* */
 
-#region Usings
-
-using System.Text.RegularExpressions;
-using System.Web;
-using FiftyOne.Foundation.Mobile.Detection.Wurfl.Matchers.Segment;
-
-#endregion
+using System.Collections.Generic;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Handlers
 {
-    internal abstract class RegexSegmentHandler : SegmentHandler
+    /// <summary>
+    /// Device detection handler using regular expressions to segment strings
+    /// before matching specific segments.
+    /// </summary>
+    internal sealed class RegexSegmentHandler : Detection.Handlers.RegexSegmentHandler, IHandler
     {
-        // This is a more precise method of matching a useragent to a device and
-        // we can therefore assign a higher level of confidence.
-        internal const byte CONFIDENCE = 7;
-        private const string DEFAULT_PATTERN = @"[^ ]+";
-        protected bool _firstMatchOnly;
-
-        protected Regex[] _patterns;
-        protected int[] _weights;
+        #region Fields
 
         /// <summary>
-        /// Constructs an instance of <cref see="RegexSegmentHandler"/>.
+        /// A list of device ids that must be in the device hierarchy
+        /// to enable the handler to support the device.
         /// </summary>
-        /// <param name="regex">The regular expression to use for a single segment.</param>
-        internal RegexSegmentHandler(string regex)
-        {
-            Init(new[] {regex}, new[] {1}, false);
-        }
+        private List<string> _supportedRootDeviceIds = new List<string>();
 
         /// <summary>
-        /// Constructs an instance of <cref see="RegexSegmentHandler"/>.
+        /// A list of device ids that must NOT be in the device hierarchy
+        /// to enable the handler to support the device.
         /// </summary>
-        /// <param name="regex">The regular expression to use for a single segment.</param>
-        /// <param name="weights">A single item array with the weight of the item.</param>
-        internal RegexSegmentHandler(string regex, int[] weights)
-        {
-            Init(new[] {regex}, weights, false);
-        }
+        private List<string> _unSupportedRootDeviceIds = new List<string>();
+
+        #endregion
+
+        #region Properties
 
         /// <summary>
-        /// Constructs an instance of <cref see="RegexSegmentHandler"/>.
+        /// A list of device ids that must be in the device hierarchy
+        /// to enable the handler to support the device.
         /// </summary>
-        /// <param name="regexs">An array of regular expressions for each segment.</param>
-        /// <param name="weights">An array of weights assigned to each segment. The higher the value the more significance given.</param>
-        internal RegexSegmentHandler(string[] regexs, int[] weights)
+        List<string> IHandler.SupportedRootDeviceIds
         {
-            Init(regexs, weights, false);
+            get { return _supportedRootDeviceIds; }
         }
 
         /// <summary>
-        /// Constructs an instance of <cref see="RegexSegmentHandler"/>.
+        /// A list of device ids that must NOT be in the device hierarchy
+        /// to enable the handler to support the device.
         /// </summary>
-        /// <param name="regex">An array of regular expressions for each segment.</param>
-        /// <param name="weights">An array of weights assigned to each segment. The higher the value the more significance given.</param>
-        /// <param name="firstMatchOnly">True if the 1st device matched should be returned.</param>
-        internal RegexSegmentHandler(string regex, int[] weights, bool firstMatchOnly)
+        List<string> IHandler.UnSupportedRootDeviceIds
         {
-            Init(new[] {regex}, weights, firstMatchOnly);
+            get { return _unSupportedRootDeviceIds; }
         }
+
+        #endregion
+
+        #region Constructor
 
         /// <summary>
-        /// Constructs an instance of <cref see="RegexSegmentHandler"/>.
+        /// Constucts an instance of <see cref="RegexSegmentHandler"/>.
         /// </summary>
-        /// <param name="regexs">An array of regular expressions for each segment.</param>
-        /// <param name="weights">An array of weights assigned to each segment. The higher the value the more significance given.</param>
-        /// <param name="firstMatchOnly">True if the 1st device matched should be returned.</param>
-        internal RegexSegmentHandler(string[] regexs, int[] weights, bool firstMatchOnly)
+        /// <param name="provider">Reference to the provider instance the handler will be associated with.</param>
+        /// <param name="name">Name of the handler for debugging purposes.</param>
+        /// <param name="defaultDeviceId">The default device ID to return if no match is possible.</param>
+        /// <param name="confidence">The confidence this handler should be given compared to others.</param>
+        /// <param name="checkUAProfs">True if UAProfs should be checked.</param>
+        internal RegexSegmentHandler(BaseProvider provider, string name, string defaultDeviceId, byte confidence, bool checkUAProfs)
+            : base(provider, name, defaultDeviceId ?? Constants.DefaultDeviceId[0], confidence, checkUAProfs)
         {
-            Init(regexs, weights, firstMatchOnly);
         }
 
-        internal override byte Confidence
-        {
-            get { return CONFIDENCE; }
-        }
+        #endregion
 
-        private void Init(string[] regexs, int[] weights, bool firstMatchOnly)
-        {
-            _patterns = new Regex[regexs.Length];
-            for (int i = 0; i < regexs.Length; i++)
-            {
-                _patterns[i] = new Regex(regexs[i], RegexOptions.Compiled);
-            }
-            _weights = weights;
-            _firstMatchOnly = firstMatchOnly;
-        }
-
-        internal override Segments CreateSegments(string source)
-        {
-            if (_firstMatchOnly)
-                return CreateSegmentsFirstMatch(source);
-            else
-                return CreateSegmentsMultipleMatches(source);
-        }
-
-        private Segments CreateSegmentsMultipleMatches(string source)
-        {
-            Segments segments = new Segments();
-            foreach (Regex pattern in _patterns)
-            {
-                MatchCollection matches = pattern.Matches(source);
-                if (matches != null)
-                {
-                    foreach (Match match in matches)
-                    {
-                        segments.Add(new Segment(match.Value));
-                    }
-                }
-            }
-            return segments;
-        }
-
-        private Segments CreateSegmentsFirstMatch(string source)
-        {
-            Segments segments = new Segments();
-            foreach (Regex pattern in _patterns)
-            {
-                Match match = pattern.Match(source);
-                if (match != null && match.Success)
-                    segments.Add(new Segment(match.Value));
-                else
-                    segments.Add(new Segment(string.Empty));
-            }
-            return segments;
-        }
-
-        internal override int GetSegmentWeight(int index, int numberOfSegments)
-        {
-            if (index < _weights.Length)
-                // We have a weight specified so return this one.
-                return _weights[index];
-            else
-                // Weight segments in reverse order as the initial segments
-                // usually have the most impact on the match.
-                return numberOfSegments - index;
-        }
+        #region Overriden Methods
 
         /// <summary>
-        /// Returns true if the handler can match the requests useragent string.
+        /// Checks to see if the handler can support this device. The 
+        /// supported and unsupported device lists are checked along
+        /// with the devices hierarchy to ensure the handler supports 
+        /// the device.
         /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        internal override bool CanHandle(HttpRequest request)
+        /// <param name="device">Device to be checked.</param>
+        /// <returns>True if the device is supported, other false.</returns>
+        protected internal override bool CanHandle(BaseDeviceInfo device)
         {
-            return CanHandle(Provider.GetUserAgent(request));
+            return Support.CanHandle(this, (DeviceInfo)device) && base.CanHandle(device);
         }
 
-        /// <summary>
-        /// Returns true if the handler can match the requests useragent string.
-        /// </summary>
-        /// <param name="userAgent"></param>
-        /// <returns></returns>
-        protected internal override bool CanHandle(string userAgent)
-        {
-            foreach (Regex pattern in _patterns)
-            {
-                if (pattern.IsMatch(userAgent))
-                    return true;
-            }
-            return false;
-        }
+        #endregion
     }
 }

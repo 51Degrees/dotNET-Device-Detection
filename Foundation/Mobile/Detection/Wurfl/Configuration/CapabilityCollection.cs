@@ -1,5 +1,5 @@
 /* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
+ * The contents of this file are subject to the Mozilla internal License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -33,7 +33,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
     /// <summary>
     /// A collection of <see cref="CapabilityElement"/>. This class cannot be inherited.
     /// </summary>
-    public sealed class CapabilityCollection : ConfigurationElementCollection
+    internal sealed class CapabilityCollection : ConfigurationElementCollection
     {
         #region Constructors
 
@@ -71,7 +71,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// <param name="capability">The capability whos index is being sought.</param>
         /// <returns>The index of the capability requested.</returns>
         /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="capability"/> equals null.</exception>
-        public int IndexOf(CapabilityElement capability)
+        internal int IndexOf(CapabilityElement capability)
         {
             if (capability == null)
                 throw new ArgumentNullException("capability");
@@ -84,7 +84,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// </summary>
         /// <param name="capability">The capability to be added to the whitelist.</param>
         /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="capability"/> equals null.</exception>
-        public void Add(CapabilityElement capability)
+        internal void Add(CapabilityElement capability)
         {
             if (capability == null)
                 throw new ArgumentNullException("capability");
@@ -97,7 +97,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// </summary>
         /// <param name="capability">The capability to be removed from the whitelist.</param>
         /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="capability"/> equals null.</exception>
-        public void Remove(CapabilityElement capability)
+        internal void Remove(CapabilityElement capability)
         {
             if (capability == null)
                 throw new ArgumentNullException("capability");
@@ -111,7 +111,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// </summary>
         /// <param name="index">The index of the element to be removed.</param>
         /// <exception cref="System.ArgumentOutOfRangeException">Thrown if <paramref name="index"/> is less than zero or bigger than the number of indexes on the collections.</exception>
-        public void RemoveAt(int index)
+        internal void RemoveAt(int index)
         {
             if ((index < 0) || (index > base.Count - 1))
                 throw new ArgumentOutOfRangeException("index");
@@ -124,7 +124,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// </summary>
         /// <param name="capabilityName">The name of the capability to be removed.</param>
         /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="capabilityName"/> equals null.</exception>
-        public void Remove(string capabilityName)
+        internal void Remove(string capabilityName)
         {
             if (string.IsNullOrEmpty(capabilityName))
                 throw new ArgumentNullException("capabilityName");
@@ -135,7 +135,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// <summary>
         /// Removes all configuration elements from the collection.
         /// </summary>
-        public void Clear()
+        internal void Clear()
         {
             BaseClear();
         }
@@ -147,7 +147,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// <summary>
         /// Gets or sets the <see cref="CapabilityElement"/>.
         /// </summary>
-        public CapabilityElement this[int index]
+        internal CapabilityElement this[int index]
         {
             get { return (CapabilityElement) BaseGet(index); }
             set
@@ -163,7 +163,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// <summary>
         /// Gets or sets the <see cref="CapabilityElement"/>.
         /// </summary>        
-        public new CapabilityElement this[string capabilityName]
+        internal new CapabilityElement this[string capabilityName]
         {
             get { return (CapabilityElement) BaseGet(capabilityName); }
         }

@@ -1,5 +1,5 @@
 /* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
+ * The contents of this file are subject to the Mozilla internal License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -33,7 +33,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
     /// <summary>
     /// A collection of <see cref="PatchesCollection"/>. This class cannot be inherited.
     /// </summary>
-    public sealed class PatchesCollection : ConfigurationElementCollection
+    internal sealed class PatchesCollection : ConfigurationElementCollection
     {
         #region Constructors
 
@@ -71,7 +71,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// <param name="wurflPatch">The element being sought.</param>
         /// <returns>The index of the element.</returns>
         /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="wurflPatch"/> equals null.</exception>
-        public int IndexOf(PatchConfigElement wurflPatch)
+        internal int IndexOf(PatchConfigElement wurflPatch)
         {
             if (wurflPatch == null)
                 throw new ArgumentNullException("wurflPatch");
@@ -84,7 +84,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// </summary>
         /// <param name="wurflPatch">The patch to be added to the collection.</param>
         /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="wurflPatch"/> equals null.</exception>
-        public void Add(PatchConfigElement wurflPatch)
+        internal void Add(PatchConfigElement wurflPatch)
         {
             if (wurflPatch == null)
                 throw new ArgumentNullException("wurflPatch");
@@ -97,7 +97,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// </summary>
         /// <param name="wurflPatch">The patch to be removed from the collection.</param>
         /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="wurflPatch"/> equals null.</exception>
-        public void Remove(PatchConfigElement wurflPatch)
+        internal void Remove(PatchConfigElement wurflPatch)
         {
             if (wurflPatch == null)
                 throw new ArgumentNullException("wurflPatch");
@@ -111,7 +111,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// </summary>
         /// <param name="index">The index of the patch to remove from the collection.</param>
         /// <exception cref="System.ArgumentOutOfRangeException">Thrown if <paramref name="index"/> is less than zero or bigger than the number of indexes on the collections.</exception>
-        public void RemoveAt(int index)
+        internal void RemoveAt(int index)
         {
             if ((index < 0) || (index > base.Count - 1))
                 throw new ArgumentOutOfRangeException("index");
@@ -124,7 +124,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// </summary>
         /// <param name="name">The name of the patch to remove from the collection.</param>
         /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="name"/> equals null.</exception>
-        public void Remove(string name)
+        internal void Remove(string name)
         {
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException("name");
@@ -135,7 +135,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// <summary>
         /// Removes all configuration elements from the collection.
         /// </summary>
-        public void Clear()
+        internal void Clear()
         {
             BaseClear();
         }
@@ -147,7 +147,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// <summary>
         /// Gets or sets the <see cref="PatchConfigElement"/>.
         /// </summary>
-        public PatchConfigElement this[int index]
+        internal PatchConfigElement this[int index]
         {
             get { return (PatchConfigElement) BaseGet(index); }
             set
@@ -163,7 +163,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration
         /// <summary>
         /// Gets or sets the <see cref="PatchConfigElement"/>.
         /// </summary>        
-        public new PatchConfigElement this[string name]
+        internal new PatchConfigElement this[string name]
         {
             get { return (PatchConfigElement) BaseGet(name); }
         }
