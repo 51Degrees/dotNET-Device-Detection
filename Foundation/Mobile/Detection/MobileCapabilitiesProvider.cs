@@ -98,7 +98,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     : _parent.GetBrowserCapabilities(request);
 
             // Get the new and overridden capabilities.
-            IDictionary overrideCapabilities = Factory.Create(request, baseCapabilities.Capabilities);
+            IDictionary overrideCapabilities = Create(request, baseCapabilities.Capabilities);
 
             if (overrideCapabilities != null)
                 // Create a new browser capabilities instance combining the two.
@@ -106,6 +106,17 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
             // We couldn't get any new values so return the current ones unaltered.
             return baseCapabilities;
+        }
+
+        /// <summary>
+        /// Create the new capabilities for the request.
+        /// </summary>
+        /// <param name="request">An HttpRequest that provides information about the source device.</param>
+        /// <param name="capabilities">Current capabilities for the request.</param>
+        /// <returns>A new list of capabilities.</returns>
+        protected virtual IDictionary Create(HttpRequest request, IDictionary capabilities)
+        {
+            return Factory.Create(request, capabilities);
         }
     }
 }

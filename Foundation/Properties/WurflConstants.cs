@@ -144,7 +144,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
                                                                             "default_image_button_height_mms",
                                                                             "default_image_button_height_pixels",
                                                                             "default_selectable_font_size_points",
-                                                                            "xhtml_file_upload"
+                                                                            "xhtml_file_upload",
+                                                                            "default_selectable_font_size_pixels"
                                                                         };
     }
 }

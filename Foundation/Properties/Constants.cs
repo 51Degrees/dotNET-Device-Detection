@@ -29,6 +29,10 @@ namespace FiftyOne.Foundation.Mobile
         /// Alternative configuration file name
         /// </summary>
         internal const string CONFIG_FILENAME = "~/App_Data/51Degrees.mobi.config";
-        
+
+        /// <summary>
+        /// Name for Azure cloud storage
+        /// </summary>
+        internal const string AZURE_STORAGE_NAME = "fiftyonedegrees";
     }
 }

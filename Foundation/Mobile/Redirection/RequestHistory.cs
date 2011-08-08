@@ -45,269 +45,19 @@ namespace FiftyOne.Foundation.Mobile.Redirection
     /// mobile web site to determine if the request is the 1st one or a 
     /// subsequent one.
     /// </summary>
-    internal static class RequestHistory
+    internal class RequestHistory : IRequestHistory
     {
         #region Private Classes
 
-        #region Nested type: PreviousDevices
+        #region Nested type: PreviousRequests
 
         /// <summary>
         /// Contains details of the previous devices held in the request history.
         /// </summary>
-        private static class PreviousDevices
+        private class PreviousRequests
         {
-            internal static readonly SortedList<long, long> Devices = new SortedList<long, long>();
-            internal static RequestRecord lastDevice = new RequestRecord();
-        }
-
-        #endregion
-
-        #region Nested type: RequestRecord
-
-        /// <summary>
-        /// Class used to convert a HttpRequest into a single long value that is
-        /// almost unique for the requesting device. Two devices that share the same
-        /// external IP address and HTTP headers will calculate to the same long value
-        /// so it may not always be unique. The number of handsets that fall into this
-        /// category should be sufficiently small enough for it not to present a 
-        /// practical problem.
-        /// The date and time the request was received is also recorded to enable 
-        /// out of date records to be removed from the list.
-        /// </summary>
-        private class RequestRecord : IComparable
-        {
-            #region Constants
-
-            // Headers used to create a hashcode based on their values when present.
-            private static readonly string[] ADDITIONAL_HEADERS = new[]
-                                                                      {
-                                                                          // Common headers
-                                                                          "Accept-Language",
-                                                                          "Host",
-                                                                          "Via",
-                                                                          "UA", // Another user agent field
-
-                                                                          // Common x headers
-                                                                          "x-forwarded-for",
-                                                                          // Originating IP of a client connection to the server
-                                                                          "x-source-id",
-                                                                          // Could be an internal MNO IP address
-                                                                          "x-wap-profile",
-                                                                          // A reference to the user-agent profile
-                                                                          "x-forwarded-host", // Origination host name
-                                                                          "x-forwarded-server",
-                                                                          // Originating server name
-
-                                                                          // OpenWave gateway headers:
-                                                                          "x-up-calling-line-id",
-                                                                          // End users phone number
-
-                                                                          // Nokia gateway headers:
-                                                                          "x-nokia-alias",
-                                                                          //The end users phone number. encrypted.
-                                                                          "x-nokia-msisdn",
-                                                                          // The users phone number in plain text.
-                                                                          "x-nokia-ipaddress", // Internal IP address
-                                                                          "x-nokia-imsi", // Imsi value 
-
-                                                                          // Other headers:
-                                                                          "x-imsi",
-                                                                          // The imsi number. Identifies the end user. 
-                                                                          "x-msisdn", // The end users phone number  
-
-                                                                          // AvantGo headers.
-                                                                          "x-avantgo-userid"
-                                                                          // Identifying the end user.
-                                                                      };
-
-            #endregion
-
-            #region Fields
-
-            // The key for this device record.
-            private long _key;
-
-            // The date and time the device was last active.
-            private long _lastActiveDate;
-            
-            #endregion
-
-            #region Constructors
-
-            /// <summary>
-            /// Creates a new empty instance of <see cref="RequestRecord"/> class.
-            /// </summary>
-            protected internal RequestRecord()
-            {
-            }
-
-            /// <summary>
-            /// Constructs a new instance of <see cref="RequestRecord"/> class.
-            /// Copies the values of the <see cref="RequestRecord"/> provided to
-            /// the new instance.
-            /// </summary>
-            /// <param name="recordToCopy"></param>
-            protected internal RequestRecord(RequestRecord recordToCopy)
-            {
-                _key = recordToCopy.Key;
-                _lastActiveDate = recordToCopy.LastActiveDate;
-            }
-
-            /// <summary>
-            /// If the IP address is IPv4 (4 bytes) then use the ip address as the high order
-            /// bytes of the value and the hashcode as the low order bytes.
-            /// If the IP address is IPv6 (8 bytes) then covert the bytes to a 64 bit
-            /// integer. 
-            /// If anything else which we can't image use a hashcode of the string value.
-            /// </summary>
-            /// <param name="request"></param>
-            protected internal RequestRecord(HttpRequest request)
-            {
-                byte[] buffer = new byte[8];
-                byte[] address = IPAddress.Parse(request.UserHostAddress).GetAddressBytes();
-                
-                // If 4 bytes use these as the high order bytes and a hashcode from the
-                // HTTP header as the low order bytes.
-                if (address.Length == 4)
-                {
-                    for (int i = 0; i < 4; i++)
-                        buffer[7 - i] = address[i];
-                    SetHashCode(buffer, request);
-                    _key = BitConverter.ToInt64(buffer, 0);
-                }
-                
-                else if (address.Length == 8)
-                {
-                    // Use the value unaltered as a 64 bit value.
-                    _key = BitConverter.ToInt64(address, 0);
-                }
-
-                else
-                {
-                    // Create hashcode from the address.
-                    int hashcode = 0;
-                    foreach(byte current in address)
-                        hashcode += current;
-                    
-                    // Merge the address hashcode and the request hashcode.
-                    byte[] hashcodeArray = BitConverter.GetBytes(hashcode);
-                    for (int i = 0; i < 4; i++)
-                        buffer[4 + i] = hashcodeArray[i];
-                    SetHashCode(buffer, request);
-
-                    _key = BitConverter.ToInt64(buffer, 0);
-                }
-
-                // Set the last time this request was seen.
-                _lastActiveDate = DateTime.UtcNow.Ticks;
-            }
-
-            protected internal RequestRecord(BinaryReader reader)
-            {
-                _key = reader.ReadInt64();
-                _lastActiveDate = reader.ReadInt64();
-            }
-
-            #endregion
-
-            #region Properties
-
-            /// <summary>
-            /// The unique key for the device.
-            /// </summary>
-            protected internal long Key
-            {
-                get { return _key; }
-            }
-
-            /// <summary>
-            /// The date and device was last seen as active expressed 
-            /// as a long value.
-            /// </summary>
-            protected internal long LastActiveDate
-            {
-                get { return _lastActiveDate; }
-                set { _lastActiveDate = value; }
-            }
-
-            #endregion
-
-            #region Methods
-
-            protected internal void Read(BinaryReader reader)
-            {
-                _key = reader.ReadInt64();
-                _lastActiveDate = reader.ReadInt64();
-            }
-
-            protected internal void Write(Stream stream)
-            {
-                BinaryWriter writer = new BinaryWriter(stream);
-                writer.Write(_key);
-                writer.Write(_lastActiveDate);
-            }
-
-            /// <summary>
-            /// Adds the hashcode of the relevent header fields as the low order
-            /// bytes of the array.
-            /// </summary>
-            /// <param name="buffer">Buffer used to set the bytes.</param>
-            /// <param name="request">HttpRequest to calculate a hashcode from.</param>
-            private static void SetHashCode(byte[] buffer, HttpRequest request)
-            {
-                StringBuilder headers = new StringBuilder();
-                headers.Append(request.UserAgent);
-#if VER4
-                foreach (string key in ADDITIONAL_HEADERS.Where(key => request.Headers[key] != null))
-                {
-                    headers.Append(key).Append(request.Headers[key]);
-                }
-#elif VER2
-                foreach (string key in ADDITIONAL_HEADERS)
-                {
-                    if (request.Headers[key] != null)
-                        headers.Append(key).Append(request.Headers[key]);
-                }
-#endif
-                int hashCode = headers.ToString().GetHashCode();
-                buffer[0] = (byte) (hashCode);
-                buffer[1] = (byte) (hashCode >> 8);
-                buffer[2] = (byte) (hashCode >> 16);
-                buffer[3] = (byte) (hashCode >> 24);
-            }
-
-            #endregion
-
-            #region IComparable Members
-
-            /// <summary>
-            /// Compares one request to another to determine if they are the same.
-            /// </summary>
-            /// <param name="obj">The object being compared.</param>
-            /// <returns>If the object contains the same value as this instance.</returns>
-            public int CompareTo(object obj)
-            {
-                RequestRecord candidate = obj as RequestRecord;
-                if (candidate != null)
-                {
-                    if (candidate.LastActiveDate < LastActiveDate)
-                        return -1;
-                    if (candidate.LastActiveDate > LastActiveDate)
-                        return 1;
-                    if (candidate.Key < Key)
-                        return -1;
-                    if (candidate.Key > Key)
-                        return 1;
-                    return 0;
-                }
-                throw new MobileException(
-                    String.Format(
-                        "Can not compare object of type '{0}' with '{1}'.",
-                        obj.GetType(),
-                        GetType()));
-            }
-
-            #endregion
+            internal readonly SortedList<long, long> Requests = new SortedList<long, long>();
+            internal RequestRecord lastRequest = new RequestRecord();
         }
 
         #endregion
@@ -330,42 +80,44 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         #region Fields
 
         // Stores the path for the devices synchronisation file.
-        private static readonly string _syncFilePath;
+        private readonly string _syncFilePath;
 
         // The next time this process should service the sync file.
-        private static DateTime _nextServiceTime = DateTime.MinValue;
+        private DateTime _nextServiceTime = DateTime.MinValue;
 
         // The last time the sync file was modified.
-        private static DateTime _lastWriteTime = DateTime.MinValue;
+        private DateTime _lastWriteTime = DateTime.MinValue;
         
         /// <summary>
         /// The number of minutes that should elapse before the record of 
         /// previous access for the device should be removed from all
         /// possible storage mechanisims.
         /// </summary>
-        private static readonly int _redirectTimeout = 0;
+        private readonly int _redirectTimeout = 0;
+
+        /// <summary>
+        /// Details about previous requests held in memory.
+        /// </summary>
+        private readonly PreviousRequests _previous = new PreviousRequests();
 
         #endregion
 
-        #region Static Constructor
+        #region Constructor
 
-        static RequestHistory()
+        internal RequestHistory()
         {
-            if (Manager.Redirect.Enabled)
-            {
-                // Get the timeout used to remove devices.
-                _redirectTimeout = Manager.Redirect.Timeout;
+            // Get the timeout used to remove devices.
+            _redirectTimeout = Manager.Redirect.Timeout;
 
-                // Get the request history file and set to null it
-                // it's empty.
-                _syncFilePath = Support.GetFilePath(Manager.Redirect.DevicesFile);
-                if (_syncFilePath == String.Empty)
-                    _syncFilePath = null;
+            // Get the request history file and set to null it
+            // it's empty.
+            _syncFilePath = Support.GetFilePath(Manager.Redirect.DevicesFile);
+            if (_syncFilePath == String.Empty)
+                _syncFilePath = null;
 
-                // Process the syncfile.
-                if (_syncFilePath != null)
-                    ProcessSyncFile();
-            }
+            // Process the syncfile.
+            if (_syncFilePath != null)
+                ProcessSyncFile();
         }
 
         #endregion
@@ -379,7 +131,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// </summary>
         /// <param name="request">HttpRequest to be checked.</param>
         /// <returns>True if the device associated with the request has been seen.</returns>
-        internal static bool IsPresent(HttpRequest request)
+        public bool IsPresent(HttpRequest request)
         {
             if (_syncFilePath != null)
             {
@@ -389,7 +141,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                 RefreshSyncFile();
 
                 long expiryDateTime;
-                if (PreviousDevices.Devices.TryGetValue(record.Key, out expiryDateTime))
+                if (_previous.Requests.TryGetValue(record.Key, out expiryDateTime))
                 {
                     // If redirect timeout is zero then simply check to see if the
                     // device is present in the list of previous devices.
@@ -408,7 +160,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// Adds this device request to the previous devices list.
         /// </summary>
         /// <param name="request">HttpRequest of the device.</param>
-        internal static void Add(HttpRequest request)
+        public void Set(HttpRequest request)
         {
             if (_syncFilePath != null)
             {
@@ -429,7 +181,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// Removes this device request from the previous devices list.
         /// </summary>
         /// <param name="request">HttpRequest of the device.</param>
-        internal static void Remove(HttpRequest request)
+        public void Remove(HttpRequest request)
         {
             if (_syncFilePath != null)
             {
@@ -439,7 +191,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                 RefreshSyncFile();
 
                 // Does the device exist in the previous devices list?
-                if (PreviousDevices.Devices.ContainsKey(record.Key))
+                if (_previous.Requests.ContainsKey(record.Key))
                 {
                     // Set the last active date to zero so that it will be 
                     // removed when the sync file is serviced.
@@ -459,7 +211,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// Checks to determine if new records need to be processed and if so
         /// loads them into memory.
         /// </summary>
-        private static void RefreshSyncFile()
+        private void RefreshSyncFile()
         {
             FileInfo info = new FileInfo(_syncFilePath);
             if (info != null && info.LastWriteTimeUtc > _lastWriteTime)
@@ -473,8 +225,8 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// Adds the current request record to the file containing details of
         /// all the available requests.
         /// </summary>
-        /// <param name="record">Record of the request to be added.</param>
-        private static void Add(object record)
+        /// <param name="record">Record of the request to be set.</param>
+        private void Add(object record)
         {
             if (record is RequestRecord)
             {
@@ -490,7 +242,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
             }
         }
 
-        private static void ProcessSyncFile()
+        private void ProcessSyncFile()
         {
             if (File.Exists(_syncFilePath))
             {
@@ -498,7 +250,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
 
                 // Lock the list of devices we're about to update to ensure they can't be
                 // changed by subsequent requests to this callback.
-                lock (PreviousDevices.Devices)
+                lock (_previous.Requests)
                 {
                     // Open the sync file for read access ensuring it's disposed 
                     // as soon as possible.
@@ -534,22 +286,22 @@ namespace FiftyOne.Foundation.Mobile.Redirection
 
                                 // If the current record is the same as the last one we got last time
                                 // this method was called then stop processing more records.
-                                if (record.CompareTo(PreviousDevices.lastDevice) == 0)
+                                if (record.CompareTo(_previous.lastRequest) == 0)
                                     break;
 
                                 // Update the memory version.
                                 if (record.LastActiveDate == 0)
                                 {
                                     // Remove from the device as the last active date is zero.
-                                    PreviousDevices.Devices.Remove(record.Key);
+                                    _previous.Requests.Remove(record.Key);
                                 }
                                 else
                                 {
                                     // Update or insert a new record.
-                                    if (PreviousDevices.Devices.ContainsKey(record.Key))
-                                        PreviousDevices.Devices[record.Key] = record.LastActiveDate;
+                                    if (_previous.Requests.ContainsKey(record.Key))
+                                        _previous.Requests[record.Key] = record.LastActiveDate;
                                     else
-                                        PreviousDevices.Devices.Add(record.Key, record.LastActiveDate);
+                                        _previous.Requests.Add(record.Key, record.LastActiveDate);
                                 }
 
                                 if (firstDevice == null)
@@ -559,7 +311,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                             // then update the last device record to limit the number of rows
                             // examined in future file changes.
                             if (length == stream.Length && firstDevice != null)
-                                PreviousDevices.lastDevice = firstDevice;
+                                _previous.lastRequest = firstDevice;
 
                             // Signal to all the method again if the length of the file
                             // has changed during processing.
@@ -582,7 +334,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// than the exception.
         /// </summary>
         /// <returns></returns>
-        private static FileStream OpenSyncFilePath(FileMode mode, FileAccess access, FileShare share)
+        private FileStream OpenSyncFilePath(FileMode mode, FileAccess access, FileShare share)
         {
             FileStream stream = null;
             Random rnd = null;
@@ -619,18 +371,18 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// remove old entries. If the redirect timeout is 0 indicating infinite
         /// then nothing should be purged.
         /// </summary>
-        private static void CheckIfServiceRequired()
+        private void CheckIfServiceRequired()
         {
             if (_nextServiceTime < DateTime.UtcNow)
             {
                 long purgeDate;
 
                 // If the last device has no active date use the current time for the purge date.
-                if (PreviousDevices.lastDevice.LastActiveDate == DateTime.MinValue.Ticks)
+                if (_previous.lastRequest.LastActiveDate == DateTime.MinValue.Ticks)
                     purgeDate = DateTime.UtcNow.Ticks - (TimeSpan.TicksPerMinute*_redirectTimeout);
                     // Otherwise use the last active devices active date for the purge date.
                 else
-                    purgeDate = PreviousDevices.lastDevice.LastActiveDate -
+                    purgeDate = _previous.lastRequest.LastActiveDate -
                                 (TimeSpan.TicksPerMinute*_redirectTimeout);
 
                 ThreadPool.QueueUserWorkItem(
@@ -647,7 +399,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// Date as a long used to determine if a request history 
         /// record is old and can be removed.
         /// </param>
-        private static void ServiceRequestHistory(object purgeDate)
+        private void ServiceRequestHistory(object purgeDate)
         {
             using (FileStream stream = OpenSyncFilePath(FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
             {
@@ -672,13 +424,13 @@ namespace FiftyOne.Foundation.Mobile.Redirection
             }
 
             // Remove old records from the memory version.
-            lock (PreviousDevices.Devices)
+            lock (_previous.Requests)
             {
                 int index = 0;
-                while (index < PreviousDevices.Devices.Count)
+                while (index < _previous.Requests.Count)
                 {
-                    if (PreviousDevices.Devices.Values[index] <= (long)purgeDate)
-                        PreviousDevices.Devices.RemoveAt(index);
+                    if (_previous.Requests.Values[index] <= (long)purgeDate)
+                        _previous.Requests.RemoveAt(index);
                     else
                         index++;
                 }

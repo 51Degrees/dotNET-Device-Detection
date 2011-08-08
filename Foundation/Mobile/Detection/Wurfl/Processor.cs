@@ -309,7 +309,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Wurfl
             foreach (string wurflFilePath in wurflFilePaths)
             {
                 if (string.IsNullOrEmpty(wurflFilePath))
-                    throw new ArgumentNullException("wurflFilePath");
+                    throw new ArgumentNullException("wurflFilePaths");
 
                 if (!File.Exists(wurflFilePath))
                     throw new FileNotFoundException(Constants.WurflFileNotFound, wurflFilePath);

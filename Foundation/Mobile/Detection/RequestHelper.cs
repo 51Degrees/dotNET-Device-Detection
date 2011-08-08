@@ -99,9 +99,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
                     // Include all header values if maximumDetail is enabled, or
                     // header values related to the useragent or any header
-                    // key containing profile.
+                    // key containing profile or information helpful to determining
+                    // mobile devices.
                     if (maximumDetail ||
                         key == "User-Agent" ||
+                        key == "Host" ||
                         key.Contains("profile") ||
                         blank)
                     {

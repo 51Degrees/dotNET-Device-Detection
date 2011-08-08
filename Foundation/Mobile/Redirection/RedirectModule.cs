@@ -109,6 +109,11 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// </summary>
         private static bool _redirectEnabled;
 
+        /// <summary>
+        /// The request history provider to use with the redirect module.
+        /// </summary>
+        private IRequestHistory _requestHistory;
+
         #endregion
 
         #region Initialisers
@@ -122,14 +127,25 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         {
             EventLog.Debug("Initialising redirection module");
             StaticFieldInit();
-            StaticRegisterEventHandlersInit(application);
+
+            // Initialise the request history processor if required.
+            if (_firstRequestOnly == true)
+            {
+#if AZURE
+                _requestHistory = new Azure.RequestHistory();
+#else
+                _requestHistory = new RequestHistory();
+#endif
+            }
+
+            RegisterEventHandlersInit(application);
         }
 
         /// <summary>
         /// Registers the event handlers if they've not done so already.
         /// </summary>
         /// <param name="application">HttpApplication object for the web application.</param>
-        private static void StaticRegisterEventHandlersInit(HttpApplication application)
+        private void RegisterEventHandlersInit(HttpApplication application)
         {
             EventLog.Debug("Initialising redirection module event handlers");
 
@@ -161,7 +177,8 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                             _redirectEnabled = true;
                             _mobileHomePageUrl = Manager.Redirect.MobileHomePageUrl;
                             _firstRequestOnly = Manager.Redirect.FirstRequestOnly;
-                            _redirectTimeout = Manager.Redirect.Timeout;
+                            if (_firstRequestOnly == true)
+                                _redirectTimeout = Manager.Redirect.Timeout;
                             if (String.IsNullOrEmpty(Manager.Redirect.MobilePagesRegex) == false)
                                 _mobilePageRegex = new Regex(Manager.Redirect.MobilePagesRegex,
                                                              RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -219,7 +236,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// </summary>
         /// <param name="sender">HttpApplication related to the request.</param>
         /// <param name="e">EventArgs related to the event. Not used.</param>
-        public static void OnPostAcquireRequestState(object sender, EventArgs e)
+        public void OnPostAcquireRequestState(object sender, EventArgs e)
         {
             // Initialise the static fields if required.
             StaticFieldInit();
@@ -355,13 +372,13 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// </summary>
         /// <param name="context">The HttpContext of the request.</param>
         /// <returns>True if the request should be redirected.</returns>
-        private static bool ShouldRequestRedirect(HttpContext context)
+        private bool ShouldRequestRedirect(HttpContext context)
         {
             return context.Handler != null &&
                    String.IsNullOrEmpty(GetLocationUrl(context)) == false &&
                    IsPage(context) &&
                    IsMobilePage(context) == false &&
-                   IsFirstTime(context) &&
+                   IsFirstTime(context) &&                   
                    IsRestrictedPageForRedirect(context) == false;
         }
 
@@ -407,7 +424,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// </summary>
         /// <param name="context">Context of the request.</param>
         /// <returns>True if this request is the first from the device. Otherwise false.</returns>
-        public static bool IsFirstTime(HttpContext context)
+        private bool IsFirstTime(HttpContext context)
         {
             // If the parameter indicating only the first request should be redirect
             // is false then return true as the implication is all requests should
@@ -453,7 +470,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                     WipeResponseCookie(context, context.Request.Cookies[Constants.AlreadyAccessedCookieName]);
 
                 // Remove from the devices cache file as session can be used.
-                RequestHistory.Remove(context.Request);
+                _requestHistory.Remove(context.Request);
 
                 return false;
             }
@@ -468,14 +485,14 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                 SetResponseCookie(context, alreadyAccessed);
 
                 // Remove from the devices cache file as cookie can be used.
-                RequestHistory.Remove(context.Request);
+                _requestHistory.Remove(context.Request);
 
                 return false;
             }
 
             // Check to see if the requested IP address and HTTP headers hashcode is
             // on record as having been seen before.
-            if (RequestHistory.IsPresent(context.Request))
+            if (_requestHistory.IsPresent(context.Request))
             {
                 // Update the cache and other methods in case they can
                 // be used in the future.
@@ -542,7 +559,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// to IsFirstTime return the correct value.
         /// </summary>
         /// <param name="context">The context of the request.</param>
-        private static void RecordFirstTime(HttpContext context)
+        private void RecordFirstTime(HttpContext context)
         {
             // Add a parameter to the session if available indicating the time that 
             // the device date should be remvoed from the session.
@@ -555,7 +572,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
             SetResponseCookie(context, new HttpCookie(Constants.AlreadyAccessedCookieName));
 
             // Add to the request history cache.
-            RequestHistory.Add(context.Request);
+            _requestHistory.Set(context.Request);
         }
 
         /// <summary>
