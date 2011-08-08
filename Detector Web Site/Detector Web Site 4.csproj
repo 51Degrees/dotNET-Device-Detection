@@ -72,6 +72,7 @@
     <Content Include="Mobile\Default.aspx" />
     <Content Include="skin.css" />
     <Content Include="MobileDevice.asmx" />
+<Content Include="LogTable.aspx" />
     <Content Include="Tablet.png" />
     <Content Include="Tablet\Default.aspx" />
     <None Include="Properties\Settings.settings">
@@ -122,6 +123,13 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+<Compile Include="LogTable.aspx.cs">
+      <DependentUpon>LogTable.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="LogTable.aspx.designer.cs">
+      <DependentUpon>LogTable.aspx</DependentUpon>
+</Compile>
     <Compile Include="Tablet\Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

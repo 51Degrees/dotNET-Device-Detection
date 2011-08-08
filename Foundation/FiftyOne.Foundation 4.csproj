@@ -61,7 +61,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;VER4</DefineConstants>
+    <DefineConstants>TRACE;VER2</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\FiftyOne.Foundation.xml</DocumentationFile>
@@ -69,9 +69,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.WindowsAzure.CloudDrive, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.WindowsAzure.Diagnostics, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.WindowsAzure.ServiceRuntime, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.WindowsAzure.StorageClient, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.Services.Client" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
@@ -122,6 +127,11 @@
     <Compile Include="Mobile\Detection\Wurfl\Provider.cs" />
     <Compile Include="Mobile\Detection\Wurfl\WurflException.cs" />
     <Compile Include="Properties\Constants.cs" />
+<Compile Include="Mobile\Redirection\Azure\RequestEntity.cs" />
+    <Compile Include="Mobile\Redirection\Azure\RequestHistory.cs" />
+    <Compile Include="Mobile\Redirection\Azure\RequestRecord.cs" />
+    <Compile Include="Mobile\Redirection\IRequestHistory.cs" />
+    <Compile Include="Mobile\Redirection\RequestRecord.cs" />
     <Compile Include="Mobile\Detection\DetectorModule.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -156,7 +166,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="PDA.ico" />
-    <EmbeddedResource Include="Properties\Handlers.xml" />
+	<EmbeddedResource Include="Properties\Handlers.xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
