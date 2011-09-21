@@ -51,7 +51,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;VER4</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;VER4 AZURE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Debug\FiftyOne.Foundation.xml</DocumentationFile>
@@ -84,6 +84,7 @@
   <ItemGroup>
     <Compile Include="Activator.cs" />
     <Compile Include="Cache.cs" />
+    <Compile Include="LogMessageEntity.cs" />
     <Compile Include="Mobile\Configuration\NewDeviceDetail.cs" />
     <Compile Include="Mobile\Detection\BaseDeviceInfo.cs" />
     <Compile Include="Mobile\Detection\BaseProvider.cs" />
@@ -127,7 +128,7 @@
     <Compile Include="Mobile\Detection\Wurfl\Provider.cs" />
     <Compile Include="Mobile\Detection\Wurfl\WurflException.cs" />
     <Compile Include="Properties\Constants.cs" />
-<Compile Include="Mobile\Redirection\Azure\RequestEntity.cs" />
+    <Compile Include="Mobile\Redirection\Azure\RequestEntity.cs" />
     <Compile Include="Mobile\Redirection\Azure\RequestHistory.cs" />
     <Compile Include="Mobile\Redirection\Azure\RequestRecord.cs" />
     <Compile Include="Mobile\Redirection\IRequestHistory.cs" />
@@ -166,7 +167,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="PDA.ico" />
-	<EmbeddedResource Include="Properties\Handlers.xml" />
+    <EmbeddedResource Include="Properties\Handlers.xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

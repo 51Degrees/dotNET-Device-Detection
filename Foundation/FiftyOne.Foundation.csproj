@@ -74,6 +74,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cache.cs" />
+	<Compile Include="LogMessageEntity.cs" />
     <Compile Include="Image\Support.cs" />
     <Compile Include="Mobile\Detection\BaseProvider.cs" />
     <Compile Include="Mobile\Detection\Handlers\Handler.cs" />
