@@ -82,6 +82,9 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         // Stores the path for the devices synchronisation file.
         private readonly string _syncFilePath;
 
+        // Record the file exists to avoid a costly call to the file system.
+        private bool _syncFileExists = false;
+
         // The next time this process should service the sync file.
         private DateTime _nextServiceTime = DateTime.MinValue;
 
@@ -244,8 +247,14 @@ namespace FiftyOne.Foundation.Mobile.Redirection
 
         private void ProcessSyncFile()
         {
-            if (File.Exists(_syncFilePath))
+            // Record if the sync file exists to avoid repeated calls
+            // to the operating system.
+            if (_syncFileExists == false)
+                _syncFileExists = File.Exists(_syncFilePath);
+
+            if (_syncFileExists)
             {
+                // Used to indicate if the process should be repeated.
                 bool repeatProcess = false;
 
                 // Lock the list of devices we're about to update to ensure they can't be

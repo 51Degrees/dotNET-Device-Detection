@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if AZURE
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -278,3 +280,5 @@ namespace FiftyOne.Foundation.Mobile.Redirection.Azure
         #endregion
     }
 }
+
+#endif

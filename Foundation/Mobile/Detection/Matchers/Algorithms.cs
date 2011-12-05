@@ -1,5 +1,5 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla internal License 
+ * The contents of this file are subject to the Mozilla Public License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -32,7 +32,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers
     /// <summary>
     /// Contains major matching algorithms used by the solution.
     /// </summary>
-    internal class Algorithms
+    public class Algorithms
     {
         /// <summary>
         /// Measures the amount of difference between two strings using the Levenshtein 
@@ -47,7 +47,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers
         /// <param name="str2">2nd string to compare.</param>
         /// <param name="maxValue">The maximum value we're interested in. Anything higher can be ignored.</param>
         /// <returns></returns>
-        internal static int EditDistance(string str1, string str2, int maxValue)
+        public static int EditDistance(string str1, string str2, int maxValue)
         {
             // Confirm input strings are valid.
             if (str1 == null) throw new ArgumentNullException("str1");

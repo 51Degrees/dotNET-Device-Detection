@@ -1,8 +1,11 @@
-﻿using System;
+﻿#if AZURE
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.WindowsAzure.StorageClient;
+
 
 namespace FiftyOne.Foundation.Mobile.Redirection.Azure
 {
@@ -34,3 +37,5 @@ namespace FiftyOne.Foundation.Mobile.Redirection.Azure
         internal DateTime LastActiveDate { get; set; }
     }
 }
+
+#endif

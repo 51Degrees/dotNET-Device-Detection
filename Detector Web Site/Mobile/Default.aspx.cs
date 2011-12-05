@@ -30,9 +30,10 @@ namespace Detector.Mobile
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            LabelManufacturer.Text = Request.Browser.MobileDeviceManufacturer;
-            LabelModel.Text = Request.Browser.MobileDeviceModel;
+            PropertiesDevice.UserAgentString = Request.UserAgent;
+
             LabelUserAgent.Text = Request.UserAgent;
+            LabelTagWriter.Text = Request.Browser.TagWriter.FullName;
 
             // Ensure the page is never cached.
             Response.Cache.SetCacheability(System.Web.HttpCacheability.NoCache);

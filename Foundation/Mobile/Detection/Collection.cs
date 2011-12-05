@@ -1,5 +1,5 @@
 /* *********************************************************************
- * The contents of this file are subject to the Mozilla internal License 
+ * The contents of this file are subject to the Mozilla Public License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -33,7 +33,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// <summary>
     /// A collection of string indexes.
     /// </summary>
-    internal class Collection : Dictionary<int, int>
+    internal class Collection : Dictionary<int, IList<int>>
     {
         #region Fields
 
@@ -56,28 +56,43 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Sets the capabilityName and Value in the collection.
         /// </summary>
         /// <param name="capabilityName">Name of the capability being set.</param>
-        /// <param name="value">Value of the capability being set.</param>
-        internal void Set(string capabilityName, string value)
+        /// <param name="values">Values of the capability being set.</param>
+        internal void Set(string capabilityName, string[] values)
         {
-            if (capabilityName == null)
-                throw new ArgumentNullException("capabilityName");
-
-            int id = _strings.Add(capabilityName);
-            if (id >= 0)
+            int capabilityNameIndex = _strings.Add(capabilityName);
+            if (capabilityNameIndex >= 0)
             {
-                lock (this)
+                var stringIndexes = new List<int>();
+                foreach (string value in values)
                 {
-                    // Does this capability already exist in the list?
-                    if (ContainsKey(id) == false)
-                    {
-                        // No. Create a new value and add it to the list.
-                        base.Add(id, _strings.Add(value ?? String.Empty));
-                    }
-                    else
-                    {
-                        // Yes. Replace it's value with the current one.
-                        base[id] = _strings.Add(value ?? String.Empty);
-                    }
+                    stringIndexes.Add(_strings.Add(value));
+                }
+                Set(capabilityNameIndex, stringIndexes);
+            }
+        }
+
+        /// <summary>
+        /// Sets the capabilityName and Value in the collection.
+        /// </summary>
+        /// <param name="capabilityNameIndex">String index of the capability being set.</param>
+        /// <param name="values">Value of the capability being set.</param>
+        internal void Set(int capabilityNameIndex, IList<int> values)
+        {
+            lock (this)
+            {
+                // Does this capability already exist in the list?
+                if (ContainsKey(capabilityNameIndex) == false)
+                {
+                    // No. Create a new value and add it to the list.
+                    base.Add(capabilityNameIndex, values);
+                }
+                else
+                {
+                    // Yes. Replace it's value with the current one.
+                    var list = base[capabilityNameIndex];
+                    foreach(int value in values)
+                        if (list.Contains(value) == false)
+                            list.Add(value);
                 }
             }
         }

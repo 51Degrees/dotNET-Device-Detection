@@ -21,7 +21,7 @@
     <SccProvider>
     </SccProvider>
     <ApplicationIcon>PDA.ico</ApplicationIcon>
-    <SignAssembly>false</SignAssembly>
+    <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
@@ -50,21 +50,21 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;VER4 AZURE</DefineConstants>
+    <OutputPath>bin\Debug4\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;VER4</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\FiftyOne.Foundation.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug4\FiftyOne.Foundation.xml</DocumentationFile>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;VER2</DefineConstants>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release4\</OutputPath>
+    <DefineConstants>TRACE;VER4 AZURE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\FiftyOne.Foundation.xml</DocumentationFile>
+    <DocumentationFile>bin\Release4\FiftyOne.Foundation.xml</DocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
@@ -82,12 +82,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Activator.cs" />
+    <None Include="Activator.cs" />
+    <Compile Include="Mobile\Detection\AutoUpdate.cs" />
+    <Compile Include="Mobile\Detection\Binary\DeviceInfo.cs" />
+    <Compile Include="Mobile\Detection\Xml\HandlersReader.cs" />
+    <Compile Include="Properties\BinaryConstants.cs" />
     <Compile Include="Cache.cs" />
     <Compile Include="LogMessageEntity.cs" />
-    <Compile Include="Mobile\Configuration\NewDeviceDetail.cs" />
+    <Compile Include="Mobile\Detection\NewDeviceDetails.cs" />
     <Compile Include="Mobile\Detection\BaseDeviceInfo.cs" />
     <Compile Include="Mobile\Detection\BaseProvider.cs" />
+    <Compile Include="Mobile\Detection\Binary\BinaryException.cs" />
+    <Compile Include="Mobile\Detection\Binary\HandlerTypes.cs" />
+    <Compile Include="Mobile\Detection\Binary\Reader.cs" />
     <Compile Include="Mobile\Detection\Handlers\EditDistanceHandler.cs" />
     <Compile Include="Mobile\Detection\Handlers\Handler.cs" />
     <Compile Include="Mobile\Detection\Handlers\HandleRegex.cs" />
@@ -109,30 +116,23 @@
     <Compile Include="Mobile\Detection\Matchers\Segment\Results.cs" />
     <Compile Include="Mobile\Detection\Matchers\Segment\Segment.cs" />
     <Compile Include="Mobile\Detection\Matchers\Segment\Segments.cs" />
-    <Compile Include="Mobile\Detection\Matchers\UserAgentParser.cs" />
     <Compile Include="Mobile\Detection\NewDevice.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Configuration\CapabilityCollection.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Configuration\CapabilityElement.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Configuration\Manager.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Configuration\PatchConfigElement.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Configuration\PatchesCollection.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Configuration\WurflSection.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\DeviceInfo.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Handlers\EditDistanceHandler.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Handlers\IHandler.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Handlers\ReducedInitialStringHandler.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Handlers\RegexSegmentHandler.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Handlers\Support.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\MobileCapabilities.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Processor.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Provider.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\WurflException.cs" />
-    <Compile Include="Properties\Constants.cs" />
+    <Compile Include="Mobile\Detection\UserAgentParser.cs" />
+    <Compile Include="Mobile\Detection\UserAgentProfileUrlParser.cs" />
+    <Compile Include="Mobile\Detection\Configuration\Manager.cs" />
+    <Compile Include="Mobile\Detection\Configuration\FileConfigElement.cs" />
+    <Compile Include="Mobile\Detection\Configuration\FilesCollection.cs" />
+    <Compile Include="Mobile\Detection\Configuration\DetectionSection.cs" />
+    <Compile Include="Mobile\Detection\Xml\DeviceInfo.cs" />
+    <Compile Include="Mobile\Detection\Xml\Reader.cs" />
+    <Compile Include="Mobile\Detection\Provider.cs" />
+    <Compile Include="Mobile\Detection\Xml\XmlException.cs" />
     <Compile Include="Mobile\Redirection\Azure\RequestEntity.cs" />
     <Compile Include="Mobile\Redirection\Azure\RequestHistory.cs" />
     <Compile Include="Mobile\Redirection\Azure\RequestRecord.cs" />
     <Compile Include="Mobile\Redirection\IRequestHistory.cs" />
     <Compile Include="Mobile\Redirection\RequestRecord.cs" />
+    <Compile Include="Properties\Constants.cs" />
     <Compile Include="Mobile\Detection\DetectorModule.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -160,14 +160,14 @@
     <Compile Include="Mobile\Redirection\Location.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\DetectionConstants.cs" />
-    <Compile Include="Properties\WurflConstants.cs" />
+    <Compile Include="Properties\XmlConstants.cs" />
     <Compile Include="Mobile\Detection\Collection.cs" />
     <Compile Include="Mobile\Detection\Strings.cs" />
     <Compile Include="Mobile\Detection\MobileCapabilities.cs" />
+    <EmbeddedResource Include="Mobile\Detection\Binary\Resources\51Degrees.mobi-Lite.dat" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="PDA.ico" />
-    <EmbeddedResource Include="Properties\Handlers.xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -189,6 +189,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

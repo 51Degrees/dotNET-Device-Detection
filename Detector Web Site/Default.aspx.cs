@@ -29,6 +29,8 @@ namespace Detector
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            PropertiesDevice.UserAgentString = Request.UserAgent;
+
             // Ensure the page is never cached.
             Response.Cache.SetCacheability(System.Web.HttpCacheability.NoCache);
         }

@@ -1,5 +1,5 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla internal License 
+ * The contents of this file are subject to the Mozilla Public License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -26,6 +26,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Web;
 using FiftyOne.Foundation.Mobile.Detection.Handlers;
+using System.Collections.Specialized;
 
 #if VER4
 using System.Linq;
@@ -41,11 +42,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Fields
 
         /// <summary>
-        /// Lock used to ensure only one thread can load the data.
-        /// </summary>
-        protected static readonly object StaticLock = new object();
-        
-        /// <summary>
         /// Collection of all strings used by the provider.
         /// </summary>
         internal readonly Strings Strings = new Strings();
@@ -53,13 +49,39 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// A list of handlers used to match devices.
         /// </summary>
-        internal readonly List<Handlers.Handler> Handlers = new List<Handlers.Handler>();
+        public readonly List<Handler> Handlers = new List<Handler>();
 
         /// <summary>
         /// Hashtable of all devices keyed on device id.
         /// </summary>
-        internal readonly SortedDictionary<int, BaseDeviceInfo> AllDevices = 
-            new SortedDictionary<int, BaseDeviceInfo>();
+        internal readonly SortedDictionary<int, List<BaseDeviceInfo>> AllDevices =
+            new SortedDictionary<int, List<BaseDeviceInfo>>();
+
+        /// <summary>
+        /// A list of string indexes used for user agent profile properties.
+        /// </summary>
+        private List<int> _userAgentProfileStringIndexes;
+
+        #endregion
+
+        #region Properties
+                
+        /// <summary>
+        /// Returns a list of the string indexes for user agent profile properties.
+        /// </summary>
+        internal List<int> UserAgentProfileStringIndexes
+        {
+            get
+            {
+                if (_userAgentProfileStringIndexes == null)
+                {
+                    _userAgentProfileStringIndexes = new List<int>();
+                    foreach (string value in Constants.UserAgentProfiles)
+                        _userAgentProfileStringIndexes.Add(Strings.Add(value));
+                }
+                return _userAgentProfileStringIndexes;
+            }
+        }
 
         #endregion
 
@@ -68,16 +90,16 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Find all the devices that match the request.
         /// </summary>
-        /// <param name="request">HttpRequest associated with the requesting device.</param>
+        /// <param name="headers">List of http headers associated with the request.</param>
         /// <returns>The closest matching device.</returns>
-        internal Matchers.Results GetMatches(HttpRequest request)
+        internal Matchers.Results GetMatches(NameValueCollection headers)
         {
             // Get a user agent string with common issues removed.
-            string userAgent = GetUserAgent(request);
+            string userAgent = GetUserAgent(headers);
             if (String.IsNullOrEmpty(userAgent) == false)
             {
                 // Using the handler for this userAgent find the device.
-                return GetMatches(request, GetHandlers(request));
+                return GetMatches(headers, GetHandlers(headers));
             }
             return null;
         }
@@ -100,29 +122,22 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Use the HttpRequest fields to determine devices that match.
         /// </summary>
-        /// <param name="request">HttpRequest object.</param>
+        /// <param name="headers">Collection of Http headers associated with the request.</param>
         /// <param name="handlers">Handlers capable of finding devices for the request.</param>
         /// <returns>The closest matching device or null if one can't be found.</returns>
-        private static Matchers.Results GetMatches(HttpRequest request, IEnumerable<Handler> handlers)
+        private static Matchers.Results GetMatches(NameValueCollection headers, IEnumerable<Handler> handlers)
         {
             Matchers.Results results = new Matchers.Results();
 
             foreach (Handler handler in handlers)
             {
                 // Find the closest matching devices.
-                Matchers.Results temp = handler.Match(request);
+                Matchers.Results temp = handler.Match(headers);
                 // If some results have been found.
                 if (temp != null)
                     // Combine the results with results from previous
                     // handlers.
                     results.AddRange(temp);
-            }
-
-            // If no results were found add the default handlers devices.
-            if (results.Count == 0)
-            {
-                foreach (Handler handler in handlers)
-                    results.Add(handler.DefaultDevice);
             }
 
             return results;
@@ -149,14 +164,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     results.AddRange(temp);
             }
 
-            // If no results were found add the default handlers devices.
-            if (results.Count == 0)
-            {
-                foreach (Handler handler in handlers)
-                    if (handler.DefaultDevice != null)
-                        results.Add(handler.DefaultDevice);
-            }
-
             return results;
         }
 
@@ -168,9 +175,15 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>BaseDeviceInfo object.</returns>
         internal BaseDeviceInfo GetDeviceInfoFromID(string deviceID)
         {
-            BaseDeviceInfo device;
-            if(AllDevices.TryGetValue(deviceID.GetHashCode(), out device))
-                return device;
+            List<BaseDeviceInfo> list;
+            if (AllDevices.TryGetValue(deviceID.GetHashCode(), out list))
+            {
+                // If only 1 element return this one.
+                if (list.Count == 1)
+                    return list[0];
+                // Return the first matching element.
+                return list.Find(i => i.DeviceId == deviceID);
+            }
             return null;
         }
 
@@ -206,7 +219,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="userAgent">Useragent string associated with the HTTP request.</param>
         /// <returns>A list of all handlers that can handle this device.</returns>
-        private Handler[] GetHandlers(string userAgent)
+        public Handler[] GetHandlers(string userAgent)
         {
             byte highestConfidence = 0;
             List<Handler> handlers = new List<Handler>();
@@ -232,15 +245,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// than Useragent can also be used in matching. For example; the
         /// Useragent Profile fields.
         /// </summary>
-        /// <param name="request">HttpRequest object.</param>
+        /// <param name="headers">Collection of Http headers associated with the request.</param>
         /// <returns>An array of handlers able to match the request.</returns>
-        private Handler[] GetHandlers(HttpRequest request)
+        private Handler[] GetHandlers(NameValueCollection headers)
         {
             byte highestConfidence = 0;
             List<Handler> handlers = new List<Handler>();
-
 #if VER4
-            foreach (Handler handler in Handlers.Where(handler => handler.CanHandle(request)))
+            foreach (Handler handler in Handlers.Where(handler => handler.CanHandle(headers)))
             {
                 GetHandlers(ref highestConfidence, handlers, handler);
             }
@@ -249,11 +261,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
             {
                 // If the handler can support the request and it's not the
                 // catch all handler add it to the list we'll use for matching.
-                if (handler.CanHandle(request))
+                if (handler.CanHandle(headers))
                     GetHandlers(ref highestConfidence, handlers, handler);
             }
 #endif
-
             return handlers.ToArray();
         }
 
@@ -292,14 +303,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 int hashCode = device.DeviceId.GetHashCode();
                 if (AllDevices.ContainsKey(hashCode))
                 {
-                    // Yes. Replace the previous device as it's likely this new
-                    // one is coming from a more current source.
-                    AllDevices[hashCode] = device;
+                    // Yes. Add this device to the list.
+                    AllDevices[hashCode].Add(device);
                 }
                 else
                 {
                     // No. So add the new device.
-                    AllDevices.Add(hashCode, device);
+                    AllDevices.Add(hashCode, new List<BaseDeviceInfo>(new[] { device }));
                 }
             }
 
@@ -323,22 +333,22 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Used to check other header fields in case a transcoder is being used
         /// and returns the true useragent string.
         /// </summary>
-        /// <param name="request">Contains details of the request.</param>
+        /// <param name="headers">Collection of Http headers associated with the request.</param>
         /// <returns>The useragent string to use for matching purposes.</returns>
-        internal static string GetUserAgent(HttpRequest request)
+        internal static string GetUserAgent(NameValueCollection headers)
         {
-            string userAgent = request.UserAgent;
+            string userAgent = headers[Detection.Constants.UserAgentHeader];
 #if VER4
             string transcodeUserAgent =
-                Detection.Constants.TRANSCODER_USERAGENT_HEADERS.FirstOrDefault(e => request.Headers[e] != null);
+                Detection.Constants.TranscoderUserAgentHeaders.FirstOrDefault(e => headers[e] != null);
             if (transcodeUserAgent != null)
                 userAgent = transcodeUserAgent;
 #elif VER2
-            foreach (string current in Detection.Constants.TRANSCODER_USERAGENT_HEADERS)
+            foreach (string current in Detection.Constants.TranscoderUserAgentHeaders)
             {
-                if (request.Headers[current] != null)
+                if (headers[current] != null)
                 {
-                    userAgent = request.Headers[current];
+                    userAgent = headers[current];
                     break;
                 }
             }
@@ -348,6 +358,18 @@ namespace FiftyOne.Foundation.Mobile.Detection
             else
                 userAgent = userAgent.Trim();
             return userAgent;
+        }
+
+        /// <summary>
+        /// Gets all the devices held in the provider.
+        /// </summary>
+        /// <returns>Returns a list of all the devices in the provider.</returns>
+        public List<BaseDeviceInfo> GetAllDevices()
+        {
+            var devices = new List<BaseDeviceInfo>();
+            foreach (int key in AllDevices.Keys)
+                devices.AddRange(AllDevices[key]);
+            return devices;
         }
 
         #endregion

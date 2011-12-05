@@ -35,11 +35,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
 {
 
     /// <summary>
-    /// Used to add additional WURFL based properties to the browser capabilities.
+    /// Used to add additional 51Degrees.mobi based properties to the browser capabilities.
     /// </summary>
     public class MobileCapabilitiesProvider : HttpCapabilitiesDefaultProvider
     {
-
         private HttpCapabilitiesDefaultProvider _parent = null;
 
         /// <summary>
@@ -88,7 +87,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Provides information to the web server about the requesting device.
         /// </summary>
         /// <param name="request">An HttpRequest that provides information about the source device.</param>
-        /// <returns>A HttpBrowserCapabilities object containing information relevent to the device sources from WURFL.</returns>
+        /// <returns>A HttpBrowserCapabilities object containing information relevent to the device 
+        /// sources from 51Degrees.mobi.</returns>
         public override HttpBrowserCapabilities GetBrowserCapabilities(HttpRequest request)
         {
             // Get the base capabilities.

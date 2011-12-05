@@ -1,5 +1,5 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla internal License 
+ * The contents of this file are subject to the Mozilla Public License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -26,8 +26,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Web;
-using FiftyOne.Foundation.Mobile.Detection.Wurfl;
-using FiftyOne.Foundation.Mobile.Detection.Wurfl.Configuration;
+using FiftyOne.Foundation.Mobile.Detection.Configuration;
+using System.IO;
+using System;
+using System.Text;
+using System.Threading;
 
 #endregion
 
@@ -55,12 +58,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Used to obtain the mobile capabilities for the request or user agent string
         /// from the device data source provided.
         /// </summary>
-        private static MobileCapabilities _mobileCapabilities;
+        internal static MobileCapabilities _mobileCapabilities;
 
         /// <summary>
         /// Class used to record new devices.
         /// </summary>
-        private static NewDevice _newDevice = new NewDevice(Manager.NewDevicesURL, Manager.NewDeviceDetail);
+        private static NewDevice _newDevice = new NewDevice(Constants.NewDevicesUrl, Constants.NewDeviceDetail);
 
         #endregion
 
@@ -80,15 +83,87 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     {
                         if (_mobileCapabilities == null)
                         {
-                            if (Manager.Enabled)
-                            {
-                                List<string> wurflFiles = new List<string>();
-                                wurflFiles.Add(Manager.WurflFilePath);
-                                wurflFiles.AddRange(Manager.WurflPatchFiles);
+                            Provider provider = null;
 
-                                _mobileCapabilities = new Wurfl.MobileCapabilities(
-                                    new Provider(wurflFiles.ToArray(), Manager.CapabilitiesWhiteList, Manager.UseActualDeviceRoot));
+                            try
+                            {
+                                // Does a binary file exist?
+                                if (Manager.BinaryFilePath != null &&
+                                    File.Exists(Manager.BinaryFilePath))
+                                {
+                                    EventLog.Info(String.Format("Creating provider from binary data file '{0}'.",
+                                        Manager.BinaryFilePath));
+                                    provider = Binary.Reader.Create(Manager.BinaryFilePath);
+                                    EventLog.Info(String.Format("Created provider from binary data file '{0}'.",
+                                        Manager.BinaryFilePath));
+                                }
+
+                                // Do XML files exist?
+                                if (Manager.XmlFiles != null &&
+                                    Manager.XmlFiles.Length > 0)
+                                {
+                                    if (provider == null)
+                                    {
+                                        EventLog.Debug(String.Format("Creating provider from XML data files '{0}'.",
+                                            String.Join(", ", Manager.XmlFiles)));
+                                        provider = Xml.Reader.Create(Manager.XmlFiles);
+                                        EventLog.Info(String.Format("Created provider from XML data files '{0}'.",
+                                            String.Join(", ", Manager.XmlFiles)));
+                                    }
+                                    else
+                                    {
+                                        EventLog.Debug(String.Format("Adding to existing provider from XML data files '{0}'.",
+                                            String.Join(", ", Manager.XmlFiles)));
+                                        Xml.Reader.Add(provider, Manager.XmlFiles);
+                                        EventLog.Info(String.Format("Added to existing provider from XML data files '{0}'.",
+                                            String.Join(", ", Manager.XmlFiles)));
+                                    }
+                                }
                             }
+                            catch (Exception ex)
+                            {
+                                // Record the exception in the log file.
+                                EventLog.Fatal(
+                                    new MobileException(String.Format(
+                                        "Exception processing device data from binary file '{0}', and XML files '{1}'. " +
+                                        "Enable debug level logging and try again to help identify cause.",
+                                        Manager.BinaryFilePath, String.Join(", ", Manager.XmlFiles)),
+                                        ex));
+                                // Reset the provider to enable it to be created from the embedded data.
+                                provider = null;
+                            }
+                            finally
+                            {
+                                // Does the provider exist and has data been loaded?
+                                if (provider == null || provider.Handlers.Count == 0)
+                                {
+                                    // No so initialise it with the embeddded binary data so at least we can do something.
+                                    using (var stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream(
+                                        Binary.BinaryConstants.EmbeddedDataResourceName))
+                                    {
+                                        EventLog.Debug(String.Format("Creating provider from embedded device data '{0}'.",
+                                            Binary.BinaryConstants.EmbeddedDataResourceName));
+                                        provider = Binary.Reader.Create(stream);
+                                        EventLog.Info(String.Format("Created provider from embedded device data '{0}'.",
+                                            Binary.BinaryConstants.EmbeddedDataResourceName));
+                                    }
+
+                                    // Do XML files exist?
+                                    if (Manager.XmlFiles != null &&
+                                        Manager.XmlFiles.Length > 0)
+                                    {
+                                        EventLog.Debug(String.Format("Adding to existing provider from XML data files '{0}'.",
+                                            String.Join(", ", Manager.XmlFiles)));
+                                        Xml.Reader.Add(provider, Manager.XmlFiles);
+                                        EventLog.Info(String.Format("Added to existing provider from XML data files '{0}'.",
+                                            String.Join(", ", Manager.XmlFiles)));
+                                    }
+                                }
+                            }
+                            _mobileCapabilities = new MobileCapabilities(provider);
+
+                            // Start the auto update thread to check for new data files.
+                            ThreadPool.QueueUserWorkItem(new WaitCallback(AutoUpdate.Run));
                         }
                     }
                 }

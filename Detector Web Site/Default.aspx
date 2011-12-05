@@ -1,4 +1,5 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="True" CodeBehind="Default.aspx.cs" Inherits="Detector._Default" EnableSessionState="True" EnableViewState="false" %>
+<%@ Register Src="~/DeviceProperties.ascx" TagPrefix="uc" TagName="DeviceProperties" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -25,6 +26,8 @@
     <asp:Panel runat="server" HorizontalAlign="Center">
         <asp:HyperLink runat="server" NavigateUrl="~/CheckUA.aspx" Text="Check a UserAgent" />
     </asp:Panel>
+    <hr />
+    <uc:DeviceProperties runat="server" ID="PropertiesDevice" />    
     </form>
 </body>
 </html>

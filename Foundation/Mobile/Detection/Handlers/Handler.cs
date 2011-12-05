@@ -1,5 +1,5 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla internal License 
+ * The contents of this file are subject to the Mozilla Public License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Web;
 using FiftyOne.Foundation.Mobile.Detection.Matchers;
+using System.Collections.Specialized;
 
 #endregion
 
@@ -36,7 +37,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
     /// <summary>
     /// Base handler class for device detection.
     /// </summary>
-    internal abstract class Handler
+    public abstract class Handler
     {
         #region Constants
 
@@ -58,11 +59,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         #endregion
 
         #region Fields
-
-        /// <summary>
-        /// WURFL uaprof capabilities to check.
-        /// </summary>
-        private readonly int[] _uaProfCapabilities;
 
         /// <summary>
         /// A collection of domain names used with uaprof urls.
@@ -119,7 +115,50 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
 
         #endregion
 
-        #region Properties
+        #region Public Properties
+        
+        /// <summary>
+        /// The name of the handler for debugging purposes.
+        /// </summary>
+        public string Name
+        {
+            get { return _name; }
+        }
+        
+        /// <summary>
+        /// Returns true/false depending on if the UA Profs should be checked.
+        /// </summary>
+        public bool CheckUAProfs { get { return _checkUAProfs; } }
+
+        /// <summary>
+        /// The confidence to assign to results from this handler.
+        /// </summary>
+        public byte Confidence
+        {
+            get { return _confidence; }
+        }
+
+        /// <summary>
+        /// A list of regexs that if matched indicate the handler does support the 
+        /// useragent passed to it.
+        /// </summary>
+        public List<HandleRegex> CanHandleRegex
+        {
+            get { return _canHandleRegex; }
+        }
+
+        /// <summary>
+        /// A list of regexs that if matched indicate the handler does not support the 
+        /// useragent passed to it.
+        /// </summary>
+        public List<HandleRegex> CantHandleRegex
+        {
+            get { return _cantHandleRegex; }
+        }
+
+        #endregion
+
+        #region Internal Properties
 
         /// <summary>
         /// Returns the provider the handler is associated to.
@@ -144,54 +183,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         {
             get { return _devices; }
         }
-
-        /// <summary>
-        /// Returns true/false depending on if the UA Profs should be checked.
-        /// </summary>
-        internal bool CheckUAProfs { get { return _checkUAProfs; } }
-
-        /// <summary>
-        /// The confidence to assign to results from this handler.
-        /// </summary>
-        internal byte Confidence
-        {
-            get { return _confidence; }
-        }
-
-        /// <summary>
-        /// The name of the handler for debugging purposes.
-        /// </summary>
-        internal string Name
-        {
-            get { return _name; }
-        }
-
-        /// <summary>
-        /// The default device to be used if no match is found.
-        /// </summary>
-        internal string DefaultDeviceId
-        {
-            get { return _defaultDeviceId; }
-        }
-
-        /// <summary>
-        /// A list of regexs that if matched indicate the handler does support the 
-        /// useragent passed to it.
-        /// </summary>
-        internal List<HandleRegex> CanHandleRegex
-        {
-            get { return _canHandleRegex; }
-        }
-
-        /// <summary>
-        /// A list of regexs that if matched indicate the handler does not support the 
-        /// useragent passed to it.
-        /// </summary>
-        internal List<HandleRegex> CantHandleRegex
-        {
-            get { return _cantHandleRegex; }
-        }
-
+        
         #endregion
 
         #region Constructor
@@ -209,20 +201,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
             if (String.IsNullOrEmpty(name))
                 throw new ArgumentNullException(name);
 
-            if (String.IsNullOrEmpty(defaultDeviceId))
-                throw new ArgumentNullException(defaultDeviceId);
-
             _provider = provider;
             _name = name;
             _defaultDeviceId = defaultDeviceId;
             _confidence = confidence > 0 ? confidence : DEFAULT_CONFIDENCE;
             _checkUAProfs = checkUAProfs;
-
-            _uaProfCapabilities = new[]{
-                                           _provider.Strings.Add("uaprof"),
-                                           _provider.Strings.Add("uaprof2"),
-                                           _provider.Strings.Add("uaprof3")
-                                       };
         }
 
         #endregion
@@ -238,7 +221,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
 
         #endregion
 
-        #region Internal Methods
+        #region Public Methods
 
         /// <summary>
         /// Returns true or false depending on the handlers ability
@@ -246,7 +229,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         /// </summary>
         /// <param name="userAgent">The user agent to be tested.</param>
         /// <returns>True if this handler can support the useragent, otherwise false.</returns>
-        protected internal virtual bool CanHandle(string userAgent)
+        public virtual bool CanHandle(string userAgent)
         {
             foreach (HandleRegex regex in _cantHandleRegex)
                 if (regex.IsMatch(userAgent))
@@ -259,14 +242,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
             return false;
         }
 
-        /// <summary>
-        /// The default device for the handler. If not overriden the default
-        /// device for the API will be returned.
-        /// </summary>
-        internal virtual BaseDeviceInfo DefaultDevice
-        {
-            get { return GetDeviceInfo(DefaultDeviceId); }
-        }
+        #endregion
+
+        #region Internal Methods
 
         /// <summary>
         /// Adds a new device to the handler.
@@ -346,17 +324,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         /// they share the same domain.
         /// </para>
         /// </summary>
-        /// <param name="request">Request with headers to be processed.</param>
+        /// <param name="headers">Collection of http headers.</param>
         /// <returns>True if this handler could be able to match the device otherwise false.</returns>
-        internal virtual bool CanHandle(HttpRequest request)
+        internal virtual bool CanHandle(NameValueCollection headers)
         {
-            bool canHandle = CanHandle(BaseProvider.GetUserAgent(request));
+            bool canHandle = CanHandle(BaseProvider.GetUserAgent(headers));
             if (_checkUAProfs && canHandle == false && _uaProfDomains.Count > 0)
             {
                 Uri url = null;
                 foreach (string header in UAPROF_HEADERS)
                 {
-                    string value = request.Headers[header];
+                    string value = headers[header];
                     if (value != null &&
                         Uri.TryCreate(value, UriKind.Absolute, out url) &&
                         _uaProfDomains.Contains(url.Host))
@@ -372,26 +350,26 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         /// Performs an exact match using the userAgent string. If no results are found
         /// uses the UA prof header parameters to find a list of devices.
         /// </summary>
-        /// <param name="request">details of the page request.</param>
+        /// <param name="headers">Collection of Http headers associated with the request.</param>
         /// <returns>null if no exact match was found. Otherwise the matching devices.</returns>
-        internal virtual Results Match(HttpRequest request)
+        internal virtual Results Match(NameValueCollection headers)
         {
             // Check for an exact match of the user agent string.
-            string userAgent = BaseProvider.GetUserAgent(request);
+            string userAgent = BaseProvider.GetUserAgent(headers);
             BaseDeviceInfo device = GetDeviceInfo(userAgent);
             if (device != null)
                 return new Results(device);
 
             // Check to see if we have a uaprof header parameter that will produce
             // an exact match.
-            if (_checkUAProfs && request.Headers != null && request.Headers.Count > 0)
+            if (_checkUAProfs && headers != null && headers.Count > 0)
             {
                 foreach (string header in UAPROF_HEADERS)
                 {
-                    string value = request.Headers[header];
+                    string value = headers[header];
                     if (String.IsNullOrEmpty(value) == false)
                     {
-                        value = CleanUaProf(value);
+                        value = UserAgentProfileUrlParser.CleanUserAgentProfileUrl(value);
                         Results results = GetResultsFromUAProf(value);
                         if (results != null && results.Count > 0)
                         {
@@ -413,16 +391,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         #region Private Methods
 
         /// <summary>
-        /// Removes any speech marks from the user agent string.
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        private static string CleanUaProf(string value)
-        {
-            return value.Replace("\"", "");
-        }
-
-        /// <summary>
         /// Adds the device and it's user agent string to the collection
         /// of user agent strings and devices. The useragent string
         /// hashcode is the key of the collection.
@@ -433,21 +401,22 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
             int hashcode = device.UserAgent.GetHashCode();
             lock (_devices)
             {
+                BaseDeviceInfo[] value;
                 // Does the hashcode already exist?
-                if (_devices.ContainsKey(hashcode))
+                if (_devices.TryGetValue(hashcode, out value))
                 {
                     // Does the key already exist?
-                    for (int i = 0; i < _devices[hashcode].Length; i++)
+                    for (int i = 0; i < value.Length; i++)
                     {
-                        if (_devices[hashcode][i].UserAgent == device.UserAgent)
+                        if (value[i].UserAgent == device.UserAgent)
                         {
                             // Yes. Update with the new device and then exit.
-                            _devices[hashcode][i] = device;
+                            value[i] = device;
                             return;
                         }
                     }
                     // No. Expand the array adding the new device.
-                    List<BaseDeviceInfo> newList = new List<BaseDeviceInfo>(_devices[hashcode]);
+                    List<BaseDeviceInfo> newList = new List<BaseDeviceInfo>(value);
                     newList.Add(device);
                     _devices[hashcode] = newList.ToArray();
                 }
@@ -466,33 +435,37 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         /// <param name="device">Device to be added.</param>
         private void SetUaProf(BaseDeviceInfo device)
         {
-            foreach (int uaprof in _uaProfCapabilities)
+            foreach (int index in _provider.UserAgentProfileStringIndexes)
             {
-                string value = _provider.Strings.Get(device.GetCapability(uaprof));
-
-                // Don't process empty values.
-                if (String.IsNullOrEmpty(value)) continue;
-
-                // Clean the useragent prof.
-                value = CleanUaProf(value);
-                Uri url = null;
-
-                // If the url is not value don't continue processing.
-                if (!Uri.TryCreate(value, UriKind.Absolute, out url)) continue;
-
-                // Get the hashcode before locking the list and processing
-                // the device and hashcode.
-                int hashcode = value.GetHashCode();
-                lock (_uaprofs)
+                var list = device.GetPropertyValueStringIndexes(index);
+                if (list != null)
                 {
-                    ProcessUaProf(device, hashcode);
-                }
+                    foreach (int userAgentProfileStringIndex in list)
+                    {
+                        string value = _provider.Strings.Get(userAgentProfileStringIndex);
 
-                // Add the domain to the list of domains for the handler.
-                lock (_uaProfDomains)
-                {
-                    if (_uaProfDomains.Contains(url.Host) == false)
-                        _uaProfDomains.Add(url.Host);
+                        // Don't process empty values.
+                        if (String.IsNullOrEmpty(value)) continue;
+                        
+                        // If the url is not valid don't continue processing.
+                        Uri url = null;
+                        if (Uri.TryCreate(value, UriKind.Absolute, out url) == false) continue;
+
+                        // Get the hashcode before locking the list and processing
+                        // the device and hashcode.
+                        int hashcode = value.GetHashCode();
+                        lock (_uaprofs)
+                        {
+                            ProcessUaProf(device, hashcode);
+                        }
+
+                        // Add the domain to the list of domains for the handler.
+                        lock (_uaProfDomains)
+                        {
+                            if (_uaProfDomains.Contains(url.Host) == false)
+                                _uaProfDomains.Add(url.Host);
+                        }
+                    }
                 }
             }
         }
@@ -525,13 +498,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         /// <summary>
         /// Returns the devices that match a specific hashcode.
         /// </summary>
-        /// <param name="_dictionary">Collection of hashcodes and devices.</param>
+        /// <param name="dictionary">Collection of hashcodes and devices.</param>
         /// <param name="value">Value that's hashcode is being sought.</param>
         /// <returns>Array of devices matching the value.</returns>
-        private static BaseDeviceInfo[] GetDeviceInfo(SortedDictionary<int, BaseDeviceInfo[]> _dictionary, string value)
+        private static BaseDeviceInfo[] GetDeviceInfo(SortedDictionary<int, BaseDeviceInfo[]> dictionary, string value)
         {
-            int hashcode = value.GetHashCode();
-            return _dictionary.ContainsKey(hashcode) ? _dictionary[hashcode] : null;
+            BaseDeviceInfo[] result;
+            if (dictionary != null && 
+                dictionary.TryGetValue(value.GetHashCode(), out result))
+                return result;
+            return null;
         }
 
         #endregion

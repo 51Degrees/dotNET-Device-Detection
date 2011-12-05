@@ -63,6 +63,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\FiftyOne.Foundation.XML</DocumentationFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -74,19 +75,31 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cache.cs" />
-	<Compile Include="LogMessageEntity.cs" />
     <Compile Include="Image\Support.cs" />
+    <Compile Include="Mobile\Detection\AutoUpdate.cs" />
     <Compile Include="Mobile\Detection\BaseProvider.cs" />
+    <Compile Include="Mobile\Detection\Binary\BinaryException.cs" />
+    <Compile Include="Mobile\Detection\Binary\DeviceInfo.cs" />
+    <Compile Include="Mobile\Detection\Binary\HandlerTypes.cs" />
+    <Compile Include="Mobile\Detection\Binary\Reader.cs" />
+    <Compile Include="Mobile\Detection\Configuration\DetectionSection.cs" />
+    <Compile Include="Mobile\Detection\Configuration\FileConfigElement.cs" />
+    <Compile Include="Mobile\Detection\Configuration\FilesCollection.cs" />
+    <Compile Include="Mobile\Detection\Configuration\Manager.cs" />
     <Compile Include="Mobile\Detection\Handlers\Handler.cs" />
     <Compile Include="Mobile\Detection\Handlers\HandleRegex.cs" />
     <Compile Include="Mobile\Detection\Handlers\SegmentHandler.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\DeviceInfo.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Handlers\IHandler.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Handlers\ReducedInitialStringHandler.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Handlers\RegexSegmentHandler.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Handlers\EditDistanceHandler.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Handlers\Support.cs" />
+    <Compile Include="Mobile\Detection\NewDeviceDetails.cs" />
+    <Compile Include="Mobile\Detection\Provider.cs" />
+    <Compile Include="Mobile\Detection\UserAgentProfileUrlParser.cs" />
+    <Compile Include="Mobile\Detection\Xml\DeviceInfo.cs" />
+    <Compile Include="Mobile\Detection\Xml\HandlersReader.cs" />
+    <Compile Include="Mobile\Detection\Xml\Reader.cs" />
+    <Compile Include="Mobile\Detection\Xml\XmlException.cs" />
+    <Compile Include="Mobile\Redirection\IRequestHistory.cs" />
+    <Compile Include="Mobile\Redirection\RequestRecord.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\BinaryConstants.cs" />
     <Compile Include="Properties\Constants.cs" />
     <Compile Include="Mobile\Configuration\FilterElement.cs" />
     <Compile Include="Mobile\Configuration\LocationElement.cs" />
@@ -102,8 +115,6 @@
     <Compile Include="Mobile\Detection\Matchers\Final\Matcher.cs" />
     <Compile Include="Mobile\Detection\Matchers\Result.cs" />
     <Compile Include="Mobile\Detection\RequestHelper.cs" />
-    <Compile Include="Mobile\Configuration\NewDeviceDetail.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\MobileCapabilities.cs" />
     <Compile Include="Mobile\Configuration\Manager.cs" />
     <Compile Include="Mobile\Configuration\LogSection.cs" />
     <Compile Include="Mobile\Detection\Handlers\EditDistanceHandler.cs" />
@@ -117,7 +128,7 @@
     <Compile Include="Mobile\Detection\Matchers\Segment\Request.cs" />
     <Compile Include="Mobile\Detection\Matchers\Segment\Results.cs" />
     <Compile Include="Mobile\Detection\Matchers\Segment\Segments.cs" />
-    <Compile Include="Mobile\Detection\Matchers\UserAgentParser.cs" />
+    <Compile Include="Mobile\Detection\UserAgentParser.cs" />
     <Compile Include="EventLog.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Mobile\MobileException.cs" />
@@ -125,14 +136,7 @@
     <Compile Include="Mobile\Redirection\Location.cs" />
     <Compile Include="Mobile\Redirection\RedirectModule.cs" />
     <Compile Include="Mobile\Redirection\RequestHistory.cs" />
-    <Compile Include="Properties\WurflConstants.cs" />
     <Compile Include="Properties\DetectionConstants.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Configuration\CapabilityCollection.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Configuration\CapabilityElement.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Configuration\Manager.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Configuration\PatchConfigElement.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Configuration\PatchesCollection.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Configuration\WurflSection.cs" />
     <Compile Include="Mobile\Detection\Collection.cs" />
     <Compile Include="Mobile\Detection\BaseDeviceInfo.cs" />
     <Compile Include="Mobile\Detection\Matchers\ReducedInitialString\Matcher.cs" />
@@ -141,18 +145,16 @@
     <Compile Include="Mobile\Detection\Handlers\RegexSegmentHandler.cs" />
     <Compile Include="Mobile\Detection\Strings.cs" />
     <Compile Include="Mobile\Detection\MobileCapabilities.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\WurflException.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Provider.cs" />
     <Compile Include="Mobile\Detection\NewDevice.cs" />
-    <Compile Include="Mobile\Detection\Wurfl\Processor.cs" />
     <Compile Include="Properties\RedirectionConstants.cs" />
+    <Compile Include="Properties\XmlConstants.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Properties\Handlers.xml" />
     <Content Include="PDA.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <EmbeddedResource Include="Mobile\Detection\Binary\Resources\51Degrees.mobi-Lite.dat" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

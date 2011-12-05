@@ -51,27 +51,5 @@ namespace FiftyOne.Foundation.Mobile.Configuration
 
         #endregion
 
-        #region Properties
-
-        /// <summary>
-        /// Returns the new device detail as a enumeration item.
-        /// </summary>
-        internal static NewDeviceDetail NewDeviceDetail
-        {
-            get
-            {
-                return Detection.Wurfl.Configuration.Manager.NewDeviceDetail;
-            }
-        }
-
-        internal static string NewDevicesURL
-        {
-            get
-            {
-                return Detection.Wurfl.Configuration.Manager.NewDevicesURL;
-            }
-        }
-
-        #endregion
     }
 }

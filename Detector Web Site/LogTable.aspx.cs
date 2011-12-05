@@ -4,12 +4,10 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-#if AZURE
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using FiftyOne;
-#endif
 
 namespace Detector
 {

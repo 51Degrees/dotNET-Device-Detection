@@ -1,5 +1,5 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla internal License 
+ * The contents of this file are subject to the Mozilla Public License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -35,7 +35,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
     /// Device detection handler using regular expressions to segment strings
     /// before matching specific segments.
     /// </summary>
-    internal class RegexSegmentHandler : SegmentHandler
+    public class RegexSegmentHandler : SegmentHandler
     {
         #region Classes
 
@@ -43,7 +43,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         /// Contains regular expression and weight to apply to
         /// each segment of the user agent string.
         /// </summary>
-        internal class RegexSegment
+        public class RegexSegment
         {
             #region Fields
 
@@ -57,13 +57,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
             /// <summary>
             /// The regular expression to use to get the segment.
             /// </summary>
-            internal Regex Pattern { get { return _pattern; }}
+            public Regex Pattern { get { return _pattern; }}
 
             /// <summary>
             /// The weight that should be given to the segment. The lower 
             /// the number the greater the significance.
             /// </summary>
-            internal int Weight { get { return _weight; } }
+            public int Weight { get { return _weight; } }
 
             #endregion
 
@@ -99,7 +99,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         /// <summary>
         /// A list of the regular expressions used to create segments.
         /// </summary>
-        internal List<RegexSegment> Segments
+        public List<RegexSegment> Segments
         {
             get { return _segments; }
         }
@@ -132,7 +132,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         /// </summary>
         /// <param name="userAgent"></param>
         /// <returns></returns>
-        protected internal override bool CanHandle(string userAgent)
+        public override bool CanHandle(string userAgent)
         {
             if (base.CanHandle(userAgent) == false)
                 return false;
@@ -152,13 +152,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         {
             Segments results = new Segments();
             foreach(RegexSegment segment in _segments)
-                results.Add(new Segment(segment.Pattern.Match(source).Value));
+                foreach(Match match in segment.Pattern.Matches(source))
+                    if (match.Success)
+                        results.Add(new Segment(match.Value, segment.Weight));
             return results;
-        }
-
-        internal override int GetSegmentWeight(int index)
-        {
-            return _segments[index].Weight;
         }
 
         #endregion

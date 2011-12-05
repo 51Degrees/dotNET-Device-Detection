@@ -1,5 +1,5 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla internal License 
+ * The contents of this file are subject to the Mozilla Public License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -36,7 +36,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
     /// Device detection handler using the reduced initial string method. The first
     /// part of the strings are checked to determine a match.
     /// </summary>
-    internal class ReducedInitialStringHandler : Handler
+    public class ReducedInitialStringHandler : Handler
     {
         #region Fields
 
@@ -50,7 +50,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         /// The regular expression used to determine the first X
         /// characters to check of the string.
         /// </summary>
-        internal Regex Tolerance
+        public Regex Tolerance
         {
             get { return _tolerance;  }
         }

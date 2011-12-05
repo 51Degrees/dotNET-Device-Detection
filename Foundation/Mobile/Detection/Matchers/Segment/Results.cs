@@ -1,5 +1,5 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla internal License 
+ * The contents of this file are subject to the Mozilla Public License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -25,6 +25,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Segment
 {
     internal class Results : Matchers.Results
     {
-        internal int LowestScore = int.MaxValue;
+        internal uint LowestScore = uint.MaxValue;
     }
 }

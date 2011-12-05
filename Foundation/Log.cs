@@ -31,7 +31,17 @@ using System.Threading;
 #endregion
 
 #if VER4 
+
 using System.Threading.Tasks;
+
+#endif
+
+#if AZURE
+
+using Microsoft.WindowsAzure;
+using Microsoft.WindowsAzure.StorageClient;
+using System.Text.RegularExpressions;
+
 #endif
 
 namespace FiftyOne
@@ -81,6 +91,55 @@ namespace FiftyOne
         #endregion
 
         #region Methods
+
+#if AZURE
+
+        /// <summary>
+        /// The main loop for the log table service thread.
+        /// </summary>
+        protected void Run(Object stateInfo)
+        {
+            // Initialise the Azure table service creating the table if it does not exist.
+            var storageAccount = CloudStorageAccount.Parse(Microsoft.WindowsAzure.ServiceRuntime.RoleEnvironment.GetConfigurationSettingValue(FiftyOne.Foundation.Mobile.Constants.AZURE_STORAGE_NAME));
+            var serviceContext = new TableServiceContext(storageAccount.TableEndpoint.ToString(), storageAccount.Credentials);
+            var tableName = Regex.Replace(LogFile, "[^A-Za-z]+", String.Empty);
+            storageAccount.CreateCloudTableClient().CreateTableIfNotExist(tableName);
+
+            while (IsQueueEmpty() == false)
+            {
+                try
+                {
+                    while (IsQueueEmpty() == false)
+                    {
+                        lock (_syncQueue)
+                        {
+                            string message = _queue.Peek();
+                            if (message != null)
+                            {
+                                var entity = new LogMessageEntity(message);
+                                serviceContext.AddObject(tableName, entity);
+                                _queue.Dequeue();
+                            }
+                        }
+                    }
+                    // Commit the new log entries to the database.
+                    serviceContext.SaveChanges();
+                }
+                catch
+                {
+                    // End the thread and wait until another message comes
+                    // arrives to resume writing.
+                    _running = false;
+                    return;
+                }
+
+                // Sleep for 50ms incase any new messages come in.
+                Thread.Sleep(50);
+            }
+            _running = false;
+        }
+
+#else
 
         /// <summary>
         /// The main loop for the log file thread.
@@ -150,6 +209,8 @@ namespace FiftyOne
             }
             _running = false;
         }
+
+#endif
 
         /// <summary>
         /// Returns true if the message queue is empty.

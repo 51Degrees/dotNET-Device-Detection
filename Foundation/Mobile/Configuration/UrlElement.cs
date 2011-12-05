@@ -31,7 +31,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
 {
     /// <summary>
     /// Used in the <c>web.config</c> to provide Urls and refresh periods to automatically
-    /// update application data files such as Wurfl data files.
+    /// update application data files such as 51Degrees.mobi data files.
     /// </summary>
     public sealed class UrlElement : ConfigurationElement
     {

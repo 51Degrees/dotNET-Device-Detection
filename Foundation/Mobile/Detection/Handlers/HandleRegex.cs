@@ -1,5 +1,5 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla internal License 
+ * The contents of this file are subject to the Mozilla Public License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -31,7 +31,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
     /// be matched by the associated handler. Not only does the regex
     /// provided have to match by any one of the children.
     /// </summary>
-    internal class HandleRegex : Regex
+    public class HandleRegex : Regex
     {
         #region Fields
 
@@ -47,7 +47,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         /// <summary>
         /// A list of children.
         /// </summary>
-        internal List<HandleRegex> Children
+        public List<HandleRegex> Children
         {
             get { return _children;  }
         }

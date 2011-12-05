@@ -17,8 +17,8 @@ using System.Security;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("51 Degrees Mobile Experts Limited")]
 [assembly: AssemblyProduct("51degrees.mobi - Foundation")]
-[assembly: AssemblyCopyright("51 Degrees Mobile Experts Limited")]
-[assembly: AssemblyTrademark("51degrees.mobi")]
+[assembly: AssemblyCopyright("Copyright © 51Degrees.mobi Mobile Experts Limited 2010 - 2011")]
+[assembly: AssemblyTrademark("51Degrees")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
@@ -39,8 +39,8 @@ using System.Security;
 //      Revision
 //
 
-[assembly: AssemblyVersion("1.2.1.3")]
-[assembly: AssemblyFileVersion("1.2.1.3")]
+[assembly: AssemblyVersion("2.0.0.0")]
+[assembly: AssemblyFileVersion("2.0.0.0")]
 [assembly: NeutralResourcesLanguage("en-GB")]
 [assembly: AllowPartiallyTrustedCallers]
 

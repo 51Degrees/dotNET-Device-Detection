@@ -40,7 +40,7 @@
 /*-- cell containing copyright     --*/ .CopyrightTD { text-align: right; padding: 0 0 0 0; }
 /*-- cell containing flash h       --*/ .FlashTD { padding: 9px 7px 0 7px; }
 /*-- cell containing flash v       --*/ .FlashTDV { padding: 4px 7px 0 7px; }
-/*-- used for setting attribute    --*/ .SkinBox, .BackgroundTile, .BackgroundTopStretch, .BackgroundImage, { height:100%; }
+/*-- used for setting attribute    --*/ .SkinBox, .BackgroundTile, .BackgroundTopStretch, .BackgroundImage { height:100%; }
 /*-- various common properties     --*/ .PanePad { padding: 0 7px 0 7px; } .Width100p { width: 100%; } .Width50p { width: 50%; } .Width25p { width: 25%; } .Width33p { width: 33%; } .Height1px { height: 1px; }
 
 /*========================================================*/
@@ -112,14 +112,14 @@
 
 /*-- default form elements      --*/ select, input { font-family: tahoma; font-size: 11px; color: #333; }
 /*-- textbox                    --*/ .NormalTextBox { color: #333; padding-left: 4px; line-height: 12px; font-family: tahoma; font-weight: normal; font-size: 11px; }
-/*-- textbox container          --*/ td.NormalTextBox { padding: 0; margin: 0; background: transparent; visibility: invisible; border: 0; }
+/*-- textbox container          --*/ td.NormalTextBox { padding: 0; margin: 0; background: transparent; display: none; border: 0; }
 /*-- textbox used for search    --*/ #dnn_dnnSEARCH_txtSearch.NormalTextBox { height:21px; background: transparent; width: 174px; color: #666; padding: 4px 4px 0px 4px; border: 0px solid #FFFFFF; cursor:text;}
 
 /*========================================================*/
 /*  Sub Menus and Module Menus                            */
 /*========================================================*/
 
-/*-- submenu container          --*/ .MainMenu_SubMenu, .ModuleTitle_SubMenu { background: #FFF; padding: 0px; border: 1px solid #ccc; z-index: 1000;  cursor: pointer;  cursor: hand; font-weight: normal; filter: none;}
+/*-- submenu container          --*/ .MainMenu_SubMenu, .ModuleTitle_SubMenu { background: #FFF; padding: 0px; border: 1px solid #ccc; z-index: 1000;  cursor: pointer;  cursor: hand; font-weight: normal;}
 /*-- submenu items idle         --*/ .MainMenu_MenuItem, .ModuleTitle_MenuItem { background: #FFF; color: #666; font-family: tahoma; font-size: 8pt; font-weight: bold; font-style: normal; padding: 0px 30px 0px 16px; height: 28px; border-left:0px; border-right:0px; border-top:0px; border-bottom: 1px solid #ccc; margin:0 0 0 0;}
 /*-- submenu items hover        --*/ .MainMenu_MenuItemSel, .ModuleTitle_MenuItemSel { background: #eee; color: #70c819; font-family: tahoma; font-size: 8pt; font-weight: bold; cursor: pointer; cursor: hand; padding: 0px 30px 0px 16px; height: 28px; border-left:0px; border-right:0px; border-top:0px; border-bottom: 1px solid #ccc; margin:0 0 0 0;}
 

@@ -1,5 +1,5 @@
 /* *********************************************************************
- * The contents of this file are subject to the Mozilla internal License 
+ * The contents of this file are subject to the Mozilla Public License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -35,10 +35,9 @@ using System.Linq;
 namespace FiftyOne.Foundation.Mobile.Detection
 {
     /// <summary>
-    /// Rather than store a unique copy of every string held in the Wurfl file a list of strings
+    /// Rather than store a copy of every string held in the data files a list of strings
     /// is used and the index of the string is held in the data classes.
     /// </summary>
-    [Serializable]
     internal class Strings
     {
         #region Fields
@@ -51,7 +50,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         private readonly Dictionary<int, object> _index = new Dictionary<int, object>();
 
         /// <summary>
-        /// All the strings used in the Wurfl file are held in this stack.
+        /// All the strings used in the 51Degrees.mobi file are held in this stack.
         /// </summary>
         internal readonly List<string> _values = new List<string>();
 
@@ -137,7 +136,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>String value at the specified index.</returns>
         internal string Get(int index)
         {
-            if (index == -1) return null;
+            if (index < 0) return null;
             return _values[index];
         }
 

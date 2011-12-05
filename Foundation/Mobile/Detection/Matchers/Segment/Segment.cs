@@ -1,5 +1,5 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla internal License 
+ * The contents of this file are subject to the Mozilla Public License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -26,16 +26,27 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Segment
     internal class Segment
     {
         private bool _isValid;
-        private int _score;
+        private uint _score;
+        private int _weight;
+        private string _value;
 
-        internal string Value;
-
-        internal Segment(string value)
+        internal string Value
         {
-            Value = value;
+            get { return _value; }
         }
 
-        internal int Score
+        internal int Weight
+        {
+            get { return _weight; }
+        }
+
+        internal Segment(string value, int weight)
+        {
+            _value = value;
+            _weight = weight;
+        }
+
+        internal uint Score
         {
             get { return _score; }
             set

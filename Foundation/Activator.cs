@@ -40,7 +40,7 @@ namespace FiftyOne.Foundation
         /// <summary>
         /// Flag to indicate if the method has already been called.
         /// </summary>
-        private static bool _initialised;
+        private static bool _initialised = false;
 
         /// <summary>
         /// Method called with the worker process starts to activate the
@@ -49,9 +49,10 @@ namespace FiftyOne.Foundation
         /// </summary>
         public static void Start()
         {
-            if (_initialised == false && Mobile.Detection.Wurfl.Configuration.Manager.Enabled)
+            if (_initialised == false)
             {
-                // Replace the browser capabilities provider.
+                // Replace the browser capabilities provider with one that is 51Degrees.mobi
+                // enabled.
                 if (HttpCapabilitiesBase.BrowserCapabilitiesProvider is FiftyOne.Foundation.Mobile.Detection.MobileCapabilitiesProvider == false)
                     HttpCapabilitiesBase.BrowserCapabilitiesProvider = new FiftyOne.Foundation.Mobile.Detection.MobileCapabilitiesProvider();
 
@@ -59,16 +60,26 @@ namespace FiftyOne.Foundation
                 // available.
                 try
                 {
-                    Microsoft.Web.Infrastructure.DynamicModuleHelper.DynamicModuleUtility.RegisterModule(typeof(FiftyOne.Foundation.Mobile.Redirection.RedirectModule));
+                    RegisterModule();
                 }
                 catch (Exception ex)
                 {
-                    EventLog.Warn("Redirection module could not automatically be registered. Redirection services will not be available unless the HttpModule is included explicitly in the web.config file.");
+                    EventLog.Warn("Redirection module could not automatically be registered. " +
+                        "Redirection services will not be available unless the HttpModule is " +
+                        "included explicitly in the web.config file.");
                     if (EventLog.IsDebug)
                         EventLog.Debug(ex);
                 }
                 _initialised = true;
             }
+        }
+
+        /// <summary>
+        /// Registers the HttpModule for redirection.
+        /// </summary>
+        private static void RegisterModule()
+        {
+            Microsoft.Web.Infrastructure.DynamicModuleHelper.DynamicModuleUtility.RegisterModule(typeof(FiftyOne.Foundation.Mobile.Redirection.RedirectModule));
         }
     }
 }

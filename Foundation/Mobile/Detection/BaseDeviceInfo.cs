@@ -1,5 +1,5 @@
 /* *********************************************************************
- * The contents of this file are subject to the Mozilla internal License 
+ * The contents of this file are subject to the Mozilla Public License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -26,6 +26,8 @@
 
 using System;
 using FiftyOne.Foundation.Mobile.Detection.Matchers;
+using System.Collections.Generic;
+using System.Collections.Specialized;
 
 #endregion
 
@@ -39,9 +41,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Fields
 
         /// <summary>
-        /// Holds all capabilities from the current device
+        /// The parent device.
         /// </summary>
-        private Collection _deviceCapabilities;
+        internal BaseDeviceInfo _parent;
+
+        /// <summary>
+        /// Holds all properties from the current device
+        /// </summary>
+        private Collection _deviceProperties;
 
         /// <summary>
         /// The Id of the device.
@@ -63,19 +70,20 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Public Properties
 
         /// <summary>
-        /// Gets the internal identifier of the device as specified in the WURFL.
-        /// </summary>
-        public string DeviceId
-        {
-            get { return _deviceId; }
-        }
-
-        /// <summary>
         /// Contains the device user agent string.
         /// </summary>
         public string UserAgent
         {
             get { return _userAgent; }
+        }
+
+        /// <summary>
+        /// The parent of the device, or null if this is a root device.
+        /// </summary>
+        public BaseDeviceInfo Parent
+        {
+            get { return _parent; }
+            set { _parent = value; }
         }
 
         #endregion
@@ -99,13 +107,21 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
 
         /// <summary>
-        /// The list of device capabilities.
+        /// The list of device properties.
         /// </summary>
-        internal Collection Capabilities
+        internal Collection Properties
         {
-            get { return _deviceCapabilities; }
+            get { return _deviceProperties; }
         }
 
+        /// <summary>
+        /// Gets the internal identifier of the device.
+        /// </summary>
+        internal string DeviceId
+        {
+            get { return _deviceId; }
+        }
+        
         #endregion
 
         #region Constructors
@@ -115,6 +131,22 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         private BaseDeviceInfo()
         {
+        }
+
+        /// <summary>
+        /// Creates an instance of <cref see="BaseDeviceInfo"/>.
+        /// </summary>
+        /// <param name="userAgent">User agent string used to identify this device.</param>
+        /// <param name="deviceId">A unique Identifier of the device.</param>
+        /// <param name="devices">A reference to the complete index of devices.</param>
+        /// <param name="parent">The parent device if one exists.</param>
+        internal BaseDeviceInfo(
+            BaseProvider devices,
+            string deviceId,
+            string userAgent,
+            BaseDeviceInfo parent)
+        {
+            Init(devices, deviceId, userAgent, parent);
         }
 
         /// <summary>
@@ -155,37 +187,164 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
             _provider = devices;
             _deviceId = deviceId;
-            _deviceCapabilities = new Collection(devices.Strings);
+            _deviceProperties = new Collection(devices.Strings);
         }
 
         private void Init(
             BaseProvider devices,
             string deviceId,
+            string userAgent,
+            BaseDeviceInfo parent)
+        {
+            _parent = parent;
+            Init(devices, deviceId, userAgent);
+        }
+        
+        private void Init(
+            BaseProvider devices,
+            string deviceId,
             string userAgent)
         {
-            if (userAgent == null)
-                throw new ArgumentNullException("userAgent");
-
-            _userAgent = UserAgentParser.Parse(userAgent);
-
+            _userAgent = userAgent;
             Init(devices, deviceId);
         }
 
         #endregion
 
-        #region Methods
+        #region Parent Methods
+
+        /// <summary>
+        /// Returns true if the deviceId is in the parent hierarchy of the 
+        /// device.
+        /// </summary>
+        /// <param name="device">The device being checked.</param>
+        /// <returns>True if the device is within the parent hierarchy.</returns>
+        internal bool GetIsParent(BaseDeviceInfo device)
+        {
+            if (this == device)
+                return true;
+            if (Parent != null)
+                return Parent.GetIsParent(device);
+            return false;
+        }
+
+        #endregion
+
+        #region Property Methods
 
         /// <summary>
         /// Gets the capability value index in the static Strings collection for this device
-        /// based on the index of the capability name.
+        /// based on the index of the capability name. If this device does not have the 
+        /// value then checks the parent if one exists.
         /// </summary>
         /// <param name="index">Capability name index.</param>
         /// <returns>Capability index value in the String collection, or -1 if the capability does not exist.</returns>
-        internal protected virtual int GetCapability(int index)
+        internal protected virtual IList<int> GetPropertyValueStringIndexes(int index)
         {
-            if (_deviceCapabilities.ContainsKey(index))
-                return _deviceCapabilities[index];
+            IList<int> value;
+            if (_deviceProperties.TryGetValue(index, out value))
+                return value;
+            if (Parent != null)
+                return Parent.GetPropertyValueStringIndexes(index);
+            return null;
+        }
+
+        /// <summary>
+        /// Returns the string index of the first element in the collection.
+        /// </summary>
+        /// <param name="index">Capability name index.</param>
+        /// <returns>Capability index value in the String collection, or -1 if the capability does not exist.</returns>
+        internal protected virtual int GetFirstPropertyValueStringIndex(int index)
+        {
+            IList<int> value = GetPropertyValueStringIndexes(index);
+            if (value != null && value.Count > 0)
+                return value[0];
             return -1;
+        }
+
+        /// <summary>
+        /// Returns a list of the string values for the property index string provided.
+        /// </summary>
+        /// <param name="propertyStringIndex">The string index of the property name.</param>
+        /// <returns>A list of string values.</returns>
+        internal protected List<string> GetPropertyValues(int propertyStringIndex)
+        {
+            var values = new List<string>();
+            foreach (int index in GetPropertyValueStringIndexes(propertyStringIndex))
+                if (index >= 0)
+                    values.Add(Provider.Strings.Get(index));
+            return values;
+        }
+
+        /// <summary>
+        /// Adds the device properties to the collection.
+        /// </summary>
+        /// <param name="collection">Collection to have properties added to.</param>
+        internal protected void AddProperties(SortedList<string, List<string>> collection)
+        {
+            foreach (var propertyStringIndex in Properties.Keys)
+            {
+                var property = _provider.Strings.Get(propertyStringIndex);
+                if (Constants.ExcludePropertiesFromAllProperties.Contains(property) == false &&
+                    collection.ContainsKey(property) == false)
+                    collection.Add(
+                        property,
+                        GetPropertyValues(propertyStringIndex));
+            }
+            if (Parent != null)
+                Parent.AddProperties(collection);
+        }
+
+        /// <summary>
+        /// Gets the value of the first value for the property.
+        /// </summary>
+        /// <param name="property"></param>
+        /// <returns></returns>
+        public string GetFirstPropertyValue(string property)
+        {
+            int index = GetFirstPropertyValueStringIndex(Provider.Strings.Add(property));
+            if (index >= 0)
+                return Provider.Strings.Get(index);
+            return null;
+        }
+
+        /// <summary>
+        /// Returns a list of the string values for the property.
+        /// </summary>
+        /// <param name="property"></param>
+        /// <returns></returns>
+        public List<string> GetPropertyValues(string property)
+        {
+            var values = new List<string>();
+            var indexes = GetPropertyValueStringIndexes(Provider.Strings.Add(property));
+            if (indexes != null)
+            {
+                foreach (int index in indexes)
+                {
+                    if (index >= 0)
+                        values.Add(Provider.Strings.Get(index));
+                }
+            }
+            return values;
+        }
+
+        /// <summary>
+        /// Returns a sorted list containing all the property values for the
+        /// the device.
+        /// </summary>
+        public SortedList<string, List<string>> GetAllProperties()
+        {
+            var collection = new SortedList<string, List<string>>();
+#if DEBUG
+            var handlerNames = new List<string>();
+            foreach (var handler in _provider.GetHandlers(UserAgent))
+                handlerNames.Add(handler.Name);
+            collection.Add("Handlers", new List<string>(new[] { String.Join(", ", handlerNames.ToArray()) }));
+            collection.Add("UserAgent", new List<string>(new[] { UserAgent }));
+            collection.Add("DeviceID", new List<string>(new[] { DeviceId }));
+#endif
+            AddProperties(collection);
+            return collection;
         }
 
         #endregion
@@ -201,7 +360,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             return DeviceId.Equals(other.DeviceId) &&
                    UserAgent.Equals(other.UserAgent) &&
-                   Capabilities.Equals(other.Capabilities) &&
+                   Properties.Equals(other.Properties) &&
                    CapabilitiesEquals(other);
         }
 
@@ -212,10 +371,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>True if the object capability strings are the same.</returns>
         private bool CapabilitiesEquals(BaseDeviceInfo other)
         {
-            foreach(int key in Capabilities.Keys)
-                if (_provider.Strings.Get(key).Equals(other.Provider.Strings.Get(key)) == false ||
-                    _provider.Strings.Get(GetCapability(key)).Equals(other.Provider.Strings.Get(other.GetCapability(key))) == false)
+            foreach(var key in Properties.Keys)
+            {
+                if (_provider.Strings.Get(key).Equals(other.Provider.Strings.Get(key)) == false)
                     return false;
+                foreach(var value in GetPropertyValueStringIndexes(key))
+                    if (_provider.Strings.Get(value).Equals(other.Provider.Strings.Get(value)) == false)
+                    return false;
+            }
             return true;
         }
 

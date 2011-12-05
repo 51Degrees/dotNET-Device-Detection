@@ -21,10 +21,6 @@
  * 
  * ********************************************************************* */
 
-#if VER4
-using System.Linq;
-#endif
-
 #region Usings
 
 using System.Collections.Generic;
@@ -144,23 +140,6 @@ namespace FiftyOne.Foundation.Image
         #endregion
 
         #region Static Methods
-
-        internal static int GetBitsPerPixel(long colors)
-        {
-#if VER4
-            foreach (ColorsToBitsPerPixel current in _colorTable.Where(current => colors <= current.Colors))
-            {
-                return current.BitsPerPixel;
-            }
-#elif VER2
-            foreach (ColorsToBitsPerPixel current in _colorTable)
-            {
-                if (colors <= current.Colors)
-                    return current.BitsPerPixel;
-            }
-#endif
-            return 8;
-        }
 
         internal static string GetContentType(ImageFormat format)
         {

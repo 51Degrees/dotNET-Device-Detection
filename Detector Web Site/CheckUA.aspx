@@ -1,4 +1,5 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="CheckUA.aspx.cs" Inherits="Detector.CheckUA" %>
+<%@ Register Src="~/DeviceProperties.ascx" TagPrefix="uc" TagName="DeviceProperties" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -18,10 +19,7 @@
                 <asp:Button runat="server" UseSubmitBehavior="true" Text="Submit" />
             </asp:Panel>
         </asp:Panel>
-        <asp:Panel runat="server" GroupingText="Basic Information:" ID="PanelBasic">
-        </asp:Panel>
-        <asp:Panel runat="server" GroupingText="Advanced Information" ID="PanelAdvanced">
-        </asp:Panel>
+        <uc:DeviceProperties runat="server" ID="PropertiesDevice" />
     </div>
     </form>
 </body>

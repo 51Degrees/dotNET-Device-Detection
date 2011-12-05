@@ -1,5 +1,5 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla internal License 
+ * The contents of this file are subject to the Mozilla Public License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -69,22 +69,18 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Initialisers
 
         /// <summary>
-        /// If the Wurfl configuration is enabled initialises the module.
+        /// Initialises the device detection module.
         /// </summary>
         /// <param name="application">HttpApplication object for the web application.</param>
         public override void Init(HttpApplication application)
         {
-            if (Wurfl.Configuration.Manager.Enabled)
-            {
-                Initialise(application);
-            }
+            Initialise(application);
             base.Init(application);
         }
 
         /// <summary>
-        /// Initiliases the HttpMobile registering this modules interest in
-        /// all new requests and handler mappings if the fiftyOne/wurfl 
-        /// element is present in the configuration.
+        /// Initiliases the HttpModule registering this modules interest in
+        /// all new requests and handler mappings.
         /// </summary>
         /// <param name="application">HttpApplication object for the web application.</param>
         protected void Initialise(HttpApplication application)

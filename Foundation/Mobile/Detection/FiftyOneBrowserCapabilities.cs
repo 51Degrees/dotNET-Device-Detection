@@ -1,5 +1,5 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla internal License 
+ * The contents of this file are subject to the Mozilla Public License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -24,11 +24,12 @@
 using System.Collections.Generic;
 using System.Collections;
 using System.Web;
+using System;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
     /// <summary>
-    /// The this[] property has been changed to also check the wurfl capabilities
+    /// The this[] property has been changed to also check the 51Degrees.mobi capabilities
     /// before returning a value if the capability has not been found in the 
     /// standard collection.
     /// </summary>
@@ -36,7 +37,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
     {
         #region Fields
 
-        private SortedList<string, string> _wurflCapabilities;
+        private SortedList<string, List<string>> _fiftyOneProperties;
 
         #endregion
 
@@ -74,16 +75,16 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Properties
 
         /// <summary>
-        /// Returns the WurflCapabilities list if it exists. It should
+        /// Returns the 51Degrees.mobi list if it exists. It should
         /// always exist if this class is being used.
         /// </summary>
-        private SortedList<string, string> WurflCapabilities
+        private SortedList<string, List<string>> FiftyOneProperties
         {
             get
             {
-                if (_wurflCapabilities == null)
-                    _wurflCapabilities = Capabilities[Wurfl.Constants.WurflCapabilities] as SortedList<string, string>;
-                return _wurflCapabilities;
+                if (_fiftyOneProperties == null)
+                    _fiftyOneProperties = Capabilities[Constants.FiftyOneDegreesProperties] as SortedList<string, List<string>>;
+                return _fiftyOneProperties;
             }
         }
 
@@ -92,9 +93,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Overridden Members
 
         /// <summary>
-        /// Returns the value for the capability key from initially the standard
+        /// Returns the value for the property key from the standard
         /// collection of capabilities provided by Microsoft. If a value is not
-        /// found then WURFL is checked.
+        /// found 51Degrees.mobi properties are checked.
         /// </summary>
         /// <param name="key">The capability key being sought.</param>
         /// <returns>The value of the key, otherwise null.</returns>
@@ -105,10 +106,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
 		        string result = base[key];
                 
                 // If the base list of capabilities does not return a result 
-                // then try the wurfl capabilities.
-                if (result == null && 
-                    WurflCapabilities != null)
-                    WurflCapabilities.TryGetValue(key, out result);
+                // then try the 51degrees.mobi capabilities.
+                if (result == null &&
+                    FiftyOneProperties != null)
+                {
+                    List<string> values;
+                    if (FiftyOneProperties.TryGetValue(key, out values))
+                        result = String.Join(Constants.ValueSeperator, values.ToArray());
+                }
                 
                 return result;
 	        }

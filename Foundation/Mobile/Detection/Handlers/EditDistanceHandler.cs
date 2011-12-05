@@ -1,5 +1,5 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla internal License 
+ * The contents of this file are subject to the Mozilla Public License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -33,7 +33,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
     /// <summary>
     /// Device detection handler using the EditDistance method of matching devices.
     /// </summary>
-    internal class EditDistanceHandler : Handler
+    public class EditDistanceHandler : Handler
     {
         #region Constructor
 

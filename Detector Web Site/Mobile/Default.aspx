@@ -1,4 +1,5 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="Detector.Mobile.Default" EnableSessionState="True" EnableViewState="false" %>
+<%@ Register Src="~/DeviceProperties.ascx" TagPrefix="uc" TagName="DeviceProperties" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -18,17 +19,16 @@
             <asp:Image Runat="server" Alignment="Center" ImageUrl="~/Mobile.png" AlternateText="Mobile Device" />
         </asp:Panel>
         <asp:Panel runat="server" HorizontalAlign="Center">
-            <asp:Label ID="LabelManufacturer" Runat="server" Alignment="Center"/>
-        </asp:Panel>
-        <asp:Panel runat="server" HorizontalAlign="Center">
-            <asp:Label ID="LabelModel" Runat="server" Alignment="Center"/>
-        </asp:Panel>
-        <asp:Panel runat="server" HorizontalAlign="Center">
             <asp:Label ID="LabelUserAgent" Runat="server" Alignment="Center"/>
         </asp:Panel>
         <asp:Panel runat="server" HorizontalAlign="Center">
+            <asp:Label ID="LabelTagWriter" Runat="server" Alignment="Center"/>
+        </asp:Panel>        
+        <asp:Panel runat="server" HorizontalAlign="Center">
             <asp:HyperLink ID="LinkDesktop" Runat="server" Text="Desktop Site" NavigateUrl="~/Default.aspx" />
         </asp:Panel>
+        <hr />
+        <uc:DeviceProperties runat="server" ID="PropertiesDevice" />
     </div>
     </form>
 </body>

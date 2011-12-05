@@ -1,5 +1,5 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla internal License 
+ * The contents of this file are subject to the Mozilla Public License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -94,43 +94,56 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Segment
 
         private static void ServiceRequest(Request request)
         {
-            int weight, difference;
+            int index;
+            uint runningScore, score;
             Segments compare;
             BaseDeviceInfo current = request.Next();
             while (current != null)
             {
+                // Reset the counters.
+                runningScore = 0;
+                index = 0;
+                
+                // Get matching number of segments.
                 compare = request.Handler.CreateSegments(current.UserAgent);
-                difference = request.Target.Count - compare.Count;
-                for (int i = 0; i < difference; i++)
-                    compare.Add(new Segment(String.Empty));
-                for (int i = 0; i < request.Target.Count; i++)
+                for (int i = compare.Count; i < request.Target.Count; i++)
+                    compare.Add(new Segment(
+                        String.Empty,
+                        request.Target[i].Weight));
+                
+                while(index < request.Target.Count &&
+                    runningScore <= request.Results.LowestScore)
                 {
-                    weight = request.Handler.GetSegmentWeight(i);
-                    // If the two segments are exactly equal score as zero.
-                    if (request.Target[i].Value == compare[i].Value)
-                        compare[i].Score = 0;
-                        // Otherwise assign the EditDistance value multiplied by the
-                        // segment weight or if one is not available the index of the segment.
+                    // If the two segments are exactly equal the score will be zero.
+                    if (request.Target[index].Value == compare[index].Value)
+                        score = 0;
+
+                    // Otherwise assign the EditDistance value multiplied by the
+                    // segment weight or if one is not available the index of the segment.
                     else
-                    {
-                        compare[i].Score = Algorithms.EditDistance(
-                                               request.Target[i].Value,
-                                               compare[i].Value,
-                                               int.MaxValue)*weight;
-                    }
+                        score = (uint)Algorithms.EditDistance(
+                            request.Target[index].Value,
+                            compare[index].Value,
+                            int.MaxValue) *
+                            (uint)request.Target[index].Weight;
+
+                    // Update the counters.
+                    compare[index].Score = score;
+                    runningScore += score;
+                    index++;
                 }
-                int totalScore = compare.TotalScore;
-                if (totalScore <= request.Results.LowestScore)
+
+                if (runningScore <= request.Results.LowestScore)
                 {
                     lock (request.Results)
                     {
-                        if (totalScore == request.Results.LowestScore)
+                        if (runningScore == request.Results.LowestScore)
                         {
                             request.Results.Add(current);
                         }
-                        else if (totalScore < request.Results.LowestScore)
+                        else if (runningScore < request.Results.LowestScore)
                         {
-                            request.Results.LowestScore = totalScore;
+                            request.Results.LowestScore = runningScore;
                             request.Results.Clear();
                             request.Results.Add(current);
                         }

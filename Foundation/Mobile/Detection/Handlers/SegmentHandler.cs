@@ -1,5 +1,5 @@
 /* *********************************************************************
- * The contents of this file are subject to the Mozilla internal License 
+ * The contents of this file are subject to the Mozilla Public License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -35,7 +35,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
     /// An abstract handler used by any handler that breaks a string down into
     /// segments.
     /// </summary>
-    internal abstract class SegmentHandler : Handler
+    public abstract class SegmentHandler : Handler
     {
         #region Constructor
 
@@ -49,8 +49,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         #region Abstract Methods
 
         internal abstract Segments CreateSegments(string source);
-
-        internal abstract int GetSegmentWeight(int index);
 
         #endregion
 

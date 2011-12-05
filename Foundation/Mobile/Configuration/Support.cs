@@ -30,7 +30,7 @@ using System.Security;
 using System.Web;
 using System.Web.Configuration;
 using System.Web.Hosting;
-using FiftyOne.Foundation.Mobile.Detection.Wurfl;
+using FiftyOne.Foundation.Mobile.Detection.Xml;
 using FiftyOne.Foundation.Mobile;
 
 #endregion

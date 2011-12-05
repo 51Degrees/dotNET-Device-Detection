@@ -1,5 +1,5 @@
 /* *********************************************************************
- * The contents of this file are subject to the Mozilla internal License 
+ * The contents of this file are subject to the Mozilla Public License 
  * Version 1.1 (the "License"); you may not use this file except in 
  * compliance with the License. You may obtain a copy of the License at 
  * http://www.mozilla.org/MPL/
@@ -48,7 +48,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Fields
 
         private readonly Uri _newDevicesUrl;
-        private readonly NewDeviceDetail _newDeviceDetail;
+        private readonly NewDeviceDetails _newDeviceDetail;
         private bool _enabled;
 
         #endregion
@@ -58,7 +58,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Sets the enabled state of the class.
         /// </summary>
-        internal NewDevice(string newDevicesUrl, NewDeviceDetail newDeviceDetail)
+        internal NewDevice(string newDevicesUrl, NewDeviceDetails newDeviceDetail)
         {
             if (Uri.TryCreate(newDevicesUrl, UriKind.RelativeOrAbsolute, out _newDevicesUrl))
                 _enabled = true;
@@ -160,14 +160,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
             private readonly bool _isLocal;
             private readonly string _userAgent;
 
-            internal NewDeviceData(HttpRequest request, NewDeviceDetail newDeviceDetail)
+            internal NewDeviceData(HttpRequest request, NewDeviceDetails newDeviceDetail)
             {
                 _content = RequestHelper.GetContent(request,
-                                                    newDeviceDetail == NewDeviceDetail.Maximum);
+                                                    newDeviceDetail == NewDeviceDetails.Maximum);
                 _userAgent = request.UserAgent;
                 _isLocal = request.IsLocal;
 
-                // If the headers contain 51D as a setting or the request is to a ]
+                // If the headers contain 51D as a setting or the request is to a
                 // web service then do not send the data.
                 _ignore = request.Headers["51D"] != null ||
                     request.Url.Segments[request.Url.Segments.Length - 1].EndsWith("asmx");
