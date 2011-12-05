@@ -252,9 +252,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             SetValue(capabilities, "isColor", GetIsColor(device));
             SetValue(capabilities, "SupportsCallback", GetSupportsCallback(device));
             SetValue(capabilities, "canInitiateVoiceCall", GetIsMobileDevice(device));
-            SetValue(capabilities, "javascript", GetJavascriptSupport(device));
             SetValue(capabilities, "jscriptversion", GetJavascriptVersion(device));
-            SetValue(capabilities, "tables", GetTablesCapable(device));
 
             // Use the Version class to find the version. If this fails use the 1st two
             // decimal segments of the string.
@@ -291,12 +289,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
             }
 
             // All we can determine from the device database is if javascript is supported as a boolean.
-            // Use this value to set a ecma version number that is the same for all devices that
-            // indicate javascript support.
-            bool javaScript = GetJavascriptSupport(device);
-            SetJavaScript(capabilities, javaScript);
-            SetValue(capabilities, "ecmascriptversion",
-                     javaScript ? "3.0" : "0.0");
+            // If the value is not provided then null is returned and the capabilities won't be altered.
+            object javaScript = GetJavascriptSupport(device);
+            if (javaScript is bool)
+            {
+                SetJavaScript(capabilities, (bool)javaScript);
+                SetValue(capabilities, "ecmascriptversion",
+                         (bool)javaScript ? "3.0" : "0.0");
+            }
 
             // Update the cookies value if we have additional information.
             SetValue(capabilities, "cookies",
@@ -325,6 +325,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
         private object GetTablesCapable(BaseDeviceInfo device)
         {
             int value = device.GetFirstPropertyValueStringIndex(TablesCapable);
+            if (value < 0)
+                return null;
+
             if (value == this.True[0] || value == this.True[1])
                 return bool.TrueString.ToLowerInvariant();
             return bool.FalseString.ToLowerInvariant(); 
@@ -332,6 +335,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         private string GetPreferredHtmlVersion(BaseDeviceInfo device)
         {
+            // Working out ASP.NET will support HTML5. Return 4 for the moment.
+            return "html4";
+
+            /*
+
             // Get the list of values.
             var values = new List<double>();
             var versions = device.GetPropertyValueStringIndexes(HtmlVersion);
@@ -364,6 +372,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
  
             // Couldn't find anything return html 4.
             return "html4";
+            */
         }
 
         /// <summary>
@@ -416,9 +425,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="device">The device to be checked.</param>
         /// <returns>True if javascript is supported.</returns>
-        private bool GetJavascriptSupport(BaseDeviceInfo device)
+        private object GetJavascriptSupport(BaseDeviceInfo device)
         {
             int value = device.GetFirstPropertyValueStringIndex(Javascript);
+            if (value < 0)
+                return null;
             return value == this.True[0] || value == this.True[1];
         }
 
@@ -429,11 +440,30 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns></returns>
         private string GetJavascriptVersion(BaseDeviceInfo device)
         {
+            var index = device.GetFirstPropertyValueStringIndex(JavascriptVersion);
+            if (index < 0)
+                return null;
+
+            string value = _provider.Strings.Get(index);
+
+            // Check if the version value is valid in the version
+            // class. If not then return null.
+#if VER2
+            try
+            {
+                new Version(value);
+                return value;
+            }
+            catch
+            {
+                return null;
+            }
+#else
             Version version;
-            string value = _provider.Strings.Get(device.GetFirstPropertyValueStringIndex(JavascriptVersion));
             if (Version.TryParse(value, out version))
                 return value;
             return null;
+#endif
         }
 
         private string GetPlatform(BaseDeviceInfo device)
@@ -483,7 +513,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         private string GetIsColor(BaseDeviceInfo device)
         {
             long bitsPerPixel = GetBitsPerPixel(device);
-            if (bitsPerPixel >= 256)
+            if (bitsPerPixel >= 4)
                 return bool.TrueString.ToLowerInvariant();
             return bool.FalseString.ToLowerInvariant();
         }
@@ -534,15 +564,18 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
 
         /// <summary>
-        /// Returns the number of bits per pixel as a string.
+        /// Returns the number of bits per pixel as a long, or 16 if not found.
         /// </summary>
         /// <param name="device"></param>
         /// <returns></returns>
         private long GetBitsPerPixel(BaseDeviceInfo device)
         {
             long bitsPerPixel = 1;
-            long.TryParse(_provider.Strings.Get(device.GetFirstPropertyValueStringIndex(BitsPerPixel)), out bitsPerPixel);
-            return bitsPerPixel;
+            if (long.TryParse(
+                _provider.Strings.Get(device.GetFirstPropertyValueStringIndex(BitsPerPixel)), 
+                out bitsPerPixel))
+                return bitsPerPixel;
+            return 16;
         }
 
         #endregion
