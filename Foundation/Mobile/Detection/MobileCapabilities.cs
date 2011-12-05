@@ -62,8 +62,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
         private readonly int HardwareVendor;
         private readonly int HtmlVersion;
         private readonly int IsMobile;
-        private readonly int True;
-        private readonly int False;
+        private readonly int[] True = new int[2];
+        private readonly int[] False = new int[2];
         private readonly int IsCrawler;
         private readonly int CcppAccept;
         private readonly int[] ImagePng;
@@ -92,8 +92,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
         internal MobileCapabilities(Provider provider)
         {
             _provider = provider;
-            True = _provider.Strings.Add("True");
-            False = _provider.Strings.Add("False");
+            True[0] = _provider.Strings.Add("True");
+            True[1] = _provider.Strings.Add("true");
+            False[0] = _provider.Strings.Add("False");
+            False[1] = _provider.Strings.Add("false");
             AjaxRequestType = _provider.Strings.Add("AjaxRequestType");
             AjaxRequestTypeNotSupported = _provider.Strings.Add("AjaxRequestTypeNotSupported");
             Javascript = _provider.Strings.Add("Javascript");
@@ -322,7 +324,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns></returns>
         private object GetTablesCapable(BaseDeviceInfo device)
         {
-            if (device.GetFirstPropertyValueStringIndex(TablesCapable) == this.True)
+            int value = device.GetFirstPropertyValueStringIndex(TablesCapable);
+            if (value == this.True[0] || value == this.True[1])
                 return bool.TrueString.ToLowerInvariant();
             return bool.FalseString.ToLowerInvariant(); 
         }
@@ -415,12 +418,22 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>True if javascript is supported.</returns>
         private bool GetJavascriptSupport(BaseDeviceInfo device)
         {
-            return device.GetFirstPropertyValueStringIndex(Javascript) == this.True;
+            int value = device.GetFirstPropertyValueStringIndex(Javascript);
+            return value == this.True[0] || value == this.True[1];
         }
 
+        /// <summary>
+        /// Get the javascript version or null if not provided or invalid.
+        /// </summary>
+        /// <param name="device"></param>
+        /// <returns></returns>
         private string GetJavascriptVersion(BaseDeviceInfo device)
         {
-            return _provider.Strings.Get(device.GetFirstPropertyValueStringIndex(JavascriptVersion));
+            Version version;
+            string value = _provider.Strings.Get(device.GetFirstPropertyValueStringIndex(JavascriptVersion));
+            if (Version.TryParse(value, out version))
+                return value;
+            return null;
         }
 
         private string GetPlatform(BaseDeviceInfo device)
@@ -430,7 +443,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         private string GetIsCrawler(BaseDeviceInfo device)
         {
-            if (device.GetFirstPropertyValueStringIndex(IsCrawler) == this.True)
+            int value = device.GetFirstPropertyValueStringIndex(IsCrawler);
+            if (value == this.True[0] || value == this.True[1])
                 return bool.TrueString.ToLowerInvariant();
             return bool.FalseString.ToLowerInvariant();
         }
@@ -442,19 +456,28 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         private string GetIsMobileDevice(BaseDeviceInfo device)
         {
-            if (device.GetFirstPropertyValueStringIndex(IsMobile) == this.True)
+            int value = device.GetFirstPropertyValueStringIndex(IsMobile);
+            if (value == this.True[0] || value == this.True[1])
                 return bool.TrueString.ToLowerInvariant();
             return bool.FalseString.ToLowerInvariant();
         }
 
         private string GetScreenPixelsHeight(BaseDeviceInfo device)
         {
-            return _provider.Strings.Get(device.GetFirstPropertyValueStringIndex(ScreenPixelsHeight));
+            int size;
+            string value = _provider.Strings.Get(device.GetFirstPropertyValueStringIndex(ScreenPixelsHeight));
+            if (int.TryParse(value, out size))
+                return value;
+            return null;
         }
 
         private string GetScreenPixelsWidth(BaseDeviceInfo device)
         {
-            return _provider.Strings.Get(device.GetFirstPropertyValueStringIndex(ScreenPixelsWidth));
+            int size;
+            string value = _provider.Strings.Get(device.GetFirstPropertyValueStringIndex(ScreenPixelsWidth));
+            if (int.TryParse(value, out size))
+                return value;
+            return null;
         }
 
         private string GetIsColor(BaseDeviceInfo device)
