@@ -36,11 +36,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
     {
         #region Properties
 
+        // Note: The default value is set for required unique properties to prevent
+        // .NET throwing an exception when validating the default value.
+
         /// <summary>
         /// Gets or sets the name of the file. 
         /// </summary>
-        [ConfigurationProperty("name", IsRequired = true, IsKey = true)]
-        [StringValidator(InvalidCharacters = "!@#$%^&*()[]{};'\"|\\", MinLength = 1, MaxLength = 60)]
+        [ConfigurationProperty("name", IsRequired = true, IsKey = true, DefaultValue="name")]
+        [StringValidator(InvalidCharacters = "!@#$%^&*()[]{};'\"|", MinLength = 1, MaxLength = 60)]
         internal string Name
         {
             get { return (string) this["name"]; }
@@ -50,8 +53,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
         /// <summary>
         /// Gets or sets the file path.
         /// </summary>
-        [ConfigurationProperty("filePath", IsRequired = true)]
-        [StringValidator(InvalidCharacters = "!@#$%^&*()[]{};'\"|", MaxLength = 255)]
+        [ConfigurationProperty("filePath", IsRequired = true, DefaultValue="filePath")]
+        [StringValidator(InvalidCharacters = "!@#$%^&*()[]{};'\"|", MinLength = 1, MaxLength = 255)]
         internal string FilePath
         {
             get { return (string) this["filePath"]; }
