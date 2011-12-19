@@ -29,27 +29,7 @@ using System.Collections.Generic;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Segment
 {
-    internal class Segments : List<Segment>
+    internal class Segments : List<List<Segment>>
     {
-        internal uint TotalScore
-        {
-            get
-            {
-                uint totalScore = 0;
-                foreach (Segment current in this)
-                {
-                    if (current.IsValid)
-                    {
-                        if (current.Score == uint.MaxValue)
-                        {
-                            totalScore = uint.MaxValue;
-                            break;
-                        }
-                        totalScore += current.Score;
-                    }
-                }
-                return totalScore;
-            }
-        }
     }
 }

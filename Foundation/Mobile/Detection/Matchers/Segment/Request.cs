@@ -63,14 +63,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Segment
         internal Request(string userAgent, SegmentHandler handler)
             : base(userAgent, handler)
         {
-            _target = Handler.CreateSegments(userAgent);
+            _target = Handler.CreateAllSegments(userAgent);
             _results = new Results();
         }
 
         internal Request(string userAgent, SegmentHandler handler, AutoResetEvent completeEvent)
             : base(userAgent, handler, completeEvent)
         {
-            _target = Handler.CreateSegments(userAgent);
+            _target = Handler.CreateAllSegments(userAgent);
             _results = new Results();
         }
 

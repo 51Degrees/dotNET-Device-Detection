@@ -86,6 +86,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
             set { _parent = value; }
         }
 
+        /// <summary>
+        /// Gets the unique identifier of the device.
+        /// </summary>
+        public string DeviceId
+        {
+            get { return _deviceId; }
+        }
+
         #endregion
 
         #region Internal Properties
@@ -113,15 +121,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             get { return _deviceProperties; }
         }
-
-        /// <summary>
-        /// Gets the internal identifier of the device.
-        /// </summary>
-        internal string DeviceId
-        {
-            get { return _deviceId; }
-        }
-        
+               
         #endregion
 
         #region Constructors
@@ -335,13 +335,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
         public SortedList<string, List<string>> GetAllProperties()
         {
             var collection = new SortedList<string, List<string>>();
+            collection.Add("DeviceID", new List<string>(new[] { DeviceId }));
 #if DEBUG
             var handlerNames = new List<string>();
             foreach (var handler in _provider.GetHandlers(UserAgent))
                 handlerNames.Add(handler.Name);
             collection.Add("Handlers", new List<string>(new[] { String.Join(", ", handlerNames.ToArray()) }));
             collection.Add("UserAgent", new List<string>(new[] { UserAgent }));
-            collection.Add("DeviceID", new List<string>(new[] { DeviceId }));
 #endif
             AddProperties(collection);
             return collection;

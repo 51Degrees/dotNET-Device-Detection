@@ -96,40 +96,48 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Segment
         {
             int index;
             uint runningScore, score;
-            Segments compare;
             BaseDeviceInfo current = request.Next();
             while (current != null)
             {
                 // Reset the counters.
                 runningScore = 0;
                 index = 0;
-                
-                // Get matching number of segments.
-                compare = request.Handler.CreateSegments(current.UserAgent);
-                for (int i = compare.Count; i < request.Target.Count; i++)
-                    compare.Add(new Segment(
-                        String.Empty,
-                        request.Target[i].Weight));
-                
-                while(index < request.Target.Count &&
+
+                while (index < request.Target.Count &&
                     runningScore <= request.Results.LowestScore)
                 {
-                    // If the two segments are exactly equal the score will be zero.
-                    if (request.Target[index].Value == compare[index].Value)
-                        score = 0;
+                    // Get the next segment for the comparision.
+                    var compare = request.Handler.CreateSegments(
+                        current.UserAgent, index);
 
-                    // Otherwise assign the EditDistance value multiplied by the
-                    // segment weight or if one is not available the index of the segment.
-                    else
-                        score = (uint)Algorithms.EditDistance(
-                            request.Target[index].Value,
-                            compare[index].Value,
-                            int.MaxValue) *
-                            (uint)request.Target[index].Weight;
+                    // If the two results are not equal in length so do not consider
+                    // this useragent as a possible match.
+                    if (request.Target[index].Count != compare.Count)
+                    {
+                        runningScore = uint.MaxValue;
+                        break;
+                    }
 
-                    // Update the counters.
-                    compare[index].Score = score;
-                    runningScore += score;
+                    // Work out the score for each of the returned segments.
+                    for (int segmentIndex = 0; 
+                        segmentIndex < request.Target[index].Count; 
+                        segmentIndex++)
+                    {
+                        // If the two are equal then set to zero.
+                        if (request.Target[index][segmentIndex].Value == compare[segmentIndex].Value)
+                            score = 0;
+                        else
+                            score = (uint)Algorithms.EditDistance(
+                                request.Target[index][segmentIndex].Value,
+                                compare[segmentIndex].Value,
+                                int.MaxValue) *
+                                (uint)request.Target[index][segmentIndex].Weight;
+
+                        // Update the counters.
+                        compare[segmentIndex].Score = score;
+                        runningScore += score;
+                    }
+                    
                     index++;
                 }
 
@@ -149,6 +157,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Segment
                         }
                     }
                 }
+
                 current = request.Next();
                 request.Complete();
             }

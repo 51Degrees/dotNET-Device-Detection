@@ -26,6 +26,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using FiftyOne.Foundation.Mobile.Detection.Matchers.Segment;
+using System;
 
 #endregion
 
@@ -148,14 +149,56 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
 
         #region Abstract Method Implementation
 
-        internal override Segments CreateSegments(string source)
+        /// <summary>
+        /// Returns segments for the index specified.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        internal override List<Segment> CreateSegments(string source, int index)
+        {
+             return CreateSegments(source, _segments[index]);
+        }
+
+        /// <summary>
+        /// Returns the segments from the source string. Where a segment returns nothing
+        /// a single empty segment will be added.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        internal override Segments CreateAllSegments(string source)
         {
             Segments results = new Segments();
-            foreach(RegexSegment segment in _segments)
-                foreach(Match match in segment.Pattern.Matches(source))
-                    if (match.Success)
-                        results.Add(new Segment(match.Value, segment.Weight));
+            foreach (RegexSegment segment in _segments)
+            {
+                results.Add(CreateSegments(source, segment));
+            }
             return results;
+        }
+
+        private List<Segment> CreateSegments(string source, RegexSegment segment)
+        {
+            bool matched = false;
+            var newSegments = new List<Segment>();
+            var matches = segment.Pattern.Matches(source);
+
+            // Add a segment for each match found.
+            foreach (Match match in matches)
+            {
+                if (match.Success)
+                {
+                    newSegments.Add(new Segment(match.Value, segment.Weight));
+                    matched = true;
+                }
+            }
+            if (matched == false)
+            {
+                // Add an empty segment to avoid problems of missing segments
+                // stopping others being compared correctly.
+                newSegments.Add(new Segment(String.Empty, segment.Weight));
+            }
+
+            return newSegments;
         }
 
         #endregion

@@ -21,6 +21,7 @@
  * 
  * ********************************************************************* */
 
+using FiftyOne.Foundation.Mobile.Detection.Handlers;
 namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Segment
 {
     internal class Segment

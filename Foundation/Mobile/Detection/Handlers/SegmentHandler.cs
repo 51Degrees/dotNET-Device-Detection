@@ -26,6 +26,7 @@
 using System;
 using FiftyOne.Foundation.Mobile.Detection.Matchers.Segment;
 using Results=FiftyOne.Foundation.Mobile.Detection.Matchers.Results;
+using System.Collections.Generic;
 
 #endregion
 
@@ -48,7 +49,20 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
 
         #region Abstract Methods
 
-        internal abstract Segments CreateSegments(string source);
+        /// <summary>
+        /// Creates segments for all regexes.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        internal abstract Segments CreateAllSegments(string source);
+
+        /// <summary>
+        /// Creates  segments for the regex index provided.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        internal abstract List<Segment> CreateSegments(string source, int index);
 
         #endregion
 
