@@ -14,7 +14,7 @@
  * 
  * The Initial Developer of the Original Code is owned by 
  * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees
- * Mobile Experts Limited are Copyright (C) 2009 - 2011. All Rights Reserved.
+ * Mobile Experts Limited are Copyright (C) 2009 - 2012. All Rights Reserved.
  * 
  * Contributor(s):
  *     James Rosewell <james@51degrees.mobi>
@@ -188,33 +188,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
 
         /// <summary>
-        /// Gets an array of handlers that will support the device information.
-        /// Device ids are used to determine if the handler supports the device
-        /// tree the requested device is within.
-        /// </summary>
-        /// <param name="device">Device information to find supporting handlers.</param>
-        /// <returns>A list of all handlers that can handle this device.</returns>
-        private Handler[] GetHandlers(BaseDeviceInfo device)
-        {
-            byte highestConfidence = 0;
-            List<Handler> handlers = new List<Handler>();
-
-#if VER4
-            foreach (Handler handler in Handlers.Where(handler => handler.CanHandle(device)))
-            {
-                GetHandlers(ref highestConfidence, handlers, handler);
-            }
-#elif VER2
-            foreach (Handler handler in Handlers)
-            {
-                if (handler.CanHandle(device))
-                    GetHandlers(ref highestConfidence, handlers, handler);
-            }
-#endif
-            return handlers.ToArray();
-        }
-
-        /// <summary>
         /// Gets an array of handlers that will support the useragent string.
         /// </summary>
         /// <param name="userAgent">Useragent string associated with the HTTP request.</param>
@@ -317,12 +290,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
             if (String.IsNullOrEmpty(device.UserAgent) == false)
             {
 #if VER4
-            foreach (Handler handler in GetHandlers(device).Where(handler => handler != null))
+                foreach (Handler handler in GetHandlers(device.UserAgent).Where(handler => handler != null))
             {
                 handler.Set(device);
             }
 #elif VER2
-                foreach (Handler handler in GetHandlers(device))
+                foreach (Handler handler in GetHandlers(device.UserAgent))
                     if (handler != null)
                         handler.Set(device);
 #endif

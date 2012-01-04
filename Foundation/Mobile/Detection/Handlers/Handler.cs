@@ -14,7 +14,7 @@
  * 
  * The Initial Developer of the Original Code is owned by 
  * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees 
- * Mobile Experts Limited are Copyright (C) 2009 - 2011. All Rights Reserved.
+ * Mobile Experts Limited are Copyright (C) 2009 - 2012. All Rights Reserved.
  * 
  * Contributor(s):
  *     James Rosewell <james@51degrees.mobi>
@@ -37,7 +37,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
     /// <summary>
     /// Base handler class for device detection.
     /// </summary>
-    public abstract class Handler
+    public abstract class Handler : IComparable<Handler>
     {
         #region Constants
 
@@ -222,6 +222,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         #endregion
 
         #region Public Methods
+
+        /// <summary>
+        /// Compares this handler to another where the handler is used
+        /// as a key in a sorted list.
+        /// </summary>
+        /// <param name="other">The other handler to compare to this one.</param>
+        /// <returns>See string CompareTo method.</returns>
+        public int CompareTo(Handler other)
+        {
+            return Name.CompareTo(other.Name);
+        }
 
         /// <summary>
         /// Returns true or false depending on the handlers ability
@@ -511,5 +522,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         }
 
         #endregion
+        
+
     }
 }

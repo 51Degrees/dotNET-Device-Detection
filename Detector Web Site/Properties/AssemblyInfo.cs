@@ -11,7 +11,7 @@ using System.Resources;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("51 Degrees Mobile Experts Limited")]
 [assembly: AssemblyProduct("Mobile Device Detector Example")]
-[assembly: AssemblyCopyright("Copyright © 51 Degrees Mobile Experts Limited 2009 - 2011")]
+[assembly: AssemblyCopyright("Copyright © 51 Degrees Mobile Experts Limited 2009 - 2012")]
 [assembly: AssemblyTrademark("51degrees.mobi")]
 [assembly: AssemblyCulture("")]
 
