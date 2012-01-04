@@ -18,7 +18,8 @@
     <SccProvider>SAK</SccProvider>
     <ApplicationIcon>PDA.ico</ApplicationIcon>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>51Degrees.mobi.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
@@ -167,7 +168,6 @@
     <Content Include="PDA.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="51Degrees.mobi.snk" />
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
