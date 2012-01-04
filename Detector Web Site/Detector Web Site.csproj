@@ -122,7 +122,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Foundation\FiftyOne.Foundation.csproj">
+    <ProjectReference Include="..\Foundation\FiftyOne.Foundation.csproj">
       <Project>{2C9B0E11-2654-49AF-855A-BFA629F302E8}</Project>
       <Name>FiftyOne.Foundation</Name>
     </ProjectReference>
@@ -159,7 +159,7 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
-          <UseIIS>True</UseIIS>
+          <UseIIS>False</UseIIS>
           <AutoAssignPort>False</AutoAssignPort>
           <DevelopmentServerPort>5151</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
