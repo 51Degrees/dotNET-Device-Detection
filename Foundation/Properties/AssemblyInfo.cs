@@ -37,10 +37,9 @@ using System.Security;
 //      Minor Version 
 //      Build Number
 //      Revision
-//
 
-[assembly: AssemblyVersion("2.0.3.2")]
-[assembly: AssemblyFileVersion("2.0.3.2")]
+[assembly: AssemblyVersion("2.0.4.2")]
+[assembly: AssemblyFileVersion("2.0.4.2")]
 [assembly: NeutralResourcesLanguage("en-GB")]
 [assembly: AllowPartiallyTrustedCallers]
 

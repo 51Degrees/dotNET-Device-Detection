@@ -12,10 +12,14 @@
     <AssemblyName>FiftyOne.Foundation</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
     <ApplicationIcon>PDA.ico</ApplicationIcon>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>
@@ -57,16 +61,14 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Release4\</OutputPath>
-    <DefineConstants>TRACE;VER4</DefineConstants>
+    <DefineConstants>TRACE;VER4 AZURE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release4\FiftyOne.Foundation.xml</DocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>False</Private>
-    </Reference>
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.WindowsAzure.CloudDrive, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.WindowsAzure.Diagnostics, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.WindowsAzure.ServiceRuntime, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
@@ -80,7 +82,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Activator.cs" />
+    <None Include="Activator.cs" />
     <Compile Include="Mobile\Detection\AutoUpdate.cs" />
     <Compile Include="Mobile\Detection\Binary\DeviceInfo.cs" />
     <Compile Include="Mobile\Detection\Xml\HandlersReader.cs" />

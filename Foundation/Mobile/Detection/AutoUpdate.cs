@@ -39,7 +39,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// licence has been installed.
     /// </summary>
     internal static class AutoUpdate
-    {        
+    {
         #region Fields
 
         private static FileInfo _binaryFile = null;
@@ -136,7 +136,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 if (Constants.AutoUpdateDelayedStart.TotalSeconds > 0 &&
                     LicenseKeys.Length > 0)
                 {
-                    // Pause for X seconds to all the worker process to complete starting up.
+                    // Pause for X seconds to allow the worker process to complete starting up.
                     Thread.Sleep(Constants.AutoUpdateDelayedStart);
 
                     // Check the last accessed date of the binary file to determine
@@ -151,14 +151,18 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         parameters.Add("Type=Binary");
 
                         var client = new WebClient();
-                        byte[] data = client.DownloadData(String.Format("{0}?{1}",
+                        var url = String.Format("{0}?{1}",
                             Constants.AutoUpdateUrl,
-                            String.Join("&", parameters.ToArray())));
+                            String.Join("&", parameters.ToArray()));
+                        byte[] data = client.DownloadData(url);
 
                         // Check the MD5 hash of the data downloaded.
                         string mdHash = client.ResponseHeaders["Content-MD5"];
                         if (mdHash != GetMd5Hash(data))
-                            throw new MobileException("MD5 hash validation failure.");
+                            throw new MobileException(String.Format(
+                                "MD5 hash '{0}' validation failure with data downloaded from update URL '{1}'.",
+                                mdHash,
+                                url));
 
                         // Create new provider with the data to ensure it is valid.
                         var provider = Binary.Reader.Create(data);
@@ -168,7 +172,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         // Both the MD5 hash was good and the provider was created.
                         // Save the data and force the factory to reload.
                         File.WriteAllBytes(BinaryFile.FullName, data);
-                                                
+
                         // Sets the last modified time of the file downloaded.
                         DateTime lastModified = DateTime.MinValue;
                         if (DateTime.TryParse(
@@ -186,7 +190,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 EventLog.Warn(new MobileException(String.Format(
                     "Exception auto updating binary data file '{0}'.",

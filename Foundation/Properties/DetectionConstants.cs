@@ -37,7 +37,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// The URL to use to get the latest device data from.
         /// </summary>
-        internal const string AutoUpdateUrl = "https://51degrees.mobi/Products/Download/PremiumData.aspx";
+        internal const string AutoUpdateUrl = "https://51degrees.mobi/Products/Downloads/Premium.aspx";
 
         /// <summary>
         /// The length of time to wait before starting the auto update
