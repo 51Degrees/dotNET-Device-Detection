@@ -61,7 +61,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Release4\</OutputPath>
-    <DefineConstants>TRACE;VER4 AZURE</DefineConstants>
+    <DefineConstants>TRACE;VER4</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release4\FiftyOne.Foundation.xml</DocumentationFile>
