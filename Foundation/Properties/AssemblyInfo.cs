@@ -38,8 +38,8 @@ using System.Security;
 //      Build Number
 //      Revision
 
-[assembly: AssemblyVersion("2.0.5.1")]
-[assembly: AssemblyFileVersion("2.0.5.1")]
+[assembly: AssemblyVersion("2.0.6.2")]
+[assembly: AssemblyFileVersion("2.0.6.2")]
 [assembly: NeutralResourcesLanguage("en-GB")]
 [assembly: AllowPartiallyTrustedCallers]
 

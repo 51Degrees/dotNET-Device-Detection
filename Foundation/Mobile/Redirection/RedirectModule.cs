@@ -112,7 +112,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// <summary>
         /// The request history provider to use with the redirect module.
         /// </summary>
-        private IRequestHistory _requestHistory;
+        private static IRequestHistory _requestHistory;
 
         #endregion
 
@@ -145,7 +145,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// Registers the event handlers if they've not done so already.
         /// </summary>
         /// <param name="application">HttpApplication object for the web application.</param>
-        private void RegisterEventHandlersInit(HttpApplication application)
+        private static void RegisterEventHandlersInit(HttpApplication application)
         {
             EventLog.Debug("Initialising redirection module event handlers");
 
@@ -236,7 +236,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// </summary>
         /// <param name="sender">HttpApplication related to the request.</param>
         /// <param name="e">EventArgs related to the event. Not used.</param>
-        public void OnPostAcquireRequestState(object sender, EventArgs e)
+        public static void OnPostAcquireRequestState(object sender, EventArgs e)
         {
             // Initialise the static fields if required.
             StaticFieldInit();
@@ -372,7 +372,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// </summary>
         /// <param name="context">The HttpContext of the request.</param>
         /// <returns>True if the request should be redirected.</returns>
-        private bool ShouldRequestRedirect(HttpContext context)
+        private static bool ShouldRequestRedirect(HttpContext context)
         {
             return context.Handler != null &&
                    String.IsNullOrEmpty(GetLocationUrl(context)) == false &&
@@ -424,7 +424,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// </summary>
         /// <param name="context">Context of the request.</param>
         /// <returns>True if this request is the first from the device. Otherwise false.</returns>
-        private bool IsFirstTime(HttpContext context)
+        private static bool IsFirstTime(HttpContext context)
         {
             // If the parameter indicating only the first request should be redirect
             // is false then return true as the implication is all requests should
@@ -559,7 +559,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// to IsFirstTime return the correct value.
         /// </summary>
         /// <param name="context">The context of the request.</param>
-        private void RecordFirstTime(HttpContext context)
+        private static void RecordFirstTime(HttpContext context)
         {
             // Add a parameter to the session if available indicating the time that 
             // the device date should be remvoed from the session.
