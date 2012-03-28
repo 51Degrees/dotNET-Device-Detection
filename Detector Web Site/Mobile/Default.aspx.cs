@@ -14,7 +14,7 @@
  * 
  * The Initial Developer of the Original Code is owned by 
  * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees
- * Mobile Experts Limited are Copyright (C) 2009 - 2011. All Rights Reserved.
+ * Mobile Experts Limited are Copyright (C) 2009 - 2012. All Rights Reserved.
  * 
  * Contributor(s):
  *     James Rosewell <james@51degrees.mobi>
@@ -28,15 +28,5 @@ namespace Detector.Mobile
 {
     public partial class Default : System.Web.UI.Page
     {
-        protected void Page_Load(object sender, EventArgs e)
-        {
-            PropertiesDevice.UserAgentString = Request.UserAgent;
-
-            LabelUserAgent.Text = Request.UserAgent;
-            LabelTagWriter.Text = Request.Browser.TagWriter.FullName;
-
-            // Ensure the page is never cached.
-            Response.Cache.SetCacheability(System.Web.HttpCacheability.NoCache);
-        }
     }
 }

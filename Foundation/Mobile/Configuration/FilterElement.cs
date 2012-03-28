@@ -1,29 +1,18 @@
 /* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
- * Version 1.1 (the "License"); you may not use this file except in 
- * compliance with the License. You may obtain a copy of the License at 
- * http://www.mozilla.org/MPL/
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0.
  * 
- * Software distributed under the License is distributed on an "AS IS" 
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. 
- * See the License for the specific language governing rights and 
- * limitations under the License.
- *
- * The Original Code is named .NET Mobile API, first released under 
- * this licence on 11th March 2009.
+ * If a copy of the MPL was not distributed with this file, You can obtain
+ * one at http://mozilla.org/MPL/2.0/.
  * 
- * The Initial Developer of the Original Code is owned by 
- * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees 
- * Mobile Experts Limited are Copyright (C) 2009 - 2012. All Rights Reserved.
- * 
- * Contributor(s):
- *     James Rosewell <james@51degrees.mobi>
- * 
+ * This Source Code Form is “Incompatible With Secondary Licenses”, as
+ * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
 #region Usings
 
 using System.Configuration;
+using System;
 
 #endregion
 
@@ -35,7 +24,21 @@ namespace FiftyOne.Foundation.Mobile.Configuration
     /// </summary>
     public sealed class FilterElement : ConfigurationElement
     {
+        #region Fields
+
+        private readonly Guid _uniqueId = Guid.NewGuid();
+
+        #endregion
+
         #region Properties
+
+        /// <summary>
+        /// Used as the internal unique key when the property is empty or null.
+        /// </summary>
+        internal Guid UniqueId
+        {
+            get { return _uniqueId; }
+        }
 
         /// <summary>
         /// Gets or sets the name of the property. 
@@ -64,6 +67,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         public bool Enabled
         {
             get { return (bool)this["enabled"]; }
+            set { this["enabled"] = value; }
         }
 
         #endregion

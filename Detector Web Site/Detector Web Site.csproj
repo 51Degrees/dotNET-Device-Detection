@@ -28,6 +28,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -40,25 +41,27 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.EnterpriseServices" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Services" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="CheckUA.aspx" />
     <Content Include="Default.aspx" />
-    <Content Include="default.css" />
     <Content Include="Desktop.png" />
     <Content Include="Global.asax" />
     <Content Include="Licence.txt" />
+    <Content Include="Mobile.css" />
     <Content Include="Mobile.png" />
     <Content Include="Mobile\Default.aspx" />
     <Content Include="DeviceProperties.ascx" />
-    <Content Include="skin.css" />
     <Content Include="MobileDevice.asmx" />
+    <Content Include="Standard.css" />
     <Content Include="Tablet.png" />
     <Content Include="Tablet\Default.aspx" />
+    <Content Include="Detector.Master" />
+    <Content Include="51Degrees.mobi.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -71,19 +74,19 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CheckUA.aspx.cs">
-      <DependentUpon>CheckUA.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="CheckUA.aspx.designer.cs">
-      <DependentUpon>CheckUA.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Default.aspx.designer.cs">
       <DependentUpon>Default.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Detector.Master.cs">
+      <DependentUpon>Detector.Master</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Detector.Master.designer.cs">
+      <DependentUpon>Detector.Master</DependentUpon>
     </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

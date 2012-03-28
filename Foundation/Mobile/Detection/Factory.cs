@@ -1,24 +1,12 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
- * Version 1.1 (the "License"); you may not use this file except in 
- * compliance with the License. You may obtain a copy of the License at 
- * http://www.mozilla.org/MPL/
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0.
  * 
- * Software distributed under the License is distributed on an "AS IS" 
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. 
- * See the License for the specific language governing rights and 
- * limitations under the License.
- *
- * The Original Code is named .NET Mobile API, first released under 
- * this licence on 11th March 2009.
+ * If a copy of the MPL was not distributed with this file, You can obtain
+ * one at http://mozilla.org/MPL/2.0/.
  * 
- * The Initial Developer of the Original Code is owned by 
- * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees 
- * Mobile Experts Limited are Copyright (C) 2009 - 2012. All Rights Reserved.
- * 
- * Contributor(s):
- *     James Rosewell <james@51degrees.mobi>
- * 
+ * This Source Code Form is “Incompatible With Secondary Licenses”, as
+ * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
 #region Usings
@@ -31,6 +19,7 @@ using System.IO;
 using System;
 using System.Text;
 using System.Threading;
+using System.Collections.Specialized;
 
 #endregion
 
@@ -39,7 +28,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// <summary>
     /// Used to create the Capabilities collection based on the input like user agent string.
     /// </summary>
-    internal static class Factory
+    public static class Factory
     {
         #region Fields
 
@@ -58,7 +47,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Used to obtain the mobile capabilities for the request or user agent string
         /// from the device data source provided.
         /// </summary>
-        internal static MobileCapabilities _mobileCapabilities;
+        private static MobileCapabilities _instance;
 
         /// <summary>
         /// Class used to record new devices.
@@ -73,15 +62,15 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Returns a single instance of the MobileCapabilities class used to provide
         /// capabilities to enhance the request.
         /// </summary>
-        private static MobileCapabilities MobileCapabilities
+        private static MobileCapabilities Instance
         {
             get
             {
-                if (_mobileCapabilities == null)
+                if (_instance == null)
                 {
                     lock (_lock)
                     {
-                        if (_mobileCapabilities == null)
+                        if (_instance == null)
                         {
                             Provider provider = null;
 
@@ -138,15 +127,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                                 if (provider == null || provider.Handlers.Count == 0)
                                 {
                                     // No so initialise it with the embeddded binary data so at least we can do something.
-                                    using (var stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream(
-                                        Binary.BinaryConstants.EmbeddedDataResourceName))
-                                    {
-                                        EventLog.Debug(String.Format("Creating provider from embedded device data '{0}'.",
-                                            Binary.BinaryConstants.EmbeddedDataResourceName));
-                                        provider = Binary.Reader.Create(stream);
-                                        EventLog.Info(String.Format("Created provider from embedded device data '{0}'.",
-                                            Binary.BinaryConstants.EmbeddedDataResourceName));
-                                    }
+                                    provider = Provider.EmbeddedProvider;
 
                                     // Do XML files exist?
                                     if (Manager.XmlFiles != null &&
@@ -160,20 +141,45 @@ namespace FiftyOne.Foundation.Mobile.Detection
                                     }
                                 }
                             }
-                            _mobileCapabilities = new MobileCapabilities(provider);
+                            _instance = new MobileCapabilities(provider);
 
                             // Start the auto update thread to check for new data files.
                             ThreadPool.QueueUserWorkItem(new WaitCallback(AutoUpdate.Run));
                         }
                     }
                 }
-                return _mobileCapabilities;
+                return _instance;
             }
         }
 
         #endregion
 
-        #region Static Methods
+        #region Public Properties
+
+        /// <summary>
+        /// Returns the <see cref="Provider"/> instance being
+        /// used by the factory.
+        /// </summary>
+        public static Provider ActiveProvider
+        {
+            get { return Instance.Provider; }
+        }
+        
+        #endregion
+
+        #region Internal Static Methods
+
+        /// <summary>
+        /// Resets the factory forcing data to be reloaded.
+        /// </summary>
+        internal static void Reset()
+        {
+            lock (_lock)
+            {
+                _instance = null;
+                _cache.Clear();
+            }
+        }
 
         /// <summary>
         /// Creates a new <see cref="MobileCapabilities"/> class based on the useragent
@@ -181,7 +187,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="userAgent">The useragent for the device.</param>
         /// <returns></returns>
-        internal static IDictionary Create(string userAgent)
+        public static IDictionary Create(string userAgent)
         {
             IDictionary caps;
 
@@ -197,8 +203,38 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
             // Create the new mobile capabilities and record the collection of
             // capabilities for quick creation in future requests.
-            caps = MobileCapabilities.Create(userAgent);
+            caps = Instance.Create(userAgent);
             _cache[userAgent] = caps;
+            return caps;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="MobileCapabilities"/> class based on the 
+        /// HttpHeaders collection provided.
+        /// </summary>
+        /// <param name="headers">A collection of Http headers from the device.</param>
+        /// <param name="currentCapabilities">Capabilities already determined by other sources.</param>
+        /// <returns>A new mobile capabilities</returns>
+        public static IDictionary Create(NameValueCollection headers, IDictionary currentCapabilities)
+        {
+            IDictionary caps;
+            string ua = headers["User-Agent"] as string;
+
+            // We can't do anything with empty user agent strings.
+            if (ua == null)
+                return null;
+
+            if (_cache.GetTryParse(ua, out caps))
+            {
+                // Return these capabilities for adding to the existing ones.
+                return caps;
+            }
+
+            // Create the new mobile capabilities and record the collection of
+            // capabilities for quick creation in future requests.
+            caps = Instance.Create(headers, currentCapabilities);
+            _cache[ua] = caps;
+
             return caps;
         }
 
@@ -209,30 +245,19 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="request">HttpRequest from the device.</param>
         /// <param name="currentCapabilities">Capabilities already determined by other sources.</param>
         /// <returns>A new mobile capabilities</returns>
-        internal static IDictionary Create(HttpRequest request, IDictionary currentCapabilities)
+        public static IDictionary Create(HttpRequest request, IDictionary currentCapabilities)
         {
-            IDictionary caps;
-
-            // We can't do anything with empty user agent strings.
-            if (request.UserAgent == null)
-                return null;
-
-            if (_cache.GetTryParse(request.UserAgent, out caps))
-            {
-                // Return these capabilities for adding to the existing ones.
-                return caps;
-            }
-
-            // Create the new mobile capabilities and record the collection of
-            // capabilities for quick creation in future requests.
-            caps = MobileCapabilities.Create(request, currentCapabilities);
-            _cache[request.UserAgent] = caps;
+            IDictionary caps = Create(request.Headers, currentCapabilities);
 
             // Send the header details to 51Degrees.mobi.
             RecordNewDevice(request);
 
             return caps;            
         }
+
+        #endregion
+
+        #region Private Static Methods
 
         /// <summary>
         /// Send the header details to 51Degrees.mobi if the configuration is enabled.

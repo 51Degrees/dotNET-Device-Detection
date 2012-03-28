@@ -21,7 +21,7 @@
     <SccProvider>
     </SccProvider>
     <ApplicationIcon>PDA.ico</ApplicationIcon>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
@@ -54,6 +54,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Debug\FiftyOne.Foundation.XML</DocumentationFile>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -89,9 +90,14 @@
     <Compile Include="Mobile\Detection\Handlers\Handler.cs" />
     <Compile Include="Mobile\Detection\Handlers\HandleRegex.cs" />
     <Compile Include="Mobile\Detection\Handlers\SegmentHandler.cs" />
+    <Compile Include="Mobile\Detection\LicenceKey.cs" />
+    <Compile Include="Mobile\Detection\LicenceKeyActivationResults.cs" />
     <Compile Include="Mobile\Detection\NewDeviceDetails.cs" />
+    <Compile Include="Mobile\Detection\Property.cs" />
+    <Compile Include="Mobile\Detection\PropertyValue.cs" />
     <Compile Include="Mobile\Detection\Provider.cs" />
     <Compile Include="Mobile\Detection\UserAgentProfileUrlParser.cs" />
+    <Compile Include="Mobile\Detection\Value.cs" />
     <Compile Include="Mobile\Detection\Xml\DeviceInfo.cs" />
     <Compile Include="Mobile\Detection\Xml\HandlersReader.cs" />
     <Compile Include="Mobile\Detection\Xml\Reader.cs" />
@@ -147,14 +153,68 @@
     <Compile Include="Mobile\Detection\MobileCapabilities.cs" />
     <Compile Include="Mobile\Detection\NewDevice.cs" />
     <Compile Include="Properties\RedirectionConstants.cs" />
+    <Compile Include="Properties\RetailerConstants.cs" />
+    <Compile Include="Properties\UIConstants.cs" />
     <Compile Include="Properties\XmlConstants.cs" />
+    <Compile Include="UI\DataProvider.cs" />
+    <Compile Include="UI\Device.cs" />
+    <Compile Include="UI\RedirectData.cs" />
+    <Compile Include="UI\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Web\Activate.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Web\ActivityResult.cs" />
+    <Compile Include="UI\Web\BaseDataControl.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Web\BaseUserControl.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Web\DeviceExplorer.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Web\DeviceFinder.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Web\DeviceTemplate.cs" />
+    <Compile Include="UI\Web\HeaderTemplate.cs" />
+    <Compile Include="UI\Web\LiteMessage.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Web\PropertyDictionary.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Web\PropertyTemplate.cs" />
+    <Compile Include="UI\Web\Redirect.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Web\RelatedDeviceTemplate.cs" />
+    <Compile Include="UI\Web\Stats.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Web\Upload.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Web\UserAgentTester.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Web\VendorTemplate.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Licence.txt" />
     <Content Include="PDA.ico" />
+    <EmbeddedResource Include="UI\Headings.xml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <EmbeddedResource Include="Mobile\Detection\Binary\Resources\51Degrees.mobi-Lite.dat" />
+    <EmbeddedResource Include="UI\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

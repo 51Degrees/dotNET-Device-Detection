@@ -1,25 +1,12 @@
 /* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
- * Version 1.1 (the "License"); you may not use this file except in 
- * compliance with the License. You may obtain a copy of the License at 
- * http://www.mozilla.org/MPL/
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0.
  * 
- * Software distributed under the License is distributed on an "AS IS" 
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. 
- * See the License for the specific language governing rights and 
- * limitations under the License.
- *
- * The Original Code is named .NET Mobile API, first released under 
- * this licence on 11th March 2009.
+ * If a copy of the MPL was not distributed with this file, You can obtain
+ * one at http://mozilla.org/MPL/2.0/.
  * 
- * The Initial Developer of the Original Code is owned by 
- * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees
- * Mobile Experts Limited are Copyright (C) 2009 - 2012. All Rights Reserved.
- * 
- * Contributor(s):
- *     James Rosewell <james@51degrees.mobi>
- *     Andy Allan <andy.allan@mobgets.com>
- * 
+ * This Source Code Form is “Incompatible With Secondary Licenses”, as
+ * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
 #region Usings
@@ -28,6 +15,12 @@ using System;
 using FiftyOne.Foundation.Mobile.Detection.Matchers;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+
+#if VER4 || VER35
+
+using System.Linq;
+
+#endif
 
 #endregion
 
@@ -41,6 +34,21 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Fields
 
         /// <summary>
+        /// Used to populate the active children.
+        /// </summary>
+        private object _lock = new object();
+
+        /// <summary>
+        /// A list of child devices.
+        /// </summary>
+        internal List<BaseDeviceInfo> _children = new List<BaseDeviceInfo>();
+    
+        /// <summary>
+        /// A list of the active children for the device.
+        /// </summary>
+        internal List<BaseDeviceInfo> _activeChildren = null;
+
+        /// <summary>
         /// The parent device.
         /// </summary>
         internal BaseDeviceInfo _parent;
@@ -51,7 +59,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         private Collection _deviceProperties;
 
         /// <summary>
-        /// The Id of the device.
+        /// The unique Id of the device.
         /// </summary>
         private string _deviceId;
 
@@ -64,6 +72,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// The useragent string of the device.
         /// </summary>
         private string _userAgent;
+
+        /// <summary>
+        /// A list of the profile IDs which make up the device.
+        /// </summary>
+        private string[] _profileIDs = null;
 
         #endregion
 
@@ -83,7 +96,19 @@ namespace FiftyOne.Foundation.Mobile.Detection
         public BaseDeviceInfo Parent
         {
             get { return _parent; }
-            set { _parent = value; }
+            set 
+            {
+                // update the parent, ensuring the child collection
+                // is also updated.
+                if (_parent != null)
+                {
+                    _parent._children.Remove(this);
+                    _parent._activeChildren = null;
+                }
+                _parent = value;
+                if (_parent != null)
+                    _parent._children.Add(this);
+            }
         }
 
         /// <summary>
@@ -92,6 +117,35 @@ namespace FiftyOne.Foundation.Mobile.Detection
         public string DeviceId
         {
             get { return _deviceId; }
+        }
+
+        /// <summary>
+        /// Returns the profile IDs which make up the device ID.
+        /// </summary>
+        public string[] ProfileIDs
+        {
+            get
+            {
+                if (_profileIDs == null)
+                {
+                    var list = new List<string>();
+                    foreach (var id in DeviceId.Split(new[] { Constants.ProfileSeperator, " " }, StringSplitOptions.RemoveEmptyEntries))
+                        list.Add(id);
+                    _profileIDs = list.ToArray();
+                }
+                return _profileIDs;
+            }
+        }
+
+        /// <summary>
+        /// Returns true if the device is only available in the premium data set.
+        /// </summary>
+        public bool IsPremium
+        {
+            get
+            {
+                return Detection.Provider.EmbeddedProvider.GetDeviceInfoByID(DeviceId) == null;
+            }
         }
 
         #endregion
@@ -120,6 +174,38 @@ namespace FiftyOne.Foundation.Mobile.Detection
         internal Collection Properties
         {
             get { return _deviceProperties; }
+        }
+
+        /// <summary>
+        /// Returns a list of the children that are active
+        /// with properties assigned to them.
+        /// </summary>
+        internal List<BaseDeviceInfo> ActiveChildren
+        {
+            get
+            {
+                if (_activeChildren == null)
+                {
+                    lock (_lock)
+                    {
+                        if (_activeChildren == null)
+                        {
+                            _activeChildren = new List<BaseDeviceInfo>();
+#if VER4 || VER35
+                            _activeChildren = _children.Where(i =>
+                                i.Properties.Count > 0 ||
+                                i._children.Count > 0).ToList();
+#else
+                            foreach (var child in _children)
+                                if (child.Properties.Count > 0 ||
+                                    child._children.Count > 0)
+                                    _activeChildren.Add(child);
+#endif
+                        }
+                    }
+                }
+                return _activeChildren;
+            }
         }
                
         #endregion
@@ -196,7 +282,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             string userAgent,
             BaseDeviceInfo parent)
         {
-            _parent = parent;
+            Parent = parent;
             Init(devices, deviceId, userAgent);
         }
         
@@ -238,10 +324,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// value then checks the parent if one exists.
         /// </summary>
         /// <param name="index">Capability name index.</param>
-        /// <returns>Capability index value in the String collection, or -1 if the capability does not exist.</returns>
-        internal protected virtual IList<int> GetPropertyValueStringIndexes(int index)
+        /// <returns>Capability index value in the String collection, or null if the capability does not exist.</returns>
+        internal protected virtual List<int> GetPropertyValueStringIndexes(int index)
         {
-            IList<int> value;
+            List<int> value;
             if (_deviceProperties.TryGetValue(index, out value))
                 return value;
             if (Parent != null)
@@ -305,6 +391,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
             int index = GetFirstPropertyValueStringIndex(Provider.Strings.Add(property));
             if (index >= 0)
                 return Provider.Strings.Get(index);
+
+            // Check for any special values not held in
+            // the strings collection.
+            switch (property)
+            {
+                case Constants.DeviceId: return DeviceId;
+            }
+
             return null;
         }
 
@@ -325,6 +419,15 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         values.Add(Provider.Strings.Get(index));
                 }
             }
+            else
+            {
+                // Check for any special values not held in
+                // the strings collection.
+                switch (property)
+                {
+                    case Constants.DeviceId: values.Add(DeviceId); break;
+                }
+            }
             return values;
         }
 
@@ -335,7 +438,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         public SortedList<string, List<string>> GetAllProperties()
         {
             var collection = new SortedList<string, List<string>>();
-            collection.Add("DeviceID", new List<string>(new[] { DeviceId }));
+            collection.Add(Constants.DeviceId, new List<string>(new[] { DeviceId }));
 #if DEBUG
             var handlerNames = new List<string>();
             foreach (var handler in _provider.GetHandlers(UserAgent))

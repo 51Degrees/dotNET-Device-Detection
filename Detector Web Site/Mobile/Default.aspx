@@ -1,35 +1,16 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="Detector.Mobile.Default" EnableSessionState="True" EnableViewState="false" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" MasterPageFile="~/Detector.Master"  CodeBehind="Default.aspx.cs" Inherits="Detector.Mobile.Default" EnableSessionState="True" EnableViewState="false" %>
 <%@ Register Src="~/DeviceProperties.ascx" TagPrefix="uc" TagName="DeviceProperties" %>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml" >
-<head runat="server">
+<asp:Content runat="server" ID="Head" ContentPlaceHolderID="head">
     <title>Mobile</title>
-    <link runat="server" rel="stylesheet" type="text/css" href="~/default.css" />
-    <link runat="server" rel="stylesheet" type="text/css" href="~/skin.css" />
-</head>
-<body>
-    <form id="form1" runat="server">
-    <div>
-        <asp:Panel runat="server" HorizontalAlign="Center">
-            <asp:Label Runat="server" Alignment="Center" Font-Size="Large" Font-Bold="true" Text="Mobile" />
-        </asp:Panel>
-        <asp:Panel runat="server" HorizontalAlign="Center">
-            <asp:Image Runat="server" Alignment="Center" ImageUrl="~/Mobile.png" AlternateText="Mobile Device" />
-        </asp:Panel>
-        <asp:Panel runat="server" HorizontalAlign="Center">
-            <asp:Label ID="LabelUserAgent" Runat="server" Alignment="Center"/>
-        </asp:Panel>
-        <asp:Panel runat="server" HorizontalAlign="Center">
-            <asp:Label ID="LabelTagWriter" Runat="server" Alignment="Center"/>
-        </asp:Panel>        
-        <asp:Panel runat="server" HorizontalAlign="Center">
-            <asp:HyperLink ID="LinkDesktop" Runat="server" Text="Desktop Site" NavigateUrl="~/Default.aspx" />
-        </asp:Panel>
-        <hr />
-        <uc:DeviceProperties runat="server" ID="PropertiesDevice" />
+</asp:Content>
+
+<asp:Content runat="server" ID="Body" ContentPlaceHolderID="body">
+    <div style="text-align: center;">
+        <div style="margin: 0px auto; display: inline;">
+            <img src="<% =ResolveClientUrl("~/Mobile.png") %>" alt="Mobile" style="vertical-align: middle;"/>
+            <span style="vertical-align: middle; font-size: 2em; font-weight: bold;">Mobile</span>
+        </div>
     </div>
-    </form>
-</body>
-</html>
+    <uc:DeviceProperties runat="server" ID="Device" />
+</asp:Content>

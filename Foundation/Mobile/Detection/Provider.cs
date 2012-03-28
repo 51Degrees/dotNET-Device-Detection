@@ -1,25 +1,12 @@
 /* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
- * Version 1.1 (the "License"); you may not use this file except in 
- * compliance with the License. You may obtain a copy of the License at 
- * http://www.mozilla.org/MPL/
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0.
  * 
- * Software distributed under the License is distributed on an "AS IS" 
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. 
- * See the License for the specific language governing rights and 
- * limitations under the License.
- *
- * The Original Code is named .NET Mobile API, first released under 
- * this licence on 11th March 2009.
+ * If a copy of the MPL was not distributed with this file, You can obtain
+ * one at http://mozilla.org/MPL/2.0/.
  * 
- * The Initial Developer of the Original Code is owned by `
- * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees
- * Mobile Experts Limited are Copyright (C) 2009 - 2012. All Rights Reserved.
- * 
- * Contributor(s):
- *     James Rosewell <james@51degrees.mobi>
- *     Andy Allan <andy.allan@mobgets.com>
- * 
+ * This Source Code Form is “Incompatible With Secondary Licenses”, as
+ * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
 #if VER4
@@ -39,9 +26,10 @@ using System.Xml.Schema;
 using FiftyOne.Foundation.Mobile.Detection.Configuration;
 using FiftyOne.Foundation.Mobile.Detection.Handlers;
 using FiftyOne.Foundation.Mobile.Detection.Matchers;
-using Matcher=FiftyOne.Foundation.Mobile.Detection.Matchers.Final.Matcher;
+using Matcher = FiftyOne.Foundation.Mobile.Detection.Matchers.Final.Matcher;
 using RegexSegmentHandler = FiftyOne.Foundation.Mobile.Detection.Handlers.RegexSegmentHandler;
 using System.Collections.Specialized;
+using System.Reflection;
 
 #endregion
 
@@ -52,18 +40,98 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// </summary>
     public class Provider : BaseProvider
     {
+        #region Fields
+
+        /// <summary>
+        /// A list of properties and associated values which can be 
+        /// returned by the provider and it's data source.
+        /// </summary>
+        private readonly List<Property> _properties = new List<Property>();
+
+        /// <summary>
+        /// The date and time the 1st data source used to create the
+        /// provider was created.
+        /// </summary>
+        internal DateTime _publishedDate = DateTime.MinValue;
+        
+        /// <summary>
+        /// Lock object used to create the embedded provider.
+        /// </summary>
+        internal static object _lock = new object();
+
+        /// <summary>
+        /// A static reference to a provider that contains the embedded 
+        /// device data.
+        /// </summary>
+        internal static Provider _embeddedProvider = null;
+
+        #endregion
+
         #region Internal Constructors
 
         /// <summary>
-        /// Constructs a new instance of <see cref="BaseProvider"/>.
+        /// Constructs a new instance of <see cref="Provider"/>.
         /// </summary>
-        internal Provider()
+        internal Provider() : base()
         {
         }
 
         #endregion
 
-        #region Methods
+        #region Public Properties
+                
+        /// <summary>
+        /// Returns the a provider initialised with the data contained in the
+        /// device data file embedded in the assembly.
+        /// </summary>
+        public static Provider EmbeddedProvider
+        {
+            get
+            {
+                if (_embeddedProvider == null)
+                {
+                    lock (_lock)
+                    {
+                        if (_embeddedProvider == null)
+                        {
+                            EventLog.Debug(String.Format("Creating provider from embedded device data '{0}'.",
+                                Binary.BinaryConstants.EmbeddedDataResourceName));
+
+                            using (var stream = Assembly.GetExecutingAssembly()
+                                .GetManifestResourceStream(
+                                Binary.BinaryConstants.EmbeddedDataResourceName))
+                                _embeddedProvider = Binary.Reader.Create(stream);
+
+                            EventLog.Info(String.Format("Created provider from embedded device data '{0}'.",
+                                Binary.BinaryConstants.EmbeddedDataResourceName));
+                        }
+                    }
+                }
+                return _embeddedProvider;
+            }
+        }
+
+        /// <summary>
+        /// A list of properties and associated values which can be 
+        /// returned by the provider and it's data source.
+        /// </summary>
+        public List<Property> Properties
+        {
+            get { return _properties; }
+        }
+
+        /// <summary>
+        /// Returns the date and time the data used to create the provider
+        /// was published.
+        /// </summary>
+        public DateTime PublishedDate
+        {
+            get { return _publishedDate; }
+        }
+
+        #endregion
+
+        #region Internal & Private Methods
 
         /// <summary>
         /// Returns the closest matching device from the result set to the target userAgent.
@@ -98,10 +166,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 GetMatches(headers), GetUserAgent(headers));
         }
 
+        #endregion
+
+        #region Public Methods
+        
         /// <summary>
-        /// Gets an array of the devices that match this useragent string.
+        /// Gets an array of  devices that match this useragent string.
         /// </summary>
-        /// <param name="userAgent">Useragent string associated with the mobile device.</param>
+        /// <param name="userAgent">Useragent string associated with the device to be found.</param>
         /// <returns>An array of matching devices.</returns>
         public List<BaseDeviceInfo> GetMatchingDeviceInfo(string userAgent)
         {
@@ -116,14 +188,56 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
 
         /// <summary>
-        /// Enhances the base implementation to check for devices marked with 
-        /// "actual_device_root" and only return these.
+        /// Gets the single most likely device to match the useragent provided.
         /// </summary>
-        /// <param name="userAgent">Useragent string associated with the mobile device.</param>
+        /// <param name="userAgent">Useragent string associated with the device to be found.</param>
         /// <returns>The closest matching device.</returns>
         public BaseDeviceInfo GetDeviceInfo(string userAgent)
         {
             return GetDeviceInfoClosestMatch(GetMatches(userAgent), userAgent);
+        }
+
+        /// <summary>
+        /// Returns all the devices that match the property and value passed 
+        /// into the method.
+        /// </summary>
+        /// <param name="property">The property required.</param>
+        /// <param name="value">The value the property must contain to be matched.</param>
+        /// <returns>A list of matching devices. An empty list will be returned if no matching devices are found.</returns>
+        public List<BaseDeviceInfo> FindDevices(string property, string value)
+        {
+            var list = new List<BaseDeviceInfo>();
+            int propertyIndex = Strings.Add(property);
+            int requiredValueIndex = Strings.Add(value);
+            foreach (var device in Devices)
+            {
+                foreach (var valueIndex in device.GetPropertyValueStringIndexes(propertyIndex))
+                    if (requiredValueIndex == valueIndex)
+                        list.Add(device);
+            }
+            return list;
+        }
+
+        /// <summary>
+        /// Returns a list of devices based on the profile id provided.
+        /// </summary>
+        /// <param name="profileID">The profile id of the devices required.</param>
+        /// <returns>A list of matching devices. An empty list will be returned if no matching devices are found.</returns>
+        public List<BaseDeviceInfo> FindDevices(string profileID)
+        {
+            var list = new List<BaseDeviceInfo>();
+            foreach (var device in Devices)
+            {
+                foreach (var id in device.ProfileIDs)
+                {
+                    if (profileID == id)
+                    {
+                        list.Add(device);
+                        break;
+                    }
+                }
+            }
+            return list;
         }
 
         #endregion

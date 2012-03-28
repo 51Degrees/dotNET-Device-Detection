@@ -11,7 +11,7 @@ using System.Resources;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("51 Degrees Mobile Experts Limited")]
 [assembly: AssemblyProduct("Mobile Device Detector Example")]
-[assembly: AssemblyCopyright("Copyright © 51 Degrees Mobile Experts Limited 2009 - 2011")]
+[assembly: AssemblyCopyright("Copyright © 51 Degrees Mobile Experts Limited 2009 - 2012")]
 [assembly: AssemblyTrademark("51degrees.mobi")]
 [assembly: AssemblyCulture("")]
 
@@ -32,6 +32,6 @@ using System.Resources;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("0.1.11.2")]
-[assembly: AssemblyFileVersion("0.1.11.2")]
+[assembly: AssemblyVersion("2.1.2.8")]
+[assembly: AssemblyFileVersion("2.1.2.8")]
 [assembly: NeutralResourcesLanguageAttribute("en-GB")]

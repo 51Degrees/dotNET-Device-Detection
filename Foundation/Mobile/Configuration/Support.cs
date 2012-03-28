@@ -1,24 +1,12 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
- * Version 1.1 (the "License"); you may not use this file except in 
- * compliance with the License. You may obtain a copy of the License at 
- * http://www.mozilla.org/MPL/
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0.
  * 
- * Software distributed under the License is distributed on an "AS IS" 
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. 
- * See the License for the specific language governing rights and 
- * limitations under the License.
- *
- * The Original Code is named .NET Mobile API, first released under 
- * this licence on 11th March 2009.
+ * If a copy of the MPL was not distributed with this file, You can obtain
+ * one at http://mozilla.org/MPL/2.0/.
  * 
- * The Initial Developer of the Original Code is owned by 
- * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees 
- * Mobile Experts Limited are Copyright (C) 2009 - 2012. All Rights Reserved.
- * 
- * Contributor(s):
- *     James Rosewell <james@51degrees.mobi>
- * 
+ * This Source Code Form is “Incompatible With Secondary Licenses”, as
+ * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
 #region Usings
@@ -125,36 +113,200 @@ namespace FiftyOne.Foundation.Mobile.Configuration
 
         private static ConfigurationSection GetConfigurationSectionFromAltConfig(string sectionName, bool isMandatory)
         {
-            string configFileName = GetFilePath(Constants.CONFIG_FILENAME);
             System.Configuration.Configuration fiftyOneConfig = null;
 
-            // Checking for the existence of the configured alternate config file
-            if (File.Exists(configFileName))
+            foreach (var file in Constants.CONFIG_FILENAMES)
             {
-                // Define cofniguration file(s) mapping for loading the alternate configuration.
-                ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
-                configFileMap.ExeConfigFilename = configFileName;
-                configFileMap.MachineConfigFilename = GetFilePath("~/Web.config");
+                string configFileName = GetFilePath(file);
 
-                // Load the alternate configuration file using the configuration file map definition.
-                fiftyOneConfig = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
-
-                // If alternate configuration file loaded successfully go ahead and retrieve requested 
-                // confguration section.
-                if (fiftyOneConfig != null && fiftyOneConfig.HasFile == true)
+                // Checking for the existence of the configured alternate config file
+                if (File.Exists(configFileName))
                 {
-                    EventLog.Debug(string.Format("Getting '{0}' configuration from file '{1}'.", sectionName, configFileName));
-                    ConfigurationSection section = fiftyOneConfig.GetSection(sectionName);
-                    if (section != null)
-                        return section;
+                    // Define cofniguration file(s) mapping for loading the alternate configuration.
+                    ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
+                    configFileMap.ExeConfigFilename = configFileName;
+                    configFileMap.MachineConfigFilename = GetFilePath("~/Web.config");
+
+                    // Load the alternate configuration file using the configuration file map definition.
+                    fiftyOneConfig = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
+
+                    // If alternate configuration file loaded successfully go ahead and retrieve requested 
+                    // confguration section.
+                    if (fiftyOneConfig != null && fiftyOneConfig.HasFile == true)
+                    {
+                        EventLog.Debug(string.Format("Getting '{0}' configuration from file '{1}'.", sectionName, configFileName));
+                        ConfigurationSection section = fiftyOneConfig.GetSection(sectionName);
+                        if (section != null)
+                            return section;
+                    }
                 }
             }
 
             // If the configuration section is mandatory and failed to load the alternate configuration throw the exception.
             if (isMandatory)
-                throw new MobileException(string.Format("Could not retrieve '{0}' section from configuration file '{1}'.", sectionName, configFileName));
+                throw new MobileException(string.Format(
+                    "Could not retrieve '{0}' section from configuration files '{1}'.",
+                    sectionName,
+                    String.Join(", ", Constants.CONFIG_FILENAMES)));
 
             return null;
+        }
+
+        /// <summary>
+        /// Sets the section name in the first valid configuration file to the value contained
+        /// in the section.
+        /// </summary>
+        /// <param name="section"></param>
+        internal static void SetWebApplicationSection(ConfigurationSection section)
+        {
+            try
+            {
+                try
+                {
+                    System.Configuration.Configuration configuration = WebConfigurationManager.OpenWebConfiguration(null);
+
+                    // If the section is present then try setting it.
+                    if (configuration != null)
+                    {
+                        var existingSection = configuration.GetSection(section.SectionInformation.SectionName);
+                        if (existingSection != null && existingSection.ElementInformation.IsPresent)
+                        {
+                            SetConfigurationSection(section, configuration);
+                            return;
+                        }
+                    }
+                }
+                catch (ConfigurationErrorsException)
+                {
+                    // Can't get to the master configuration file. Do nothing and carry on.
+                }
+
+                // If section is not present in default web.config try to set it with the alternative files.
+                SetConfigurationSectionFromAltConfig(section);
+            }
+            catch (Exception ex)
+            {
+                throw new ConfigurationErrorsException(String.Format(
+                    "Could not set configuration name '{0}'.",
+                    section.SectionInformation.SectionName), ex);
+            }
+        }
+
+        internal static System.Configuration.Configuration GetConfigurationContainingSectionGroupName(string name)
+        {
+            foreach (var file in Constants.CONFIG_FILENAMES)
+            {
+                string configFileName = GetFilePath(file);
+
+                // Checking for the existence of the configured alternate config file
+                if (File.Exists(configFileName))
+                {
+                    // Define cofniguration file(s) mapping for loading the alternate configuration.
+                    ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
+                    configFileMap.ExeConfigFilename = configFileName;
+                    configFileMap.MachineConfigFilename = GetFilePath("~/Web.config");
+
+                    // Load the alternate configuration file using the configuration file map definition.
+                    var fiftyOneConfig = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
+
+                    // If alternate configuration file loaded successfully go ahead and retrieve requested 
+                    // confguration section.
+                    if (fiftyOneConfig != null && fiftyOneConfig.HasFile == true)
+                    {
+                        foreach (ConfigurationSectionGroup group in fiftyOneConfig.SectionGroups)
+                            if (SectionGroupMatch(group, name))
+                                return fiftyOneConfig;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Checks to determine if the group contains the section name requested.
+        /// </summary>
+        /// <param name="group"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        private static bool SectionGroupMatch(ConfigurationSectionGroup group, string name)
+        {
+            foreach(ConfigurationSection section in group.Sections)
+                if (section.SectionInformation.SectionName == name)
+                    return true;
+
+            foreach (ConfigurationSectionGroup child in group.SectionGroups)
+                if (SectionGroupMatch(child, name))
+                    return true;
+            
+            return false;
+        }
+
+        /// <summary>
+        /// Sets the section name in the first valid alternative configuration file to the value contained
+        /// in the section.
+        /// </summary>
+        /// <param name="section"></param>
+        internal static void SetConfigurationSectionFromAltConfig(ConfigurationSection section)
+        {
+            System.Configuration.Configuration fiftyOneConfig = null;
+
+            foreach (var file in Constants.CONFIG_FILENAMES)
+            {
+                try
+                {
+                    string configFileName = GetFilePath(file);
+
+                    // Checking for the existence of the configured alternate config file
+                    if (File.Exists(configFileName))
+                    {
+                        // Define cofniguration file(s) mapping for loading the alternate configuration.
+                        ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
+                        configFileMap.ExeConfigFilename = configFileName;
+                        configFileMap.MachineConfigFilename = GetFilePath("~/Web.config");
+
+                        // Load the alternate configuration file using the configuration file map definition.
+                        fiftyOneConfig = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
+
+                        // If alternate configuration file loaded successfully go ahead and retrieve requested 
+                        // confguration section.
+                        if (fiftyOneConfig != null && fiftyOneConfig.HasFile == true &&
+                            SetConfigurationSection(section, fiftyOneConfig))
+                            return;
+                    }
+                }
+                catch (SecurityException)
+                {
+                    // Ignore as could be because file permissions are denied. Move
+                    // to the next file.
+                }
+            }
+
+            throw new MobileException(String.Format(
+                "Could not set section with name '{0}' in any configuration files.",
+                section.SectionInformation.SectionName));
+        }
+
+        /// <summary>
+        /// Replaces an existing section with the name provided with a new one.
+        /// </summary>
+        /// <param name="section">The definintion of the section.</param>
+        /// <param name="configuration">The configuration it's being replaced within.</param>
+        private static bool SetConfigurationSection(ConfigurationSection section, System.Configuration.Configuration configuration)
+        {
+            var existingSection = configuration.GetSection(section.SectionInformation.SectionName);
+
+            // Remove the existing section if it exists.
+            if (existingSection != null &&
+                existingSection.GetType() == section.GetType())
+            {
+                foreach(string key in existingSection.ElementInformation.Properties.Keys)
+                    existingSection.ElementInformation.Properties[key].Value = 
+                        section.ElementInformation.Properties[key].Value;
+                configuration.Save(ConfigurationSaveMode.Modified);
+                return true;
+            }
+            return false;
         }
 
         #endregion

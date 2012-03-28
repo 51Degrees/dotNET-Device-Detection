@@ -1,4 +1,27 @@
-﻿using System;
+﻿/* *********************************************************************
+ * The contents of this file are subject to the Mozilla Public License 
+ * Version 1.1 (the "License"); you may not use this file except in 
+ * compliance with the License. You may obtain a copy of the License at 
+ * http://www.mozilla.org/MPL/
+ * 
+ * Software distributed under the License is distributed on an "AS IS" 
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. 
+ * See the License for the specific language governing rights and 
+ * limitations under the License.
+ *
+ * The Original Code is named .NET Mobile API, first released under 
+ * this licence on 11th March 2009.
+ * 
+ * The Initial Developer of the Original Code is owned by 
+ * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees
+ * Mobile Experts Limited are Copyright (C) 2009 - 2012. All Rights Reserved.
+ * 
+ * Contributor(s):
+ *     James Rosewell <james@51degrees.mobi>
+ * 
+ * ********************************************************************* */
+
+using System;
 using System.Collections.Generic;
 using System.Web;
 using System.Web.UI;
@@ -9,93 +32,85 @@ namespace Detector
     public partial class DeviceProperties : System.Web.UI.UserControl
     {
         /// <summary>
-        /// A list of the basic properties to be displayed at the top of the list.
+        /// Sets the device Id to the current device.
         /// </summary>
-        private static readonly string[] LITE_PROPERTIES = new string[] {
-            "HardwareVendor",
-            "HardwareModel",
-            "IsMobile",
-            "LayoutEngine" };
-
-        /// <summary>
-        /// The user agent string whose properties should be found.
-        /// </summary>
-        public string UserAgentString = null;
-
-        /// <summary>
-        /// Creates a new label to display a property and it's values.
-        /// </summary>
-        /// <param name="capability"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        private Panel CreateResultLabel(string capability, string value)
-        {
-            Panel pnl = new Panel();
-            Label lbl = new Label();
-            lbl.Text = String.Format("{0}: {1}", capability, value);
-            pnl.Controls.Add(lbl);
-            return pnl;
-
-        }
-        
-        /// <summary>
-        /// Finds the property values for the name provided.
-        /// </summary>
-        /// <param name="allProperties">List of all properties.</param>
-        /// <param name="propertyName">Property name to be found.</param>
-        /// <returns>A string array for the values found, or null if no values are found.</returns>
-        private WebService.Property GetProperty(List<WebService.Property> allProperties, string propertyName)
-        {
-            foreach (var property in allProperties)
-                if (property.Name == propertyName)
-                    return property;
-            return null;
-        }
-
-        /// <summary>
-        /// Gets the device details for the user agent passed to the control.
-        /// </summary>
-        /// <param name="sender"></param>
         /// <param name="e"></param>
-        protected void Page_PreRender(object sender, EventArgs e)
+        protected override void OnInit(EventArgs e)
         {
-            if (String.IsNullOrEmpty(UserAgentString) == false)
-            {
-                // Create the service setting the URL to the current application.
-                var service = new WebService.MobileDevice
-                {
-                    UserAgent = UserAgentString,
-                    Url = Request.Url.GetComponents(UriComponents.SchemeAndServer, UriFormat.Unescaped) + ResolveUrl("~/MobileDevice.asmx")
-                };
-
-                var allProperties = new List<WebService.Property>(service.GetAllProperties());
-
-                // Add the lite properties.
-                foreach (string name in LITE_PROPERTIES)
-                {
-                    var property = GetProperty(allProperties, name);
-                    if (property != null)
-                    {
-                        PanelLite.Controls.Add(CreateResultLabel(
-                            name, String.Join(", ", property.Values)));
-                        allProperties.Remove(property);
-                    }
-                }
-
-                // Add the premium properties.
-                foreach (var property in allProperties)
-                {
-                    PanelPremium.Controls.Add(CreateResultLabel(
-                        property.Name, String.Join(", ", property.Values)));
-                }
-
-                PanelLite.Visible = true;
-                PanelPremium.Visible = true;
-            }
+            Current.DeviceID = Request.Browser["Id"];
+            var cookie = Request.Cookies["tab"];
+            if (cookie != null)
+                SetTab(cookie.Value);
             else
+                SetTab(CurrentView.ID);
+            base.OnLoad(e);
+        }
+
+        protected override void OnPreRender(EventArgs e)
+        {
+            CurrentButton.CssClass = String.Join(" ", new[] {
+                "tab", Tabs.GetActiveView() == CurrentView ? "active" : String.Empty });
+            ExplorerButton.CssClass = String.Join(" ", new[] {
+                "tab", Tabs.GetActiveView() == ExplorerView ? "active" : String.Empty });
+            DictionaryButton.CssClass = String.Join(" ", new[] {
+                "tab", Tabs.GetActiveView() == DictionaryView ? "active" : String.Empty });
+            UserAgentTesterButton.CssClass = String.Join(" ", new[] {
+                "tab", Tabs.GetActiveView() == UserAgentTesterView ? "active" : String.Empty });
+            RedirectButton.CssClass = String.Join(" ", new[] {
+                "tab", Tabs.GetActiveView() == RedirectView ? "active" : String.Empty });
+            ActivateButton.Visible = FiftyOne.Foundation.UI.DataProvider.IsPremium == false;
+            ActivateButton.CssClass = String.Join(" ", new[] {
+                "tab", Tabs.GetActiveView() == ActivateView ? "active" : String.Empty });
+            StandardPropertiesButton.CssClass = String.Join(" ", new[] {
+                "tab", Tabs.GetActiveView() == StandardPropertiesView ? "active" : String.Empty });
+
+            var cookie = Request.Cookies["tab"];
+            if (cookie == null)
+                cookie = new HttpCookie("tab");
+            cookie.Value = Tabs.GetActiveView().ID;
+            Response.Cookies.Add(cookie);
+
+            base.OnLoad(e);
+        }
+
+        protected void TabChange(object sender, CommandEventArgs e)
+        {
+            SetTab(e.CommandArgument as string);
+        }
+
+        private void SetTab(string name)
+        {
+            switch (name)
             {
-                PanelLite.Visible = false;
-                PanelPremium.Visible = false;
+                default:
+                case "CurrentView":
+                    Tabs.SetActiveView(CurrentView);
+                    CurrentButton.CssClass = "active";
+                    break;
+                case "ExplorerView":
+                    Tabs.SetActiveView(ExplorerView);
+                    ExplorerButton.CssClass = "active";
+                    break;
+                case "DictionaryView":
+                    Tabs.SetActiveView(DictionaryView);
+                    DictionaryButton.CssClass = "active";
+                    break;
+                case "UserAgentTesterView":
+                    Tabs.SetActiveView(UserAgentTesterView);
+                    UserAgentTesterButton.CssClass = "active";
+                    break;
+                case "RedirectView":
+                    Tabs.SetActiveView(RedirectView);
+                    RedirectButton.CssClass = "active";
+                    break;
+                case "ActivateView":
+                    Tabs.SetActiveView(ActivateView);
+                    ActivateButton.CssClass = "active";
+                    break;
+                case "StandardPropertiesView":
+                    Tabs.SetActiveView(StandardPropertiesView);
+                    StandardPropertiesButton.CssClass = "active";
+                    break;
             }
         }
     }

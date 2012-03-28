@@ -1,24 +1,12 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
- * Version 1.1 (the "License"); you may not use this file except in 
- * compliance with the License. You may obtain a copy of the License at 
- * http://www.mozilla.org/MPL/
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0.
  * 
- * Software distributed under the License is distributed on an "AS IS" 
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. 
- * See the License for the specific language governing rights and 
- * limitations under the License.
- *
- * The Original Code is named .NET Mobile API, first released under 
- * this licence on 11th March 2009.
+ * If a copy of the MPL was not distributed with this file, You can obtain
+ * one at http://mozilla.org/MPL/2.0/.
  * 
- * The Initial Developer of the Original Code is owned by 
- * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees
- * Mobile Experts Limited are Copyright (C) 2009 - 2012. All Rights Reserved.
- * 
- * Contributor(s):
- *     James Rosewell <james@51degrees.mobi>
- * 
+ * This Source Code Form is “Incompatible With Secondary Licenses”, as
+ * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
 using System;
@@ -82,12 +70,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Binary
             return provider;
         }
 
+        #endregion
+
+        #region Static Private Methods
+
         /// <summary>
         /// Adds the data from the binary reader to the provider.
         /// </summary>
         /// <param name="provider">The provider to have data added to/</param>
         /// <param name="reader">Reader connected to the input stream.</param>
-        public static void Add(Provider provider, BinaryReader reader)
+        private static void Add(Provider provider, BinaryReader reader)
         {
             // Read and ignore the copyright notice. This is ignored.
             string copyright = reader.ReadString();
@@ -109,11 +101,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Binary
             ReadStrings(reader, provider.Strings);
             ReadHandlers(reader, provider);
             ReadDevices(reader, provider, null);
+            ReadPublishedDate(reader, provider);
+            ReadManifest(reader, provider);
         }
-
-        #endregion
-
-        #region Static Private Methods
 
         /// <summary>
         /// Reads the devices and any children.
@@ -133,32 +123,54 @@ namespace FiftyOne.Foundation.Mobile.Detection.Binary
                     provider.Strings.Get(uniqueDeviceIDStringIndex) :
                     String.Empty;
 
-                // Create the new device.
-                var device = new DeviceInfo(
-                    provider,
-                    uniqueDeviceID,
-                    parent);
+                DeviceInfo device;
 
-                // Read the number of useragents to associate with this
-                // device.
+                // Get the number of useragents available for the device.
                 short userAgentCount = reader.ReadInt16();
+                               
+                if (userAgentCount > 0)
+                {
+                    // Read the 1st one, if one is present to assign to the master device.
+                    device = new DeviceInfo(
+                        provider,
+                        uniqueDeviceID,
+                        reader.ReadInt32(),
+                        parent);
+
+                    // Add the device to the handlers.
+                    foreach (short index in ReadDeviceHandlers(reader))
+                        provider.Handlers[index].Set(device);
+
+                    // Reduce the number of useragents by 1 because we've read
+                    // the 1st one.
+                    userAgentCount--;
+                }
+                else
+                {
+                    // Create the device and don't assign any useragents.
+                    device = new DeviceInfo(
+                        provider,
+                        uniqueDeviceID,
+                        parent);
+                }
+
+                // Create new devices as children of this one to hold the
+                // remaining user agent strings.
                 for (int u = 0; u < userAgentCount; u++)
                 {
                     // Get the user agent string index and create a new
                     // device.
-                    int userAgentStringIndex = reader.ReadInt32();
                     var uaDevice = new DeviceInfo(
                         provider,
                         uniqueDeviceID,
-                        userAgentStringIndex,
+                        reader.ReadInt32(),
                         device);
 
                     // Add the device to the handlers.
                     foreach (short index in ReadDeviceHandlers(reader))
                         provider.Handlers[index].Set(uaDevice);
                 }
-
-                
+                                
                 // Add the device to the list of all devices.
                 int hashCode = device.DeviceId.GetHashCode();
                 if (provider.AllDevices.ContainsKey(hashCode))
@@ -331,6 +343,88 @@ namespace FiftyOne.Foundation.Mobile.Detection.Binary
             return new Version(
                 reader.ReadInt32(),
                 reader.ReadInt32());
+        }
+
+        /// <summary>
+        /// Reads the date and time the file was published.
+        /// </summary>
+        /// <param name="reader">Data source being processed.</param>
+        /// <param name="provider">Provider the new handler should be assigned to.</param>
+        private static void ReadPublishedDate(BinaryReader reader, Provider provider)
+        {
+            try
+            {
+                provider._publishedDate = new DateTime(reader.ReadInt64());
+            }
+            catch (EndOfStreamException)
+            {
+                // Nothing we can do as data is not included.
+                EventLog.Debug("EndOfStreamException reading published date.");
+                provider._publishedDate = DateTime.MinValue;
+            }
+        }
+        
+        /// <summary>
+        /// Adds manifest information to the provider if the data file includes it.
+        /// </summary>
+        /// <param name="reader">Data source being processed.</param>
+        /// <param name="provider">Provider the new handler should be assigned to.</param>
+        private static void ReadManifest(BinaryReader reader, Provider provider)
+        {
+            // Ensure any old properties are removed.
+            provider.Properties.Clear();
+
+            try
+            {
+                int countOfProperties = reader.ReadInt32();
+                for (int p = 0; p < countOfProperties; p++)
+                {
+                    // Create the property.
+                    var property = new Property(
+                        provider,
+                        provider.Strings.Get(reader.ReadInt32()),
+                        ReadString(reader),
+                        ReadString(reader),
+                        reader.ReadBoolean(),
+                        reader.ReadBoolean(),
+                        reader.ReadBoolean());
+
+                    // Add the values to the list.
+                    var countOfValues = reader.ReadInt32();
+                    for (int v = 0; v < countOfValues; v++)
+                    {
+                        var value = new Value(
+                            property,
+                            provider.Strings.Get(reader.ReadInt32()),
+                            ReadString(reader),
+                            ReadString(reader));
+                        property.Values.Add(value);
+                    }
+
+                    // Finally add the property to the list of properties.
+                    provider.Properties.Add(property);
+                }
+            }
+            catch (EndOfStreamException)
+            {
+                // Nothing we can do. Clear the data.
+                EventLog.Debug("EndOfStreamException reading manifest.");
+                provider.Properties.Clear();
+            }
+        }
+
+        /// <summary>
+        /// Checks for a boolean value to indicate if the string is present.
+        /// If it is present then read the string and return it.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        private static string ReadString(BinaryReader reader)
+        {
+            bool isPresent = reader.ReadBoolean();
+            if (isPresent)
+                return reader.ReadString();
+            return null;
         }
 
         #endregion

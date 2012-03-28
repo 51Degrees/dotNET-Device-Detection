@@ -1,24 +1,12 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
- * Version 1.1 (the "License"); you may not use this file except in 
- * compliance with the License. You may obtain a copy of the License at 
- * http://www.mozilla.org/MPL/
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0.
  * 
- * Software distributed under the License is distributed on an "AS IS" 
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. 
- * See the License for the specific language governing rights and 
- * limitations under the License.
- *
- * The Original Code is named .NET Mobile API, first released under 
- * this licence on 11th March 2009.
+ * If a copy of the MPL was not distributed with this file, You can obtain
+ * one at http://mozilla.org/MPL/2.0/.
  * 
- * The Initial Developer of the Original Code is owned by 
- * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees
- * Mobile Experts Limited are Copyright (C) 2009 - 2012. All Rights Reserved.
- * 
- * Contributor(s):
- *     James Rosewell <james@51degrees.mobi>
- * 
+ * This Source Code Form is “Incompatible With Secondary Licenses”, as
+ * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
 using System.IO;
@@ -41,12 +29,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
         public static IList<Handler> ProcessHandlers(string xml, BaseProvider provider)
         {
             // Use different code to handle the DTD in the Xml if present.
-#if VER2
-            xml = Regex.Replace(xml, "<!DOCTYPE.+>", "");
-            using (XmlReader reader = XmlReader.Create(new StringReader(xml)))
-#endif
 #if VER4
             using (XmlReader reader = XmlReader.Create(new StringReader(xml), GetXmlReaderSettings()))
+#else 
+            xml = Regex.Replace(xml, "<!DOCTYPE.+>", "");
+            using (XmlReader reader = XmlReader.Create(new StringReader(xml)))
 #endif
             {
                 return ProcessHandlers(reader, provider);
@@ -65,7 +52,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
             while (reader.Read())
             {
                 if (reader.NodeType == XmlNodeType.Element &&
-                    reader.IsStartElement("handler"))
+                    reader.IsStartElement(Constants.HandlerElementName))
                 {
                     ProcessHandler(
                         handlers,
@@ -103,13 +90,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
                 {
                     switch (reader.Name)
                     {
-                        case "canHandle":
+                        case Constants.CanHandleElementName:
                             handler.CanHandleRegex.AddRange(ProcessRegex(reader.ReadSubtree()));
                             break;
-                        case "cantHandle":
+                        case Constants.CantHandleElementName:
                             handler.CantHandleRegex.AddRange(ProcessRegex(reader.ReadSubtree()));
                             break;
-                        case "regexSegments":
+                        case Constants.RegexSegmentsElementName:
                             if (handler is RegexSegmentHandler)
                                 ProcessRegexSegments((RegexSegmentHandler)handler, reader.ReadSubtree());
                             break;
@@ -130,10 +117,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
             {
                 if (reader.Depth > 0)
                 {
-                    string pattern = reader.GetAttribute("pattern");
+                    string pattern = reader.GetAttribute(Constants.PatternAttributeName);
                     int weight = 0;
                     if (String.IsNullOrEmpty(pattern) == false &&
-                        int.TryParse(reader.GetAttribute("weight"), out weight))
+                        int.TryParse(reader.GetAttribute(Constants.WeightAttributeName), out weight))
                         handler.AddSegment(pattern, weight);
                 }
             }
@@ -150,9 +137,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
             List<HandleRegex> regexs = new List<HandleRegex>();
             while (reader.Read())
             {
-                if (reader.Depth > 0 && reader.IsStartElement("regex"))
+                if (reader.Depth > 0 && reader.IsStartElement(Constants.RegexPrefix))
                 {
-                    HandleRegex regex = new HandleRegex(reader.GetAttribute("pattern"));
+                    HandleRegex regex = new HandleRegex(reader.GetAttribute(Constants.PatternAttributeName));
                     regex.Children.AddRange(ProcessRegex(reader.ReadSubtree()));
                     regexs.Add(regex);
                 }
@@ -170,24 +157,23 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
         {
             bool checkUAProf;
             byte confidence;
-            string name = reader.GetAttribute("name");
-            string defaultDeviceId = reader.GetAttribute("defaultDevice");
-            string type = reader.GetAttribute("type");
-            bool.TryParse(reader.GetAttribute("checkUAProf"), out checkUAProf);
-            byte.TryParse(reader.GetAttribute("confidence"), out confidence);
+            string name = reader.GetAttribute(Constants.NameAttributeName);
+            string type = reader.GetAttribute(Constants.TypeAttributeName);
+            bool.TryParse(reader.GetAttribute(Constants.CheckUserAgentProfileAttibuteName), out checkUAProf);
+            byte.TryParse(reader.GetAttribute(Constants.ConfidenceAttributeName), out confidence);
 
             switch (type)
             {
                 case "editDistance":
                     return new Handlers.EditDistanceHandler(
-                        provider, name, defaultDeviceId, confidence, checkUAProf);
+                        provider, name, String.Empty, confidence, checkUAProf);
                 case "reducedInitialString":
                     return new Handlers.ReducedInitialStringHandler(
-                        provider, name, defaultDeviceId, confidence,
-                        checkUAProf, reader.GetAttribute("tolerance"));
+                        provider, name, String.Empty, confidence,
+                        checkUAProf, reader.GetAttribute(Constants.ToleranceAttributeName));
                 case "regexSegment":
                     return new Handlers.RegexSegmentHandler(
-                        provider, name, defaultDeviceId, confidence, checkUAProf);
+                        provider, name, String.Empty, confidence, checkUAProf);
             }
 
             throw new XmlException(String.Format("Type '{0}' is invalid.", type));

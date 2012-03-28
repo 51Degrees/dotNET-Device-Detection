@@ -1,24 +1,12 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
- * Version 1.1 (the "License"); you may not use this file except in 
- * compliance with the License. You may obtain a copy of the License at 
- * http://www.mozilla.org/MPL/
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0.
  * 
- * Software distributed under the License is distributed on an "AS IS" 
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. 
- * See the License for the specific language governing rights and 
- * limitations under the License.
- *
- * The Original Code is named .NET Mobile API, first released under 
- * this licence on 11th March 2009.
+ * If a copy of the MPL was not distributed with this file, You can obtain
+ * one at http://mozilla.org/MPL/2.0/.
  * 
- * The Initial Developer of the Original Code is owned by 
- * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees
- * Mobile Experts Limited are Copyright (C) 2009 - 2012. All Rights Reserved.
- * 
- * Contributor(s):
- *     James Rosewell <james@51degrees.mobi>
- * 
+ * This Source Code Form is “Incompatible With Secondary Licenses”, as
+ * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
 using System;
@@ -28,7 +16,7 @@ using System.Web;
 using FiftyOne.Foundation.Mobile.Detection.Handlers;
 using System.Collections.Specialized;
 
-#if VER4
+#if VER4 || VER35
 using System.Linq;
 #endif
 
@@ -42,17 +30,17 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Fields
 
         /// <summary>
+        /// A list of handlers used to match devices.
+        /// </summary>
+        private readonly List<Handler> _handlers = new List<Handler>();
+
+        /// <summary>
         /// Collection of all strings used by the provider.
         /// </summary>
         internal readonly Strings Strings = new Strings();
-
+        
         /// <summary>
-        /// A list of handlers used to match devices.
-        /// </summary>
-        public readonly List<Handler> Handlers = new List<Handler>();
-
-        /// <summary>
-        /// Hashtable of all devices keyed on device id.
+        /// Hashtable of all devices keyed on device hash code.
         /// </summary>
         internal readonly SortedDictionary<int, List<BaseDeviceInfo>> AllDevices =
             new SortedDictionary<int, List<BaseDeviceInfo>>();
@@ -62,9 +50,17 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         private List<int> _userAgentProfileStringIndexes;
 
+        /// <summary>
+        /// List of all the actual devices ignoring parents, or those
+        /// children added to handle useragent strings.
+        /// </summary>
+        private List<BaseDeviceInfo> _actualDevices = null;
+
+        private object _lockDevices = new object();
+
         #endregion
 
-        #region Properties
+        #region Internal Properties
                 
         /// <summary>
         /// Returns a list of the string indexes for user agent profile properties.
@@ -80,6 +76,46 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         _userAgentProfileStringIndexes.Add(Strings.Add(value));
                 }
                 return _userAgentProfileStringIndexes;
+            }
+        }
+
+        #endregion
+
+        #region Public Properties
+
+        /// <summary>
+        /// A list of handlers being used by the provider.
+        /// </summary>
+        public List<Handler> Handlers
+        {
+            get { return _handlers; }
+        }
+
+        /// <summary>
+        /// Returns a list of all devices available to the provider which
+        /// have properties assigned to them. This is needed to ignore devices
+        /// which are only present to represent a useragent and do not have
+        /// any properties assigned to them.
+        /// </summary>
+        public List<BaseDeviceInfo> Devices
+        {
+            get
+            {
+                if (_actualDevices == null)
+                {
+                    lock (_lockDevices)
+                    {
+                        if (_actualDevices == null)
+                        {
+                            _actualDevices = new List<BaseDeviceInfo>();
+                            foreach (int key in AllDevices.Keys)
+                                foreach (var device in AllDevices[key])
+                                    if (device.DeviceId.Split(new string[] { Constants.ProfileSeperator }, StringSplitOptions.RemoveEmptyEntries).Length == 4)
+                                        _actualDevices.Add(device);
+                        }
+                    }
+                }
+                return _actualDevices;
             }
         }
 
@@ -173,7 +209,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="deviceID">Unique internal ID of the device.</param>
         /// <returns>BaseDeviceInfo object.</returns>
-        internal BaseDeviceInfo GetDeviceInfoFromID(string deviceID)
+        public BaseDeviceInfo GetDeviceInfoByID(string deviceID)
         {
             List<BaseDeviceInfo> list;
             if (AllDevices.TryGetValue(deviceID.GetHashCode(), out list))
@@ -196,13 +232,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             byte highestConfidence = 0;
             List<Handler> handlers = new List<Handler>();
-#if VER4
+#if VER4 || VER35
 
             foreach (Handler handler in Handlers.Where(handler => handler.CanHandle(userAgent)))
             {
                 GetHandlers(ref highestConfidence, handlers, handler);
             }
-#elif VER2
+#else
             foreach (Handler handler in Handlers)
             {
                 if (handler.CanHandle(userAgent))
@@ -224,12 +260,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             byte highestConfidence = 0;
             List<Handler> handlers = new List<Handler>();
-#if VER4
+#if VER4 || VER35
             foreach (Handler handler in Handlers.Where(handler => handler.CanHandle(headers)))
             {
                 GetHandlers(ref highestConfidence, handlers, handler);
             }
-#elif VER2
+#else
             foreach (Handler handler in Handlers)
             {
                 // If the handler can support the request and it's not the
@@ -270,6 +306,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="device">The new device being added.</param>
         internal virtual void Set(BaseDeviceInfo device)
         {
+            // Reset the list of devices.
+            _actualDevices = null;
+
             // Does the device already exist?
             lock (AllDevices)
             {
@@ -289,12 +328,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
             // Add the new device to handlers that can support it.
             if (String.IsNullOrEmpty(device.UserAgent) == false)
             {
-#if VER4
+#if VER4 || VER35
                 foreach (Handler handler in GetHandlers(device.UserAgent).Where(handler => handler != null))
             {
                 handler.Set(device);
             }
-#elif VER2
+#else
                 foreach (Handler handler in GetHandlers(device.UserAgent))
                     if (handler != null)
                         handler.Set(device);
@@ -311,12 +350,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
         internal static string GetUserAgent(NameValueCollection headers)
         {
             string userAgent = headers[Detection.Constants.UserAgentHeader];
-#if VER4
+#if VER4 || VER35
             string transcodeUserAgent =
                 Detection.Constants.TranscoderUserAgentHeaders.FirstOrDefault(e => headers[e] != null);
             if (transcodeUserAgent != null)
                 userAgent = transcodeUserAgent;
-#elif VER2
+#else
             foreach (string current in Detection.Constants.TranscoderUserAgentHeaders)
             {
                 if (headers[current] != null)
@@ -331,18 +370,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
             else
                 userAgent = userAgent.Trim();
             return userAgent;
-        }
-
-        /// <summary>
-        /// Gets all the devices held in the provider.
-        /// </summary>
-        /// <returns>Returns a list of all the devices in the provider.</returns>
-        public List<BaseDeviceInfo> GetAllDevices()
-        {
-            var devices = new List<BaseDeviceInfo>();
-            foreach (int key in AllDevices.Keys)
-                devices.AddRange(AllDevices[key]);
-            return devices;
         }
 
         #endregion

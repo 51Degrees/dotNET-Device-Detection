@@ -1,24 +1,12 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
- * Version 1.1 (the "License"); you may not use this file except in 
- * compliance with the License. You may obtain a copy of the License at 
- * http://www.mozilla.org/MPL/
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0.
  * 
- * Software distributed under the License is distributed on an "AS IS" 
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. 
- * See the License for the specific language governing rights and 
- * limitations under the License.
- *
- * The Original Code is named .NET Mobile API, first released under 
- * this licence on 11th March 2009.
+ * If a copy of the MPL was not distributed with this file, You can obtain
+ * one at http://mozilla.org/MPL/2.0/.
  * 
- * The Initial Developer of the Original Code is owned by 
- * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees 
- * Mobile Experts Limited are Copyright (C) 2009 - 2012. All Rights Reserved.
- * 
- * Contributor(s):
- *     James Rosewell <james@51degrees.mobi>
- * 
+ * This Source Code Form is “Incompatible With Secondary Licenses”, as
+ * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
 using System.Web;
@@ -29,8 +17,10 @@ using FiftyOne.Foundation.Mobile.Configuration;
 using System.Web.Security;
 using System.Web.UI;
 
-#if VER4
-using System.Linq;
+#if VER4 || VER35
+
+using System.Linq; 
+
 #endif
 
 namespace FiftyOne.Foundation.Mobile.Redirection
@@ -182,7 +172,11 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                             if (String.IsNullOrEmpty(Manager.Redirect.MobilePagesRegex) == false)
                                 _mobilePageRegex = new Regex(Manager.Redirect.MobilePagesRegex,
                                                              RegexOptions.Compiled | RegexOptions.IgnoreCase);
+#if VER4
+                            _formsLoginUrl = FormsAuthentication.IsEnabled ? FormsAuthentication.LoginUrl : String.Empty;
+#else
                             _formsLoginUrl = FormsAuthentication.LoginUrl;
+#endif
                             _originalUrlAsQueryString = Manager.Redirect.OriginalUrlAsQueryString;
 
                             foreach (LocationElement homePage in Manager.Redirect.Locations)
@@ -583,9 +577,9 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// <returns>True if the string is present. False if not.</returns>
         private static bool IsInArray(string value, string[] array)
         {
-#if VER4
+#if VER4 || VER35
             return array.Any(current => value == current);
-#elif VER2
+#else
             foreach (string current in array)
             {
                 if (value == current)

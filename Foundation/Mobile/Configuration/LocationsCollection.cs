@@ -1,30 +1,18 @@
 /* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
- * Version 1.1 (the "License"); you may not use this file except in 
- * compliance with the License. You may obtain a copy of the License at 
- * http://www.mozilla.org/MPL/
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0.
  * 
- * Software distributed under the License is distributed on an "AS IS" 
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. 
- * See the License for the specific language governing rights and 
- * limitations under the License.
- *
- * The Original Code is named .NET Mobile API, first released under 
- * this licence on 11th March 2009.
+ * If a copy of the MPL was not distributed with this file, You can obtain
+ * one at http://mozilla.org/MPL/2.0/.
  * 
- * The Initial Developer of the Original Code is owned by 
- * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees
- * Mobile Experts Limited are Copyright (C) 2009 - 2012. All Rights Reserved.
- * 
- * Contributor(s):
- *     James Rosewell <james@51degrees.mobi>
- *     Thomas Holmes <tom@51degrees.mobi>
- * 
+ * This Source Code Form is “Incompatible With Secondary Licenses”, as
+ * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
 #region Usings
 
 using System.Configuration;
+using System;
 
 #endregion
 
@@ -46,14 +34,41 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         }
 
         /// <summary>
-        /// Returns element key from a <see cref="LocationElement"/>
+        /// Get the element key. Check for empty strings and return null
+        /// to avoid a problem with the defaultvalue property of the key
+        /// element becoming an empty string and causing a duplicate key
+        /// exception within .NET.
         /// </summary>
         protected override object GetElementKey(ConfigurationElement element)
         {
-            return ((LocationElement) element).Name;
+            var key = ((LocationElement)element).Name;
+            if (String.IsNullOrEmpty(key))
+                return ((LocationElement)element).UniqueId;
+            return key;
         }
 
         #endregion 
+
+        #region Internal Methods
+
+        /// <summary>
+        /// Adds a new element to the collection.
+        /// </summary>
+        /// <param name="element">Element to be added.</param>
+        internal void Add(LocationElement element)
+        {
+            base.BaseAdd(element);
+        }
+
+        /// <summary>
+        /// Removes all elements from the configuration.
+        /// </summary>
+        internal void Clear()
+        {
+            base.BaseClear();
+        }
+
+        #endregion
     }
 }
 

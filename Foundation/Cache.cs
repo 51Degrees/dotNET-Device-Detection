@@ -1,24 +1,12 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
- * Version 1.1 (the "License"); you may not use this file except in 
- * compliance with the License. You may obtain a copy of the License at 
- * http://www.mozilla.org/MPL/
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0.
  * 
- * Software distributed under the License is distributed on an "AS IS" 
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. 
- * See the License for the specific language governing rights and 
- * limitations under the License.
- *
- * The Original Code is named .NET Mobile API, first released under 
- * this licence on 11th March 2009.
+ * If a copy of the MPL was not distributed with this file, You can obtain
+ * one at http://mozilla.org/MPL/2.0/.
  * 
- * The Initial Developer of the Original Code is owned by 
- * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees 
- * Mobile Experts Limited are Copyright (C) 2009 - 2012. All Rights Reserved.
- * 
- * Contributor(s):
- *     James Rosewell <james@51degrees.mobi>
- * 
+ * This Source Code Form is “Incompatible With Secondary Licenses”, as
+ * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
 #region Usings
@@ -32,8 +20,9 @@ using System.Threading;
 #if VER4
 using System.Linq;
 using System.Threading.Tasks;
-#elif VER2
 
+#elif VER35
+using System.Linq;
 #endif
 
 namespace FiftyOne
@@ -89,6 +78,15 @@ namespace FiftyOne
         #endregion
 
         #region Internal Members
+
+        /// <summary>
+        /// Clears everything from the cache.
+        /// </summary>
+        internal void Clear()
+        {
+            _internalCache.Clear();
+            _lastAccessed.Clear();
+        }
 
         /// <summary>
         /// Removes the specified key from the cache.
@@ -199,7 +197,7 @@ namespace FiftyOne
             _nextServiceTime = DateTime.MaxValue;
 #if VER4
             Task.Factory.StartNew(() => ServiceCache(DateTime.UtcNow.AddMinutes(-_timeout)));
-#elif VER2
+#else
             ThreadPool.QueueUserWorkItem(ServiceCache, DateTime.UtcNow.AddMinutes(-_timeout));
 #endif
         }
@@ -216,13 +214,13 @@ namespace FiftyOne
             // Obtain a list of the keys to be purged.
             lock (this)
             {
-#if VER4
+#if VER4 || VER35
                 foreach (Key key in
                     _lastAccessed.Keys.Where(key => (DateTime) _lastAccessed[key] < (DateTime) purgeDate))
                 {
                     purgeKeys.Enqueue(key);
                 }
-#elif VER2
+#else
                 foreach (Key key in _lastAccessed.Keys)
                 {
                     if (_lastAccessed[key] < (DateTime) purgeDate)

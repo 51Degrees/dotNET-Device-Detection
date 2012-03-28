@@ -1,24 +1,12 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
- * Version 1.1 (the "License"); you may not use this file except in 
- * compliance with the License. You may obtain a copy of the License at 
- * http://www.mozilla.org/MPL/
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0.
  * 
- * Software distributed under the License is distributed on an "AS IS" 
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. 
- * See the License for the specific language governing rights and 
- * limitations under the License.
- *
- * The Original Code is named .NET Mobile API, first released under 
- * this licence on 11th March 2009.
+ * If a copy of the MPL was not distributed with this file, You can obtain
+ * one at http://mozilla.org/MPL/2.0/.
  * 
- * The Initial Developer of the Original Code is owned by 
- * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees 
- * Mobile Experts Limited are Copyright (C) 2009 - 2012. All Rights Reserved.
- * 
- * Contributor(s):
- *     James Rosewell <james@51degrees.mobi>
- * 
+ * This Source Code Form is “Incompatible With Secondary Licenses”, as
+ * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
 using System.Collections.Generic;
@@ -42,44 +30,19 @@ namespace FiftyOne.Foundation.Mobile.Detection
     {
         #region Fields
 
+        /// <summary>
+        /// Maps to the binary file path.
+        /// </summary>
         private static FileInfo _binaryFile = null;
 
         #endregion
 
-        #region Properties
-
-        /// <summary>
-        /// Returns a list of the valid license keys available
-        /// to the assembly.
-        /// </summary>
-        private static string[] LicenseKeys
-        {
-            get
-            {
-                var list = new List<string>();
-
-                // See if a license key is included in the assembly.
-                if (String.IsNullOrEmpty(Constants.PremiumLicenceKey) == false)
-                    list.Add(Constants.PremiumLicenceKey);
-
-                // Now try the bin folder for license key files.
-                foreach (string fileName in Directory.GetFiles(
-                    HostingEnvironment.ApplicationPhysicalPath + "bin", "*.lic"))
-                {
-                    var alltext = File.ReadAllText(fileName);
-                    list.AddRange(alltext.Split(
-                        new[] { "\r\n", "\r", "\n" },
-                        StringSplitOptions.RemoveEmptyEntries));
-                }
-
-                return list.ToArray();
-            }
-        }
+        #region Internal Properties
 
         /// <summary>
         /// Returns details of the binary file to be updated.
         /// </summary>
-        private static FileInfo BinaryFile
+        internal static FileInfo BinaryFile
         {
             get
             {
@@ -125,6 +88,72 @@ namespace FiftyOne.Foundation.Mobile.Detection
             return sBuilder.ToString();
         }
 
+        /// <summary>
+        /// Checks the MD5 hash of the data against the expected value.
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="data"></param>
+        internal static void ValidateMD5(WebClient client, byte[] data)
+        {
+            // Check the MD5 hash of the data downloaded.
+            string mdHash = client.ResponseHeaders["Content-MD5"];
+            if (mdHash != GetMd5Hash(data))
+                throw new MobileException(String.Format(
+                    "MD5 hash '{0}' validation failure with data downloaded from update URL '{1}'.",
+                    mdHash,
+                    client.BaseAddress));
+
+        }
+
+        /// <summary>
+        /// Throws an exception if the data is not valid.
+        /// </summary>
+        /// <param name="data">The data to use to create the provider.</param>
+        /// <returns>A newly created provider.</returns>
+        internal static Provider CreateProvider(byte[] data)
+        {
+            try
+            {
+                // Create new provider with the data to ensure it is valid.
+                var provider = Binary.Reader.Create(data);
+                if (provider.AllDevices.Count == 0)
+                    throw new MobileException("No devices found in downloaded data.");
+                return provider;
+            }
+            catch (Exception ex)
+            {
+                throw new MobileException("Exception validating data array", ex);
+            }
+        }
+
+        /// <summary>
+        /// Used to get the url for data download.
+        /// </summary>
+        /// <returns>The full url including all parameters needed to download
+        /// the device data file.</returns>
+        internal static string FullUrl()
+        {
+            return FullUrl(LicenceKey.Keys);
+        }
+
+        /// <summary>
+        /// Used to get the url for data download.
+        /// </summary>
+        /// <param name="licences">An array of licences to try.</param>
+        /// <returns>The full url including all parameters needed to download
+        /// the device data file.</returns>
+        internal static string FullUrl(string[] licences)
+        {
+            var parameters = new List<string>();
+            parameters.Add(String.Format("LicenseKeys={0}", String.Join("|", licences)));
+            parameters.Add(String.Format("Download={0}", bool.TrueString));
+            parameters.Add("Type=Binary");
+
+            return String.Format("{0}?{1}",
+                Constants.AutoUpdateUrl,
+                String.Join("&", parameters.ToArray()));
+        }
+
         #endregion
 
         #region Thread Methods
@@ -133,68 +162,78 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             try
             {
-                if (Constants.AutoUpdateDelayedStart.TotalSeconds > 0 &&
-                    LicenseKeys.Length > 0)
+                if (Constants.AutoUpdateDelayedStart.TotalSeconds > 0)
                 {
                     // Pause for X seconds to allow the worker process to complete starting up.
                     Thread.Sleep(Constants.AutoUpdateDelayedStart);
 
-                    // Check the last accessed date of the binary file to determine
-                    // if it should be updated.
-                    if (BinaryFile != null &&
-                        BinaryFile.LastWriteTimeUtc.Add(Constants.AutoUpdateWait) < DateTime.UtcNow)
+                    // If licence keys are available auto update.
+                    if (LicenceKey.Keys.Length > 0)
                     {
-                        // Download the latest data.
-                        var parameters = new List<string>();
-                        parameters.Add(String.Format("LicenseKeys={0}", String.Join("|", LicenseKeys)));
-                        parameters.Add(String.Format("Download={0}", bool.TrueString));
-                        parameters.Add("Type=Binary");
-
-                        var client = new WebClient();
-                        var url = String.Format("{0}?{1}",
-                            Constants.AutoUpdateUrl,
-                            String.Join("&", parameters.ToArray()));
-                        byte[] data = client.DownloadData(url);
-
-                        // Check the MD5 hash of the data downloaded.
-                        string mdHash = client.ResponseHeaders["Content-MD5"];
-                        if (mdHash != GetMd5Hash(data))
-                            throw new MobileException(String.Format(
-                                "MD5 hash '{0}' validation failure with data downloaded from update URL '{1}'.",
-                                mdHash,
-                                url));
-
-                        // Create new provider with the data to ensure it is valid.
-                        var provider = Binary.Reader.Create(data);
-                        if (provider.AllDevices.Count == 0)
-                            throw new MobileException("No devices found in downloaded data.");
-
-                        // Both the MD5 hash was good and the provider was created.
-                        // Save the data and force the factory to reload.
-                        File.WriteAllBytes(BinaryFile.FullName, data);
-
-                        // Sets the last modified time of the file downloaded.
-                        DateTime lastModified = DateTime.MinValue;
-                        if (DateTime.TryParse(
-                            client.ResponseHeaders["Last-Modified"],
-                            out lastModified))
-                            BinaryFile.LastWriteTimeUtc = lastModified;
-
-                        Factory._mobileCapabilities = null;
-
-                        EventLog.Info(String.Format(
-                            "Automatically updated binary data file '{0}' with new version " +
-                            "dated the '{1:d}'.",
-                            BinaryFile.FullName,
-                            lastModified == DateTime.MinValue ? "Unknown" : lastModified.ToString("d")));
+                        // Check the last accessed date of the binary file to determine
+                        // if it should be updated.
+                        if (BinaryFile != null &&
+                            BinaryFile.LastWriteTimeUtc.Add(Constants.AutoUpdateWait) < DateTime.UtcNow)
+                        {
+                            Download();
+                        }
                     }
                 }
             }
+            catch (ThreadAbortException ex)
+            {
+                EventLog.Warn(new MobileException(
+                    "Auto update thread aborted",
+                    ex));
+            }
             catch (Exception ex)
             {
-                EventLog.Warn(new MobileException(String.Format(
-                    "Exception auto updating binary data file '{0}'.",
-                    BinaryFile.FullName), ex));
+                if (BinaryFile != null && BinaryFile.FullName != null)
+                {
+                    EventLog.Warn(new MobileException(String.Format(
+                        "Exception auto updating binary data file '{0}'.",
+                        BinaryFile.FullName), ex));
+                }
+                else
+                {
+                    EventLog.Fatal(ex);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Downloads and updates the premium data file.
+        /// </summary>
+        internal static void Download()
+        {
+            // Download the latest data.
+            var client = new WebClient();
+            var data = client.DownloadData(FullUrl());
+
+            // Validate the results.
+            ValidateMD5(client, data);
+            var provider = CreateProvider(data);
+
+            // Check this is new data based on publish data and
+            // number of available properties.
+            if (provider.PublishedDate != Factory.ActiveProvider.PublishedDate ||
+                provider.Properties.Count != Factory.ActiveProvider.Properties.Count)
+            {
+                // Both the MD5 hash was good and the provider was created.
+                // Save the data and force the factory to reload.
+                File.WriteAllBytes(BinaryFile.FullName, data);
+
+                // Sets the last modified time of the file downloaded.
+                BinaryFile.LastWriteTimeUtc = provider.PublishedDate;
+
+                // Switch the instance of the data provider over.
+                Factory.Reset();
+
+                EventLog.Info(String.Format(
+                    "Automatically updated binary data file '{0}' with version " +
+                    "published on the '{1:d}'.",
+                    BinaryFile.FullName,
+                    Factory.ActiveProvider.PublishedDate));
             }
         }
 

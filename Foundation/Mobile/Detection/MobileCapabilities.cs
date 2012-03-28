@@ -1,24 +1,12 @@
 /* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
- * Version 1.1 (the "License"); you may not use this file except in 
- * compliance with the License. You may obtain a copy of the License at 
- * http://www.mozilla.org/MPL/
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0.
  * 
- * Software distributed under the License is distributed on an "AS IS" 
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. 
- * See the License for the specific language governing rights and 
- * limitations under the License.
- *
- * The Original Code is named .NET Mobile API, first released under 
- * this licence on 11th March 2009.
+ * If a copy of the MPL was not distributed with this file, You can obtain
+ * one at http://mozilla.org/MPL/2.0/.
  * 
- * The Initial Developer of the Original Code is owned by 
- * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees
- * Mobile Experts Limited are Copyright (C) 2009 - 2012. All Rights Reserved.
- * 
- * Contributor(s):
- *     James Rosewell <james@51degrees.mobi>
- * 
+ * This Source Code Form is “Incompatible With Secondary Licenses”, as
+ * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
 #if VER4
@@ -32,6 +20,8 @@ using System.Collections;
 using System.Web;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Collections.Specialized;
+using System.Web.Hosting;
 
 #endregion
 
@@ -52,6 +42,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         private readonly int JavascriptVersion;
         private readonly int CookiesCapable;
         private readonly int BrowserVersion;
+        private readonly int BrowserName;
         private readonly int PlatformName;
         private readonly int Adapters;
         private readonly int ScreenPixelsHeight;
@@ -83,6 +74,18 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         #endregion
 
+        #region Properties
+
+        /// <summary>
+        /// Returns the instance of the provider being used.
+        /// </summary>
+        internal Provider Provider
+        {
+            get { return _provider; }
+        }
+
+        #endregion
+
         #region Constructor
 
         /// <summary>
@@ -102,6 +105,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             JavascriptVersion = _provider.Strings.Add("JavascriptVersion");
             CookiesCapable = _provider.Strings.Add("CookiesCapable");
             BrowserVersion = _provider.Strings.Add("BrowserVersion");
+            BrowserName = _provider.Strings.Add("BrowserName");
             PlatformName = _provider.Strings.Add("PlatformName");
             Adapters = _provider.Strings.Add("Adapters");
             ScreenPixelsHeight = _provider.Strings.Add("ScreenPixelsHeight");
@@ -132,16 +136,28 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Creates a dictionary of capabilites for the requesting device.
         /// </summary>
-        /// <param name="request">Details of the request.</param>
+        /// <param name="headers">A collection of Http headers from the device.</param>
         /// <param name="currentCapabilities">The current capabilities assigned by .NET.</param>
         /// <returns>A dictionary of capabilities for the request.</returns>
-        internal IDictionary Create(HttpRequest request, IDictionary currentCapabilities)
+        internal IDictionary Create(NameValueCollection headers, IDictionary currentCapabilities)
         {
             // Use the base class to create the initial list of capabilities.
             IDictionary capabilities = new Hashtable();
 
-            // Use the device for the request to set the capabilities.
-            Create(_provider.GetDeviceInfo(request.Headers), capabilities, currentCapabilities);
+            // Get the device.
+            var start = Environment.TickCount;
+            var device = _provider.GetDeviceInfo(headers);
+            var detectionTime = Environment.TickCount - start + 1;
+
+            // Add the capabilities.
+            Create(device, capabilities, currentCapabilities);
+
+            // Add the detection time to the list of properties.
+            ((SortedList<string, List<string>>)capabilities[Constants.FiftyOneDegreesProperties])
+                .Add(Constants.DetectionTimeProperty, 
+                new List<string>(new [] {
+                    detectionTime.ToString() 
+                } ));
 
             // Initialise any capability values that rely on the settings
             // from the device data source.
@@ -164,14 +180,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
             // it can be and that the inheriting class will provide the additional details.
             SetJavaScript(capabilities, true);
 
-            // Use the device for the request to set the capabilities.
-            Create((BaseDeviceInfo)_provider.GetDeviceInfo(userAgent), capabilities, null);
-
-            // Initialise any capability values that rely on the settings
-            // from the device data source.
-            Init(capabilities);
-
-            return capabilities;
+            // Set the headers and return the new capabilities collection.
+            var headers = new NameValueCollection();
+            headers.Add("User-Agent", userAgent);
+            return Create(headers, capabilities);
         }
 
         #endregion
@@ -244,15 +256,26 @@ namespace FiftyOne.Foundation.Mobile.Detection
             SetValue(capabilities, "mobileDeviceModel", GetMobileDeviceModel(device));
             SetValue(capabilities, "mobileDeviceManufacturer", GetMobileDeviceManufacturer(device));
             SetValue(capabilities, "platform", GetPlatform(device));
+            SetValue(capabilities, "browser", GetBrowser(device));
             SetValue(capabilities, "type", capabilities["mobileDeviceManufacturer"]);
-            SetValue(capabilities, "screenPixelsHeight", GetScreenPixelsHeight(device));
-            SetValue(capabilities, "screenPixelsWidth", GetScreenPixelsWidth(device));
+            SetValue(capabilities, "screenPixelsHeight", GetScreenPixelsHeight(device) ??
+                GetDefaultValue("screenPixelsHeight", currentCapabilities));
+            SetValue(capabilities, "screenPixelsWidth", GetScreenPixelsWidth(device) ??
+                GetDefaultValue("screenPixelsWidth", currentCapabilities));
             SetValue(capabilities, "screenBitDepth", GetBitsPerPixel(device));
             SetValue(capabilities, "preferredImageMime", GetPreferredImageMime(device, capabilities));
             SetValue(capabilities, "isColor", GetIsColor(device));
+            SetValue(capabilities, "supportsCallback", GetSupportsCallback(device));
             SetValue(capabilities, "SupportsCallback", GetSupportsCallback(device));
             SetValue(capabilities, "canInitiateVoiceCall", GetIsMobileDevice(device));
             SetValue(capabilities, "jscriptversion", GetJavascriptVersion(device));
+
+            // The following values are set to prevent exceptions being thrown in
+            // the standard .NET base classes if the property is accessed.
+            SetValue(capabilities, "screenCharactersHeight", 
+                GetDefaultValue("screenCharactersHeight", currentCapabilities));
+            SetValue(capabilities, "screenCharactersWidth",
+                GetDefaultValue("screenCharactersWidth", currentCapabilities));
 
             // Use the Version class to find the version. If this fails use the 1st two
             // decimal segments of the string.
@@ -297,6 +320,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 SetValue(capabilities, "ecmascriptversion",
                          (bool)javaScript ? "3.0" : "0.0");
             }
+
+            // Sets the W3C DOM version.
+            SetValue(capabilities, "w3cdomversion",
+                GetW3CDOMVersion(device,
+                    currentCapabilities != null
+                        ? (string)currentCapabilities["w3cdomversion"]
+                        : String.Empty));
 
             // Update the cookies value if we have additional information.
             SetValue(capabilities, "cookies",
@@ -421,6 +451,35 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
 
         /// <summary>
+        /// Returns version 1.0 if DOM is supported based on Ajax
+        /// being supported, otherwise returns false.
+        /// </summary>
+        /// <param name="device">The device to be checked.</param>
+        /// <param name="current">The current value of the property.</param>
+        /// <returns>1.0, 0.0 or the current value.</returns>
+        private string GetW3CDOMVersion(BaseDeviceInfo device, string current)
+        {
+            Version version = new Version(0, 0);
+
+            // Set the version to the current version.
+            try
+            {
+                version = new Version(current);
+            }
+            catch (ArgumentException)
+            {
+                // Do nothing and let the default value be returned.
+            }
+
+            // Try and set version 1.0 if ajax is supported.
+            var values = device.GetPropertyValueStringIndexes(AjaxRequestType);
+            if (values != null && values.Contains(AjaxRequestTypeNotSupported) == false)
+                version = new Version("2.0.0.0");
+
+            return version.ToString(2);
+        }
+
+        /// <summary>
         /// If the device indicates javascript support then return true.
         /// </summary>
         /// <param name="device">The device to be checked.</param>
@@ -448,7 +507,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
             // Check if the version value is valid in the version
             // class. If not then return null.
-#if VER2
+#if VER4
+            Version version;
+            if (Version.TryParse(value, out version))
+                return value;
+            return null;
+#else
             try
             {
                 new Version(value);
@@ -458,17 +522,17 @@ namespace FiftyOne.Foundation.Mobile.Detection
             {
                 return null;
             }
-#else
-            Version version;
-            if (Version.TryParse(value, out version))
-                return value;
-            return null;
 #endif
         }
 
         private string GetPlatform(BaseDeviceInfo device)
         {
             return _provider.Strings.Get(device.GetFirstPropertyValueStringIndex(PlatformName));
+        }
+
+        private string GetBrowser(BaseDeviceInfo device)
+        {
+            return _provider.Strings.Get(device.GetFirstPropertyValueStringIndex(BrowserName));
         }
 
         private string GetIsCrawler(BaseDeviceInfo device)
@@ -581,6 +645,35 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #endregion
 
         #region Static Methods
+
+        /// <summary>
+        /// Returns the current capabilities value if it exists, otherwise
+        /// uses the provided default values.
+        /// </summary>
+        /// <param name="key">The property key to be returned.</param>
+        /// <param name="currentCapabilities">The current capabilities found by .NET.</param>
+        /// <returns>A default value.</returns>
+        protected static string GetDefaultValue(string key, IDictionary currentCapabilities)
+        {
+            var currentValue = currentCapabilities[key] as string;
+            if (currentValue != null)
+                return currentValue;
+            return GetDefaultValue(key);
+        }
+
+        /// <summary>
+        /// Returns the default value for the key to use if one can not be 
+        /// found.
+        /// </summary>
+        /// <param name="key">The property key to be returned.</param>
+        /// <returns>The hardcoded default value.</returns>
+        protected static string GetDefaultValue(string key)
+        {
+            for (int i = 0; i < Constants.DefaultPropertyValues.Length; i++)
+                if (Constants.DefaultPropertyValues[i, 0] == key)
+                    return Constants.DefaultPropertyValues[i, 1];
+            return null;
+        }
 
         /// <summary>
         /// Sets the javascript boolean string in the capabilities dictionary.

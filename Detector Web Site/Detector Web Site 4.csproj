@@ -25,14 +25,14 @@
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation />
     <TargetFrameworkProfile />
-    <UseIISExpress>false</UseIISExpress>
+    <UseIISExpress>true</UseIISExpress>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;VER4</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -40,7 +40,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;VER4</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -61,22 +61,24 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Mobile.css" />
     <Content Include="DeviceProperties.ascx" />
     <Content Include="Global.asax" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="CheckUA.aspx" />
     <Content Include="Default.aspx" />
-    <Content Include="default.css" />
     <Content Include="Desktop.png" />
     <Content Include="Licence.txt" />
     <Content Include="Mobile.png" />
     <Content Include="Mobile\Default.aspx" />
-    <Content Include="skin.css" />
     <Content Include="MobileDevice.asmx" />
     <Content Include="LogTable.aspx" />
+    <Content Include="SearchDevice.aspx" />
+    <Content Include="Standard.css" />
     <Content Include="Tablet.png" />
     <Content Include="Tablet\Default.aspx" />
+    <Content Include="Detector.Master" />
+    <Content Include="51Degrees.mobi.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -94,19 +96,19 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CheckUA.aspx.cs">
-      <DependentUpon>CheckUA.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="CheckUA.aspx.designer.cs">
-      <DependentUpon>CheckUA.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Default.aspx.designer.cs">
       <DependentUpon>Default.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Detector.Master.cs">
+      <DependentUpon>Detector.Master</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Detector.Master.designer.cs">
+      <DependentUpon>Detector.Master</DependentUpon>
     </Compile>
     <Compile Include="DeviceProperties.ascx.cs">
       <DependentUpon>DeviceProperties.ascx</DependentUpon>
@@ -141,6 +143,13 @@
     </Compile>
     <Compile Include="LogTable.aspx.designer.cs">
       <DependentUpon>LogTable.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="SearchDevice.aspx.cs">
+      <DependentUpon>SearchDevice.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="SearchDevice.aspx.designer.cs">
+      <DependentUpon>SearchDevice.aspx</DependentUpon>
     </Compile>
     <Compile Include="Tablet\Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
@@ -197,7 +206,7 @@
           <AutoAssignPort>False</AutoAssignPort>
           <DevelopmentServerPort>5151</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost/Detector4</IISUrl>
+          <IISUrl>http://localhost:5151/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

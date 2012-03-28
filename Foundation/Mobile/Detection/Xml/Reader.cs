@@ -1,25 +1,12 @@
 /* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
- * Version 1.1 (the "License"); you may not use this file except in 
- * compliance with the License. You may obtain a copy of the License at 
- * http://www.mozilla.org/MPL/
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0.
  * 
- * Software distributed under the License is distributed on an "AS IS" 
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. 
- * See the License for the specific language governing rights and 
- * limitations under the License.
- *
- * The Original Code is named .NET Mobile API, first released under 
- * this licence on 11th March 2009.
+ * If a copy of the MPL was not distributed with this file, You can obtain
+ * one at http://mozilla.org/MPL/2.0/.
  * 
- * The Initial Developer of the Original Code is owned by 
- * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees
- * Mobile Experts Limited are Copyright (C) 2009 - 2012. All Rights Reserved.
- * 
- * Contributor(s):
- *     James Rosewell <james@51degrees.mobi>
- *     Andy Allan <andy.allan@mobgets.com>
- * 
+ * This Source Code Form is “Incompatible With Secondary Licenses”, as
+ * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
 #if VER4 
@@ -133,20 +120,58 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
                     if (stream.CanSeek == false)
                         throw new XmlException(String.Format("Stream must support seek operations."));
 
-                    // Ensure we're at the start of the stream before reading.
+                    // Ensure we're at the start of the stream before reading starts.
                     stream.Position = 0;
                     using (XmlReader reader = XmlReader.Create(stream, GetXmlReaderSettings()))
-                        provider.Handlers.AddRange(HandlersReader.ProcessHandlers(reader, provider));
+                    {
+                        if (reader.ReadToDescendant(Constants.HandlersElementName) ||
+                            (reader.ReadToDescendant(Constants.TopLevelElementName) &&
+                            reader.ReadToDescendant(Constants.HandlersElementName)))
+                            provider.Handlers.AddRange(
+                                HandlersReader.ProcessHandlers(
+                                    reader.ReadSubtree(), 
+                                    provider));
+                    }
                 }
 
                 // Parse the data for devices.
-                var availableCapabilities = new StringCollection();
                 foreach (var stream in streams)
                 {
                     // Ensure we're at the start of the stream before reading.
                     stream.Position = 0;
                     using (XmlReader reader = XmlReader.Create(stream, GetXmlReaderSettings()))
-                        ProcessDevices(availableCapabilities, provider, reader);
+                    {
+                        if (reader.ReadToDescendant(Constants.TopLevelElementName) &&
+                            reader.ReadToDescendant(Constants.ProfilesElementName))
+                            ProcessDevices(provider, reader.ReadSubtree());
+                    }
+                }
+
+                // Read the manifest properties from the file.
+                foreach (var stream in streams)
+                {
+                    // Ensure we're at the start of the stream before reading.
+                    stream.Position = 0;
+                    using (XmlReader reader = XmlReader.Create(stream, GetXmlReaderSettings()))
+                    {
+                        if (reader.ReadToDescendant(Constants.TopLevelElementName) &&
+                            reader.ReadToDescendant(Constants.PropertiesElementName))
+                            ProcessManifest(provider, reader.ReadSubtree());
+                    }
+                }
+
+                // Finally read the date the files were created.
+                foreach (var stream in streams)
+                {
+                    // Ensure we're at the start of the stream before reading.
+                    stream.Position = 0;
+                    using (XmlReader reader = XmlReader.Create(stream, GetXmlReaderSettings()))
+                    {
+                        if (reader.ReadToDescendant(Constants.TopLevelElementName) &&
+                            reader.ReadToDescendant(Constants.HeaderElementName))
+                            if (ProcessHeaders(provider, reader))
+                                break;
+                    }
                 }
             } 
             catch (System.Xml.XmlException ex)
@@ -188,15 +213,85 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
 
         #endregion
 
+        #region Manifest Methods
+
+        /// <summary>
+        /// Processes the properties manifest section of the xml.
+        /// </summary>
+        /// <param name="provider">Provider to have data loaded into.</param>
+        /// <param name="reader">XmlReader for the source data stream.</param>
+        private static void ProcessManifest(Provider provider, XmlReader reader)
+        {
+            Property property = null;
+            while (reader.Read())
+            {
+                if (reader.NodeType == XmlNodeType.Element)
+                {
+                    switch (reader.Name)
+                    {
+                        case Constants.PropertyElementName:
+                            if (property != null)
+                                provider.Properties.Add(property);
+                            property = new Property(
+                                provider,
+                                reader.GetAttribute(Constants.NameAttributeName),
+                                reader.GetAttribute(Constants.DescriptionAttributeName),
+                                reader.GetAttribute(Constants.UrlAttributeName),
+                                bool.Parse(reader.GetAttribute(Constants.MandatoryAttributeName)),
+                                bool.Parse(reader.GetAttribute(Constants.ListAttributeName)),
+                                bool.Parse(reader.GetAttribute(Constants.ShowValuesAttributeName)));
+                            break;
+                        case Constants.ValueElementName:
+                            property.Values.Add(new Value(
+                                property,
+                                reader.GetAttribute(Constants.NameAttributeName),
+                                reader.GetAttribute(Constants.DescriptionAttributeName),
+                                reader.GetAttribute(Constants.UrlAttributeName)));
+                            break;
+                    }
+                }
+            }
+            provider.Properties.Add(property);
+        }
+
+        #endregion
+
+        #region Header Methods
+
+        /// <summary>
+        /// Processes the xml header section.
+        /// </summary>
+        /// <param name="provider">Provider to have data loaded into.</param>
+        /// <param name="reader">XmlReader for the source data stream.</param>
+        /// <returns>Returns true if the headers elements are processed correctly.</returns>
+        private static bool ProcessHeaders(Provider provider, XmlReader reader)
+        {
+            while (reader.Read())
+            {
+                if (reader.NodeType == XmlNodeType.Element)
+                {
+                    switch (reader.Name)
+                    {
+                        case Constants.PublishedDateAttributeName:
+                            string date = reader.ReadElementContentAsString();
+                            DateTime.TryParse(date, out provider._publishedDate);
+                            return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        #endregion
+
         #region Device Methods
-               
+
         /// <summary>
         /// Uses the xml reader to load data into the provider.
         /// </summary>
-        /// <param name="availableCapabilities">List of capabilities that are available.</param>
         /// <param name="provider">Provider to have data loaded into.</param>
         /// <param name="reader">XmlReader for the source data stream.</param>
-        private static void ProcessDevices(StringCollection availableCapabilities, Provider provider, XmlReader reader)
+        private static void ProcessDevices(Provider provider, XmlReader reader)
         {
             BaseDeviceInfo device = null;
 
@@ -224,8 +319,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
                             {
                                 LoadCapabilityData(
                                     reader,
-                                    device,
-                                    availableCapabilities);
+                                    device);
                             }
                             break;
                     }
@@ -253,7 +347,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
             // If the device already exists then use the previous one. This may happen
             // when an earlier device referenced a fallback device that had not yet
             // been created.
-            var device = provider.GetDeviceInfoFromID(deviceId);
+            var device = provider.GetDeviceInfoByID(deviceId);
             if (device == null)
             {
                 // Create the new device.
@@ -270,7 +364,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
             if (fallbackDeviceId != null && device.DeviceId != fallbackDeviceId)
             {
                 // Does the fallback device already exist?
-                device.Parent = provider.GetDeviceInfoFromID(fallbackDeviceId);
+                device.Parent = provider.GetDeviceInfoByID(fallbackDeviceId);
                 if (device.Parent == null)
                 {
                     // No. So create new fallback device.
@@ -284,16 +378,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
 
         private static void LoadCapabilityData(
             XmlReader reader,
-            BaseDeviceInfo device,
-            StringCollection availableCapabilities)
+            BaseDeviceInfo device)
         {
             string capabilityName = reader.GetAttribute(Constants.NameAttributeName, string.Empty);
             string capabilityValue = reader.GetAttribute(Constants.ValueAttributeName, string.Empty);
-
-            // Store all the capabilities names, that's used to make sure
-            // all devices havae all capabilities associated to it.
-            if (availableCapabilities.Contains(capabilityName) == false)
-                availableCapabilities.Add(capabilityName);
 
             // Ensure the capability is set to the current value.
             device.Properties.Set(capabilityName, capabilityValue.Split(

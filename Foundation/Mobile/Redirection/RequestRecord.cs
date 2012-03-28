@@ -1,11 +1,24 @@
-﻿using System;
+﻿/* *********************************************************************
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0.
+ * 
+ * If a copy of the MPL was not distributed with this file, You can obtain
+ * one at http://mozilla.org/MPL/2.0/.
+ * 
+ * This Source Code Form is “Incompatible With Secondary Licenses”, as
+ * defined by the Mozilla Public License, v. 2.0.
+ * ********************************************************************* */
+
+using System;
 using System.Net;
 using System.Web;
 using System.IO;
 using System.Text;
 
-#if VER4
+#if VER4 || VER35
+
 using System.Linq;
+
 #endif
 
 namespace FiftyOne.Foundation.Mobile.Redirection
@@ -213,18 +226,20 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         {
             StringBuilder headers = new StringBuilder();
             headers.Append(request.UserAgent);
-#if VER4
+
+#if VER4 || VER35
             foreach (string key in ADDITIONAL_HEADERS.Where(key => request.Headers[key] != null))
             {
                 headers.Append(key).Append(request.Headers[key]);
             }
-#elif VER2
-                foreach (string key in ADDITIONAL_HEADERS)
-                {
-                    if (request.Headers[key] != null)
-                        headers.Append(key).Append(request.Headers[key]);
-                }
+#else
+            foreach (string key in ADDITIONAL_HEADERS)
+            {
+                if (request.Headers[key] != null)
+                    headers.Append(key).Append(request.Headers[key]);
+            }
 #endif
+
             int hashCode = headers.ToString().GetHashCode();
             buffer[0] = (byte)(hashCode);
             buffer[1] = (byte)(hashCode >> 8);

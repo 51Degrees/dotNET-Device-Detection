@@ -1,30 +1,19 @@
 ﻿/* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
- * Version 1.1 (the "License"); you may not use this file except in 
- * compliance with the License. You may obtain a copy of the License at 
- * http://www.mozilla.org/MPL/
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0.
  * 
- * Software distributed under the License is distributed on an "AS IS" 
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. 
- * See the License for the specific language governing rights and 
- * limitations under the License.
- *
- * The Original Code is named .NET Mobile API, first released under 
- * this licence on 11th March 2009.
+ * If a copy of the MPL was not distributed with this file, You can obtain
+ * one at http://mozilla.org/MPL/2.0/.
  * 
- * The Initial Developer of the Original Code is owned by 
- * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees
- * Mobile Experts Limited are Copyright (C) 2009 - 2012. All Rights Reserved.
- * 
- * Contributor(s):
- *     James Rosewell <james@51degrees.mobi>
- *     Thomas Holmes <tom@51degrees.mobi>
- * 
+ * This Source Code Form is “Incompatible With Secondary Licenses”, as
+ * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
 #region Usings
 
 using System.Configuration;
+using System.Text;
+using System.Xml;
 
 #endregion
 
@@ -33,9 +22,43 @@ namespace FiftyOne.Foundation.Mobile.Configuration
     /// <summary>
     /// Settings for automatic redirection of mobile devices.
     /// </summary>
-    public class RedirectSection : ConfigurationSection
+    public sealed class RedirectSection : ConfigurationSection
     {
         #region Constructors
+
+        /// <summary>
+        /// Default constructor for an instance of <see cref="RedirectSection"/>
+        /// </summary>
+        public RedirectSection() {}
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Simple settings to remove the declaration.
+        /// </summary>
+        private XmlWriterSettings Settings
+        {
+            get
+            {
+                var settings = new XmlWriterSettings();
+                settings.OmitXmlDeclaration = true;
+                return settings;
+            }
+        }
+
+        /// <summary>
+        /// Returns the XML that needs to be written to the configuration file.
+        /// </summary>
+        /// <returns></returns>
+        internal string GetXmlElement()
+        {
+            var sb = new StringBuilder();
+            using (var writer = XmlWriter.Create(sb, Settings))
+                base.SerializeToXmlElement(writer, "redirect");
+            return sb.ToString();
+        }
 
         #endregion
 
@@ -61,6 +84,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         public string DevicesFile
         {
             get { return (string) this["devicesFile"]; }
+            set { this["devicesFile"] = value; }
         }
 
         /// <summary>
@@ -73,6 +97,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         public int Timeout
         {
             get { return (int) this["timeout"]; }
+            set { this["timeout"] = value; }
         }
 
         /// <summary>
@@ -84,6 +109,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         public bool FirstRequestOnly
         {
             get { return (bool) this["firstRequestOnly"]; }
+            set { this["firstRequestOnly"] = value; }
         }
 
         /// <summary>
@@ -96,6 +122,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         public bool OriginalUrlAsQueryString
         {
             get { return (bool) this["originalUrlAsQueryString"]; }
+            set { this["originalUrlAsQueryString"] = value; }
         }
 
         /// <summary>
@@ -107,6 +134,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         public string MobileHomePageUrl
         {
             get { return (string) this["mobileHomePageUrl"]; }
+            set { this["mobileHomePageUrl"] = value; }
         }
 
         /// <summary>
@@ -124,6 +152,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         public string MobilePagesRegex
         {
             get { return (string) this["mobilePagesRegex"]; }
+            set { this["mobilePagesRegex"] = value; }
         }
 
         /// <summary>
@@ -139,7 +168,12 @@ namespace FiftyOne.Foundation.Mobile.Configuration
             {
                 return (LocationsCollection)this["locations"];
             }
+            set
+            {
+                this["locations"] = value;
+            }
         }
+        
         #endregion
     }
 }

@@ -1,25 +1,12 @@
 /* *********************************************************************
- * The contents of this file are subject to the Mozilla Public License 
- * Version 1.1 (the "License"); you may not use this file except in 
- * compliance with the License. You may obtain a copy of the License at 
- * http://www.mozilla.org/MPL/
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0.
  * 
- * Software distributed under the License is distributed on an "AS IS" 
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. 
- * See the License for the specific language governing rights and 
- * limitations under the License.
- *
- * The Original Code is named .NET Mobile API, first released under 
- * this licence on 11th March 2009.
+ * If a copy of the MPL was not distributed with this file, You can obtain
+ * one at http://mozilla.org/MPL/2.0/.
  * 
- * The Initial Developer of the Original Code is owned by 
- * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees
- * Mobile Experts Limited are Copyright (C) 2009 - 2012. All Rights Reserved.
- * 
- * Contributor(s):
- *     James Rosewell <james@51degrees.mobi>
- *     Andy Allan <andy.allan@mobgets.com>
- * 
+ * This Source Code Form is “Incompatible With Secondary Licenses”, as
+ * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
 #region Usings
@@ -35,8 +22,10 @@ using FiftyOne.Foundation.Mobile.Configuration;
 
 #endregion
 
-#if VER4
+#if VER4 || VER35
+
 using System.Linq;
+
 #endif
 
 namespace FiftyOne.Foundation.Mobile.Detection.Configuration
@@ -48,7 +37,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
     {
         #region Fields
 
-        private static readonly DetectionSection _configurationSection;
+        private static DetectionSection _configurationSection;
 
         #endregion
 
@@ -85,11 +74,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
             {
                 if (_configurationSection == null)
                     return null;
-#if VER4
+#if VER4 || VER35
                 return  (from FileConfigElement patch in _configurationSection.XmlFiles
                          where patch.Enabled
                          select Mobile.Configuration.Support.GetFilePath(patch.FilePath)).ToArray();
-#elif VER2
+#else
                 List<string> patchFiles = new List<string>();
                 foreach (FileConfigElement patch in _configurationSection.XmlFiles)
                     if (patch.Enabled)
@@ -97,6 +86,23 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
                 return patchFiles.ToArray();
 #endif
             }
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Creates a new configuration instance checking for
+        /// fresh data.
+        /// </summary>
+        internal static void Refresh()
+        {
+            // Ensure the managers detection section is refreshed in case the
+            // process is not going to restart as a result of the change.
+            ConfigurationManager.RefreshSection("fiftyOne/detection");
+
+            _configurationSection = Support.GetWebApplicationSection("fiftyOne/detection", false) as DetectionSection;
         }
 
         #endregion

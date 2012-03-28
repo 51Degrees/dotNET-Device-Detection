@@ -21,7 +21,7 @@
     <SccProvider>
     </SccProvider>
     <ApplicationIcon>PDA.ico</ApplicationIcon>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
@@ -68,7 +68,9 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
@@ -78,9 +80,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Activator.cs" />
+    <Compile Include="Activator.cs" />
     <Compile Include="Mobile\Detection\AutoUpdate.cs" />
     <Compile Include="Mobile\Detection\Binary\DeviceInfo.cs" />
+    <Compile Include="Mobile\Detection\LicenceKey.cs" />
+    <Compile Include="Mobile\Detection\LicenceKeyActivationResults.cs" />
+    <Compile Include="Mobile\Detection\Property.cs" />
+    <Compile Include="Mobile\Detection\PropertyValue.cs" />
+    <Compile Include="Mobile\Detection\Value.cs" />
     <Compile Include="Mobile\Detection\Xml\HandlersReader.cs" />
     <Compile Include="Properties\BinaryConstants.cs" />
     <Compile Include="Cache.cs" />
@@ -156,17 +163,70 @@
     <Compile Include="Mobile\Redirection\Location.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\DetectionConstants.cs" />
+    <Compile Include="Properties\RetailerConstants.cs" />
+    <Compile Include="Properties\UIConstants.cs" />
     <Compile Include="Properties\XmlConstants.cs" />
     <Compile Include="Mobile\Detection\Collection.cs" />
     <Compile Include="Mobile\Detection\Strings.cs" />
     <Compile Include="Mobile\Detection\MobileCapabilities.cs" />
+    <Compile Include="UI\DataProvider.cs" />
+    <Compile Include="UI\Device.cs" />
+    <Compile Include="UI\RedirectData.cs" />
+    <Compile Include="UI\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Web\Activate.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Web\ActivityResult.cs" />
+    <Compile Include="UI\Web\BaseDataControl.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Web\BaseUserControl.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Web\Stats.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Web\DeviceExplorer.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Web\DeviceFinder.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Web\DeviceTemplate.cs" />
+    <Compile Include="UI\Web\HeaderTemplate.cs" />
+    <Compile Include="UI\Web\LiteMessage.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Web\PropertyDictionary.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Web\PropertyTemplate.cs" />
+    <Compile Include="UI\Web\Redirect.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Web\RelatedDeviceTemplate.cs" />
+    <Compile Include="UI\Web\Upload.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Web\UserAgentTester.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Web\VendorTemplate.cs" />
     <EmbeddedResource Include="Mobile\Detection\Binary\Resources\51Degrees.mobi-Lite.dat" />
+    <EmbeddedResource Include="UI\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Licence.txt" />
     <Content Include="PDA.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
+    <EmbeddedResource Include="UI\Headings.xml" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
