@@ -49,11 +49,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         private static MobileCapabilities _instance;
 
-        /// <summary>
-        /// Class used to record new devices.
-        /// </summary>
-        private static NewDevice _newDevice = new NewDevice(Constants.NewDevicesUrl, Constants.NewDeviceDetail);
-
         #endregion
 
         #region Private Properties
@@ -164,7 +159,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             get { return Instance.Provider; }
         }
-        
+
         #endregion
 
         #region Internal Static Methods
@@ -194,7 +189,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             // We can't do anything with empty user agent strings.
             if (userAgent == null)
                 return null;
-            
+
             if (_cache.GetTryParse(userAgent, out caps))
             {
                 // Return these capabilities for adding to the existing ones.
@@ -247,26 +242,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>A new mobile capabilities</returns>
         public static IDictionary Create(HttpRequest request, IDictionary currentCapabilities)
         {
-            IDictionary caps = Create(request.Headers, currentCapabilities);
-
-            // Send the header details to 51Degrees.mobi.
-            RecordNewDevice(request);
-
-            return caps;            
-        }
-
-        #endregion
-
-        #region Private Static Methods
-
-        /// <summary>
-        /// Send the header details to 51Degrees.mobi if the configuration is enabled.
-        /// </summary>
-        /// <param name="request">Details about the request that was used to create the new device.</param>
-        private static void RecordNewDevice(HttpRequest request)
-        {
-            if (_newDevice.Enabled)
-                _newDevice.RecordNewDevice(request);
+            return Create(request.Headers, currentCapabilities);
         }
 
         #endregion

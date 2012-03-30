@@ -15,16 +15,10 @@ using System;
 using System.IO;
 using System.Net;
 using System.Security;
-using System.Threading;
 using System.Web;
-using FiftyOne.Foundation.Mobile.Configuration;
+using System.Net.Cache;
 
 #endregion
-
-#if VER4
-using System.Linq;
-using System.Threading.Tasks;
-#endif
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
@@ -80,61 +74,88 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             // Get the new device details.
             NewDeviceData data = new NewDeviceData(request, _newDeviceDetail);
-#if VER4
+
+            // Process the new data details.
             if (!data.Ignore)
-                Task.Factory.StartNew(() => ProcessNewDevice(data));
-#else
-            if (data.Ignore == false)
-                ThreadPool.QueueUserWorkItem(ProcessNewDevice, data);
-#endif
+                try { Start(data); }
+                catch (Exception ex) { HandleException(ex); }
         }
 
-        private void ProcessNewDevice(object sender)
+        private void Start(NewDeviceData data)
         {
-            NewDeviceData newDevice = sender as NewDeviceData;
-            if (newDevice != null)
+            try
+            {
+                HttpWebRequest request = WebRequest.Create(_newDevicesUrl) as HttpWebRequest;
+                request.ReadWriteTimeout = Constants.NewUrlTimeOut;
+                request.Method = "POST";
+                request.CachePolicy = new RequestCachePolicy(RequestCacheLevel.NoCacheNoStore);
+                request.BeginGetRequestStream(
+                    new AsyncCallback(GetRequestStreamCallback),
+                    new object[] { request, data.Content });
+            }
+            catch (Exception ex) { HandleException(ex); }
+        }
+
+        private void GetRequestStreamCallback(IAsyncResult asynchronousResult)
+        {
+            try
+            {
+                var state = (object[])asynchronousResult.AsyncState;
+                var request = (HttpWebRequest)state[0];
+                var content = (string)state[1];
+
+                Stream postStream = request.EndGetRequestStream(asynchronousResult);
+                using (var writer = new StreamWriter(postStream))
+                    writer.Write(content);
+
+                request.BeginGetResponse(new AsyncCallback(GetResponseCallback), request);
+            }
+            catch (Exception ex) { HandleException(ex); }
+        }
+
+        private void GetResponseCallback(IAsyncResult asynchronousResult)
+        {
+            try
+            {
+                HttpWebRequest request = (HttpWebRequest)asynchronousResult.AsyncState;
+
+                // End the operation
+                HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asynchronousResult);
+                using (var reader = new StreamReader(response.GetResponseStream()))
+                    EventLog.Debug(reader.ReadToEnd());
+
+                // Release the HttpWebResponse
+                response.Close();
+            }
+            catch (Exception ex) { HandleException(ex); }
+        }
+
+        private void HandleException(Exception ex)
+        {
+            if (ex is SecurityException)
+            {
+                EventLog.Debug(String.Format("Insufficient permission to send new device information to '{0}'.",
+                                            _newDevicesUrl));
+                _enabled = false;
+            }
+            else if (ex is WebException)
             {
                 try
                 {
-                    // Record to a URL if one has been provided and the new devices.
-                    if (String.IsNullOrEmpty(newDevice.Content) == false)
-                        RecordToURL(newDevice);
+                    EventLog.Debug(
+                        String.Format(
+                            "Could not write device information to URL '{0}'. Exception '{1}'",
+                            _newDevicesUrl, ex.Message));
                 }
-                catch (SecurityException)
+                catch
                 {
-                    EventLog.Debug(String.Format("Insufficient permission to send new device information to '{0}'.",
-                                                _newDevicesUrl));
-                    _enabled = false;
-                }
-                catch (WebException ex)
-                {
-                    try
-                    {
-                        EventLog.Debug(
-                            String.Format(
-                                "Could not write device information for useragent '{0}' to URL '{1}'. Exception '{2}'",
-                                newDevice.UserAgent, _newDevicesUrl, ex.Message));
-                    }
-                    catch
-                    {
-                        // Do nothing as there is nothing we can do.
-                    }
+                    // Do nothing as there is nothing we can do.
                 }
             }
-        }
-
-        private void RecordToURL(NewDeviceData newDevice)
-        {
-            HttpWebRequest request = WebRequest.Create(_newDevicesUrl) as HttpWebRequest;
-            request.Timeout = Constants.NewUrlTimeOut;
-            request.Method = "POST";
-
-            StreamWriter writer = new StreamWriter(request.GetRequestStream());
-            writer.Write(newDevice.Content);
-            writer.Flush();
-            writer.Close();
-
-            request.GetResponse();
+            else
+            {
+                EventLog.Debug(ex);
+            }
         }
 
         #endregion

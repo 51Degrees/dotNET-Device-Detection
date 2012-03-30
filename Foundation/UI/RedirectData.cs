@@ -183,7 +183,7 @@ namespace FiftyOne.Foundation.UI
 
             if (element != null)
             {
-                element.DevicesFile = null;
+                element.DevicesFile = DevicesFile;
                 element.Timeout = Timeout;
                 element.FirstRequestOnly = FirstRequestOnly;
                 element.OriginalUrlAsQueryString = OriginalUrlAsQueryString;

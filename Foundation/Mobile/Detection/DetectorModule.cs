@@ -73,7 +73,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="application">HttpApplication object for the web application.</param>
         protected void Initialise(HttpApplication application)
         {
-            EventLog.Debug("Initialising Detector Module");
 #if VER4
                 // Replace the .NET v4 BrowserCapabilitiesProvider if it's not ours.
                 if (HttpCapabilitiesBase.BrowserCapabilitiesProvider is MobileCapabilitiesProvider == false)
@@ -97,6 +96,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 // override browser properties in the following way. The rest of the module is redundent
                 // in .NET v4.
 #else
+            EventLog.Debug("Initialising Detector Module");
+
             StaticFieldInit();
 
             // Intercept the beginning of the request to override the capabilities.
@@ -317,7 +318,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="context"><see cref="HttpContext"/> to be tested and overridden.</param>
         protected virtual void OverrideCapabilities(HttpContext context)
         {
-            context.Request.Browser = AddNewCapabilities(context.Request.Browser, 
+            context.Request.Browser = AddNewCapabilities(context.Request.Browser,
                 Factory.Create(context.Request, context.Request.Browser.Capabilities));
         }
 

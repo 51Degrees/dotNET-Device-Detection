@@ -16,6 +16,7 @@ using System;
 using FiftyOne.Foundation.Mobile.Configuration;
 using System.Web.Security;
 using System.Web.UI;
+using FiftyOne.Foundation.Mobile.Detection;
 
 #if VER4 || VER35
 
@@ -104,6 +105,11 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// </summary>
         private static IRequestHistory _requestHistory;
 
+        /// <summary>
+        /// Class used to record new devices.
+        /// </summary>
+        private static NewDevice _newDevice = new NewDevice(Detection.Constants.NewDevicesUrl, Detection.Constants.NewDeviceDetail);
+
         #endregion
 
         #region Initialisers
@@ -116,7 +122,8 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         public virtual void Init(HttpApplication application)
         {
             EventLog.Debug("Initialising redirection module");
-            StaticFieldInit();
+            
+            StaticFieldInit(application);
 
             // Initialise the request history processor if required.
             if (_firstRequestOnly == true)
@@ -127,7 +134,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                 _requestHistory = new RequestHistory();
 #endif
             }
-
+            
             RegisterEventHandlersInit(application);
         }
 
@@ -137,8 +144,6 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// <param name="application">HttpApplication object for the web application.</param>
         private static void RegisterEventHandlersInit(HttpApplication application)
         {
-            EventLog.Debug("Initialising redirection module event handlers");
-
             // Record the original requesting URL.
             application.BeginRequest += OnBeginRequest;
 
@@ -150,7 +155,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// <summary>
         /// Initialises the static fields.
         /// </summary>
-        private static void StaticFieldInit()
+        private static void StaticFieldInit(HttpApplication application)
         {
             if (_staticFieldsInitialised == false)
             {
@@ -232,17 +237,20 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// <param name="e">EventArgs related to the event. Not used.</param>
         public static void OnPostAcquireRequestState(object sender, EventArgs e)
         {
-            // Initialise the static fields if required.
-            StaticFieldInit();
-
-            if (_redirectEnabled && sender is HttpApplication)
+            if (sender is HttpApplication)
             {
+                // Initialise the static fields if required.
+                StaticFieldInit((HttpApplication)sender);
+
                 HttpContext context = ((HttpApplication)sender).Context;
 
                 if (context != null)
                 {
+
+                    RecordNewDevice(context);
+
                     // Check to see if the request should be redirected.
-                    if (ShouldRequestRedirect(context))
+                    if (_redirectEnabled && ShouldRequestRedirect(context))
                     {
                         string newUrl = GetLocationUrl(context);
                         if (_originalUrlAsQueryString)
@@ -275,10 +283,34 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                 }
             }
         }
-
+        
         #endregion
 
         #region Methods
+        
+        /// <summary>
+        /// Record the new device if we're as certain as we can be that it is
+        /// not one we've processed already.
+        /// </summary>
+        /// <param name="context">Context of the request.</param>
+        private static void RecordNewDevice(HttpContext context)
+        {
+            try
+            {
+                if (_newDevice.Enabled &&
+                    context.Request.HttpMethod == "GET" &&
+                    context.Handler != null &&
+                    IsPageType(context.Handler.GetType()) &&
+                    context.Request.Cookies[Constants.AlreadyAccessedCookieName] == null &&
+                    (context.Session == null || context.Session[Constants.ExpiryTime] == null) &&
+                    (_requestHistory == null || _requestHistory.IsPresent(context.Request) == false))
+                    _newDevice.RecordNewDevice(context.Request);
+            }
+            catch (Exception ex)
+            {
+                EventLog.Debug(ex);
+            }
+        }
 
         /// <summary>
         /// Records the module being disposed if debug enabled.
@@ -463,9 +495,6 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                 if (context.Request.Cookies[Constants.AlreadyAccessedCookieName] != null)
                     WipeResponseCookie(context, context.Request.Cookies[Constants.AlreadyAccessedCookieName]);
 
-                // Remove from the devices cache file as session can be used.
-                _requestHistory.Remove(context.Request);
-
                 return false;
             }
 
@@ -595,7 +624,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// </summary>
         /// <param name="type">The type to be checked.</param>
         /// <returns>True is the request relates to a page.</returns>
-        private static bool IsPageType(Type type)
+        internal static bool IsPageType(Type type)
         {
             if (type != null)
             {

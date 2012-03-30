@@ -38,7 +38,7 @@ namespace FiftyOne.Foundation.UI.Web
 
         internal const string REGEX_NUMERIC = @"^\d{1,}$";
         internal const string REGEX_FILE = @"^$|^(~|\\|\w).+";
-        internal const string REGEX_URL = @"^(\w+://|~)[/\w\d\.]+$";
+        internal const string REGEX_URL = @"^(\w+://|~)[/\w\d\.{}]+$";
         internal const string VALIDATION_GROUP = "Redirect";
         internal const string EXPRESSION_VALUE = "[Expression]";
 
@@ -142,12 +142,11 @@ namespace FiftyOne.Foundation.UI.Web
                 _buttonDelete = new Button();
                 _customValidatorMatchExpression = new CustomValidator();
 
-                _ddlProperties.DataSource = DataProvider.Provider.Properties;
-                _ddlProperties.DataTextField = "Name";
-                _ddlProperties.DataValueField = "Name";
-
-                _ddlValues.DataTextField = "Name";
-                _ddlValues.DataValueField = "Name";
+                var list = new List<string>();
+                foreach (var property in DataProvider.Provider.Properties)
+                    list.Add(property.Name);
+                list.Sort();
+                _ddlProperties.DataSource = list;
 
                 _ddlProperties.AutoPostBack = true;
                 _ddlValues.AutoPostBack = true;
@@ -209,8 +208,12 @@ namespace FiftyOne.Foundation.UI.Web
                     // Bind the values list to the ones that are available
                     // for the property selected.
                     _ddlValues.Items.Clear();
+                    var list = new List<string>();
                     foreach (var value in property.Values)
-                        _ddlValues.Items.Add(new ListItem(value.Name, value.Name));
+                        list.Add(value.Name);
+                    list.Sort();
+                    foreach (var item in list)
+                        _ddlValues.Items.Add(new ListItem(item, item));
                     _ddlValues.Items.Add(new ListItem(EXPRESSION_VALUE, String.Empty));
 
                     // Selected the current item if available, otherwise select

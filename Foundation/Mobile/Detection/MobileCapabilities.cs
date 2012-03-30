@@ -153,11 +153,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
             Create(device, capabilities, currentCapabilities);
 
             // Add the detection time to the list of properties.
-            ((SortedList<string, List<string>>)capabilities[Constants.FiftyOneDegreesProperties])
-                .Add(Constants.DetectionTimeProperty, 
-                new List<string>(new [] {
+            if (capabilities[Constants.FiftyOneDegreesProperties] is SortedList<string, List<string>>)
+            {
+                ((SortedList<string, List<string>>)capabilities[Constants.FiftyOneDegreesProperties])
+                    .Add(Constants.DetectionTimeProperty,
+                    new List<string>(new[] {
                     detectionTime.ToString() 
-                } ));
+                }));
+            }
 
             // Initialise any capability values that rely on the settings
             // from the device data source.

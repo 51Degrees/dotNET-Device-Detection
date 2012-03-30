@@ -33,13 +33,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Sets the cache key length to a value of 256 to allow for mobile
         /// useragents that can often be longer than the default 64 characters.
         /// </summary>
-        public MobileCapabilitiesProvider() : base()
+        public MobileCapabilitiesProvider()
+            : base()
         {
             EventLog.Debug("Constructing MobileCapabilitiesProvider - Default");
-            #if DEBUG
-                LogStackTrace();
-            #endif
-            base.UserAgentCacheKeyLength = 256;    
+#if DEBUG
+            LogStackTrace();
+#endif
+            base.UserAgentCacheKeyLength = 256;
         }
 
         /// <summary>
@@ -51,16 +52,16 @@ namespace FiftyOne.Foundation.Mobile.Detection
             : base(parent)
         {
             EventLog.Debug("Constructing MobileCapabilitiesProvider - HttpCapabilitiesDefaultProvider");
-            #if DEBUG
-                LogStackTrace();
-            #endif
+#if DEBUG
+            LogStackTrace();
+#endif
             _parent = parent;
-            base.UserAgentCacheKeyLength = 256; 
+            base.UserAgentCacheKeyLength = 256;
         }
 
         // If in debug compilation record the stake trace as this class is constructed
         // before the debugger can become active.
-        #if DEBUG
+#if DEBUG
         private void LogStackTrace()
         {
             StringBuilder trace = new StringBuilder().AppendLine("Constructor Stack Trace:");
@@ -68,7 +69,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 trace.AppendLine(frame.ToString());
             EventLog.Debug(trace.ToString());
         }
-        #endif
+#endif
 
         /// <summary>
         /// Provides information to the web server about the requesting device.
@@ -99,7 +100,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>.NET base browser capabilities</returns>
         protected virtual System.Web.HttpBrowserCapabilities GetBaseCapabilities(HttpRequest request)
         {
-            return 
+            return
                 _parent == null
                     ? base.GetBrowserCapabilities(request)
                     : _parent.GetBrowserCapabilities(request);

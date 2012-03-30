@@ -97,13 +97,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Length of time in ms the new devices thread should wait for a response from the
         /// web server used to record new device information.
         /// </summary>
-        internal const int NewUrlTimeOut = 10000;
+        internal const int NewUrlTimeOut = 5000;
 
         /// <summary>
         /// Forces the useragent matcher to use a single thread if 
         /// multiple processors are available.
         /// </summary>
-        internal const bool ForceSingleProcessor = false;
+        internal const bool ForceSingleProcessor = true;
 
         /// <summary>
         /// Array of transcoder HTTP headers that represent the useragent string of the
