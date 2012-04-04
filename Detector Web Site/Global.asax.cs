@@ -36,18 +36,18 @@ namespace Detector
         // and the following uncommented code. Unpredictable results may be experienced.
 
 #if VER4
-        protected void Application_Start(object sender, EventArgs e)
-        {
-            // Enable the mobile detection provider.
-            HttpCapabilitiesBase.BrowserCapabilitiesProvider =
-                new FiftyOne.Foundation.Mobile.Detection.MobileCapabilitiesProvider();
-        }
+        //protected void Application_Start(object sender, EventArgs e)
+        //{
+        //    // Enable the mobile detection provider.
+        //    HttpCapabilitiesBase.BrowserCapabilitiesProvider =
+        //        new FiftyOne.Foundation.Mobile.Detection.MobileCapabilitiesProvider();
+        //}
 
-        protected void Application_AcquireRequestState(object sender, EventArgs e)
-        {
-            // Check if a redirection is needed.
-            FiftyOne.Foundation.Mobile.Redirection.RedirectModule.OnPostAcquireRequestState(sender, e);
-        }
+        //protected void Application_AcquireRequestState(object sender, EventArgs e)
+        //{
+        //    // Check if a redirection is needed.
+        //    FiftyOne.Foundation.Mobile.Redirection.RedirectModule.OnPostAcquireRequestState(sender, e);
+        //}
 #endif
     }
 }
