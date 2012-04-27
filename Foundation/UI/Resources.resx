@@ -253,7 +253,7 @@ The web servers firewall or another firewall is blocking access to the host or t
     <value>&lt;div class="{0}"&gt;&lt;p&gt;The data source provided could not be read from.&lt;/p&gt;&lt;/div&gt;</value>
   </data>
   <data name="StatsHtml" xml:space="preserve">
-    <value>&lt;div class="{0}"&gt;&lt;span&gt;Data Version: &lt;b&gt;{1}&lt;/b&gt;&lt;/span&gt; &lt;span&gt;Published: &lt;b&gt;{2:d}&lt;/b&gt;&lt;/span&gt; &lt;span&gt;Properties: &lt;b&gt;{3}&lt;/b&gt;&lt;span&gt;&lt;/div&gt;</value>
+    <value>&lt;div class="{0}"&gt;&lt;span&gt;Data Version: &lt;b&gt;{1}&lt;/b&gt;&lt;/span&gt; &lt;span&gt;Published: &lt;b&gt;{2:d}&lt;/b&gt;&lt;/span&gt;&lt;span&gt;Properties: &lt;b&gt;{3}&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;</value>
   </data>
   <data name="UploadButtonText" xml:space="preserve">
     <value>Upload</value>

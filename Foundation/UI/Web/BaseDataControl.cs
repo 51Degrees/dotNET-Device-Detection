@@ -276,7 +276,7 @@ namespace FiftyOne.Foundation.UI.Web
                     return new ActivityResult(String.Format(
                         ActivationFailureCouldNotUpdateConfigHtml,
                         ErrorCssClass,
-                        String.Join(", ", FiftyOne.Foundation.Mobile.Constants.CONFIG_FILENAMES)));
+                        String.Join(", ", FiftyOne.Foundation.Mobile.Constants.ConfigFileNames)));
                 case Mobile.Detection.LicenceKeyResults.Https:
                     return new ActivityResult(String.Format(
                         ActivationFailureHttpHtml,
@@ -296,8 +296,8 @@ namespace FiftyOne.Foundation.UI.Web
                         ErrorCssClass));
                 case Mobile.Detection.LicenceKeyResults.WriteLicenceFile:
                     return new ActivityResult(String.Format(
-                        ErrorCssClass,
                         ActivationFailureCouldNotWriteLicenceFileHtml,
+                        ErrorCssClass,
                         FiftyOne.Foundation.Mobile.Detection.LicenceKey.LicenceKeyFileName,
                         Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "bin")));
                 case Mobile.Detection.LicenceKeyResults.WriteDataFile:

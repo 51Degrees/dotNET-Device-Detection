@@ -226,14 +226,38 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 // Sets the last modified time of the file downloaded.
                 BinaryFile.LastWriteTimeUtc = provider.PublishedDate;
 
-                // Switch the instance of the data provider over.
-                Factory.Reset();
+                // Reset the worker processes.
+                Reset();
 
                 EventLog.Info(String.Format(
                     "Automatically updated binary data file '{0}' with version " +
                     "published on the '{1:d}'.",
                     BinaryFile.FullName,
                     Factory.ActiveProvider.PublishedDate));
+            }
+        }
+
+        /// <summary>
+        /// Writes a file to the bin folder to reset the application if the 
+        /// data file is not already in the bin folder.
+        /// </summary>
+        internal static void Reset()
+        {
+            try
+            {
+                var binDirectory = new DirectoryInfo(Path.Combine(
+                    HostingEnvironment.ApplicationPhysicalPath, "bin"));
+
+                if (BinaryFile.Directory.FullName.Equals(binDirectory.FullName) == false)
+                {
+                    File.WriteAllText(
+                        Path.Combine(binDirectory.FullName, "51Degrees.mobi.reset.txt"),
+                        "This file is used to force worker processes to restart following a data file update. It can be deleted.");
+                }
+            }
+            catch
+            {
+                // Ignore as there is nothing we can do.
             }
         }
 

@@ -56,10 +56,10 @@ namespace FiftyOne.Foundation.UI
             {
 #if VER4 || VER35
                 return Provider.Properties.Where(i =>
-                    Constants.HARDWARE.Contains(i.Name) &&
+                    Constants.Hardware.Contains(i.Name) &&
                     i.Values.Count > 0).ToList();
 #else
-                return GetProperties(Provider.Properties, Constants.HARDWARE);
+                return GetProperties(Provider.Properties, Constants.Hardware);
 #endif
             }
         }
@@ -73,10 +73,10 @@ namespace FiftyOne.Foundation.UI
             {
 #if VER4 || VER35
                 return Provider.Properties.Where(i =>
-                  Constants.SOFTWARE.Contains(i.Name) &&
+                  Constants.Software.Contains(i.Name) &&
                   i.Values.Count > 0).ToList();
 #else
-                return GetProperties(Provider.Properties, Constants.SOFTWARE);
+                return GetProperties(Provider.Properties, Constants.Software);
 #endif
             }
         }
@@ -90,10 +90,10 @@ namespace FiftyOne.Foundation.UI
             {
 #if VER4 || VER35
                 return Provider.Properties.Where(i =>
-                  Constants.BROWSER.Contains(i.Name) &&
+                  Constants.Browser.Contains(i.Name) &&
                   i.Values.Count > 0).ToList();
 #else
-                return GetProperties(Provider.Properties, Constants.BROWSER);
+                return GetProperties(Provider.Properties, Constants.Browser);
 #endif
             }
         }
@@ -107,10 +107,10 @@ namespace FiftyOne.Foundation.UI
             {
 #if VER4 || VER35
                 return Provider.Properties.Where(i =>
-                  Constants.CONTENT.Contains(i.Name) &&
+                  Constants.Content.Contains(i.Name) &&
                   i.Values.Count > 0).ToList();
 #else
-                return GetProperties(Provider.Properties, Constants.CONTENT);
+                return GetProperties(Provider.Properties, Constants.Content);
 #endif
             }
         }

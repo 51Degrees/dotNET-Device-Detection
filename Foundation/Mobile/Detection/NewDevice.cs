@@ -122,7 +122,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 // End the operation
                 HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asynchronousResult);
                 using (var reader = new StreamReader(response.GetResponseStream()))
-                    EventLog.Debug(reader.ReadToEnd());
+                {
+                    var content = reader.ReadToEnd();
+#if DEBUG
+                    EventLog.Debug(content);
+#endif
+                }
 
                 // Release the HttpWebResponse
                 response.Close();

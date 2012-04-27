@@ -18,7 +18,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// Full type names of classes representing mobile
         /// page handlers.
         /// </summary>
-        internal static readonly string[] MOBILE_PAGES = {
+        internal static readonly string[] MobilePages = {
                                                             "System.Web.UI.MobileControls.MobilePage",
                                                             "FiftyOne.Framework.Mobile.Page"
                                                         };
@@ -27,7 +27,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// Full type names of classes representing standard
         /// page handlers.
         /// </summary>
-        internal static readonly string[] PAGES = new[]
+        internal static readonly string[] Pages = new[]
                                                      {
                                                          "System.Web.UI.Page",
                                                          "System.Web.Mvc.MvcHandler",
@@ -41,18 +41,18 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// The key in the Items collection of the requesting context used to
         /// store the Url originally requested by the browser.
         /// </summary>
-        internal const string ORIGINAL_URL_KEY = "51D_Original_Url";
+        internal const string OriginalUrlKey = "51D_Original_Url";
 
         /// <summary>
         /// The property name to use to access the original Url for the request.
         /// </summary>
-        internal const string ORIGINAL_URL_SPECIAL_PROPERTY = "origUrl";
+        internal const string OriginalUrlSpecialProperty = "origUrl";
 
         /// <summary>
         /// The key in the Items collection of the requesting context used to
         /// store the home page Url for a possible redirection.
         /// </summary>
-        internal const string LOCATION_URL_KEY = "51D_Location_Url";
+        internal const string LocationUrlKey = "51D_Location_Url";
 
         /// <summary>
         /// Set the UTC date and time that details of the device should be removed

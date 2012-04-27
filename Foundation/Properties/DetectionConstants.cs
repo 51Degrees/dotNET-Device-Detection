@@ -32,12 +32,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
         public const string LicenceKeyFileName = "51Degrees.mobi.lic";
 
         /// <summary>
-        /// The character used to seperate property values.
+        /// The character used to seperate property values when concatenated as a single string.
         /// </summary>
         public const string ValueSeperator = "|";
 
         /// <summary>
-        /// The character used to seperate profiles in the device id.
+        /// The character used to seperate profile integer values  in the device id.
         /// </summary>
         public const string ProfileSeperator = "-";
 
@@ -75,7 +75,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         internal const string PremiumLicenceKey = "";
 
         /// <summary>
-        /// The URL to use to get the latest device data from.
+        /// The URL to use to get the latest device data from if a Premium licence key is provided.
         /// </summary>
         internal const string AutoUpdateUrl = "https://51degrees.mobi/Products/Downloads/Premium.aspx";
 
@@ -103,7 +103,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Forces the useragent matcher to use a single thread if 
         /// multiple processors are available.
         /// </summary>
-        internal const bool ForceSingleProcessor = true;
+        internal const bool ForceSingleProcessor = false;
+
+        /// <summary>
+        /// Improves performance of segment handlers by storing the results of 
+        /// useragent segment matches to improve performance at the expense
+        /// of memory consumption. Set this to false to reduce memory consumption.
+        /// </summary>
+        internal const bool StoreSegmentResults = true;
 
         /// <summary>
         /// Array of transcoder HTTP headers that represent the useragent string of the
@@ -127,7 +134,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         internal const string NewDevicesUrl = "http://devices.51degrees.mobi/new.ashx";
         
         /// <summary>
-        /// The detail that should be provided relating to possible new devices.
+        /// The detail that should be provided relating to new devices.
         /// </summary>
         internal const NewDeviceDetails NewDeviceDetail = NewDeviceDetails.Maximum;
 

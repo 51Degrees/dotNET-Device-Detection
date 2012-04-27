@@ -25,7 +25,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Binary
         public static readonly Version FormatVersion = new Version(1, 0);
 
         /// <summary>
-        /// The name of the embedded resource containing the device data.
+        /// The name of the embedded resource containing the Lite device data compiled into the assembly.
         /// </summary>
         public const string EmbeddedDataResourceName = "FiftyOne.Foundation.Mobile.Detection.Binary.Resources.51Degrees.mobi-Lite.dat";
     }

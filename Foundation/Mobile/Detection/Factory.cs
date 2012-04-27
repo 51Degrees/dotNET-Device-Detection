@@ -165,18 +165,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Internal Static Methods
 
         /// <summary>
-        /// Resets the factory forcing data to be reloaded.
-        /// </summary>
-        internal static void Reset()
-        {
-            lock (_lock)
-            {
-                _instance = null;
-                _cache.Clear();
-            }
-        }
-
-        /// <summary>
         /// Creates a new <see cref="MobileCapabilities"/> class based on the useragent
         /// string provided.
         /// </summary>

@@ -78,6 +78,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         private string[] _profileIDs = null;
 
+        /// <summary>
+        /// A collection of handler specific data.
+        /// </summary>
+        private SortedList<Handlers.Handler, object> _handlerData;
+
         #endregion
 
         #region Public Properties
@@ -208,6 +213,52 @@ namespace FiftyOne.Foundation.Mobile.Detection
             }
         }
                
+        #endregion
+
+        #region Private Properties
+
+        /// <summary>
+        /// Returns the data object for the specific handler.
+        /// </summary>
+        private SortedList<Handlers.Handler, object> HandlerData
+        {
+            get
+            {
+                if (_handlerData == null)
+                {
+                    lock (_lock)
+                    {
+                        if (_handlerData == null)
+                        {
+                            _handlerData = new SortedList<Handlers.Handler, object>();
+                        }
+                    }
+                }
+                return _handlerData;
+            }
+        }
+
+        #endregion
+
+        #region Handler Data Methods
+
+        /// <summary>
+        /// Returns a the handlers data object of type T. If no data has
+        /// been created for the handler then new data is created.
+        /// </summary>
+        /// <typeparam name="T">The type of handler data to store.</typeparam>
+        /// <param name="handler">The handler related to the device.</param>
+        /// <returns>The data of type T, or a new instance.</returns>
+        internal object GetHandlerData<T>(Handlers.Handler handler) where T : new()
+        {
+            object data = null;
+            if (HandlerData.TryGetValue(handler, out data))
+                return data;
+            data = new T();
+            HandlerData.Add(handler, data);
+            return data;
+        }
+
         #endregion
 
         #region Constructors

@@ -96,7 +96,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Segment
                 {
                     // Get the next segment for the comparision.
                     var compare = request.Handler.CreateSegments(
-                        current.UserAgent, index);
+                        current, index);
 
                     // If the two results are not equal in length so do not consider
                     // this useragent as a possible match.

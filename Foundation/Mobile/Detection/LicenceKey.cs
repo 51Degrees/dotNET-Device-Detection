@@ -193,7 +193,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 }
 
                 // Switch in the new data to complete activation.
-                Factory.Reset();
+                AutoUpdate.Reset();
 
                 EventLog.Info(String.Format(
                     "Activated binary data file '{0}' with new version " +
@@ -263,6 +263,19 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     return LicenceKeyResults.Invalid;
                 }
 
+                // Write the license key to the bin folder.
+                try
+                {
+                    File.WriteAllText(Path.Combine(
+                        HostingEnvironment.ApplicationPhysicalPath,
+                        Path.Combine("bin", Constants.LicenceKeyFileName)), licenceKey);
+                }
+                catch (Exception ex)
+                {
+                    EventLog.Warn(ex);
+                    return LicenceKeyResults.WriteLicenceFile;
+                }
+
                 // Write the file to the binary data path.
                 try
                 {
@@ -275,21 +288,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     return LicenceKeyResults.WriteDataFile;
                 }
 
-                // Write the license key to the bin folder.
-                try
-                {
-                    File.WriteAllText(Path.Combine(
-                        HostingEnvironment.ApplicationPhysicalPath,
-                        String.Format("bin\\{0}", Constants.LicenceKeyFileName)), licenceKey);
-                }
-                catch (Exception ex)
-                {
-                    EventLog.Warn(ex);
-                    return LicenceKeyResults.WriteLicenceFile;
-                }
-
                 // Switch in the new data to complete activation.
-                Factory.Reset();
+                AutoUpdate.Reset();
 
                 EventLog.Info(String.Format(
                     "Activated binary data file '{0}' with new version " +

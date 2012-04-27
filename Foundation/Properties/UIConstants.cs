@@ -16,7 +16,7 @@ namespace FiftyOne.Foundation.UI
         /// <summary>
         /// List of properties which are associated with the physical hardware.
         /// </summary>
-        internal static readonly string[] HARDWARE = new[] {
+        internal static readonly string[] Hardware = new[] {
             "HardwareVendor",
             "HardwareModel",
             "HardwareName",
@@ -51,7 +51,7 @@ namespace FiftyOne.Foundation.UI
         /// List of properties associated with the operating system
         /// or software.
         /// </summary>
-        internal static readonly string[] SOFTWARE = new[] {
+        internal static readonly string[] Software = new[] {
             "PlatformVendor",
             "PlatformName",
             "PlatformVersion",
@@ -60,7 +60,7 @@ namespace FiftyOne.Foundation.UI
         /// <summary>
         /// List of properties associated with the browser.
         /// </summary>
-        internal static readonly string[] BROWSER = new[] {
+        internal static readonly string[] Browser = new[] {
             "BrowserVendor",
             "BrowserName",
             "BrowserVersion",
@@ -125,20 +125,21 @@ namespace FiftyOne.Foundation.UI
             "TouchEvents",
             "Track",
             "Video",
-            "Viewport"
+            "Viewport",
+            "SupportsTls/Ssl"
         };
 
         /// <summary>
         /// List of properties associated wtih the type of content
         /// the browser/device can display.
         /// </summary>
-        internal static readonly string[] CONTENT = new[] {
+        internal static readonly string[] Content = new[] {
             "CcppAccept",
             "StreamingAccept" };
 
         /// <summary>
         /// The 51Degrees.mobi thumbnail logo.
         /// </summary>
-        internal const string LOGO = "http://download.51degrees.mobi/51Degrees%20Logo%20Small.png";
+        internal const string Logo = "http://download.51degrees.mobi/51Degrees%20Logo%20Small.png";
     }
 }

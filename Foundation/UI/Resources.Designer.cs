@@ -779,7 +779,7 @@ namespace FiftyOne.Foundation.UI {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;div class=&quot;{0}&quot;&gt;&lt;span&gt;Data Version: &lt;b&gt;{1}&lt;/b&gt;&lt;/span&gt; &lt;span&gt;Published: &lt;b&gt;{2:d}&lt;/b&gt;&lt;/span&gt; &lt;span&gt;Properties: &lt;b&gt;{3}&lt;/b&gt;&lt;span&gt;&lt;/div&gt;.
+        ///   Looks up a localized string similar to &lt;div class=&quot;{0}&quot;&gt;&lt;span&gt;Data Version: &lt;b&gt;{1}&lt;/b&gt;&lt;/span&gt; &lt;span&gt;Published: &lt;b&gt;{2:d}&lt;/b&gt;&lt;/span&gt;&lt;span&gt;Properties: &lt;b&gt;{3}&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;.
         /// </summary>
         internal static string StatsHtml {
             get {

@@ -14,9 +14,9 @@ namespace FiftyOne.Foundation.Mobile
     internal static class Constants
     {
         /// <summary>
-        /// Alternative configuration file name
+        /// Array of file locations to check for configuration information.
         /// </summary>
-        internal static readonly string[] CONFIG_FILENAMES = new string[] {
+        internal static readonly string[] ConfigFileNames = new string[] {
             "~/Web.config",
             "~/App_Data/51Degrees.mobi.config",
             "~/51Degrees.mobi.config" };

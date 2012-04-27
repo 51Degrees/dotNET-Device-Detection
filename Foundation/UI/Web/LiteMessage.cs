@@ -24,8 +24,8 @@ namespace FiftyOne.Foundation.UI.Web
     {
         #region Fields
 
-        private Uri _retailerUrl = new Uri(RetailerConstants.RETAILER_URL);
-        private string _retailerName = RetailerConstants.RETAILER_NAME;
+        private Uri _retailerUrl = new Uri(RetailerConstants.RetailerUrl);
+        private string _retailerName = RetailerConstants.RetailerName;
         private Literal _html;
 
         #endregion

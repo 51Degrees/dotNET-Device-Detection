@@ -67,7 +67,7 @@ namespace FiftyOne.Foundation
         /// </summary>
         private static void RegisterModule()
         {
-            Microsoft.Web.Infrastructure.DynamicModuleHelper.DynamicModuleUtility.RegisterModule(typeof(FiftyOne.Foundation.Mobile.Redirection.RedirectModule));
+            // Microsoft.Web.Infrastructure.DynamicModuleHelper.DynamicModuleUtility.RegisterModule(typeof(FiftyOne.Foundation.Mobile.Redirection.RedirectModule));
         }
     }
 }

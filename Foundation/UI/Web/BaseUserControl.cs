@@ -296,7 +296,7 @@ namespace FiftyOne.Foundation.UI.Web
                 image.Style.Add("border", "none");
                 image.Style.Add("margin", "5px");
                 image.Style.Add("float", "right");
-                image.ImageUrl = Constants.LOGO;
+                image.ImageUrl = Constants.Logo;
                 _container.Controls.AddAt(0, image);
             }
 

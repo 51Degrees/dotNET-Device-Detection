@@ -158,10 +158,10 @@ namespace FiftyOne.Foundation.UI.Web
                 // Bind the list of properties to the control.
                 _ddlProperties.DataBind();
                 _ddlProperties.Items.Add(new ListItem(
-                    FiftyOne.Foundation.Mobile.Redirection.Constants.ORIGINAL_URL_SPECIAL_PROPERTY,
-                    FiftyOne.Foundation.Mobile.Redirection.Constants.ORIGINAL_URL_SPECIAL_PROPERTY));
+                    FiftyOne.Foundation.Mobile.Redirection.Constants.OriginalUrlSpecialProperty,
+                    FiftyOne.Foundation.Mobile.Redirection.Constants.OriginalUrlSpecialProperty));
                 _ddlProperties.SelectedValue =
-                    FiftyOne.Foundation.Mobile.Redirection.Constants.ORIGINAL_URL_SPECIAL_PROPERTY;
+                    FiftyOne.Foundation.Mobile.Redirection.Constants.OriginalUrlSpecialProperty;
 
                 SetValuesDataSource();
 

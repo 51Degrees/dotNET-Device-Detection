@@ -154,8 +154,8 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         {
             switch(property)
             {
-                case Constants.ORIGINAL_URL_SPECIAL_PROPERTY:
-                    return context.Items[Constants.ORIGINAL_URL_KEY] as string;
+                case Constants.OriginalUrlSpecialProperty:
+                    return context.Items[Constants.OriginalUrlKey] as string;
             }
             return null;
         }

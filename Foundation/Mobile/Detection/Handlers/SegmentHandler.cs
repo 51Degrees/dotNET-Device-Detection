@@ -40,17 +40,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         /// <summary>
         /// Creates segments for all regexes.
         /// </summary>
-        /// <param name="source"></param>
-        /// <returns></returns>
-        internal abstract Segments CreateAllSegments(string source);
+        /// <param name="userAgent">The useragent segments should be returned for.</param>
+        /// <returns>The list of segments.</returns>
+        internal abstract Segments CreateAllSegments(string userAgent);
 
         /// <summary>
-        /// Creates  segments for the regex index provided.
+        /// Creates segments for the regex index provided.
         /// </summary>
-        /// <param name="source"></param>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        internal abstract List<Segment> CreateSegments(string source, int index);
+        /// <param name="device">The device to get the segments from.</param>
+        /// <param name="index">The index of the segment required.</param>
+        /// <returns>The list of segments.</returns>
+        internal abstract List<Segment> CreateSegments(BaseDeviceInfo device, int index);
 
         #endregion
 

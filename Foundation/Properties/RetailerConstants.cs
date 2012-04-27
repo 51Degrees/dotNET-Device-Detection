@@ -14,13 +14,13 @@ namespace FiftyOne.Foundation
     internal static class RetailerConstants
     {
         /// <summary>
-        /// The default url to send customers to.
+        /// The default url to send customers to when they want to find out more and purchase.
         /// </summary>
-        internal const string RETAILER_URL = "http://51degrees.mobi/Purchase/PremiumData.aspx";
+        internal const string RetailerUrl = "http://51degrees.mobi/Purchase/PremiumData.aspx";
 
         /// <summary>
         /// The default name of the retailer.
         /// </summary>
-        internal const string RETAILER_NAME = "Visit the 51Degrees.mobi store";
+        internal const string RetailerName = "Visit the 51Degrees.mobi store";
     }
 }

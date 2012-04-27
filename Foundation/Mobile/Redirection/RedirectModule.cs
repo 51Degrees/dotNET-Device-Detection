@@ -222,7 +222,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                 HttpContext context = ((HttpApplication)sender).Context;
                 if (context != null)
                 {
-                    context.Items[Constants.ORIGINAL_URL_KEY] = context.Request.Url.ToString();
+                    context.Items[Constants.OriginalUrlKey] = context.Request.Url.ToString();
                 }
             }
         }
@@ -274,7 +274,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                         if (EventLog.IsDebug)
                             EventLog.Debug(String.Format("Redirecting device with useragent '{0}' from url '{1}' to '{2}' due to '{3}'.",
                                               context.Request.UserAgent,
-                                              context.Items[Constants.ORIGINAL_URL_KEY],
+                                              context.Items[Constants.OriginalUrlKey],
                                               newUrl,
                                               GetLocationName(context)));
 
@@ -301,9 +301,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                     context.Request.HttpMethod == "GET" &&
                     context.Handler != null &&
                     IsPageType(context.Handler.GetType()) &&
-                    context.Request.Cookies[Constants.AlreadyAccessedCookieName] == null &&
-                    (context.Session == null || context.Session[Constants.ExpiryTime] == null) &&
-                    (_requestHistory == null || _requestHistory.IsPresent(context.Request) == false))
+                    IsFirstTime(context))
                     _newDevice.RecordNewDevice(context.Request);
             }
             catch (Exception ex)
@@ -329,7 +327,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// <returns>The original Url of the request.</returns>
         internal static string GetOriginalUrl(HttpContext context)
         {
-            string originalUrl = context.Items[Constants.ORIGINAL_URL_KEY] as string;
+            string originalUrl = context.Items[Constants.OriginalUrlKey] as string;
             if (String.IsNullOrEmpty(originalUrl) == false)
                 return originalUrl;
             return context.Request.Url.ToString();
@@ -345,7 +343,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// <returns>The url to redirect the request to, if any.</returns>
         private static string GetLocationUrl(HttpContext context)
         {
-            string locationUrl = context.Items[Constants.LOCATION_URL_KEY] as string;
+            string locationUrl = context.Items[Constants.LocationUrlKey] as string;
             if (locationUrl == null)
             {
                 // Use the mobileHomePageUrl setting as the default if this is a
@@ -359,7 +357,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                     locationUrl = current.GetUrl(context);
 
                 // Store so that the value does not need to be calculated next time.
-                context.Items[Constants.LOCATION_URL_KEY] = locationUrl;
+                context.Items[Constants.LocationUrlKey] = locationUrl;
             }
             return locationUrl;
         }
@@ -628,7 +626,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         {
             if (type != null)
             {
-                if (IsInArray(type.FullName, Constants.PAGES))
+                if (IsInArray(type.FullName, Constants.Pages))
                     return true;
                 if (type.BaseType != null)
                     return IsPageType(type.BaseType);
@@ -656,7 +654,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         {
             if (type != null)
             {
-                if (IsInArray(type.FullName, Constants.MOBILE_PAGES))
+                if (IsInArray(type.FullName, Constants.MobilePages))
                     return true;
                 if (type.BaseType != null)
                     return IsMobileType(type.BaseType);

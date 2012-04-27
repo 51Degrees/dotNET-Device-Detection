@@ -115,7 +115,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         {
             System.Configuration.Configuration fiftyOneConfig = null;
 
-            foreach (var file in Constants.CONFIG_FILENAMES)
+            foreach (var file in Constants.ConfigFileNames)
             {
                 string configFileName = GetFilePath(file);
 
@@ -147,7 +147,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
                 throw new MobileException(string.Format(
                     "Could not retrieve '{0}' section from configuration files '{1}'.",
                     sectionName,
-                    String.Join(", ", Constants.CONFIG_FILENAMES)));
+                    String.Join(", ", Constants.ConfigFileNames)));
 
             return null;
         }
@@ -194,7 +194,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
 
         internal static System.Configuration.Configuration GetConfigurationContainingSectionGroupName(string name)
         {
-            foreach (var file in Constants.CONFIG_FILENAMES)
+            foreach (var file in Constants.ConfigFileNames)
             {
                 string configFileName = GetFilePath(file);
 
@@ -251,7 +251,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         {
             System.Configuration.Configuration fiftyOneConfig = null;
 
-            foreach (var file in Constants.CONFIG_FILENAMES)
+            foreach (var file in Constants.ConfigFileNames)
             {
                 try
                 {

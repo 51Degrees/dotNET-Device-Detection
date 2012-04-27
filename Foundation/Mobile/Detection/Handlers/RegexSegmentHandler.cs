@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using FiftyOne.Foundation.Mobile.Detection.Matchers.Segment;
 using System;
+using System.Collections;
 
 #endregion
 
@@ -81,6 +82,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         /// </summary>
         private List<RegexSegment> _segments = new List<RegexSegment>();
 
+        /// <summary>
+        /// Lock used to add new segments to the device.
+        /// </summary>
+        private object _createSegmentsLock = new object();
+
         #endregion
 
         #region Properties
@@ -138,15 +144,45 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         #region Abstract Method Implementation
 
         /// <summary>
-        /// Returns segments for the index specified.
+        /// Returns segments for the index specified checking in the stored results first
+        /// if the StoreSegmentResults constant is enabled.
         /// </summary>
-        /// <param name="source"></param>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        internal override List<Segment> CreateSegments(string source, int index)
+        /// <param name="device">The source useragent string.</param>
+        /// <param name="index">The index of the regular expression to use to get the segments.</param>
+        /// <returns>The list of matching segments.</returns>
+        #pragma warning disable 162
+        internal override List<Segment> CreateSegments(BaseDeviceInfo device, int index)
         {
-             return CreateSegments(source, _segments[index]);
+            List<Segment> segments = null;
+            if (Constants.StoreSegmentResults)
+            {
+                // Get the handlers data from the device.
+                var cachedSegments = (List<List<Segment>>)device.GetHandlerData<List<List<Segment>>>(this);
+
+                // If the segment does not already exist then add it.
+                if (cachedSegments.Count <= index)
+                {
+                    lock (_createSegmentsLock)
+                    {
+                        if (cachedSegments.Count <= index)
+                        {
+                            while (cachedSegments.Count <= index)
+                                cachedSegments.Add(new List<Segment>());
+                            segments = CreateSegments(device.UserAgent, _segments[index]);
+                            cachedSegments[index] = segments;
+                        }
+                    }
+                }
+                else
+                    segments = cachedSegments[index];
+            }
+            else
+            {
+                segments = CreateSegments(device.UserAgent, _segments[index]);
+            }
+            return segments;
         }
+        #pragma warning restore 162
 
         /// <summary>
         /// Returns the segments from the source string. Where a segment returns nothing
