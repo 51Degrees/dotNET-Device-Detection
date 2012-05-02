@@ -55,7 +55,9 @@ namespace FiftyOne.Foundation.UI
             "PlatformVendor",
             "PlatformName",
             "PlatformVersion",
-            "JavaEnabled" };
+            "JavaEnabled",
+            "CLDC",
+            "MIDP"};
 
         /// <summary>
         /// List of properties associated with the browser.

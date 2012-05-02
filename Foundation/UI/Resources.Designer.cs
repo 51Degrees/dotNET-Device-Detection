@@ -331,13 +331,14 @@ namespace FiftyOne.Foundation.UI {
         ///   Looks up a localized string similar to &lt;h1 class=&quot;{heading}&quot;&gt;Legend&lt;/h1&gt;
         ///&lt;table&gt;
         ///&lt;tr&gt;
-        ///&lt;td class=&quot;{property} {lite}&quot;&gt;Property is included in BOTH Lite and Premium data sets.&lt;/td&gt;
-        ///&lt;td class=&quot;{property} {premium}&quot;&gt;Property is included ONLY in the Premium data sets.&lt;/td&gt;
-        ///&lt;/tr&gt;&lt;tr&gt;
-        ///&lt;td class=&quot;{description}&quot;&gt;Description of the property.&lt;/td&gt;
-        ///&lt;td class=&quot;{value}&quot;&gt;All possible values the property can have.&lt;/td&gt;
+        ///&lt;td class=&quot;{property} {lite}&quot; style=&quot;width:auto;float:none;&quot;&gt;Property is included in BOTH Lite and Premium data sets.&lt;/td&gt;
+        ///&lt;td class=&quot;{property} {premium}&quot; style=&quot;width:auto;float:none;&quot;&gt;Property is included ONLY in the Premium data sets.&lt;/td&gt;
         ///&lt;/tr&gt;
-        ///&lt;/table&gt;.
+        ///&lt;tr&gt;
+        ///&lt;td class=&quot;{description}&quot; style=&quot;width:auto;float:none;&quot;&gt;Description of the property.&lt;/td&gt;
+        ///&lt;td class=&quot;{value}&quot; style=&quot;width:auto;float:none;&quot;&gt;All possible values the property can have.&lt;/td&gt;
+        ///&lt;/tr&gt;
+        ///&lt;tr&gt; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string PropertyDictionaryLegend {
             get {

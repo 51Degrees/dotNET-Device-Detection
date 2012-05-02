@@ -194,11 +194,16 @@ The web servers firewall or another firewall is blocking access to the host or t
     <value>&lt;h1 class="{heading}"&gt;Legend&lt;/h1&gt;
 &lt;table&gt;
 &lt;tr&gt;
-&lt;td class="{property} {lite}"&gt;Property is included in BOTH Lite and Premium data sets.&lt;/td&gt;
-&lt;td class="{property} {premium}"&gt;Property is included ONLY in the Premium data sets.&lt;/td&gt;
-&lt;/tr&gt;&lt;tr&gt;
-&lt;td class="{description}"&gt;Description of the property.&lt;/td&gt;
-&lt;td class="{value}"&gt;All possible values the property can have.&lt;/td&gt;
+&lt;td class="{property} {lite}" style="width:auto;float:none;"&gt;Property is included in BOTH Lite and Premium data sets.&lt;/td&gt;
+&lt;td class="{property} {premium}" style="width:auto;float:none;"&gt;Property is included ONLY in the Premium data sets.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="{description}" style="width:auto;float:none;"&gt;Description of the property.&lt;/td&gt;
+&lt;td class="{value}" style="width:auto;float:none;"&gt;All possible values the property can have.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt; 
+&lt;td class="{property}" style="width:auto;float:none;"&gt;[L] = the property can return multiple values as a list.&lt;/td&gt;
+&lt;td class="{property}" style="width:auto;float:none;"&gt;(?) = More information.&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/table&gt;</value>
   </data>

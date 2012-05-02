@@ -51,6 +51,8 @@
     <heading name="PlatformName"></heading>
     <heading name="PlatformVersion"></heading>
     <heading name="JavaEnabled"></heading>
+    <heading name="CLDC"></heading>
+    <heading name="MIDP"></heading>
   </heading>
   <heading name="Browser">
     <heading name="BrowserVendor"></heading>
@@ -59,7 +61,7 @@
     <heading name="LayoutEngine"></heading>
     <heading name="HtmlVersion"></heading>
     <heading name="SupportsTls/Ssl"></heading>
-    <heading name="Javascript">
+    <heading name="Javascript Properties">
       <heading name="AjaxRequestType"></heading>
       <heading name="Javascript"></heading>
       <heading name="JavascriptVersion"></heading>

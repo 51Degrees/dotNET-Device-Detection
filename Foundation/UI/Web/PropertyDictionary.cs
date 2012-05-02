@@ -61,8 +61,9 @@ namespace FiftyOne.Foundation.UI.Web
                 var propertyPanel = e.Item.FindControl("Property") as Panel;
                 var descriptionPanel = e.Item.FindControl("Description") as Panel;
                 
-
                 AddLabel(propertyPanel, property.Name, null, property.Url, property.Name);
+                if (property.IsList)
+                    AddLabel(propertyPanel, " [L]", null, null, null);
                 AddLabel(descriptionPanel, property.Description, null, null, null);
 
                 if (property.ShowValues)

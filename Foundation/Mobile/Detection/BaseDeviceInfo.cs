@@ -252,10 +252,17 @@ namespace FiftyOne.Foundation.Mobile.Detection
         internal object GetHandlerData<T>(Handlers.Handler handler) where T : new()
         {
             object data = null;
-            if (HandlerData.TryGetValue(handler, out data))
-                return data;
-            data = new T();
-            HandlerData.Add(handler, data);
+            if (HandlerData.TryGetValue(handler, out data) == false)
+            {
+                lock (HandlerData)
+                {
+                    if (HandlerData.TryGetValue(handler, out data) == false)
+                    {
+                        data = new T();
+                        HandlerData.Add(handler, data);
+                    }
+                }
+            }
             return data;
         }
 
