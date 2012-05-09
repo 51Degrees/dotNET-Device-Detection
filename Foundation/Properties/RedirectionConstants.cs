@@ -36,6 +36,12 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                                                          "System.Web.WebPages.WebPageHttpHandler",
                                                          "Orchard.Mvc.Routes.ShellRoute.HttpAsyncHandler"                                                
                                                      };
+        
+        /// <summary>
+        /// The key in the Items collection of the requesting context used to
+        /// store result of the is first time check.
+        /// </summary>
+        internal const string IsFirstTimeKey = "51D_Is_First_Time";     
 
         /// <summary>
         /// The key in the Items collection of the requesting context used to

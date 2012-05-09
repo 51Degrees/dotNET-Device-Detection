@@ -450,6 +450,23 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// <returns>True if this request is the first from the device. Otherwise false.</returns>
         private static bool IsFirstTime(HttpContext context)
         {
+            var isFirstTime = context.Items[Constants.IsFirstTimeKey];
+            if (isFirstTime == null)
+            {
+                isFirstTime = GetIsFirstTime(context);
+                context.Items[Constants.IsFirstTimeKey] = isFirstTime;
+            }
+            return (bool)isFirstTime;
+        }
+
+        /// <summary>
+        /// Determines if this is the first request received from the device. Should
+        /// only be called once pre request.
+        /// </summary>
+        /// <param name="context">Context of the request.</param>
+        /// <returns>True if this request is the first from the device. Otherwise false.</returns>
+        private static bool GetIsFirstTime(HttpContext context)
+        {
             // If the parameter indicating only the first request should be redirect
             // is false then return true as the implication is all requests should
             // be redirected.
