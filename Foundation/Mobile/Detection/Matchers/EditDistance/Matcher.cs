@@ -85,11 +85,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.EditDistance
         private static void ServiceRequest(Request request)
         {
             string userAgent = request.UserAgent;
+            int[][] rows = new int[][] { new int[userAgent.Length + 1], new int[userAgent.Length + 1] };
             BaseDeviceInfo current = request.Next();
             while (current != null)
             {
                 // Perform the edit distance check.
-                int distance = Algorithms.EditDistance(current.UserAgent, userAgent, request.Results.MinDistance);
+                int distance = Algorithms.EditDistance(rows, userAgent, current.UserAgent, request.Results.MinDistance);
                 if (distance <= request.Results.MinDistance)
                 {
                     lock (request.Results)

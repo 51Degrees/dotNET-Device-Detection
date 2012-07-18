@@ -138,7 +138,7 @@ namespace FiftyOne.Foundation.UI
                         if (_devices == null)
                         {
                             _devices = new List<Device>();
-                            foreach (var vendor in Vendors)
+                            foreach (KeyValuePair<Value, List<Device>> vendor in Vendors)
                                 _devices.AddRange(vendor.Value);
                         }
                     }
@@ -172,10 +172,10 @@ namespace FiftyOne.Foundation.UI
                                     _vendors.Add(value, GetVendorDevices(value));
                             }
 #else
-                            var property = GetFirstWhereNameEquals(Provider.Properties, "HardwareVendor");
+                            Property property = GetFirstWhereNameEquals(Provider.Properties, "HardwareVendor");
                             if (property != null)
                             {
-                                foreach (var value in property.Values)
+                                foreach (Value value in property.Values)
                                     if (value.Name != "Unknown" &&
                                         value.Devices.Count > 0)
                                         _vendors.Add(value, GetVendorDevices(value));
@@ -199,7 +199,7 @@ namespace FiftyOne.Foundation.UI
         /// <returns></returns>
         public static string GetDeviceID(string userAgent)
         {
-            var device = Provider.GetDeviceInfo(userAgent);
+            BaseDeviceInfo device = Provider.GetDeviceInfo(userAgent);
             if (device != null)
                 return device.DeviceId;
             return null;
@@ -245,7 +245,7 @@ namespace FiftyOne.Foundation.UI
                 i.ProfileIDs[0] == profileID &&
                 new Device(i).SoftwareBrowserCaption.Contains("Unknown") == false);
 #else
-            foreach (var device in Provider.FindDevices(profileID))
+            foreach (BaseDeviceInfo device in Provider.FindDevices(profileID))
             {
                 if (device.ProfileIDs[0] == profileID &&
                     new Device(device).Caption.Contains("Unknown") == false)
@@ -262,7 +262,7 @@ namespace FiftyOne.Foundation.UI
                 baseDevice = Provider.FindDevices(profileID).FirstOrDefault(i =>
                 i.ProfileIDs[0] == profileID);
 #else
-                foreach (var device in Provider.FindDevices(profileID))
+                foreach (BaseDeviceInfo device in Provider.FindDevices(profileID))
                 {
                     if (device.ProfileIDs[0] == profileID)
                     {
@@ -291,9 +291,9 @@ namespace FiftyOne.Foundation.UI
                 new Device(i).HardwareModel == model &&
                 new Device(i).SoftwareBrowserCaption.Contains("Unknown") == false);
 #else
-            foreach (var item in Provider.Devices)
+            foreach (BaseDeviceInfo item in Provider.Devices)
             {
-                var newDevice = new Device(item);
+                Device newDevice = new Device(item);
                 if (newDevice.HardwareVendor == vendor &&
                     newDevice.HardwareModel == model &&
                     newDevice.Caption.Contains("Unknown") == false)
@@ -311,9 +311,9 @@ namespace FiftyOne.Foundation.UI
                 new Device(i).HardwareVendor == vendor &&
                 new Device(i).HardwareModel == model);
 #else
-            foreach (var item in Provider.Devices)
+            foreach (BaseDeviceInfo item in Provider.Devices)
             {
-                var newDevice = new Device(item);
+                Device newDevice = new Device(item);
                 if (newDevice.HardwareVendor == vendor &&
                     newDevice.HardwareModel == model)
                 {
@@ -336,7 +336,7 @@ namespace FiftyOne.Foundation.UI
         /// <returns>A list of related devices.</returns>
         public static List<Device> GetRelatedInfo(Device device)
         {
-            var list = new List<Device>();
+            List<Device> list = new List<Device>();
             if (device.HardwareModel != null)
             {
 #if VER4 || VER35
@@ -344,9 +344,9 @@ namespace FiftyOne.Foundation.UI
                     CompareRelatedDevices(new Device(i), device)))
                     list.Add(new Device(item));
 #else
-                foreach (var item in Provider.FindDevices("HardwareModel", device.HardwareModel))
+                foreach (BaseDeviceInfo item in Provider.FindDevices("HardwareModel", device.HardwareModel))
                 {
-                    var newDevice = new Device(item);
+                    Device newDevice = new Device(item);
                     if (CompareRelatedDevices(newDevice, device))
                         list.Add(newDevice);
                 }
@@ -371,8 +371,8 @@ namespace FiftyOne.Foundation.UI
                 (i.SoftwareCaption != null && i.SoftwareCaption.IndexOf(value, StringComparison.InvariantCultureIgnoreCase) >= 0) ||
                 (i.BrowserCaption != null && i.BrowserCaption.IndexOf(value, StringComparison.InvariantCultureIgnoreCase) >= 0)).ToList<Device>();
 #else
-            var list = new List<Device>();
-            foreach (var item in Devices)
+            List<Device> list = new List<Device>();
+            foreach (Device item in Devices)
             {
                 if ((item.HardwareVendor != null && item.HardwareVendor.IndexOf(value, StringComparison.InvariantCultureIgnoreCase) >= 0) ||
                     (item.HardwareModel != null && item.HardwareModel.IndexOf(value, StringComparison.InvariantCultureIgnoreCase) >= 0) ||
@@ -444,13 +444,13 @@ namespace FiftyOne.Foundation.UI
         /// <returns></returns>
         private static List<Device> GetVendorDevices(Value vendor)
         {
-            var list = new List<Device>();
-            foreach (var baseDevice in vendor.Devices)
+            List<Device> list = new List<Device>();
+            foreach (BaseDeviceInfo baseDevice in vendor.Devices)
             {
-                var device = new Device(baseDevice);
+                Device device = new Device(baseDevice);
                 
                 bool found = false;
-                foreach (var existingDevice in list)
+                foreach (Device existingDevice in list)
                 {
                     if (existingDevice.HardwareModel == device.HardwareModel)
                     {
@@ -485,9 +485,9 @@ namespace FiftyOne.Foundation.UI
         /// <returns></returns>
         private static IList<Property> GetProperties(List<Property> properties, string[] matches)
         {
-            var list = new List<Property>();
-            var matchesList = new List<string>(matches);
-            foreach (var property in Provider.Properties)
+            List<Property> list = new List<Property>();
+            List<string> matchesList = new List<string>(matches);
+            foreach (Property property in Provider.Properties)
                 if (matchesList.Contains(property.Name))
                     list.Add(property);
             return list;
@@ -501,7 +501,7 @@ namespace FiftyOne.Foundation.UI
         /// <returns></returns>
         private static Property GetFirstWhereNameEquals(List<Property> properties, string name)
         {
-            foreach (var property in properties)
+            foreach (Property property in properties)
                 if (property.Name == name)
                     return property;
             return null;

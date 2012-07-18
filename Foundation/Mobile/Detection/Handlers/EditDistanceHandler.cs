@@ -12,7 +12,7 @@
 #region Usings
 
 using FiftyOne.Foundation.Mobile.Detection.Matchers;
-using Matcher=FiftyOne.Foundation.Mobile.Detection.Matchers.EditDistance.Matcher;
+using Matcher = FiftyOne.Foundation.Mobile.Detection.Matchers.EditDistance.Matcher;
 
 #endregion
 

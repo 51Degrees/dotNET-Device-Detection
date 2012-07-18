@@ -9,16 +9,15 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Web.Hosting;
-using System.Threading;
-using FiftyOne.Foundation.Mobile.Detection.Configuration;
 using System.Net;
-using System.Collections.Specialized;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
+using System.Web.Hosting;
+using FiftyOne.Foundation.Mobile.Detection.Configuration;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
@@ -115,7 +114,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             try
             {
                 // Create new provider with the data to ensure it is valid.
-                var provider = Binary.Reader.Create(data);
+                Provider provider = Binary.Reader.Create(data);
                 if (provider.AllDevices.Count == 0)
                     throw new MobileException("No devices found in downloaded data.");
                 return provider;
@@ -144,7 +143,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// the device data file.</returns>
         internal static string FullUrl(string[] licences)
         {
-            var parameters = new List<string>();
+            List<string> parameters = new List<string>();
             parameters.Add(String.Format("LicenseKeys={0}", String.Join("|", licences)));
             parameters.Add(String.Format("Download={0}", bool.TrueString));
             parameters.Add("Type=Binary");
@@ -207,12 +206,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
         internal static void Download()
         {
             // Download the latest data.
-            var client = new WebClient();
-            var data = client.DownloadData(FullUrl());
+            WebClient client = new WebClient();
+            byte[] data = client.DownloadData(FullUrl());
 
             // Validate the results.
             ValidateMD5(client, data);
-            var provider = CreateProvider(data);
+            Provider provider = CreateProvider(data);
 
             // Check this is new data based on publish data and
             // number of available properties.
@@ -245,7 +244,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             try
             {
-                var binDirectory = new DirectoryInfo(Path.Combine(
+                DirectoryInfo binDirectory = new DirectoryInfo(Path.Combine(
                     HostingEnvironment.ApplicationPhysicalPath, "bin"));
 
                 if (BinaryFile.Directory.FullName.Equals(binDirectory.FullName) == false)

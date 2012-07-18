@@ -163,7 +163,7 @@ namespace FiftyOne.Foundation.UI.Web
         {
             if (Page.IsValid)
             {
-                var result = Execute(_fileUploadData.PostedFile.InputStream);
+                ActivityResult result = Execute(_fileUploadData.PostedFile.InputStream);
                 if (UploadComplete != null)
                     UploadComplete(this, result);
             }

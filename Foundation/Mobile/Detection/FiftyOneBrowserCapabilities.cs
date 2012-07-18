@@ -9,10 +9,10 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
-using System.Collections.Generic;
-using System.Collections;
-using System.Web;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Web;
 
 #if VER4 || VER35
 
@@ -28,7 +28,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// standard collection.
     /// </summary>
     /// <remarks>
-    /// Note: The LEGACY_SUPPORT pre-compilation directive should be set if support is needed
+    /// Note: The OBSOLETE_SUPPORT pre-compilation directive should be set if support is needed
     /// for SharePoint or other applications that expect the Request.Browser property to return
     /// an object of type <cref see="System.Web.Mobile.MobileCapabilities"/>. A reference will 
     /// need to be added to the project to System.Web.Mobile. This module has been marked 
@@ -128,8 +128,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         var matches = FiftyOneProperties.Where(i =>
                             i.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase)).ToList();
 #else
-                        var matches = new List<KeyValuePair<string, List<string>>>();
-                        foreach(var item in FiftyOneProperties)
+                        List<KeyValuePair<string, List<string>>> matches = new List<KeyValuePair<string, List<string>>>();
+                        foreach(KeyValuePair<string, List<string>> item in FiftyOneProperties)
                             if (item.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase))
                                 matches.Add(item);
 #endif

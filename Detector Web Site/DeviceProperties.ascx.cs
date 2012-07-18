@@ -22,9 +22,7 @@
  * ********************************************************************* */
 
 using System;
-using System.Collections.Generic;
 using System.Web;
-using System.Web.UI;
 using System.Web.UI.WebControls;
 
 namespace Detector
@@ -38,11 +36,19 @@ namespace Detector
         protected override void OnInit(EventArgs e)
         {
             Current.DeviceID = Request.Browser["Id"];
-            var cookie = Request.Cookies["tab"];
+            HttpCookie cookie;
+            try
+            {
+                cookie = Request.Cookies["tab"];
+            }
+            catch
+            {
+                cookie = null;
+            }
             if (cookie != null)
                 SetTab(cookie.Value);
             else
-                SetTab(CurrentView.ID);
+                SetTab(DictionaryView.ID);
             base.OnLoad(e);
         }
 
@@ -58,9 +64,8 @@ namespace Detector
                 "tab", Tabs.GetActiveView() == UserAgentTesterView ? "active" : String.Empty });
             RedirectButton.CssClass = String.Join(" ", new[] {
                 "tab", Tabs.GetActiveView() == RedirectView ? "active" : String.Empty });
-            ActivateButton.Visible = FiftyOne.Foundation.UI.DataProvider.IsPremium == false;
-            ActivateButton.CssClass = String.Join(" ", new[] {
-                "tab", Tabs.GetActiveView() == ActivateView ? "active" : String.Empty });
+            DetectionButton.CssClass = String.Join(" ", new[] {
+                "tab", Tabs.GetActiveView() == DetectionView ? "active" : String.Empty });
             StandardPropertiesButton.CssClass = String.Join(" ", new[] {
                 "tab", Tabs.GetActiveView() == StandardPropertiesView ? "active" : String.Empty });
 
@@ -103,9 +108,9 @@ namespace Detector
                     Tabs.SetActiveView(RedirectView);
                     RedirectButton.CssClass = "active";
                     break;
-                case "ActivateView":
-                    Tabs.SetActiveView(ActivateView);
-                    ActivateButton.CssClass = "active";
+                case "DetectionView":
+                    Tabs.SetActiveView(DetectionView);
+                    DetectionButton.CssClass = "active";
                     break;
                 case "StandardPropertiesView":
                     Tabs.SetActiveView(StandardPropertiesView);

@@ -9,8 +9,8 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
@@ -97,7 +97,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Length of time in ms the new devices thread should wait for a response from the
         /// web server used to record new device information.
         /// </summary>
-        internal const int NewUrlTimeOut = 5000;
+        internal const int NewUrlTimeOut = 10000;
 
         /// <summary>
         /// Forces the useragent matcher to use a single thread if 
@@ -116,7 +116,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Array of transcoder HTTP headers that represent the useragent string of the
         /// mobile device rather than the desktop browser.
         /// </summary>
-        internal static readonly string[] TranscoderUserAgentHeaders = new[]
+        internal static readonly string[] TranscoderUserAgentHeaders = new string[]
                                                                              {
                                                                                  "x-Device-User-Agent",
                                                                                  "X-Device-User-Agent",
@@ -129,7 +129,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         internal const string UserAgentHeader = "User-Agent";
 
         /// <summary>
-        /// The URL new device information should be sent to.
+        /// The URL usage sharing information should be sent to.
         /// </summary>
         internal const string NewDevicesUrl = "http://devices.51degrees.mobi/new.ashx";
         
@@ -139,19 +139,25 @@ namespace FiftyOne.Foundation.Mobile.Detection
         internal const NewDeviceDetails NewDeviceDetail = NewDeviceDetails.Maximum;
 
         /// <summary>
+        /// The number of requests that should be held in the queue before
+        /// transmission.
+        /// </summary>
+        internal const int NewDeviceQueueLength = 50;
+
+        /// <summary>
         /// The name of the property which contains the user agent profile.
         /// </summary>
-        internal static readonly string[] UserAgentProfiles = new[] { "UserAgentProfile" };
+        internal static readonly string[] UserAgentProfiles = new string[] { "UserAgentProfile" };
 
         /// <summary>
         /// Extensions to indicate a file is compressed.
         /// </summary>
-        internal static readonly List<string> CompressedFileExtensions = new List<string>(new[] { ".gz" } );
+        internal static readonly List<string> CompressedFileExtensions = new List<string>(new string[] { ".gz" });
 
         /// <summary>
         /// A list of properties to exclude from the AllProperties results.
         /// </summary>
-        internal static readonly List<string> ExcludePropertiesFromAllProperties = new List<string>(new[] { "" });
+        internal static readonly List<string> ExcludePropertiesFromAllProperties = new List<string>(new string[] { "" });
 
         /// <summary>
         /// An array of default values for properties where they can't be found

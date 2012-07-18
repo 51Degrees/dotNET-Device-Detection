@@ -14,11 +14,11 @@ namespace FiftyOne.Foundation.UI.Web
         /// <param name="container">Container the template is being displayed in.</param>
         public void InstantiateIn(Control container)
         {
-            var panel = new Panel();
-            var open = new Literal();
-            var close = new Literal();
-            var vendorLink = new HyperLink();
-            var countLabel = new Label();
+            Panel panel = new Panel();
+            Literal open = new Literal();
+            Literal close = new Literal();
+            HyperLink vendorLink = new HyperLink();
+            Label countLabel = new Label();
 
             vendorLink.ID = "Vendor";
             countLabel.ID = "Count";

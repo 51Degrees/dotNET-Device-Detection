@@ -202,7 +202,13 @@
     <Compile Include="UI\Web\LiteMessage.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="UI\Web\Activate.cs">
+    <Compile Include="UI\Web\Activate.cs" >
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Web\ShareUsage.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UI\Web\Detection.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
   </ItemGroup>

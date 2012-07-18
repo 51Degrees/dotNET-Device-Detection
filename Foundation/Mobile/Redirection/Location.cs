@@ -9,10 +9,10 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
-using System.Text.RegularExpressions;
-using System.Collections.Generic;
-using System.Web;
 using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Web;
 
 namespace FiftyOne.Foundation.Mobile.Redirection
 {
@@ -20,6 +20,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
     {
         #region Fields
 
+        internal static readonly Regex _regexReplaceEmptyTags = new Regex(@"{\d+}", RegexOptions.Compiled);
         internal readonly string _name;
         internal readonly string _url;
         internal readonly List<Filter> _filters = new List<Filter>();
@@ -57,15 +58,20 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                 // A match regular expression has been found that should be used to
                 // extract all the items of interest from the original URL and place
                 // them and the positions contains in {} brackets in the URL property
-                // of the location.
+                // of the location. Removes any remaining {} brackets before returning
+                // the url for the location.
                 MatchCollection matches = _matchRegex.Matches(RedirectModule.GetOriginalUrl(context));
+                string url = null;
                 if (matches.Count > 0)
                 {
                     string[] values = new string[matches.Count];
                     for (int i = 0; i < matches.Count; i++)
                         values[i] = matches[i].Value;
-                    return String.Format(_url, values);
+                    url = String.Format(_url, values);
                 }
+                else
+                    url = _url;
+                return _regexReplaceEmptyTags.Replace(url, String.Empty);
             }
             // Return the URL unformatted.
             return _url;

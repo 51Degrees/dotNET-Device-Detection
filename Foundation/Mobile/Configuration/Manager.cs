@@ -11,7 +11,6 @@
 
 #region Usings
 
-using System.Web.Configuration;
 using System.Configuration;
 
 #endregion

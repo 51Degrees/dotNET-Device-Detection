@@ -2,7 +2,6 @@
 
 using System.Reflection;
 using System.Resources;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
 
@@ -38,7 +37,7 @@ using System.Security;
 //      Build Number
 //      Revision
 
-[assembly: AssemblyVersion("2.1.4.9")]
-[assembly: AssemblyFileVersion("2.1.4.9")]
+[assembly: AssemblyVersion("2.1.8.1")]
+[assembly: AssemblyFileVersion("2.1.8.1")]
 [assembly: NeutralResourcesLanguage("en-GB")]
 [assembly: AllowPartiallyTrustedCallers]

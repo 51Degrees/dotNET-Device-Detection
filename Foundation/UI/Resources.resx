@@ -112,16 +112,16 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ActivateButtonText" xml:space="preserve">
     <value>Activate</value>
   </data>
   <data name="ActivatedMessageHtml" xml:space="preserve">
-    <value>&lt;p class="{0}"&gt;Premium Data is active. Thank you.&lt;/p&gt;</value>
+    <value>&lt;div class="{0}"&gt;Premium Data is active. Thank you.&lt;/div&gt;</value>
   </data>
   <data name="ActivateInstructionsHtml" xml:space="preserve">
     <value>&lt;p&gt;Paste your Premium Data licence key into the textbox below. Select "Activate" to use the licence key with this web site.&lt;/p&gt;</value>
@@ -428,5 +428,23 @@ The web servers firewall or another firewall is blocking access to the host or t
   </data>
   <data name="RedirectButtonNewLocationText" xml:space="preserve">
     <value>New Location</value>
+  </data>
+  <data name="ShareUsageText" xml:space="preserve">
+    <value>Share usage data with 51Degrees.mobi.</value>
+  </data>
+  <data name="ShareUsageErrorHtml" xml:space="preserve">
+    <value>&lt;div class="{0}"&gt;There was a problem recording your share usage data preference. If the web site is operating in a medium trust environment or modify permission to the configuration file(s) is not granted to the application pool identity you will have to change this value in the configuration file manually. Find the fiftyOne/detection element in the config file and set the shareUsage attribute.&lt;/div&gt;</value>
+  </data>
+  <data name="ShareUsageFalseHtml" xml:space="preserve">
+    <value>&lt;div class="{0}"&gt;We're sorry you've decided not to share usage data. We hope you'll reconsider as usage data helps us provide you a better product. Find out more &lt;a href="http://51degrees.mobi/Support/FAQs/UsageData" target="_blank"&gt;here&lt;/a&gt;.&lt;br/&gt;You may need to restart the web site for the change to become effective.&lt;/div&gt;</value>
+  </data>
+  <data name="ShareUsageLinkText" xml:space="preserve">
+    <value>Learn More</value>
+  </data>
+  <data name="ShareUsageTrueHtml" xml:space="preserve">
+    <value>&lt;div class="{0}"&gt;Thank you for sharing usage data and helping improve this product.&lt;br/&gt;You may need to restart the web site for the change to become effective.&lt;/div&gt;</value>
+  </data>
+  <data name="ShareUsageUrl" xml:space="preserve">
+    <value>http://51degrees.mobi/Support/FAQs/UsageData</value>
   </data>
 </root>

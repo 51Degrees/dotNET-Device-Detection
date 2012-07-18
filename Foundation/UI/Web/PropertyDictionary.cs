@@ -56,10 +56,10 @@ namespace FiftyOne.Foundation.UI.Web
             if (e.Item.DataItem != null &&
                 e.Item.DataItem is Property)
             {
-                var property = (Property)e.Item.DataItem;
+                Property property = (Property)e.Item.DataItem;
 
-                var propertyPanel = e.Item.FindControl("Property") as Panel;
-                var descriptionPanel = e.Item.FindControl("Description") as Panel;
+                Panel propertyPanel = e.Item.FindControl("Property") as Panel;
+                Panel descriptionPanel = e.Item.FindControl("Description") as Panel;
                 
                 AddLabel(propertyPanel, property.Name, null, property.Url, property.Name);
                 if (property.IsList)
@@ -68,15 +68,15 @@ namespace FiftyOne.Foundation.UI.Web
 
                 if (property.ShowValues)
                 {
-                    var valuesPanel = AddPlus(descriptionPanel, "block");
+                    Panel valuesPanel = AddPlus(descriptionPanel, "block");
                     valuesPanel.CssClass = ValueCssClass;
 
                     int count = 0;
-                    foreach (var value in property.Values)
+                    foreach (Value value in property.Values)
                     {
                         if (count > 0)
                         {
-                            var comma = new Literal();
+                            Literal comma = new Literal();
                             comma.Text = ", ";
                             valuesPanel.Controls.Add(comma);
                         }
@@ -146,7 +146,7 @@ namespace FiftyOne.Foundation.UI.Web
 
         private DataList CreateDataList(string heading)
         {
-            var dataList = new DataList();
+            DataList dataList = new DataList();
             dataList.ShowHeader = true;
             dataList.ItemDataBound += new DataListItemEventHandler(DataList_ItemDataBound);
             dataList.HeaderTemplate = new HeaderTemplate(heading, 1);

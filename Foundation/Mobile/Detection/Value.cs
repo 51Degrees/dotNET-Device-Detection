@@ -9,8 +9,8 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 
 #if VER4
 
@@ -112,10 +112,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
                                 i.GetPropertyValueStringIndexes(_property.NameStringIndex).Contains(NameStringIndex)).ToList();
 #else
                             _devices = new List<BaseDeviceInfo>();
-                            foreach (var device in Provider.Devices)
+                            foreach (BaseDeviceInfo device in Provider.Devices)
                             {
                                 // Get all the values this property has for the current device.
-                                foreach (var index in device.GetPropertyValueStringIndexes(_property.NameStringIndex))
+                                foreach (int index in device.GetPropertyValueStringIndexes(_property.NameStringIndex))
                                 {
                                     // If the value of the device property and this value match 
                                     // then add the device to the list and move to the next device.

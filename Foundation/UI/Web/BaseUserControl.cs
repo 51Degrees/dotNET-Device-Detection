@@ -11,12 +11,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Web.UI;
-using FiftyOne.Foundation.Mobile.Detection;
-using System.Web.UI.WebControls;
 using System.Collections.Specialized;
+using System.Text;
 using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
 
 namespace FiftyOne.Foundation.UI.Web
 {
@@ -292,7 +291,7 @@ namespace FiftyOne.Foundation.UI.Web
         {
             if (_logoEnabled)
             {
-                var image = new System.Web.UI.WebControls.Image();
+                System.Web.UI.WebControls.Image image = new System.Web.UI.WebControls.Image();
                 image.Style.Add("border", "none");
                 image.Style.Add("margin", "5px");
                 image.Style.Add("float", "right");
@@ -315,7 +314,7 @@ namespace FiftyOne.Foundation.UI.Web
         /// <returns></returns>
         protected virtual string ReplaceTags(string source)
         {
-            var list = new List<KeyValuePair<string, string>>();
+            List<KeyValuePair<string, string>> list = new List<KeyValuePair<string, string>>();
             AddTag(list, "property", _propertyCssClass);
             AddTag(list, "premium", _premiumCssClass);
             AddTag(list, "lite", _liteCssClass);
@@ -336,8 +335,8 @@ namespace FiftyOne.Foundation.UI.Web
         /// <returns>A string containing the altered text.</returns>
         protected static string ReplaceTags(string source, List<KeyValuePair<string, string>> tags)
         {
-            var builder = new StringBuilder(source);
-            foreach(var pair in tags)
+            StringBuilder builder = new StringBuilder(source);
+            foreach(KeyValuePair<string, string> pair in tags)
                 builder = builder.Replace(String.Format("{{{0}}}", pair.Key), pair.Value);
             return builder.ToString();
         }
@@ -358,7 +357,7 @@ namespace FiftyOne.Foundation.UI.Web
         /// </summary>
         protected void AddBreak()
         {
-            var literalBreak = new Literal();
+            Literal literalBreak = new Literal();
             literalBreak.Text = "<br/>";
             _container.Controls.Add(literalBreak);
         }
@@ -377,7 +376,7 @@ namespace FiftyOne.Foundation.UI.Web
             // Open the anchor.
             if (String.IsNullOrEmpty(anchor) == false)
             {
-                var literalAnchorOpen = new Literal();
+                Literal literalAnchorOpen = new Literal();
                 literalAnchorOpen.Text = String.Format("<a name=\"{0}\" style=\"text-decoration: none;\">", anchor);
                 panel.Controls.Add(literalAnchorOpen);
             }
@@ -391,7 +390,7 @@ namespace FiftyOne.Foundation.UI.Web
             }
             else
             {
-                var labelContent = new Label();
+                Label labelContent = new Label();
                 labelContent.Text = HttpUtility.HtmlEncode(text);
                 labelContent.ToolTip = tooltip;
                 panel.Controls.Add(labelContent);
@@ -401,7 +400,7 @@ namespace FiftyOne.Foundation.UI.Web
             // Close the anchor.
             if (String.IsNullOrEmpty(anchor) == false)
             {
-                var literalAnchorClose = new Literal();
+                Literal literalAnchorClose = new Literal();
                 literalAnchorClose.Text = "</a>";
                 panel.Controls.Add(literalAnchorClose);
             }
@@ -417,15 +416,15 @@ namespace FiftyOne.Foundation.UI.Web
         {
             if (url != null || String.IsNullOrEmpty(tooltip) == false)
             {
-                var labelOpen = new Label();
-                var labelClose = new Label();
+                Label labelOpen = new Label();
+                Label labelClose = new Label();
 
                 labelOpen.Text = " (";
                 panel.Controls.Add(labelOpen);
 
                 if (url != null)
                 {
-                    var link = new HyperLink();
+                    HyperLink link = new HyperLink();
                     link.NavigateUrl = url.ToString();
                     link.Text = "?";
                     link.ToolTip = tooltip;
@@ -434,7 +433,7 @@ namespace FiftyOne.Foundation.UI.Web
                 }
                 else
                 {
-                    var label = new Label();
+                    Label label = new Label();
                     label.Text = "?";
                     label.ToolTip = tooltip;
                     panel.Controls.Add(label);
@@ -456,10 +455,10 @@ namespace FiftyOne.Foundation.UI.Web
             if (Page.ClientScript.IsClientScriptBlockRegistered(GetType(), "toggle") == false)
                 Page.ClientScript.RegisterClientScriptBlock(GetType(), "toggle", Resources.JavaScriptToggle, true);
 
-            var target = new Panel();
-            var labelOpen = new Label();
-            var labelClose = new Label();
-            var button = new LinkButton();
+            Panel target = new Panel();
+            Label labelOpen = new Label();
+            Label labelClose = new Label();
+            LinkButton button = new LinkButton();
             
             control.Controls.Add(labelOpen);
             control.Controls.Add(button);
@@ -505,7 +504,7 @@ namespace FiftyOne.Foundation.UI.Web
             if (value != null)
                 parameters.Add(key, value);
 
-            var list = new List<string>();
+            List<string> list = new List<string>();
             foreach(string index in parameters.Keys)
                 list.Add(String.Format("{0}={1}", index, HttpUtility.UrlEncode(parameters[index])));
 

@@ -11,8 +11,8 @@
 
 #region Usings
 
-using System.Configuration;
 using System;
+using System.Configuration;
 
 #endregion
 
@@ -41,7 +41,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         /// </summary>
         protected override object GetElementKey(ConfigurationElement element)
         {
-            var key = ((LocationElement)element).Name;
+            string key = ((LocationElement)element).Name;
             if (String.IsNullOrEmpty(key))
                 return ((LocationElement)element).UniqueId;
             return key;

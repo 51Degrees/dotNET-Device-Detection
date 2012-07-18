@@ -17,9 +17,9 @@ namespace FiftyOne.Foundation.Mobile
         /// Array of file locations to check for configuration information.
         /// </summary>
         internal static readonly string[] ConfigFileNames = new string[] {
-            "~/Web.config",
+            "~/51Degrees.mobi.config",
             "~/App_Data/51Degrees.mobi.config",
-            "~/51Degrees.mobi.config" };
+            "~/Web.config" };
 
 #if AZURE
         /// <summary>

@@ -14,17 +14,17 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
-using System.Text;
 using System.Threading;
 using System.Web;
 using FiftyOne.Foundation.Mobile.Configuration;
 
-#endregion
-
 #if VER4
+
 using System.Linq;
+
 #endif
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Redirection
 {

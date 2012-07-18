@@ -15,15 +15,18 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
-#endregion
-
 #if VER4
+
 using System.Linq;
 using System.Threading.Tasks;
 
 #elif VER35
+
 using System.Linq;
+
 #endif
+
+#endregion
 
 namespace FiftyOne
 {

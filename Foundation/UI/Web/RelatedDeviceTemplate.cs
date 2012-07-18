@@ -25,8 +25,8 @@ namespace FiftyOne.Foundation.UI.Web
         /// <param name="container">Container the template is being displayed in.</param>
         public void InstantiateIn(Control container)
         {
-            var panel = new Panel();
-            var deviceLink = new HyperLink();
+            Panel panel = new Panel();
+            HyperLink deviceLink = new HyperLink();
 
             deviceLink.ID = "Link";
             panel.ID = "Device";

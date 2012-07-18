@@ -42,7 +42,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         {
             get
             {
-                var settings = new XmlWriterSettings();
+                XmlWriterSettings settings = new XmlWriterSettings();
                 settings.OmitXmlDeclaration = true;
                 return settings;
             }
@@ -54,8 +54,8 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         /// <returns></returns>
         internal string GetXmlElement()
         {
-            var sb = new StringBuilder();
-            using (var writer = XmlWriter.Create(sb, Settings))
+            StringBuilder sb = new StringBuilder();
+            using (XmlWriter writer = XmlWriter.Create(sb, Settings))
                 base.SerializeToXmlElement(writer, "redirect");
             return sb.ToString();
         }

@@ -275,6 +275,17 @@ a:link, a:visited
     background-color: #CCCCCC;
 }
 
+.checkbox
+{
+    display: inline-block;
+}
+
+.hyperlink
+{
+    display: inline-block;
+    margin-left: 1em;
+}
+
 .textbox
 {
     width: 100%;
@@ -313,7 +324,6 @@ a:link, a:visited
 {
     margin-right: 3em;
 }
-
 
 .redirect table
 {

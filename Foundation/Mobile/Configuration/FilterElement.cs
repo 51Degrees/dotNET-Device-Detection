@@ -11,8 +11,8 @@
 
 #region Usings
 
-using System.Configuration;
 using System;
+using System.Configuration;
 
 #endregion
 

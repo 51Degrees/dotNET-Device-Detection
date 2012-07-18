@@ -11,15 +11,13 @@
 
 #region Usings
 
+using System;
 using System.Collections;
-using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.IO;
+using System.Threading;
 using System.Web;
 using FiftyOne.Foundation.Mobile.Detection.Configuration;
-using System.IO;
-using System;
-using System.Text;
-using System.Threading;
-using System.Collections.Specialized;
 
 #endregion
 
@@ -88,7 +86,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                                 {
                                     if (provider == null)
                                     {
-                                        EventLog.Debug(String.Format("Creating provider from XML data files '{0}'.",
+                                        EventLog.Info(String.Format("Creating provider from XML data files '{0}'.",
                                             String.Join(", ", Manager.XmlFiles)));
                                         provider = Xml.Reader.Create(Manager.XmlFiles);
                                         EventLog.Info(String.Format("Created provider from XML data files '{0}'.",
@@ -96,7 +94,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                                     }
                                     else
                                     {
-                                        EventLog.Debug(String.Format("Adding to existing provider from XML data files '{0}'.",
+                                        EventLog.Info(String.Format("Adding to existing provider from XML data files '{0}'.",
                                             String.Join(", ", Manager.XmlFiles)));
                                         Xml.Reader.Add(provider, Manager.XmlFiles);
                                         EventLog.Info(String.Format("Added to existing provider from XML data files '{0}'.",
@@ -128,7 +126,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                                     if (Manager.XmlFiles != null &&
                                         Manager.XmlFiles.Length > 0)
                                     {
-                                        EventLog.Debug(String.Format("Adding to existing provider from XML data files '{0}'.",
+                                        EventLog.Info(String.Format("Adding to existing provider from XML data files '{0}'.",
                                             String.Join(", ", Manager.XmlFiles)));
                                         Xml.Reader.Add(provider, Manager.XmlFiles);
                                         EventLog.Info(String.Format("Added to existing provider from XML data files '{0}'.",

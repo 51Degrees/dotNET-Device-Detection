@@ -7,7 +7,7 @@
     <asp:Button runat="server" ID="DictionaryButton" CommandName="Tab" CommandArgument="DictionaryView" OnCommand="TabChange" Text="Dictionary" />
     <asp:Button runat="server" ID="UserAgentTesterButton" CommandName="Tab" CommandArgument="UserAgentTesterView" OnCommand="TabChange" Text="Test UserAgent" />
     <asp:Button runat="server" ID="RedirectButton" CommandName="Tab" CommandArgument="RedirectView" OnCommand="TabChange" Text="Redirect" />
-    <asp:Button runat="server" ID="ActivateButton" CommandName="Tab" CommandArgument="ActivateView" OnCommand="TabChange" Text="Activate Premium" />
+    <asp:Button runat="server" ID="DetectionButton" CommandName="Tab" CommandArgument="DetectionView" OnCommand="TabChange" Text="Detection" />
     <asp:Button runat="server" ID="StandardPropertiesButton" CommandName="Tab" CommandArgument="StandardPropertiesView" OnCommand="TabChange" Text="Standard Properties" />
 </div>
 
@@ -29,8 +29,8 @@
     <asp:View runat="server" ID="RedirectView">
         <fiftyOne:Redirect runat="server" ID="Redirect" />        
     </asp:View>
-    <asp:View runat="server" ID="ActivateView" >
-        <fiftyOne:Activate runat="server" ID="Activate" />
+    <asp:View runat="server" ID="DetectionView" >
+        <fiftyOne:Detection runat="server" ID="Detection" />
     </asp:View>
     <asp:View runat="server" ID="StandardPropertiesView">
         <p>This page provides the values .NET will report for properties of the HttpBrowserCapabilities class. Many of these properties are no longer relevent but are provided here for convenience.</p>

@@ -10,10 +10,10 @@
  * ********************************************************************* */
 
 using System;
-using System.Net;
-using System.Web;
 using System.IO;
+using System.Net;
 using System.Text;
+using System.Web;
 
 #if VER4 || VER35
 
@@ -38,7 +38,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         #region Constants
 
         // Headers used to create a hashcode based on their values when present.
-        private static readonly string[] ADDITIONAL_HEADERS = new[]
+        private static readonly string[] ADDITIONAL_HEADERS = new string[]
                                                                       {
                                                                           // Common headers
                                                                           "Accept-Language",

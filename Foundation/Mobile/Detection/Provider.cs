@@ -9,27 +9,21 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
-#if VER4
-using System.Linq;
-#endif
-
 #region Usings
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Text.RegularExpressions;
-using System.Web;
-using System.Xml;
-using System.Xml.Schema;
-using FiftyOne.Foundation.Mobile.Detection.Configuration;
-using FiftyOne.Foundation.Mobile.Detection.Handlers;
-using FiftyOne.Foundation.Mobile.Detection.Matchers;
-using Matcher = FiftyOne.Foundation.Mobile.Detection.Matchers.Final.Matcher;
-using RegexSegmentHandler = FiftyOne.Foundation.Mobile.Detection.Handlers.RegexSegmentHandler;
 using System.Collections.Specialized;
 using System.Reflection;
+using FiftyOne.Foundation.Mobile.Detection.Matchers;
+using Matcher = FiftyOne.Foundation.Mobile.Detection.Matchers.Final.Matcher;
+using System.IO;
+
+#if VER4
+
+using System.Linq;
+
+#endif
 
 #endregion
 
@@ -97,7 +91,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                             EventLog.Debug(String.Format("Creating provider from embedded device data '{0}'.",
                                 Binary.BinaryConstants.EmbeddedDataResourceName));
 
-                            using (var stream = Assembly.GetExecutingAssembly()
+                            using (Stream stream = Assembly.GetExecutingAssembly()
                                 .GetManifestResourceStream(
                                 Binary.BinaryConstants.EmbeddedDataResourceName))
                                 _embeddedProvider = Binary.Reader.Create(stream);
@@ -155,17 +149,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
             return null;
         }
 
-        /// <summary>
-        /// Gets the closest matching device based on the HTTP headers.
-        /// </summary>
-        /// <param name="headers">Collection of Http headers associated with the request.</param>
-        /// <returns>The closest matching device.</returns>
-        internal BaseDeviceInfo GetDeviceInfo(NameValueCollection headers)
-        {
-            return GetDeviceInfoClosestMatch(
-                GetMatches(headers), GetUserAgent(headers));
-        }
-
         #endregion
 
         #region Public Methods
@@ -177,14 +160,25 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>An array of matching devices.</returns>
         public List<BaseDeviceInfo> GetMatchingDeviceInfo(string userAgent)
         {
-            var list = new List<BaseDeviceInfo>();
-            var results = GetMatches(userAgent);
+            List<BaseDeviceInfo> list = new List<BaseDeviceInfo>();
+            Results results = GetMatches(userAgent);
             if (results != null)
             {
-                foreach (var result in results)
+                foreach (Result result in results)
                     list.Add(result.Device);
             }
             return list;
+        }
+
+        /// <summary>
+        /// Gets the closest matching device based on the HTTP headers.
+        /// </summary>
+        /// <param name="headers">Collection of Http headers associated with the request.</param>
+        /// <returns>The closest matching device.</returns>
+        public BaseDeviceInfo GetDeviceInfo(NameValueCollection headers)
+        {
+            return GetDeviceInfoClosestMatch(
+                GetMatches(headers), GetUserAgent(headers));
         }
 
         /// <summary>
@@ -206,12 +200,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>A list of matching devices. An empty list will be returned if no matching devices are found.</returns>
         public List<BaseDeviceInfo> FindDevices(string property, string value)
         {
-            var list = new List<BaseDeviceInfo>();
+            List<BaseDeviceInfo> list = new List<BaseDeviceInfo>();
             int propertyIndex = Strings.Add(property);
             int requiredValueIndex = Strings.Add(value);
-            foreach (var device in Devices)
+            foreach (BaseDeviceInfo device in Devices)
             {
-                foreach (var valueIndex in device.GetPropertyValueStringIndexes(propertyIndex))
+                foreach (int valueIndex in device.GetPropertyValueStringIndexes(propertyIndex))
                     if (requiredValueIndex == valueIndex)
                         list.Add(device);
             }
@@ -225,10 +219,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>A list of matching devices. An empty list will be returned if no matching devices are found.</returns>
         public List<BaseDeviceInfo> FindDevices(string profileID)
         {
-            var list = new List<BaseDeviceInfo>();
-            foreach (var device in Devices)
+            List<BaseDeviceInfo> list = new List<BaseDeviceInfo>();
+            foreach (BaseDeviceInfo device in Devices)
             {
-                foreach (var id in device.ProfileIDs)
+                foreach (string id in device.ProfileIDs)
                 {
                     if (profileID == id)
                     {

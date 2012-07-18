@@ -16,7 +16,7 @@ namespace FiftyOne.Foundation.UI
         /// <summary>
         /// List of properties which are associated with the physical hardware.
         /// </summary>
-        internal static readonly string[] Hardware = new[] {
+        internal static readonly string[] Hardware = new string[] {
             "HardwareVendor",
             "HardwareModel",
             "HardwareName",
@@ -51,7 +51,7 @@ namespace FiftyOne.Foundation.UI
         /// List of properties associated with the operating system
         /// or software.
         /// </summary>
-        internal static readonly string[] Software = new[] {
+        internal static readonly string[] Software = new string[] {
             "PlatformVendor",
             "PlatformName",
             "PlatformVersion",
@@ -62,7 +62,7 @@ namespace FiftyOne.Foundation.UI
         /// <summary>
         /// List of properties associated with the browser.
         /// </summary>
-        internal static readonly string[] Browser = new[] {
+        internal static readonly string[] Browser = new string[] {
             "BrowserVendor",
             "BrowserName",
             "BrowserVersion",
@@ -135,7 +135,7 @@ namespace FiftyOne.Foundation.UI
         /// List of properties associated wtih the type of content
         /// the browser/device can display.
         /// </summary>
-        internal static readonly string[] Content = new[] {
+        internal static readonly string[] Content = new string[] {
             "CcppAccept",
             "StreamingAccept" };
 

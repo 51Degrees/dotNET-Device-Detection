@@ -12,9 +12,7 @@
 #region Usings
 
 using System;
-using FiftyOne.Foundation.Mobile.Detection.Matchers;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 
 #if VER4 || VER35
 
@@ -133,8 +131,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
             {
                 if (_profileIDs == null)
                 {
-                    var list = new List<string>();
-                    foreach (var id in DeviceId.Split(new[] { Constants.ProfileSeperator, " " }, StringSplitOptions.RemoveEmptyEntries))
+                    List<string> list = new List<string>();
+                    foreach (string id in DeviceId.Split(new string[] { Constants.ProfileSeperator, " " }, StringSplitOptions.RemoveEmptyEntries))
                         list.Add(id);
                     _profileIDs = list.ToArray();
                 }
@@ -201,7 +199,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                                 i.Properties.Count > 0 ||
                                 i._children.Count > 0).ToList();
 #else
-                            foreach (var child in _children)
+                            foreach (BaseDeviceInfo child in _children)
                                 if (child.Properties.Count > 0 ||
                                     child._children.Count > 0)
                                     _activeChildren.Add(child);
@@ -413,7 +411,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>A list of string values.</returns>
         internal protected List<string> GetPropertyValues(int propertyStringIndex)
         {
-            var values = new List<string>();
+            List<string> values = new List<string>();
             foreach (int index in GetPropertyValueStringIndexes(propertyStringIndex))
                 if (index >= 0)
                     values.Add(Provider.Strings.Get(index));
@@ -426,9 +424,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="collection">Collection to have properties added to.</param>
         internal protected void AddProperties(SortedList<string, List<string>> collection)
         {
-            foreach (var propertyStringIndex in Properties.Keys)
+            foreach (int propertyStringIndex in Properties.Keys)
             {
-                var property = _provider.Strings.Get(propertyStringIndex);
+                string property = _provider.Strings.Get(propertyStringIndex);
                 if (Constants.ExcludePropertiesFromAllProperties.Contains(property) == false &&
                     collection.ContainsKey(property) == false)
                     collection.Add(
@@ -467,8 +465,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns></returns>
         public List<string> GetPropertyValues(string property)
         {
-            var values = new List<string>();
-            var indexes = GetPropertyValueStringIndexes(Provider.Strings.Add(property));
+            List<string> values = new List<string>();
+            List<int> indexes = GetPropertyValueStringIndexes(Provider.Strings.Add(property));
             if (indexes != null)
             {
                 foreach (int index in indexes)
@@ -495,14 +493,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         public SortedList<string, List<string>> GetAllProperties()
         {
-            var collection = new SortedList<string, List<string>>();
-            collection.Add(Constants.DeviceId, new List<string>(new[] { DeviceId }));
+            SortedList<string, List<string>> collection = new SortedList<string, List<string>>();
+            collection.Add(Constants.DeviceId, new List<string>(new string[] { DeviceId }));
 #if DEBUG
-            var handlerNames = new List<string>();
-            foreach (var handler in _provider.GetHandlers(UserAgent))
+            List<string> handlerNames = new List<string>();
+            foreach (FiftyOne.Foundation.Mobile.Detection.Handlers.Handler handler in _provider.GetHandlers(UserAgent))
                 handlerNames.Add(handler.Name);
-            collection.Add("Handlers", new List<string>(new[] { String.Join(", ", handlerNames.ToArray()) }));
-            collection.Add("UserAgent", new List<string>(new[] { UserAgent }));
+            collection.Add("Handlers", new List<string>(new string[] { String.Join(", ", handlerNames.ToArray()) }));
+            collection.Add("UserAgent", new List<string>(new string[] { UserAgent }));
 #endif
             AddProperties(collection);
             return collection;
@@ -532,11 +530,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>True if the object capability strings are the same.</returns>
         private bool CapabilitiesEquals(BaseDeviceInfo other)
         {
-            foreach(var key in Properties.Keys)
+            foreach(int key in Properties.Keys)
             {
                 if (_provider.Strings.Get(key).Equals(other.Provider.Strings.Get(key)) == false)
                     return false;
-                foreach(var value in GetPropertyValueStringIndexes(key))
+                foreach(int value in GetPropertyValueStringIndexes(key))
                     if (_provider.Strings.Get(value).Equals(other.Provider.Strings.Get(value)) == false)
                     return false;
             }

@@ -12,7 +12,6 @@
 #region Usings
 
 using System.Configuration;
-using FiftyOne.Foundation.Mobile.Configuration;
 
 #endregion
 
@@ -43,6 +42,19 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
         {
             get { return (string)this["binaryFilePath"]; }
             set { this["binaryFilePath"] = value; }
+        }
+
+        /// <summary>
+        /// Real usage information provides 51Degrees.mobi insight to improve this products
+        /// performance and identify new or less popular devices quickly. It is amalgamated
+        /// with other data sources to bring you this solution. We ask you to leave this 
+        /// property set to true.
+        /// </summary>
+        [ConfigurationProperty("shareUsage", IsRequired = false, DefaultValue = "true")]
+        internal bool ShareUsage
+        {
+            get { return (bool)this["shareUsage"]; }
+            set { this["shareUsage"] = value; }
         }
 
         #endregion

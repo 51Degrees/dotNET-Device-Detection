@@ -9,10 +9,9 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
+using System;
 using System.Text.RegularExpressions;
 using System.Web;
-using System;
-using System.Collections.Generic;
 
 namespace FiftyOne.Foundation.Mobile.Redirection
 {

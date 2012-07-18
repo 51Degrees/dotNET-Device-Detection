@@ -11,22 +11,20 @@
 
 #region Usings
 
-using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Configuration;
-using System.IO;
-using System.Web.Configuration;
-using System.Web.Hosting;
 using FiftyOne.Foundation.Mobile.Configuration;
-
-#endregion
 
 #if VER4 || VER35
 
 using System.Linq;
 
+#else
+
+using System.Collections.Generic;
+
 #endif
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection.Configuration
 {
@@ -51,6 +49,50 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// Returns true or false depending on whether usage information
+        /// should be shared with 51Degrees.mobi.
+        /// </summary>
+        internal static bool ShareUsage
+        {
+            get
+            {
+                if (_configurationSection == null)
+                    return true;
+                return _configurationSection.ShareUsage;
+            }
+            set
+            {
+                SetShareUsage(value);
+            }
+        }
+
+        /// <summary>
+        /// Sets the shared usage value.
+        /// </summary>
+        /// <param name="value"></param>
+        private static void SetShareUsage(bool value)
+        {
+            DetectionSection element = GetDetectionElement();
+            element.ShareUsage = value;
+            Support.SetWebApplicationSection(element);
+            Refresh();
+        }
+
+        /// <summary>
+        /// Gets the detection element from a configuration source.
+        /// </summary>
+        /// <returns></returns>
+        private static DetectionSection GetDetectionElement()
+        {
+            System.Configuration.Configuration configuration = Support.GetConfigurationContainingSectionGroupName("fiftyOne/detection");
+
+            if (configuration == null)
+                return null;
+
+            return configuration.GetSection("fiftyOne/detection") as DetectionSection;
+        }
 
         /// <summary>
         /// Returns the path to the binary file if provided.

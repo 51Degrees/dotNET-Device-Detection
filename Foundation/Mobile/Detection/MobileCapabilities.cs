@@ -9,19 +9,19 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
-#if VER4
-using System.Linq;
-#endif
-
 #region Usings
 
 using System;
 using System.Collections;
-using System.Web;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.Collections.Specialized;
-using System.Web.Hosting;
+using System.Text.RegularExpressions;
+
+#if VER4
+
+using System.Linq;
+
+#endif
 
 #endregion
 
@@ -120,11 +120,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
             IsCrawler = _provider.Strings.Add("IsCrawler");
             TablesCapable = _provider.Strings.Add("TablesCapable");
             CcppAccept = _provider.Strings.Add("CcppAccept");
-            ImageGif = new[] { 
+            ImageGif = new int[] { 
                 _provider.Strings.Add("image/gif") };
-            ImagePng = new[] { 
+            ImagePng = new int[] { 
                 _provider.Strings.Add("image/png") };
-            ImageJpeg = new[] { 
+            ImageJpeg = new int[] { 
                 _provider.Strings.Add("image/jpeg"),
                 _provider.Strings.Add("image/jpg") };
         }
@@ -145,9 +145,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
             IDictionary capabilities = new Hashtable();
 
             // Get the device.
-            var start = Environment.TickCount;
-            var device = _provider.GetDeviceInfo(headers);
-            var detectionTime = Environment.TickCount - start + 1;
+            int start = Environment.TickCount;
+            BaseDeviceInfo device = _provider.GetDeviceInfo(headers);
+            int detectionTime = Environment.TickCount - start + 1;
 
             // Add the capabilities.
             Create(device, capabilities, currentCapabilities);
@@ -157,7 +157,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             {
                 ((SortedList<string, List<string>>)capabilities[Constants.FiftyOneDegreesProperties])
                     .Add(Constants.DetectionTimeProperty,
-                    new List<string>(new[] {
+                    new List<string>(new string[] {
                     detectionTime.ToString() 
                 }));
             }
@@ -184,7 +184,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             SetJavaScript(capabilities, true);
 
             // Set the headers and return the new capabilities collection.
-            var headers = new NameValueCollection();
+            NameValueCollection headers = new NameValueCollection();
             headers.Add("User-Agent", userAgent);
             return Create(headers, capabilities);
         }
@@ -266,7 +266,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             SetValue(capabilities, "screenPixelsWidth", GetScreenPixelsWidth(device) ??
                 GetDefaultValue("screenPixelsWidth", currentCapabilities));
             SetValue(capabilities, "screenBitDepth", GetBitsPerPixel(device));
-            SetValue(capabilities, "preferredImageMime", GetPreferredImageMime(device, capabilities));
+            SetValue(capabilities, "preferredImageMime", GetPreferredImageMime(device));
             SetValue(capabilities, "isColor", GetIsColor(device));
             SetValue(capabilities, "supportsCallback", GetSupportsCallback(device));
             SetValue(capabilities, "SupportsCallback", GetSupportsCallback(device));
@@ -447,7 +447,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>True if callback is supported.</returns>
         private string GetSupportsCallback(BaseDeviceInfo device)
         {
-            var values = device.GetPropertyValueStringIndexes(AjaxRequestType);
+            List<int> values = device.GetPropertyValueStringIndexes(AjaxRequestType);
             if (values != null && values.Contains(AjaxRequestTypeNotSupported))
                 return bool.FalseString.ToLowerInvariant();
             return bool.TrueString.ToLowerInvariant();
@@ -475,7 +475,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             }
 
             // Try and set version 1.0 if ajax is supported.
-            var values = device.GetPropertyValueStringIndexes(AjaxRequestType);
+            List<int> values = device.GetPropertyValueStringIndexes(AjaxRequestType);
             if (values != null && values.Contains(AjaxRequestTypeNotSupported) == false)
                 version = new Version("2.0.0.0");
 
@@ -502,7 +502,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns></returns>
         private string GetJavascriptVersion(BaseDeviceInfo device)
         {
-            var index = device.GetFirstPropertyValueStringIndex(JavascriptVersion);
+            int index = device.GetFirstPropertyValueStringIndex(JavascriptVersion);
             if (index < 0)
                 return null;
 
@@ -538,12 +538,21 @@ namespace FiftyOne.Foundation.Mobile.Detection
             return _provider.Strings.Get(device.GetFirstPropertyValueStringIndex(BrowserName));
         }
 
+        /// <summary>
+        /// If the data set does not contain the IsCrawler property null is returned.
+        /// If it is present and contains the value true or false then a value
+        /// is returned.
+        /// </summary>
+        /// <param name="device"></param>
+        /// <returns></returns>
         private string GetIsCrawler(BaseDeviceInfo device)
         {
             int value = device.GetFirstPropertyValueStringIndex(IsCrawler);
             if (value == this.True[0] || value == this.True[1])
                 return bool.TrueString.ToLowerInvariant();
-            return bool.FalseString.ToLowerInvariant();
+            if (value == this.False[0] || value == this.False[1])
+                return bool.FalseString.ToLowerInvariant();
+            return null;
         }
 
         private string GetAdapters(BaseDeviceInfo device)
@@ -598,9 +607,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
             return _provider.Strings.Get(device.GetFirstPropertyValueStringIndex(HardwareVendor));
         }
 
-        private string GetPreferredImageMime(BaseDeviceInfo device, IDictionary capabilities)
+        private string GetPreferredImageMime(BaseDeviceInfo device)
         {
-            var mimeTypes = device.GetPropertyValueStringIndexes(CcppAccept);
+            List<int> mimeTypes = device.GetPropertyValueStringIndexes(CcppAccept);
             // Look at the database and return the 1st one that matches in order
             // of preference.
             if (Contains(mimeTypes, ImagePng))
@@ -658,7 +667,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>A default value.</returns>
         protected static string GetDefaultValue(string key, IDictionary currentCapabilities)
         {
-            var currentValue = currentCapabilities[key] as string;
+            string currentValue = currentCapabilities[key] as string;
             if (currentValue != null)
                 return currentValue;
             return GetDefaultValue(key);

@@ -162,7 +162,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 // for the requesting device" exception is likely to occur.
                 if (context.Handler != null &&
                     IsMobileType(context.Handler.GetType()) &&
-                    "html4" == context.Request.Browser.Capabilities["preferredRenderingType"] as string)
+                    "html4".Equals(context.Request.Browser.PreferredRenderingType, 
+                        StringComparison.InvariantCultureIgnoreCase))
                 {
                     context.Request.Browser.Capabilities["preferredRenderingType"] = "html32";
                 }
@@ -271,7 +272,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 {
                     // Client targets have been defined so set the sorted list to include
                     // these details.
-                    var clientNames = new SortedList<string, string>();
+                    SortedList<string, string> clientNames = new SortedList<string, string>();
                     for (int index = 0; index < targets.ClientTargets.Count; index++)
                     {
                         clientNames.Add(

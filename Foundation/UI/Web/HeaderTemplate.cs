@@ -40,9 +40,9 @@ namespace FiftyOne.Foundation.UI.Web
         /// <param name="container">Container the template is being displayed in.</param>
         public void InstantiateIn(Control container)
         {
-            var open = new Literal();
-            var close = new Literal();
-            var label = new Label();
+            Literal open = new Literal();
+            Literal close = new Literal();
+            Label label = new Label();
 
             open.Text = String.Format("<h{0}>", _level);
             label.ID = "Heading";

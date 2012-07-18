@@ -12,11 +12,8 @@
 using System;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using System.Web.Hosting;
-using System.IO;
-using FiftyOne.Foundation.Mobile.Detection;
-using System.Security.Principal;
 using FiftyOne.Foundation.Mobile;
+using FiftyOne.Foundation.Mobile.Detection;
 
 namespace FiftyOne.Foundation.UI.Web
 {

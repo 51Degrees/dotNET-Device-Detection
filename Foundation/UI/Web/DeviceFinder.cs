@@ -10,9 +10,7 @@
  * ********************************************************************* */
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Web.UI;
 using System.Web.UI.WebControls;
 using FiftyOne.Foundation.Mobile.Detection;
 
@@ -56,7 +54,7 @@ namespace FiftyOne.Foundation.UI.Web
             _gvResults = new GridView();
             _gvResults.AutoGenerateColumns = false;
 
-            var captionColumn = new BoundField();
+            BoundField captionColumn = new BoundField();
             captionColumn.HeaderText = "Device";
             captionColumn.DataField = "Caption";
             _gvResults.Columns.Add(captionColumn);
@@ -90,9 +88,9 @@ namespace FiftyOne.Foundation.UI.Web
 
         private Table CreateCriteriaTable()
         {
-            var table = new Table();
-            
-            var row = new TableRow();
+            Table table = new Table();
+
+            TableRow row = new TableRow();
             CreateCell(_lblDevice, row, 2);
             table.Rows.Add(row);
 
@@ -131,7 +129,7 @@ namespace FiftyOne.Foundation.UI.Web
 
         private void CreateCell(WebControl withControl, TableRow addToRow, int colSpan)
         {
-            var cell = new TableCell();
+            TableCell cell = new TableCell();
             cell.ColumnSpan = colSpan;
             cell.Controls.Add(withControl);
             addToRow.Cells.Add(cell);
@@ -139,7 +137,7 @@ namespace FiftyOne.Foundation.UI.Web
 
         private void CreateLabelCell(string text, string toolTip, TableRow addToRow, int colSpan)
         {
-            var cell = new TableCell();
+            TableCell cell = new TableCell();
             cell.ColumnSpan = colSpan;
             AddLabel(cell, text, toolTip, null, "");
             addToRow.Cells.Add(cell);
@@ -175,7 +173,7 @@ namespace FiftyOne.Foundation.UI.Web
         /// </summary>
         private void SetVendor()
         {
-            var selectedVendor = GetSelectedVendor();
+            Value selectedVendor = GetSelectedVendor();
             if (selectedVendor != null)
             {
                 _ddlModels.DataSource = DataProvider.Vendors[selectedVendor];
@@ -262,7 +260,7 @@ namespace FiftyOne.Foundation.UI.Web
         {
             if (String.IsNullOrEmpty(_deviceId) == false)
             {
-                var device = DataProvider.GetDeviceFromDeviceID(_deviceId);
+                Device device = DataProvider.GetDeviceFromDeviceID(_deviceId);
                 _lblDevice.Text = device.Caption;
             }
             else
@@ -283,7 +281,7 @@ namespace FiftyOne.Foundation.UI.Web
         /// <returns></returns>
         private Value GetSelectedVendor()
         {
-            foreach (var vendor in DataProvider.Vendors.Keys)
+            foreach (Value vendor in DataProvider.Vendors.Keys)
                 if (vendor.Name == _ddlVendors.SelectedValue)
                     return vendor;
             return null;

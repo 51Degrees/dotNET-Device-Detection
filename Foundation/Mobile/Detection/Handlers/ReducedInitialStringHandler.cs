@@ -11,10 +11,9 @@
 
 #region Usings
 
-using System;
 using System.Text.RegularExpressions;
 using FiftyOne.Foundation.Mobile.Detection.Matchers;
-using Matcher=FiftyOne.Foundation.Mobile.Detection.Matchers.ReducedInitialString.Matcher;
+using Matcher = FiftyOne.Foundation.Mobile.Detection.Matchers.ReducedInitialString.Matcher;
 
 #endregion
 

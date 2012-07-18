@@ -18,7 +18,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// Full type names of classes representing mobile
         /// page handlers.
         /// </summary>
-        internal static readonly string[] MobilePages = {
+        internal static readonly string[] MobilePages = new string[] {
                                                             "System.Web.UI.MobileControls.MobilePage",
                                                             "FiftyOne.Framework.Mobile.Page"
                                                         };
@@ -27,21 +27,21 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// Full type names of classes representing standard
         /// page handlers.
         /// </summary>
-        internal static readonly string[] Pages = new[]
+        internal static readonly string[] Pages = new string[]
                                                      {
                                                          "System.Web.UI.Page",
                                                          "System.Web.Mvc.MvcHandler",
                                                          "System.Web.Mvc.MvcHttpHandler",
                                                          "System.Web.UI.MobileControls.MobilePage",
                                                          "System.Web.WebPages.WebPageHttpHandler",
-                                                         "Orchard.Mvc.Routes.ShellRoute.HttpAsyncHandler"                                                
-                                                     };
-        
+                                                         "Orchard.Mvc.Routes.ShellRoute.HttpAsyncHandler"
+                                                     };                                             
+                         
         /// <summary>
         /// The key in the Items collection of the requesting context used to
         /// store result of the is first time check.
         /// </summary>
-        internal const string IsFirstTimeKey = "51D_Is_First_Time";     
+        internal const string IsFirstTimeKey = "51D_Is_First_Time";                                                     
 
         /// <summary>
         /// The key in the Items collection of the requesting context used to

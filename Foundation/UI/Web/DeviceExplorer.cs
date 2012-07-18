@@ -10,12 +10,13 @@
  * ********************************************************************* */
 
 using System;
-using System.Web.UI.WebControls;
-using System.Reflection;
-using System.IO;
-using FiftyOne.Foundation.Mobile.Detection;
-using System.Xml;
 using System.Collections.Specialized;
+using System.IO;
+using System.Reflection;
+using System.Web.UI.WebControls;
+using System.Xml;
+using FiftyOne.Foundation.Mobile.Detection;
+using System.Collections.Generic;
 
 #if VER4 || VER35
 
@@ -229,8 +230,8 @@ namespace FiftyOne.Foundation.UI.Web
         {
             base.OnInit(e);
 
-            var clearTop = new Literal();
-            var clearBottom = new Literal();
+            Literal clearTop = new Literal();
+            Literal clearBottom = new Literal();
             clearTop.Text = clearBottom.Text = "<div style=\"clear: both\"></div>";
             _literalInstruction = new Literal();
             _linkBackTop = new HyperLink();
@@ -290,7 +291,7 @@ namespace FiftyOne.Foundation.UI.Web
                 key = DataProvider.Vendors.Keys.FirstOrDefault(i =>
                     i.Name == Vendor);
 #else
-                foreach (var i in DataProvider.Vendors.Keys)
+                foreach (Value i in DataProvider.Vendors.Keys)
                 {
                     if (i.Name == Vendor)
                     {
@@ -306,7 +307,7 @@ namespace FiftyOne.Foundation.UI.Web
                     _models.DataBind();
                     _container.CssClass = DevicesCssClass;
 
-                    var parameters = new NameValueCollection(Request.QueryString);
+                    NameValueCollection parameters = new NameValueCollection(Request.QueryString);
                     parameters.Remove("Vendor");
                     _panelBackBottom.Visible = _panelBackTop.Visible = _navigation;
                     _linkBackBottom.Text = _linkBackTop.Text = String.Format(BackButtonDevicesText);
@@ -331,14 +332,14 @@ namespace FiftyOne.Foundation.UI.Web
                     ConstructDeviceContent(device);
                     _container.CssClass = DeviceCssClass;
 
-                    var relatedDevices = DataProvider.GetRelatedInfo(device);
+                    List<Device> relatedDevices = DataProvider.GetRelatedInfo(device);
                     if (relatedDevices.Count > 0)
                     {
                         _related.DataSource = DataProvider.GetRelatedInfo(device);
                         _related.DataBind();
                     }
 
-                    var parameters = new NameValueCollection(Request.QueryString);
+                    NameValueCollection parameters = new NameValueCollection(Request.QueryString);
                     parameters.Remove("Model");
                     parameters.Remove("DeviceID");
                     _panelBackBottom.Visible = _panelBackTop.Visible = _navigation;
@@ -364,7 +365,7 @@ namespace FiftyOne.Foundation.UI.Web
         /// <param name="property"></param>
         protected void ItemDataBound(Panel namePanel, Panel valuePanel, Device device, Property property)
         {
-            var nameLiteral = new Literal();
+            Literal nameLiteral = new Literal();
             namePanel.Controls.Add(nameLiteral);
 
             // Add the name.
@@ -372,15 +373,15 @@ namespace FiftyOne.Foundation.UI.Web
 
             // Add the values.
             int count = 0;
-            foreach (var value in device.Properties[property.Name])
+            foreach (string value in device.Properties[property.Name])
             {
                 if (count > 0)
                 {
-                    var comma = new Literal();
+                    Literal comma = new Literal();
                     comma.Text = ", ";
                     valuePanel.Controls.Add(comma);
                 }
-                foreach (var i in property.Values)
+                foreach (Value i in property.Values)
                 {
                     if (value == i.Name)
                     {
@@ -393,7 +394,7 @@ namespace FiftyOne.Foundation.UI.Web
 
         private void AddNodes(Device device, int headingLevel)
         {
-            using (var reader = XmlReader.Create(Headings))
+            using (XmlReader reader = XmlReader.Create(Headings))
             {
                 while (reader.EOF == false)
                 {
@@ -430,7 +431,7 @@ namespace FiftyOne.Foundation.UI.Web
                             default: caption = key; break;
                         }
 
-                        var heading = CreateHeading(depth, caption);
+                        Literal heading = CreateHeading(depth, caption);
                         parent.Controls.Add(heading);
 
                         reader.Read();
@@ -443,24 +444,24 @@ namespace FiftyOne.Foundation.UI.Web
 
                     if (device.Properties.ContainsKey(key) && device.Properties[key].Count > 0)
                     {
-                        var property = DataProvider.GetProperty(key);
+                        Property property = DataProvider.GetProperty(key);
 
                         if (property != null)
                         {
-                            var itemPanel = new Panel();
-                            var namePanel = new Panel();
-                            var valuePanel = new Panel();
+                            Panel itemPanel = new Panel();
+                            Panel namePanel = new Panel();
+                            Panel valuePanel = new Panel();
 
                             parent.Controls.Add(itemPanel);
                             itemPanel.Controls.Add(namePanel);
                             itemPanel.Controls.Add(valuePanel);
 
                             valuePanel.CssClass = ValueCssClass;
-                            namePanel.CssClass = String.Join(" ", new[] {
-                            PropertyCssClass,
-                            (property.IsPremium ? PremiumCssClass : LiteCssClass) });
+                            namePanel.CssClass = String.Join(" ", new string[] {
+                                PropertyCssClass,
+                                (property.IsPremium ? PremiumCssClass : LiteCssClass) });
 
-                            var wide = reader.GetAttribute("wide");
+                            string wide = reader.GetAttribute("wide");
                             itemPanel.CssClass = String.IsNullOrEmpty(wide) ? ItemCssClass : WideCssClass;
 
                             ItemDataBound(namePanel, valuePanel, device, property);
@@ -481,7 +482,7 @@ namespace FiftyOne.Foundation.UI.Web
         /// <param name="caption"></param>
         private Literal CreateHeading(int depth, string caption)
         {
-            var heading = new Literal();
+            Literal heading = new Literal();
             heading.Text = String.Format("<h{0}>{1}</h{0}>", depth, caption);
             return heading;
         }
@@ -491,10 +492,10 @@ namespace FiftyOne.Foundation.UI.Web
             if (e.Item.DataItem != null &&
                 e.Item.DataItem is Value)
             {
-                var vendor = (Value)e.Item.DataItem;
-                var linkVendor = e.Item.FindControl("Vendor") as HyperLink;
-                var labelCount = e.Item.FindControl("Count") as Label;
-                var panelContainer = e.Item.FindControl("Panel") as Panel;
+                Value vendor = (Value)e.Item.DataItem;
+                HyperLink linkVendor = e.Item.FindControl("Vendor") as HyperLink;
+                Label labelCount = e.Item.FindControl("Count") as Label;
+                Panel panelContainer = e.Item.FindControl("Panel") as Panel;
 
                 linkVendor.Text = vendor.Name;
                 linkVendor.NavigateUrl = GetNewUrl("Vendor", vendor.Name);
@@ -510,9 +511,9 @@ namespace FiftyOne.Foundation.UI.Web
             if (e.Item.DataItem != null &&
                 e.Item.DataItem is Device)
             {
-                var device = e.Item.DataItem as Device;
-                var container = e.Item.FindControl("Device") as Panel;
-                var link = e.Item.FindControl("Link") as HyperLink;
+                Device device = e.Item.DataItem as Device;
+                Panel container = e.Item.FindControl("Device") as Panel;
+                HyperLink link = e.Item.FindControl("Link") as HyperLink;
 
                 link.NavigateUrl = GetNewUrl("DeviceID", device.DeviceID);
                 link.Text = device.SoftwareBrowserCaption;
@@ -526,15 +527,15 @@ namespace FiftyOne.Foundation.UI.Web
             if (e.Item.DataItem != null &&
                 e.Item.DataItem is Device)
             {
-                var device = e.Item.DataItem as Device;
+                Device device = e.Item.DataItem as Device;
 
-                var panelContainer = e.Item.FindControl("Device") as Panel;
-                var panelModel = e.Item.FindControl("Model") as Panel;
-                var panelImage = e.Item.FindControl("Image") as Panel;
-                var panelName = e.Item.FindControl("Name") as Panel;
+                Panel panelContainer = e.Item.FindControl("Device") as Panel;
+                Panel panelModel = e.Item.FindControl("Model") as Panel;
+                Panel panelImage = e.Item.FindControl("Image") as Panel;
+                Panel panelName = e.Item.FindControl("Name") as Panel;
 
-                var linkModel = new HyperLink();
-                var linkName = new HyperLink();
+                HyperLink linkModel = new HyperLink();
+                HyperLink linkName = new HyperLink();
 
                 linkModel.Text = device.HardwareModel;
                 linkModel.NavigateUrl = GetNewUrl("Model", device.HardwareModel);
@@ -561,7 +562,7 @@ namespace FiftyOne.Foundation.UI.Web
 
         private Repeater CreateVendorRepeater()
         {
-            var repeater = new Repeater();
+            Repeater repeater = new Repeater();
             repeater.ItemDataBound += new RepeaterItemEventHandler(VendorRepeater_ItemDataBound);
             repeater.ItemTemplate = new VendorTemplate();
             return repeater;
@@ -569,7 +570,7 @@ namespace FiftyOne.Foundation.UI.Web
 
         private DataList CreateDeviceDataList()
         {
-            var dataList = new DataList();
+            DataList dataList = new DataList();
             dataList.ItemDataBound += new DataListItemEventHandler(DeviceDataList_ItemDataBound);
             
             dataList.ItemTemplate = new DeviceTemplate();
@@ -580,7 +581,7 @@ namespace FiftyOne.Foundation.UI.Web
 
         private DataList CreateRelatedDeviceDataList()
         {
-            var dataList = new DataList();
+            DataList dataList = new DataList();
             dataList.ItemDataBound += new DataListItemEventHandler(RelatedDeviceDataList_ItemDataBound);
             dataList.ItemTemplate = new RelatedDeviceTemplate();
             dataList.RepeatLayout = RepeatLayout.Flow;

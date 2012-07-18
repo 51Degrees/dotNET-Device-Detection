@@ -27,5 +27,9 @@ namespace Detector
 {
     public partial class _Default : System.Web.UI.Page
     {
+        protected override void OnInit(EventArgs e)
+        {
+               
+        }
     }
 }

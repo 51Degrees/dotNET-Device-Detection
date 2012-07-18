@@ -11,14 +11,15 @@
 
 #region Usings
 
-using System;
 using System.Collections.Generic;
 
-#endregion
-
 #if VER4
+
 using System.Linq;
+
 #endif
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
@@ -97,7 +98,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 {
                     object obj = _index[hashcode];
                     if (obj is int)
-                        newList = new List<int> {(int) obj};
+                        newList = new List<int>(new int[] { (int) obj });
                     else
                         newList = new List<int>((int[]) obj);
 

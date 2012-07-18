@@ -10,15 +10,14 @@
  * ********************************************************************* */
 
 using System;
-using System.Web.UI.WebControls;
-using FiftyOne.Foundation.Mobile.Configuration;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Security.Permissions;
-using System.Web.UI;
-using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
 using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using FiftyOne.Foundation.Mobile.Detection;
+using FiftyOne.Foundation.Mobile.Configuration;
 
 #if VER4 || VER35
 
@@ -85,7 +84,7 @@ namespace FiftyOne.Foundation.UI.Web
         /// <param name="className"></param>
         private static void AddCssClass(WebControl control, string className)
         {
-            var list = new List<string>(control.CssClass.Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries));
+            List<string> list = new List<string>(control.CssClass.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries));
             list.Add(className);
             control.CssClass = String.Join(" ", list.ToArray());
         }
@@ -142,8 +141,8 @@ namespace FiftyOne.Foundation.UI.Web
                 _buttonDelete = new Button();
                 _customValidatorMatchExpression = new CustomValidator();
 
-                var list = new List<string>();
-                foreach (var property in DataProvider.Provider.Properties)
+                List<string> list = new List<string>();
+                foreach (Property property in DataProvider.Provider.Properties)
                     list.Add(property.Name);
                 list.Sort();
                 _ddlProperties.DataSource = list;
@@ -175,7 +174,7 @@ namespace FiftyOne.Foundation.UI.Web
 
             private TableCell NewCell(Control control)
             {
-                var cell = new TableCell();
+                TableCell cell = new TableCell();
                 cell.Controls.Add(control);
                 return cell;
             }
@@ -188,7 +187,7 @@ namespace FiftyOne.Foundation.UI.Web
                     i.Name == _data.Property);
 #else
                 FiftyOne.Foundation.Mobile.Detection.Property property = null;
-                foreach (var item in DataProvider.Provider.Properties)
+                foreach (Property item in DataProvider.Provider.Properties)
                 {
                     if (item.Name == _data.Property)
                     {
@@ -208,11 +207,11 @@ namespace FiftyOne.Foundation.UI.Web
                     // Bind the values list to the ones that are available
                     // for the property selected.
                     _ddlValues.Items.Clear();
-                    var list = new List<string>();
-                    foreach (var value in property.Values)
+                    List<string> list = new List<string>();
+                    foreach (Value value in property.Values)
                         list.Add(value.Name);
                     list.Sort();
-                    foreach (var item in list)
+                    foreach (string item in list)
                         _ddlValues.Items.Add(new ListItem(item, item));
                     _ddlValues.Items.Add(new ListItem(EXPRESSION_VALUE, String.Empty));
 
@@ -225,7 +224,7 @@ namespace FiftyOne.Foundation.UI.Web
                             i.Name == _data.MatchExpression);
 #else
                         FiftyOne.Foundation.Mobile.Detection.Value selectedValue = null;
-                        foreach (var item in property.Values)
+                        foreach (Value item in property.Values)
                         {
                             if (item.Name == _data.MatchExpression)
                             {
@@ -265,7 +264,7 @@ namespace FiftyOne.Foundation.UI.Web
                 Cells.Add(NewCell(_textBoxExpression));
                 Cells.Add(NewCell(_checkBoxEnabled));
 
-                var cellLast = new TableCell();
+                TableCell cellLast = new TableCell();
                 cellLast.Controls.Add(_buttonDelete);
                 cellLast.Controls.Add(_customValidatorMatchExpression);
                 Cells.Add(cellLast);
@@ -431,7 +430,7 @@ namespace FiftyOne.Foundation.UI.Web
 
                 _regularExpressionValidatorUrl.ValidationExpression = REGEX_URL;
 
-                var rowHeader = new TableHeaderRow();
+                TableHeaderRow rowHeader = new TableHeaderRow();
                 rowHeader.Cells.Add(NewCell(_panelProperty));
                 rowHeader.Cells.Add(NewCell(_panelValue));
                 rowHeader.Cells.Add(NewCell(_panelMatchExpression));
@@ -448,7 +447,7 @@ namespace FiftyOne.Foundation.UI.Web
 
             private TableCell NewCell(Control control)
             {
-                var cell = new TableCell();
+                TableCell cell = new TableCell();
                 cell.Controls.Add(control);
                 return cell;
             }
@@ -467,7 +466,7 @@ namespace FiftyOne.Foundation.UI.Web
                 Cells.Add(NewCell(_buttonAdd));
                 Cells.Add(NewCell(_buttonToggle));
 
-                var cellLast =  new TableCell();
+                TableCell cellLast = new TableCell();
                 cellLast.Controls.Add(_buttonRemove);
                 cellLast.Controls.Add(_customValidatorMatchExpression);
                 cellLast.Controls.Add(_regularExpressionValidatorUrl);
@@ -561,7 +560,7 @@ namespace FiftyOne.Foundation.UI.Web
 
             private void _buttonAdd_Click(object sender, EventArgs e)
             {
-                var newFilter = new FilterData(_data);
+                FilterData newFilter = new FilterData(_data);
                 _data.Add(newFilter);
                 _tableFilters.Rows.Add(new FilterControl(newFilter, _parent));
                 _data.ShowFilters = true;
@@ -622,7 +621,7 @@ namespace FiftyOne.Foundation.UI.Web
 
             private TableCell NewCell(Control control)
             {
-                var cell = new TableCell();
+                TableCell cell = new TableCell();
                 cell.Controls.Add(control);
                 return cell;
             }
@@ -639,11 +638,11 @@ namespace FiftyOne.Foundation.UI.Web
             {
                 base.OnInit(e);
 
-                var rowHeader = new TableHeaderRow();
+                TableHeaderRow rowHeader = new TableHeaderRow();
                 rowHeader.Cells.Add(NewCell(_panelName));
                 rowHeader.Cells.Add(NewCell(_panelUrl));
                 rowHeader.Cells.Add(NewCell(_panelMatchExpression));
-                var cellFiltersLabel = new TableCell();
+                TableCell cellFiltersLabel = new TableCell();
                 cellFiltersLabel.ColumnSpan = 2;
                 cellFiltersLabel.Controls.Add(_panelFilters);
                 cellFiltersLabel.Controls.Add(_customValidatorUniqueName);
@@ -657,12 +656,12 @@ namespace FiftyOne.Foundation.UI.Web
                 foreach (LocationData item in _data)
                 {
                     // Add the location row.
-                    var locationRow = new LocationControl(item, _parent);
+                    LocationControl locationRow = new LocationControl(item, _parent);
 
                     // Add the filters associated with the location to the next row.
                     Rows.Add(locationRow);
-                    var rowFilters = new TableRow();
-                    var cellFilters = new TableCell();
+                    TableRow rowFilters = new TableRow();
+                    TableCell cellFilters = new TableCell();
                     rowFilters.Cells.Add(cellFilters);
                     cellFilters.ColumnSpan = 6;
                     Rows.Add(rowFilters);
@@ -680,12 +679,12 @@ namespace FiftyOne.Foundation.UI.Web
             /// <param name="args"></param>
             private void _customValidatorUniqueName_ServerValidate(object source, ServerValidateEventArgs args)
             {
-                var counts = new SortedList<string, int>();
+                SortedList<string, int> counts = new SortedList<string, int>();
                 foreach (TableRow row in Rows)
                 {
                     if (row is LocationControl)
                     {
-                        var locationRow = (LocationControl)row;
+                        LocationControl locationRow = (LocationControl)row;
                         if (counts.ContainsKey(locationRow.TextBoxName.Text) == false)
                             counts.Add(locationRow.TextBoxName.Text, 1);
                         else
@@ -693,8 +692,8 @@ namespace FiftyOne.Foundation.UI.Web
                     }
                 }
 
-                var list = new List<string>();
-                foreach (var key in counts.Keys)
+                List<string> list = new List<string>();
+                foreach (string key in counts.Keys)
                     if (counts[key] > 1)
                         list.Add(key);
 
@@ -702,7 +701,7 @@ namespace FiftyOne.Foundation.UI.Web
                 {
                     if (row is LocationControl)
                     {
-                        var locationRow = (LocationControl)row;
+                        LocationControl locationRow = (LocationControl)row;
                         if (counts[locationRow.TextBoxName.Text] > 1)
                             _listDuplicateNames.Add(locationRow);
                     }
@@ -743,7 +742,7 @@ namespace FiftyOne.Foundation.UI.Web
                     _parent.RedirectLocationFiltersToolTip,
                     null, null);
 
-                foreach (var row in _listDuplicateNames)
+                foreach (LocationControl row in _listDuplicateNames)
                     row.TextBoxName.CssClass = _parent.ErrorCssClass;
 
                 int count = 1;
@@ -1143,9 +1142,9 @@ namespace FiftyOne.Foundation.UI.Web
         /// <returns>The data object to be saved.</returns>
         protected override object SaveControlState()
         {
-            using (var ms = new MemoryStream())
+            using (MemoryStream ms = new MemoryStream())
             {
-                using (var writer = new BinaryWriter(ms))
+                using (BinaryWriter writer = new BinaryWriter(ms))
                 {
                     _data.Serialize(writer);
                 }
@@ -1159,7 +1158,7 @@ namespace FiftyOne.Foundation.UI.Web
         /// <param name="savedState">The previous data object.</param>
         protected override void LoadControlState(object savedState)
         {
-            using (var reader = new BinaryReader(new MemoryStream((byte[])savedState)))
+            using (BinaryReader reader = new BinaryReader(new MemoryStream((byte[])savedState)))
             {
                 _data = new RedirectData(reader);
                 LoadData();
@@ -1187,17 +1186,17 @@ namespace FiftyOne.Foundation.UI.Web
 
         private Panel AddPanel()
         {
-            var panel = new Panel();
+            Panel panel = new Panel();
             Controls.Add(panel);
             return panel;
         }
 
         private TableRow AddTableRow(Panel label, Control ctrl)
         {
-            var row = new TableRow();
+            TableRow row = new TableRow();
             _tableBasic.Controls.Add(row);
-            var cell1 = new TableCell();
-            var cell2 = new TableCell();
+            TableCell cell1 = new TableCell();
+            TableCell cell2 = new TableCell();
             row.Controls.Add(cell1);
             row.Controls.Add(cell2);
             cell1.Controls.Add(label);
@@ -1207,12 +1206,12 @@ namespace FiftyOne.Foundation.UI.Web
 
         private TableRow AddTableRowSingle(Panel label, Control ctrl)
         {
-            var row1 = new TableRow();
-            var row2 = new TableRow();
+            TableRow row1 = new TableRow();
+            TableRow row2 = new TableRow();
             _tableBasic.Controls.Add(row1);
             _tableBasic.Controls.Add(row2);
-            var cell1 = new TableCell();
-            var cell2 = new TableCell();
+            TableCell cell1 = new TableCell();
+            TableCell cell2 = new TableCell();
             cell1.ColumnSpan = cell2.ColumnSpan = 2;
             row1.Controls.Add(cell1);
             row2.Controls.Add(cell2);
@@ -1382,7 +1381,7 @@ namespace FiftyOne.Foundation.UI.Web
             {
                 if (Page.IsValid)
                 {
-                    var section = _data.GetElement();
+                    RedirectSection section = _data.GetElement();
                     xml = section.GetXmlElement();
                     if (section != null)
                     {
@@ -1419,7 +1418,7 @@ namespace FiftyOne.Foundation.UI.Web
 
         private void _buttonAdd_Click(object sender, EventArgs e)
         {
-            var newLocation = new LocationData(_data);
+            LocationData newLocation = new LocationData(_data);
             _data.Add(newLocation);
             _locationsControl.Rows.Add(new LocationControl(newLocation, this));
         }

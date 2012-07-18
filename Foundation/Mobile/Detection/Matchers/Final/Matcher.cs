@@ -108,10 +108,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Final
             // Find the tail with the closest edit distance match.
             string closestTail = null;
             int minDistance = int.MaxValue;
+            int[][] rows = new int[][] { new int[userAgentTail.Length + 1], new int[userAgentTail.Length + 1] };
             while (tails.Count > 0)
             {
                 string current = tails.Dequeue();
-                int currentDistance = Algorithms.EditDistance(userAgentTail, current, minDistance);
+                int currentDistance = Algorithms.EditDistance(rows, userAgentTail, current, minDistance);
                 if (currentDistance < minDistance)
                 {
                     minDistance = currentDistance;
@@ -120,7 +121,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Final
             }
 
             // Find the 1st matching useragent and return.
-            BaseDeviceInfo result = devices.Find(device => device.UserAgent.EndsWith(closestTail));
+            BaseDeviceInfo result = null;
+#if VER35 || VER4
+            result = devices.Find(device => device.UserAgent.EndsWith(closestTail));
+#else
+            foreach (BaseDeviceInfo device in devices)
+                if (device.UserAgent.EndsWith(closestTail))
+                    result = device;
+#endif
             if (result != null)
                 return result;
 

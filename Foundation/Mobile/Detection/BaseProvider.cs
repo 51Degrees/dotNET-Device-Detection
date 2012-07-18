@@ -10,14 +10,14 @@
  * ********************************************************************* */
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Web;
-using FiftyOne.Foundation.Mobile.Detection.Handlers;
 using System.Collections.Specialized;
+using FiftyOne.Foundation.Mobile.Detection.Handlers;
 
 #if VER4 || VER35
+
 using System.Linq;
+
 #endif
 
 namespace FiftyOne.Foundation.Mobile.Detection
@@ -109,7 +109,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         {
                             _actualDevices = new List<BaseDeviceInfo>();
                             foreach (int key in AllDevices.Keys)
-                                foreach (var device in AllDevices[key])
+                                foreach (BaseDeviceInfo device in AllDevices[key])
                                     if (device.DeviceId.Split(new string[] { Constants.ProfileSeperator }, StringSplitOptions.RemoveEmptyEntries).Length == 4)
                                         _actualDevices.Add(device);
                         }
@@ -218,7 +218,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 if (list.Count == 1)
                     return list[0];
                 // Return the first matching element.
+#if VER35 || VER4
                 return list.Find(i => i.DeviceId == deviceID);
+#else
+                foreach (BaseDeviceInfo device in list)
+                    if (device.DeviceId == deviceID)
+                        return device;
+#endif
             }
             return null;
         }
@@ -321,7 +327,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 else
                 {
                     // No. So add the new device.
-                    AllDevices.Add(hashCode, new List<BaseDeviceInfo>(new[] { device }));
+                    AllDevices.Add(hashCode, new List<BaseDeviceInfo>(new BaseDeviceInfo[] { device }));
                 }
             }
 

@@ -65,7 +65,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 return Provider.EmbeddedProvider.Properties.FirstOrDefault(i =>
                     i.Name == Name) == null; 
 #else
-                foreach (var property in Provider.EmbeddedProvider.Properties)
+                foreach (Property property in Provider.EmbeddedProvider.Properties)
                     if (property.Name == Name)
                         return false;
                 return true;

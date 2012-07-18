@@ -10,10 +10,10 @@
  * ********************************************************************* */
 
 using System;
-using FiftyOne.Foundation.Mobile.Detection;
 using System.IO;
-using System.Web.Hosting;
 using System.Security.Principal;
+using System.Web.Hosting;
+using FiftyOne.Foundation.Mobile.Detection;
 
 namespace FiftyOne.Foundation.UI.Web
 {

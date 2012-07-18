@@ -11,15 +11,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Net;
 using System.IO;
-using FiftyOne.Foundation.Mobile.Detection.Configuration;
-using FiftyOne.Foundation.Mobile.Configuration;
-using System.Web;
-using System.Web.Hosting;
+using System.Net;
 using System.Security;
 using System.Text.RegularExpressions;
+using System.Web.Hosting;
+using FiftyOne.Foundation.Mobile.Configuration;
+using FiftyOne.Foundation.Mobile.Detection.Configuration;
 
 #if VER4
 
@@ -55,7 +53,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             get
             {
                 // Initilaise the list with any dynamic keys.
-                var list = new List<string>(_dynamicKeys);
+                List<string> list = new List<string>(_dynamicKeys);
 
                 // See if a license key is included in the assembly.
                 if (String.IsNullOrEmpty(Constants.PremiumLicenceKey) == false &&
@@ -66,9 +64,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 foreach (string fileName in Directory.GetFiles(
                     HostingEnvironment.ApplicationPhysicalPath + "bin", "*.lic"))
                 {
-                    var alltext = File.ReadAllText(fileName);
-                    foreach(var key in alltext.Split(
-                        new[] { "\r\n", "\r", "\n" },
+                    string alltext = File.ReadAllText(fileName);
+                    foreach(string key in alltext.Split(
+                        new string[] { "\r\n", "\r", "\n" },
                         StringSplitOptions.RemoveEmptyEntries))
                         if (IsKeyFormatValid(key))
                             list.Add(key);
@@ -124,7 +122,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             byte[] data = null;
             try
             {
-                using (var ms = new MemoryStream())
+                using (MemoryStream ms = new MemoryStream())
                 {
 #if VER4
                     stream.CopyTo(ms);
@@ -328,7 +326,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         private static void CheckConfig()
         {
             // Get the current section.
-            var section = Support.GetWebApplicationSection("fiftyOne/detection", false) as DetectionSection;
+            DetectionSection section = Support.GetWebApplicationSection("fiftyOne/detection", false) as DetectionSection;
 
             // If the section is valid then do nothing.
             if (section != null &&

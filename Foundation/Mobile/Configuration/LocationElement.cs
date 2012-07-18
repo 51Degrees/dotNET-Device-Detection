@@ -11,8 +11,8 @@
 
 #region Usings
 
-using System.Configuration;
 using System;
+using System.Configuration;
 
 #endregion
 
@@ -124,7 +124,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         /// </summary>
         protected override object GetElementKey(ConfigurationElement element)
         {
-            var key = ((FilterElement)element).Property;
+            string key = ((FilterElement)element).Property;
             if (String.IsNullOrEmpty(key))
                 return ((FilterElement)element).UniqueId;
             return key;

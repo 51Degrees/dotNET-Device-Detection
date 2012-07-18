@@ -1,4 +1,5 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="True" MasterPageFile="~/Detector.Master" CodeBehind="Default.aspx.cs" Inherits="Detector.Tablet.Default" EnableSessionState="True" EnableViewState="false" %>
+<%@ OutputCache VaryByParam="*" VaryByHeader="User-Agent" Duration="240" Location="Any" %>
 <%@ Register Src="~/DeviceProperties.ascx" TagPrefix="uc" TagName="DeviceProperties" %>
 
 <asp:Content runat="server" ID="Head" ContentPlaceHolderID="head">

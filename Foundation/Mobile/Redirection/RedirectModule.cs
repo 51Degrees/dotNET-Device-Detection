@@ -9,18 +9,18 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
-using System.Web;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using System;
-using FiftyOne.Foundation.Mobile.Configuration;
+using System.Web;
 using System.Web.Security;
 using System.Web.UI;
+using FiftyOne.Foundation.Mobile.Configuration;
 using FiftyOne.Foundation.Mobile.Detection;
 
 #if VER4 || VER35
 
-using System.Linq; 
+using System.Linq;
 
 #endif
 
@@ -108,7 +108,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// <summary>
         /// Class used to record new devices.
         /// </summary>
-        private static NewDevice _newDevice = new NewDevice(Detection.Constants.NewDevicesUrl, Detection.Constants.NewDeviceDetail);
+        private NewDevice _newDevice;
 
         #endregion
 
@@ -136,13 +136,17 @@ namespace FiftyOne.Foundation.Mobile.Redirection
             }
             
             RegisterEventHandlersInit(application);
+            
+            _newDevice = new NewDevice(
+                Detection.Constants.NewDevicesUrl,
+                Detection.Constants.NewDeviceDetail);
         }
 
         /// <summary>
         /// Registers the event handlers if they've not done so already.
         /// </summary>
         /// <param name="application">HttpApplication object for the web application.</param>
-        private static void RegisterEventHandlersInit(HttpApplication application)
+        private void RegisterEventHandlersInit(HttpApplication application)
         {
             // Record the original requesting URL.
             application.BeginRequest += OnBeginRequest;
@@ -235,7 +239,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// </summary>
         /// <param name="sender">HttpApplication related to the request.</param>
         /// <param name="e">EventArgs related to the event. Not used.</param>
-        public static void OnPostAcquireRequestState(object sender, EventArgs e)
+        public void OnPostAcquireRequestState(object sender, EventArgs e)
         {
             if (sender is HttpApplication)
             {
@@ -286,14 +290,54 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         
         #endregion
 
-        #region Methods
+        #region Public Methods
+
+        /// <summary>
+        /// Returns true if the current handler relates to a mobile web page.
+        /// </summary>
+        /// <param name="context">The context associated with the Http request.</param>
+        public static bool IsMobilePage(HttpContext context)
+        {
+            return IsMobileType(context.Handler.GetType()) ||
+                   IsMobileRegexPage(context);
+        }
+
+        /// <summary>
+        /// Determines if this is the first request received from the device.
+        /// </summary>
+        /// <param name="context">Context of the request.</param>
+        /// <returns>True if this request is the first from the device. Otherwise false.</returns>
+        public static bool IsFirstTime(HttpContext context)
+        {
+            object isFirstTime = context.Items[Constants.IsFirstTimeKey];
+            if (isFirstTime == null)
+            {
+                isFirstTime = GetIsFirstTime(context);
+                context.Items[Constants.IsFirstTimeKey] = isFirstTime;
+            }
+            return (bool)isFirstTime;
+        }
         
+        /// <summary>
+        /// Sends any queued data and records the module being 
+        /// disposed if debug enabled.
+        /// </summary>
+        public virtual void Dispose()
+        {
+            EventLog.Debug("Disposing Redirection Module");
+            _newDevice.Dispose();
+        }
+
+        #endregion
+
+        #region Internal and Private Methods
+
         /// <summary>
         /// Record the new device if we're as certain as we can be that it is
         /// not one we've processed already.
         /// </summary>
         /// <param name="context">Context of the request.</param>
-        private static void RecordNewDevice(HttpContext context)
+        private void RecordNewDevice(HttpContext context)
         {
             try
             {
@@ -308,14 +352,6 @@ namespace FiftyOne.Foundation.Mobile.Redirection
             {
                 EventLog.Debug(ex);
             }
-        }
-
-        /// <summary>
-        /// Records the module being disposed if debug enabled.
-        /// </summary>
-        public virtual void Dispose()
-        {
-            EventLog.Debug("Disposing Redirection Module");
         }
 
         /// <summary>
@@ -441,22 +477,6 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                 value ? "a" : "not a"));
 
             return value;
-        }
-
-        /// <summary>
-        /// Determines if this is the first request received from the device.
-        /// </summary>
-        /// <param name="context">Context of the request.</param>
-        /// <returns>True if this request is the first from the device. Otherwise false.</returns>
-        private static bool IsFirstTime(HttpContext context)
-        {
-            var isFirstTime = context.Items[Constants.IsFirstTimeKey];
-            if (isFirstTime == null)
-            {
-                isFirstTime = GetIsFirstTime(context);
-                context.Items[Constants.IsFirstTimeKey] = isFirstTime;
-            }
-            return (bool)isFirstTime;
         }
 
         /// <summary>
@@ -695,16 +715,6 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                        _mobilePageRegex.IsMatch(originalUrl);
             }
             return false;
-        }
-
-        /// <summary>
-        /// Returns true if the current handler relates to a mobile web page.
-        /// </summary>
-        /// <param name="context">The context associated with the Http request.</param>
-        public static bool IsMobilePage(HttpContext context)
-        {
-            return IsMobileType(context.Handler.GetType()) ||
-                   IsMobileRegexPage(context);
         }
 
         #endregion

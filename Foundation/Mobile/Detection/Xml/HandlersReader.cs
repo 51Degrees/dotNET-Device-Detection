@@ -9,12 +9,12 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml;
 using FiftyOne.Foundation.Mobile.Detection.Handlers;
-using System;
-using System.Collections.Generic;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Xml
 {
@@ -48,7 +48,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
         /// <returns></returns>
         public static IList<Handler> ProcessHandlers(XmlReader reader, BaseProvider provider)
         {
-            var handlers = new List<Handler>();
+            List<Handler> handlers = new List<Handler>();
             while (reader.Read())
             {
                 if (reader.NodeType == XmlNodeType.Element &&

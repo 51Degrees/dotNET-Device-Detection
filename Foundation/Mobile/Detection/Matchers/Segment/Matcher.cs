@@ -14,6 +14,7 @@
 using System;
 using System.Threading;
 using FiftyOne.Foundation.Mobile.Detection.Handlers;
+using System.Collections.Generic;
 
 #endregion
 
@@ -84,6 +85,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Segment
         {
             int index;
             uint runningScore, score;
+            int[][] rows = new int[][] { new int[request.UserAgent.Length + 1], new int[request.UserAgent.Length + 1] };
             BaseDeviceInfo current = request.Next();
             while (current != null)
             {
@@ -95,7 +97,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Segment
                     runningScore <= request.Results.LowestScore)
                 {
                     // Get the next segment for the comparision.
-                    var compare = request.Handler.CreateSegments(
+                    List<Segment> compare = request.Handler.CreateSegments(
                         current, index);
 
                     if (compare != null)
@@ -118,6 +120,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Segment
                                 score = 0;
                             else
                                 score = (uint)Algorithms.EditDistance(
+                                    rows,
                                     request.Target[index][segmentIndex].Value,
                                     compare[segmentIndex].Value,
                                     int.MaxValue) *

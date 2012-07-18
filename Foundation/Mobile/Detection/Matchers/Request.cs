@@ -120,7 +120,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers
             Queue<BaseDeviceInfo> queue = new Queue<BaseDeviceInfo>(handler.Devices.Count);
             lock (handler.Devices)
             {
-                foreach (var devices in handler.Devices.Values)
+                foreach (BaseDeviceInfo[] devices in handler.Devices.Values)
                 {
                     foreach (BaseDeviceInfo device in devices)
                     {

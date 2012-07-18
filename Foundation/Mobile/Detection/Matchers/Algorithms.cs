@@ -37,6 +37,29 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers
         /// <returns></returns>
         public static int EditDistance(string str1, string str2, int maxValue)
         {
+            return EditDistance(
+                new int[][] {new int[str1.Length + 1], new int[str1.Length + 1]},
+                str1, str2, maxValue);
+        }
+
+
+        /// <summary>
+        /// Measures the amount of difference between two strings using the Levenshtein 
+        /// Distance algorithm. This implementation uses a modified version of the pseudo
+        /// code found at http://en.wikipedia.org/wiki/Levenshtein_distance.
+        /// The logic has been modified to ignore string comparisions that will return
+        /// a value greater than the lowest one found so far. This significantly improves
+        /// performance as we can determine earlier if there is any point completing the 
+        /// calculation.
+        /// Requires the integer array to preallocated to improve memory management.
+        /// </summary>
+        /// <param name="rows">Preallocated memory for the calculation.</param>
+        /// <param name="str1">1st string to compare.</param>
+        /// <param name="str2">2nd string to compare.</param>
+        /// <param name="maxValue">The maximum value we're interested in. Anything higher can be ignored.</param>
+        /// <returns></returns>
+        public static int EditDistance(int[][] rows, string str1, string str2, int maxValue)
+        {
             // Confirm input strings are valid.
             if (str1 == null) throw new ArgumentNullException("str1");
             if (str2 == null) throw new ArgumentNullException("str2");
@@ -48,7 +71,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers
 
             // Initialise the data structures.
             int curRow = 0, nextRow = 1;
-            int[][] rows = new[] {new int[l1 + 1], new int[l1 + 1]};
             for (int x = 0; x <= l1; ++x) rows[curRow][x] = x;
 
             for (int y = 1; y <= l2; ++y)

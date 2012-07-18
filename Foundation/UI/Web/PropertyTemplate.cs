@@ -25,8 +25,8 @@ namespace FiftyOne.Foundation.UI.Web
         /// <param name="container">Container the template is being displayed in.</param>
         public void InstantiateIn(Control container)
         {
-            var property = new Panel();
-            var description = new Panel();
+            Panel property = new Panel();
+            Panel description = new Panel();
 
             property.ID = "Property";
             description.ID = "Description";

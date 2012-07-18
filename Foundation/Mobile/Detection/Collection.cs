@@ -11,7 +11,6 @@
 
 #region Usings
 
-using System;
 using System.Collections.Generic;
 
 #endregion
@@ -50,7 +49,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             int capabilityNameIndex = _strings.Add(capabilityName);
             if (capabilityNameIndex >= 0)
             {
-                var stringIndexes = new List<int>();
+                List<int> stringIndexes = new List<int>();
                 foreach (string value in values)
                 {
                     stringIndexes.Add(_strings.Add(value));
@@ -77,7 +76,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 else
                 {
                     // Yes. Replace it's value with the current one.
-                    var list = base[capabilityNameIndex];
+                    List<int> list = base[capabilityNameIndex];
                     foreach(int value in values)
                         if (list.Contains(value) == false)
                             list.Add(value);
@@ -93,7 +92,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>True if the object instances contain the same values.</returns>
         internal bool Equals(Collection other)
         {
-            foreach(var key in Keys)
+            foreach(int key in Keys)
                 if (other[key] != this[key])
                     return false;
             return true;

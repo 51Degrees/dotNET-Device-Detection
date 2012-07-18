@@ -11,11 +11,10 @@
 
 #region Usings
 
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using FiftyOne.Foundation.Mobile.Detection.Matchers.Segment;
-using System;
-using System.Collections;
 
 #endregion
 
@@ -157,7 +156,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
             if (Constants.StoreSegmentResults)
             {
                 // Get the handlers data from the device.
-                var cachedSegments = (List<List<Segment>>)device.GetHandlerData<List<List<Segment>>>(this);
+                List<List<Segment>> cachedSegments = (List<List<Segment>>)device.GetHandlerData<List<List<Segment>>>(this);
 
                 // If the segment does not already exist then add it.
                 if (cachedSegments.Count <= index)
@@ -203,8 +202,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         private List<Segment> CreateSegments(string source, RegexSegment segment)
         {
             bool matched = false;
-            var newSegments = new List<Segment>();
-            var matches = segment.Pattern.Matches(source);
+            List<Segment> newSegments = new List<Segment>();
+            MatchCollection matches = segment.Pattern.Matches(source);
 
             // Add a segment for each match found.
             foreach (Match match in matches)

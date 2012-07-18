@@ -13,10 +13,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Web;
-using FiftyOne.Foundation.Mobile.Detection.Matchers;
 using System.Collections.Specialized;
+using FiftyOne.Foundation.Mobile.Detection.Matchers;
 
 #endregion
 
@@ -37,7 +35,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         /// <summary>
         /// HTTP headers containing uaprof urls.
         /// </summary>
-        private static readonly string[] UAPROF_HEADERS = new[]
+        private static readonly string[] UAPROF_HEADERS = new string[]
                                                               {
                                                                   "profile",
                                                                   "x-wap-profile",
@@ -422,7 +420,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
                 else
                 {
                     // Add the device to the collection.
-                    _devices.Add(hashcode, new[] { device });
+                    _devices.Add(hashcode, new BaseDeviceInfo[] { device });
                 }
             }
         }
@@ -436,7 +434,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         {
             foreach (int index in _provider.UserAgentProfileStringIndexes)
             {
-                var list = device.GetPropertyValueStringIndexes(index);
+                List<int> list = device.GetPropertyValueStringIndexes(index);
                 if (list != null)
                 {
                     foreach (int userAgentProfileStringIndex in list)
@@ -484,13 +482,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
                     return;
                 }
                 // No. Expand the array adding the new device.
-                List<BaseDeviceInfo> newList = new List<BaseDeviceInfo>(_uaprofs[hashcode]) { device };
+                List<BaseDeviceInfo> newList = new List<BaseDeviceInfo>(_uaprofs[hashcode]);
+                newList.Add(device);
                 _uaprofs[hashcode] = newList.ToArray();
             }
             else
             {
                 // Add the device to the collection.
-                _uaprofs.Add(hashcode, new[] { device });
+                _uaprofs.Add(hashcode, new BaseDeviceInfo[] { device });
             }
         }
 

@@ -1,10 +1,18 @@
-﻿using System;
+﻿/* *********************************************************************
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0.
+ * 
+ * If a copy of the MPL was not distributed with this file, You can obtain
+ * one at http://mozilla.org/MPL/2.0/.
+ * 
+ * This Source Code Form is “Incompatible With Secondary Licenses”, as
+ * defined by the Mozilla Public License, v. 2.0.
+ * ********************************************************************* */
+
+using System;
 using System.Collections.Generic;
-using FiftyOne.Foundation.Mobile.Configuration;
-using System.Security.Permissions;
 using System.IO;
-using System.Configuration;
-using System.Web.Configuration;
+using FiftyOne.Foundation.Mobile.Configuration;
 
 namespace FiftyOne.Foundation.UI
 {
@@ -43,7 +51,7 @@ namespace FiftyOne.Foundation.UI
 
         internal FilterElement GetElement()
         {
-            var element = new FilterElement();
+            FilterElement element = new FilterElement();
             element.Property = Property;
             element.MatchExpression = MatchExpression;
             element.Enabled = Enabled;
@@ -105,13 +113,13 @@ namespace FiftyOne.Foundation.UI
 
         internal LocationElement GetElement()
         {
-            var element = new LocationElement();
+            LocationElement element = new LocationElement();
             element.Enabled = Enabled;
             element.Name = Name;
             element.Url = Url;
             element.MatchExpression = MatchExpression;
 
-            foreach (var item in this)
+            foreach (FilterData item in this)
                 element.Add(item.GetElement());
 
             return element;
@@ -125,7 +133,7 @@ namespace FiftyOne.Foundation.UI
             writer.Write(MatchExpression);
             writer.Write(ShowFilters);
             writer.Write(Count);
-            foreach (var item in this)
+            foreach (FilterData item in this)
                 item.Serialize(writer);
         }
 
@@ -179,7 +187,7 @@ namespace FiftyOne.Foundation.UI
             if (configuration == null)
                 return null;
 
-            var element = configuration.GetSection("fiftyOne/redirect") as RedirectSection;
+            RedirectSection element = configuration.GetSection("fiftyOne/redirect") as RedirectSection;
 
             if (element != null)
             {
@@ -191,7 +199,7 @@ namespace FiftyOne.Foundation.UI
                 element.MobilePagesRegex = MobilePagesRegex;
 
                 element.Locations.Clear();
-                foreach (var item in this)
+                foreach (LocationData item in this)
                     element.Locations.Add(item.GetElement());
             }
 
@@ -207,7 +215,7 @@ namespace FiftyOne.Foundation.UI
             writer.Write(MobileHomePageUrl);
             writer.Write(MobilePagesRegex);
             writer.Write(Count);
-            foreach (var item in this)
+            foreach (LocationData item in this)
                 item.Serialize(writer);
         }
 

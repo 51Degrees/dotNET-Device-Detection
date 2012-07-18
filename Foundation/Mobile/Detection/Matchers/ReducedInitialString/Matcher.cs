@@ -36,7 +36,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.ReducedInitialString
             int maxInitialString = 0;
             lock (handler.Devices)
             {
-                foreach (var devices in handler.Devices.Values)
+                foreach (BaseDeviceInfo[] devices in handler.Devices.Values)
                 {
                     foreach (BaseDeviceInfo device in devices)
                     {

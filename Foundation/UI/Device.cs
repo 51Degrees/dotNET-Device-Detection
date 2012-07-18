@@ -22,7 +22,7 @@ namespace FiftyOne.Foundation.UI
     {
         #region Constants
 
-        private static readonly string[] UNKNOWN_FIELDS = new[] {
+        private static readonly string[] UNKNOWN_FIELDS = new string[] {
             "HardwareVendor",
             "HardwareModel",
             "PlatformVendor",
@@ -30,16 +30,16 @@ namespace FiftyOne.Foundation.UI
             "BrowserVendor",
             "BrowserName" };
 
-        private static readonly string[] HARDWARE_CAPTION = new[] {
+        private static readonly string[] HARDWARE_CAPTION = new string[] {
             "HardwareVendor",
             "HardwareModel" };
 
-        private static readonly string[] SOFTWARE_CAPTION = new[] {
+        private static readonly string[] SOFTWARE_CAPTION = new string[] {
             "PlatformVendor",
             "PlatformName",
             "PlatformVersion" };
 
-        private static readonly string[] BROWSER_CAPTION = new[] {
+        private static readonly string[] BROWSER_CAPTION = new string[] {
             "BrowserVendor",
             "BrowserName",
             "BrowserVersion" };
@@ -98,7 +98,7 @@ namespace FiftyOne.Foundation.UI
         {
             get
             {
-                foreach (var key in UNKNOWN_FIELDS)
+                foreach (string key in UNKNOWN_FIELDS)
                     if (_device.GetFirstPropertyValue(key) == "Unknown")
                         return true;
                 return false;
@@ -171,7 +171,7 @@ namespace FiftyOne.Foundation.UI
         /// </summary>
         public string[] ProfileIDs
         {
-            get { return DeviceID.Split(new[] { "-" }, StringSplitOptions.RemoveEmptyEntries); }
+            get { return DeviceID.Split(new string[] { "-" }, StringSplitOptions.RemoveEmptyEntries); }
         }
 
         /// <summary>
@@ -226,9 +226,9 @@ namespace FiftyOne.Foundation.UI
         {
             get
             {
-                var list = new List<string>();
-                var all = _device.GetAllProperties();
-                foreach (var key in all.Keys)
+                List<string> list = new List<string>();
+                SortedList<string, List<string>> all = _device.GetAllProperties();
+                foreach (string key in all.Keys)
                     if (all[key].Count > 0)
                         list.Add(String.Format("{0} = {1}",
                             key,
@@ -248,10 +248,10 @@ namespace FiftyOne.Foundation.UI
         /// <returns></returns>
         private string GetCaption(string[] keys)
         {
-            var list = new List<string>();
-            foreach (var key in keys)
+            List<string> list = new List<string>();
+            foreach (string key in keys)
             {
-                var values = _device.GetPropertyValues(key);
+                List<string> values = _device.GetPropertyValues(key);
                 if (values.Count != 0 &&
                     values.Contains("Unknown") == false)
                     list.AddRange(values);

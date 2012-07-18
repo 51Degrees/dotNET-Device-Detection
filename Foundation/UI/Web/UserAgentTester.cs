@@ -11,6 +11,7 @@
 
 using System;
 using System.Web.UI.WebControls;
+using FiftyOne.Foundation.Mobile.Detection;
 
 namespace FiftyOne.Foundation.UI.Web
 {
@@ -113,7 +114,7 @@ namespace FiftyOne.Foundation.UI.Web
 
         private void ButtonTest_Click(object sender, EventArgs e)
         {
-            var device = DataProvider.Provider.GetDeviceInfo(_textBoxUserAgent.Text);
+            BaseDeviceInfo device = DataProvider.Provider.GetDeviceInfo(_textBoxUserAgent.Text);
             if (device != null)
                 _deviceExplorer.DeviceID = device.DeviceId;
         }

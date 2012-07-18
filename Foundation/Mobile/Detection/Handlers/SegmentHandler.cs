@@ -11,10 +11,9 @@
 
 #region Usings
 
-using System;
-using FiftyOne.Foundation.Mobile.Detection.Matchers.Segment;
-using Results=FiftyOne.Foundation.Mobile.Detection.Matchers.Results;
 using System.Collections.Generic;
+using FiftyOne.Foundation.Mobile.Detection.Matchers.Segment;
+using Results = FiftyOne.Foundation.Mobile.Detection.Matchers.Results;
 
 #endregion
 

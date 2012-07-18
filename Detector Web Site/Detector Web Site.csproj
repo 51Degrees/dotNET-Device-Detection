@@ -48,20 +48,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="51Degrees.mobi.config" />
     <Content Include="Default.aspx" />
     <Content Include="Desktop.png" />
     <Content Include="Global.asax" />
     <Content Include="Licence.txt" />
-    <Content Include="Mobile.css" />
     <Content Include="Mobile.png" />
     <Content Include="Mobile\Default.aspx" />
     <Content Include="DeviceProperties.ascx" />
     <Content Include="MobileDevice.asmx" />
     <Content Include="Standard.css" />
+    <Content Include="Mobile.css" />
     <Content Include="Tablet.png" />
     <Content Include="Tablet\Default.aspx" />
     <Content Include="Detector.Master" />
-    <Content Include="51Degrees.mobi.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

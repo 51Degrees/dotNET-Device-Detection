@@ -9,7 +9,6 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
-using FiftyOne.Foundation.Mobile.Detection.Handlers;
 namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Segment
 {
     internal class Segment

@@ -4,8 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
     <title>Log</title>
-    <link id="Link1" runat="server" rel="stylesheet" type="text/css" href="~/default.css" />
-    <link id="Link2" runat="server" rel="stylesheet" type="text/css" href="~/skin.css" />
+    <link id="CSS" runat="server" rel="stylesheet" type="text/css" href="~/Standard.css" />
 </head>
 <body>
     <form id="form1" runat="server">

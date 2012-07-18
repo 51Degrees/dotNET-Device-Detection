@@ -12,6 +12,7 @@
 #region Usings
 
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
@@ -19,13 +20,13 @@ using System.Text;
 using System.Web;
 using System.Xml;
 
-#endregion
-
 #if VER4 || VER35
 
 using System.Linq;
 
 #endif
+
+#endregion
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
@@ -36,7 +37,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// IP Addresses of local host device.
         /// </summary>
-        private static readonly IPAddress[] LOCALHOSTS = new[]
+        private static readonly IPAddress[] LOCALHOSTS = new IPAddress[]
                                                              {
                                                                  IPAddress.Parse("127.0.0.1"),
                                                                  IPAddress.Parse("::1")
@@ -46,76 +47,132 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// The content of fields in this array should not be included in the request information
         /// information sent to 51degrees.
         /// </summary>
-        private static readonly string[] IgnoreHeaderFieldValues = new string[] { "Referer", "cookie", "AspFilterSessionId" };
+        private static readonly string[] IgnoreHeaderFieldValues = new string[] { 
+            "Referer", 
+            "cookie", 
+            "AspFilterSessionId",
+            "Akamai-Origin-Hop",
+            "Cache-Control",
+            "Cneonction",
+            "Connection",
+            "Content-Filter-Helper",
+            "Content-Length",
+            "Cookie",
+            "Cookie2",
+            "Date",
+            "Etag",
+            "If-Last-Modified",
+            "If-Match",
+            "If-Modified-Since",
+            "If-None-Match",
+            "If-Range",
+            "If-Unmodified-Since",
+            "IMof-dified-Since",
+            "INof-ne-Match",
+            "Keep-Alive",
+            "Max-Forwards",
+            "mmd5",
+            "nnCoection",
+            "Origin",
+            "ORIGINAL-REQUEST",
+            "Original-Url",
+            "Pragma",
+            "Proxy-Connection",
+            "Range",
+            "Referrer",
+            "Script-Url",
+            "Unless-Modified-Since",
+            "URL",
+            "UrlID",
+            "URLSCAN-ORIGINAL-URL",
+            "UVISS-Referer",
+            "X-ARR-LOG-ID",
+            "X-Cachebuster",
+            "X-Discard",
+            "X-dotDefender-first-line",
+            "X-DRUTT-REQUEST-ID",
+            "X-Initial-Url",
+            "X-Original-URL",
+            "X-PageView",
+            "X-REQUEST-URI",
+            "X-REWRITE-URL",
+            "x-tag",
+            "x-up-subno",
+            "X-Varnish" };
 
         #endregion
 
         #region Internal Static Methods
 
         /// <summary>
-        /// Provides the content as XML for the http request.
+        /// Provides the content as XML for the HttpRequest.
         /// </summary>
         /// <param name="request">HttpRequest containing the required information.</param>
         /// <param name="maximumDetail">The amount of detail to provided.</param>
-        /// <returns>XML string of request content.</returns>
-        internal static string GetContent(HttpRequest request, bool maximumDetail)
+        /// <returns>byte array in XML string form of request content.</returns>
+        internal static byte[] GetContent(HttpRequest request, bool maximumDetail)
         {
-            StringBuilder content = new StringBuilder();
-            XmlWriter writer = XmlWriter.Create(content, GetXmlSettings());
-            try
+            return GetContent(request, maximumDetail, false);
+        }
+
+        /// <summary>
+        /// Provides the content as XML for the HttpRequest.
+        /// </summary>
+        /// <param name="request">HttpRequest containing the required information.</param>
+        /// <param name="maximumDetail">The amount of detail to provided.</param>
+        /// <param name="fragment">True if only a fragment should be returned, otherwise false for a document.</param>
+        /// <returns>byte array in XML string form of request content.</returns>
+        internal static byte[] GetContent(HttpRequest request, bool maximumDetail, bool fragment)
+        {
+            using (MemoryStream ms = new MemoryStream())
             {
-                writer.WriteStartElement("Device");
-                writer.WriteElementString("DateSent", DateTime.UtcNow.ToString("s"));
-
-                // Record details about the assembly for diagnosis purposes.
-                WriteAssembly(writer);
-
-                // Record either the IP address of the client if not local or the IP
-                // address of the machine.
-                if (request.IsLocal == false ||
-                    IsLocalHost(IPAddress.Parse(request.UserHostAddress)) == false)
+                using (XmlWriter writer = XmlWriter.Create(ms, GetXmlSettings(fragment)))
                 {
-                    writer.WriteElementString("ClientIP", request.UserHostAddress);
-                }
-                else
-                {
-                    WriteHostIP(writer);
-                }
+                    writer.WriteStartElement("Device");
+                    writer.WriteElementString("DateSent", DateTime.UtcNow.ToString("s"));
 
-                foreach (string key in request.Headers.AllKeys)
-                {
-                    // Determine if the field should be treated as a blank.
-                    bool blank = IsBlankField(key);
+                    // Record details about the assembly for diagnosis purposes.
+                    WriteAssembly(writer);
 
-                    // Include all header values if maximumDetail is enabled, or
-                    // header values related to the useragent or any header
-                    // key containing profile or information helpful to determining
-                    // mobile devices.
-                    if (maximumDetail ||
-                        key == "User-Agent" ||
-                        key == "Host" ||
-                        key.Contains("profile") ||
-                        blank)
+                    // Record either the IP address of the client if not local or the IP
+                    // address of the machine.
+                    if (request.IsLocal == false ||
+                        IsLocalHost(IPAddress.Parse(request.UserHostAddress)) == false)
                     {
-                        // Record the header content if it's not a cookie header.
-                        if (blank)
-                            WriteHeader(writer, key);
-                        else
-                            WriteHeaderValue(writer, key, request.Headers[key]);
+                        writer.WriteElementString("ClientIP", request.UserHostAddress);
                     }
+                    else
+                    {
+                        WriteHostIP(writer);
+                    }
+
+                    foreach (string key in request.Headers.AllKeys)
+                    {
+                        // Determine if the field should be treated as a blank.
+                        bool blank = IsBlankField(key);
+
+                        // Include all header values if maximumDetail is enabled, or
+                        // header values related to the useragent or any header
+                        // key containing profile or information helpful to determining
+                        // mobile devices.
+                        if (maximumDetail ||
+                            key == "User-Agent" ||
+                            key == "Host" ||
+                            key.Contains("profile") ||
+                            blank)
+                        {
+                            // Record the header content if it's not a cookie header.
+                            if (blank)
+                                WriteHeader(writer, key);
+                            else
+                                WriteHeaderValue(writer, key, request.Headers[key]);
+                        }
+                    }
+                    writer.WriteEndElement();
+                    writer.Flush();
                 }
-                writer.WriteEndElement();
-                writer.Flush();
+                return ms.ToArray();
             }
-            finally
-            {
-                if (writer != null)
-                {
-                    writer.Close();
-                }
-            }
-            writer.Close();
-            return content.ToString();
         }
 
         #endregion
@@ -247,11 +304,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Provides the xml writer settings.
         /// </summary>
         /// <returns></returns>
-        private static XmlWriterSettings GetXmlSettings()
+        private static XmlWriterSettings GetXmlSettings(bool fragment)
         {
             XmlWriterSettings settings = new XmlWriterSettings();
-            settings.OmitXmlDeclaration = false;
-            settings.ConformanceLevel = ConformanceLevel.Document;
+            settings.OmitXmlDeclaration = fragment;
+            settings.ConformanceLevel = fragment ? ConformanceLevel.Fragment : ConformanceLevel.Document;
             settings.Encoding = Encoding.UTF8;
             settings.CheckCharacters = true;
             settings.NewLineHandling = NewLineHandling.None;

@@ -60,7 +60,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
         /// <returns>Capability index value in the String collection, or null if the capability does not exist.</returns>
         internal protected override List<int> GetPropertyValueStringIndexes(int index)
         {
-            var value = base.GetPropertyValueStringIndexes(index);
+            List<int> value = base.GetPropertyValueStringIndexes(index);
             if (value != null)
                 return value;
 
@@ -78,12 +78,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
         internal protected string GetCapabilityAsString(int index)
         {
             // Get the string indexes for the capabilities values.
-            var valueIndexes = GetPropertyValueStringIndexes(index);
+            List<int> valueIndexes = GetPropertyValueStringIndexes(index);
             if (valueIndexes == null)
                 return null;
 
             // Convert the values list into strings.
-            var values = new string[valueIndexes.Count];
+            string[] values = new string[valueIndexes.Count];
             for (int i = 0; i < valueIndexes.Count; i++)
                 values[i] = _provider.Strings.Get(valueIndexes[i]);
 

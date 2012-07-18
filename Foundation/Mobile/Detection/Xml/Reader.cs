@@ -9,19 +9,20 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
-#if VER4 
-using System.Linq;
-#endif
-
 #region Usings
 
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.IO;
 using System.IO.Compression;
 using System.Xml;
 using System.Xml.Schema;
+
+#if VER4
+
+using System.Linq;
+
+#endif
 
 #endregion
 
@@ -41,7 +42,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
         /// <returns></returns>
         public static Provider Create(IList<Stream> streams)
         {
-            var provider = new Provider();
+            Provider provider = new Provider();
             Add(provider, streams);
             return provider;
         }
@@ -52,46 +53,50 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
         /// <param name="files">List of files to be processed.</param>
         public static Provider Create(IList<string> files)
         {
-            var provider = new Provider();
+            Provider provider = new Provider();
             Add(provider, files);
             return provider;
         }
 
         /// <summary>
-        /// Adds the xml files provided to the provider.
+        /// Adds the xml files provided to the provider. If the file is compressed
+        /// it will be uncompressed before being processed because the reader needs
+        /// to be able to seek within the file which is not possible with compressed
+        /// file access.
         /// </summary>
         /// <param name="provider">The provider to be modified.</param>
         /// <param name="files">List of files to be processed.</param>
         public static void Add(Provider provider, IList<string> files)
         {
-            var streams = new List<Stream>();
+            List<Stream> streams = new List<Stream>();
             try
             {
                 foreach (string file in files)
                 {
-                    var fileInfo = new FileInfo(file);
+                    FileInfo fileInfo = new FileInfo(file);
                     if (fileInfo.Exists)
                     {
                         if (Detection.Constants.CompressedFileExtensions.Contains(fileInfo.Extension))
                         {
                             // This is a compressed file. It needs to be copied to a memory stream
-                            // to enable multiple passed of the data.
-                            var ms = new MemoryStream();
-                            var temp = new GZipStream(
-                                new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read),
-                                CompressionMode.Decompress);
-                            
-                            // Copy the data to the memory stream.
-                            int value = temp.ReadByte();
-                            while (value > 0)
-                            {
-                                ms.WriteByte((byte)value);
-                                value = temp.ReadByte();
-                            }
+                            // to enable multiple passes of the data.
 
+                            // Create a 1mb buffer to hold data before writing to the memory stream.
+                            byte[] buffer = new byte[0x100000];
+                            
+                            // Create a memory stream and read the data from the compressed file.
+                            MemoryStream ms = new MemoryStream();
+                            using (GZipStream gz = new GZipStream(
+                                new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read),
+                                CompressionMode.Decompress))
+                                ReadStream(gz, buffer, ms);
+
+                            // Add the memory stream to the list of streams for later processing.
                             streams.Add(ms);
                         }
                         else
+                            // A raw file stream supports seeking so does not need to be copied to 
+                            // a memory stream.
                             streams.Add(new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read));
                     }
                 }
@@ -99,8 +104,28 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
             }
             finally
             {
-                foreach (var stream in streams)
+                foreach (Stream stream in streams)
                     stream.Dispose();
+            }
+
+            // A lot of data has just been moved around. Force garbage collection including large objects.
+            // See: http://msdn.microsoft.com/en-us/magazine/cc534993.aspx
+            GC.Collect();
+        }
+        
+        /// <summary>
+        /// Reads the content of one stream into another.
+        /// </summary>
+        /// <param name="source">The forward only stream to read from.</param>
+        /// <param name="buffer">The preallocated memory buffer to read from.</param>
+        /// <param name="destination">The destination stream to write data to.</param>
+        private static void ReadStream(Stream source, byte[] buffer, Stream destination)
+        {
+            int bytes = source.Read(buffer, 0, buffer.Length);
+            while (bytes > 0)
+            {
+                destination.Write(buffer, 0, bytes);
+                bytes = source.Read(buffer, 0, buffer.Length);
             }
         }
 
@@ -115,7 +140,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
             try
             {
                 // Read the streams provided looking for handlers.
-                foreach (var stream in streams)
+                foreach (Stream stream in streams)
                 {
                     if (stream.CanSeek == false)
                         throw new XmlException(String.Format("Stream must support seek operations."));
@@ -135,7 +160,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
                 }
 
                 // Parse the data for devices.
-                foreach (var stream in streams)
+                foreach (Stream stream in streams)
                 {
                     // Ensure we're at the start of the stream before reading.
                     stream.Position = 0;
@@ -148,7 +173,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
                 }
 
                 // Read the manifest properties from the file.
-                foreach (var stream in streams)
+                foreach (Stream stream in streams)
                 {
                     // Ensure we're at the start of the stream before reading.
                     stream.Position = 0;
@@ -161,7 +186,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
                 }
 
                 // Finally read the date the files were created.
-                foreach (var stream in streams)
+                foreach (Stream stream in streams)
                 {
                     // Ensure we're at the start of the stream before reading.
                     stream.Position = 0;
@@ -347,7 +372,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
             // If the device already exists then use the previous one. This may happen
             // when an earlier device referenced a fallback device that had not yet
             // been created.
-            var device = provider.GetDeviceInfoByID(deviceId);
+            BaseDeviceInfo device = provider.GetDeviceInfoByID(deviceId);
             if (device == null)
             {
                 // Create the new device.

@@ -12,10 +12,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using FiftyOne.Foundation.Mobile.Detection;
-using FiftyOne.Foundation.Mobile.Detection.Handlers;
 using System.IO.Compression;
 using System.Text;
+using FiftyOne.Foundation.Mobile.Detection.Handlers;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Binary
 {
@@ -33,10 +32,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Binary
         /// <returns>A new provider initialised with data from the file provided.</returns>
         public static Provider Create(string file)
         {
-            var fileInfo = new FileInfo(file);
+            FileInfo fileInfo = new FileInfo(file);
             if (fileInfo.Exists)
             {
-                using (var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
                     return Create(stream);
                 }
@@ -51,7 +50,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Binary
         /// <returns>A new provider initialised with data from the stream provided.</returns>
         public static Provider Create(byte[] data)
         {
-            using (var ms = new MemoryStream(data))
+            using (MemoryStream ms = new MemoryStream(data))
                 return Create(ms);
         }
 
@@ -62,8 +61,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Binary
         /// <returns>A new provider initialised with data from the stream provided.</returns>
         public static Provider Create(Stream stream)
         {
-            var provider = new Provider();
-            using (var reader = new BinaryReader(new GZipStream(stream, CompressionMode.Decompress)))
+            Provider provider = new Provider();
+            using (BinaryReader reader = new BinaryReader(new GZipStream(stream, CompressionMode.Decompress)))
             {
                 Add(provider, reader);
             }
@@ -160,7 +159,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Binary
                 {
                     // Get the user agent string index and create a new
                     // device.
-                    var uaDevice = new DeviceInfo(
+                    DeviceInfo uaDevice = new DeviceInfo(
                         provider,
                         uniqueDeviceID,
                         reader.ReadInt32(),
@@ -181,7 +180,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Binary
                 else
                 {
                     // No. So add the new device.
-                    provider.AllDevices.Add(hashCode, new List<BaseDeviceInfo>(new[] { device }));
+                    provider.AllDevices.Add(hashCode, new List<BaseDeviceInfo>(new BaseDeviceInfo[] { device }));
                 }
 
                 // Get the remaining properties and values to the device.
@@ -259,7 +258,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Binary
                 byte valuesCount = reader.ReadByte();
                 
                 // Read all the values.
-                var values = new List<int>();
+                List<int> values = new List<int>();
                 for (int v = 0; v < valuesCount; v++)
                     values.Add(reader.ReadInt32());
 
@@ -291,7 +290,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Binary
                     return new Handlers.ReducedInitialStringHandler(
                         provider, name, defaultDeviceId, confidence, checkUAProfs, reader.ReadString());
                 case HandlerTypes.RegexSegment:
-                    var handler = new Handlers.RegexSegmentHandler(
+                    Handlers.RegexSegmentHandler handler = new Handlers.RegexSegmentHandler(
                         provider, name, defaultDeviceId, confidence, checkUAProfs);
                     ReadRegexSegmentHandler(reader, handler);
                     return handler;
@@ -380,7 +379,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Binary
                 for (int p = 0; p < countOfProperties; p++)
                 {
                     // Create the property.
-                    var property = new Property(
+                    Property property = new Property(
                         provider,
                         provider.Strings.Get(reader.ReadInt32()),
                         ReadString(reader),
@@ -390,10 +389,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Binary
                         reader.ReadBoolean());
 
                     // Add the values to the list.
-                    var countOfValues = reader.ReadInt32();
+                    int countOfValues = reader.ReadInt32();
                     for (int v = 0; v < countOfValues; v++)
                     {
-                        var value = new Value(
+                        Value value = new Value(
                             property,
                             provider.Strings.Get(reader.ReadInt32()),
                             ReadString(reader),
