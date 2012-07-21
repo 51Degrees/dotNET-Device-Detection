@@ -61,9 +61,18 @@ namespace FiftyOne.Foundation.Mobile.Configuration
                 // trust.
             }
 
-            // Use the sites web.config file which medium trust does have
-            // access to.
-            _machineConfigFile = GetFilePath("~/Web.config");
+            // Use the first configuration file we can find which we 
+            // do have read access to.
+            foreach (string file in Constants.ConfigFileNames)
+            {
+                string configFileName = GetFilePath(file);
+                // Checking for the existence of the configuration file.
+                if (File.Exists(configFileName))
+                {
+                    _machineConfigFile = configFileName;
+                    break;
+                }
+            }
         }
 
         /// <summary>
