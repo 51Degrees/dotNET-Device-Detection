@@ -57,7 +57,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         #endregion
 
-        #region internal Methods
+        #region Internal Methods
 
         /// <summary>
         /// Adds a new string value to the list of strings. If the value already exists

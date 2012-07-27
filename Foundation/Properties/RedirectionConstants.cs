@@ -70,5 +70,11 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// Used to indicate the device has already accessed the web site.
         /// </summary>
         internal const string AlreadyAccessedCookieName = "51D";
+
+        /// <summary>
+        /// Used to control if the already accessed cookie should be included
+        /// in the response.
+        /// </summary>
+        internal const bool AllowAlreadyAccessedCookie = true;
     }
 }

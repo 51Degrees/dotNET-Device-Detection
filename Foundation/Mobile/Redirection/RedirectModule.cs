@@ -303,18 +303,43 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         }
 
         /// <summary>
-        /// Determines if this is the first request received from the device.
+        /// Determines if this is the first request received from the device assuming first
+        /// request only is set in the configuration.
         /// </summary>
         /// <param name="context">Context of the request.</param>
         /// <returns>True if this request is the first from the device. Otherwise false.</returns>
         public static bool IsFirstTime(HttpContext context)
         {
+            // If the parameter indicating only the first request should be redirect
+            // is false then return true as the implication is all requests should
+            // be redirected.
+            if (_firstRequestOnly == false)
+                return true;
+
+            // Check the various methods of recording previous requests 
+            // and return the revised value.
+            return IsFirstTime(context, Constants.AllowAlreadyAccessedCookie);
+        }
+
+        /// <summary>
+        /// Determines if this is the first request received from the device.
+        /// </summary>
+        /// <param name="context">Context of the request.</param>
+        /// <param name="cookies">True if the first time routine is allowed to use response cookies.</param>
+        /// <returns>True if this request is the first from the device. Otherwise false.</returns>
+        internal static bool IsFirstTime(HttpContext context, bool cookies)
+        {
+            // Try the context collection for the key.
             object isFirstTime = context.Items[Constants.IsFirstTimeKey];
+
             if (isFirstTime == null)
             {
-                isFirstTime = GetIsFirstTime(context);
+                // If not set, get it and store.
+                isFirstTime = GetIsFirstTime(context, cookies);
                 context.Items[Constants.IsFirstTimeKey] = isFirstTime;
             }
+
+            // Return the value found.
             return (bool)isFirstTime;
         }
         
@@ -345,7 +370,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                     context.Request.HttpMethod == "GET" &&
                     context.Handler != null &&
                     IsPageType(context.Handler.GetType()) &&
-                    IsFirstTime(context))
+                    IsFirstTime(context, false))
                     _newDevice.RecordNewDevice(context.Request);
             }
             catch (Exception ex)
@@ -484,15 +509,10 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// only be called once pre request.
         /// </summary>
         /// <param name="context">Context of the request.</param>
+        /// <param name="cookies">True is the method is allowed to use cookies.</param>
         /// <returns>True if this request is the first from the device. Otherwise false.</returns>
-        private static bool GetIsFirstTime(HttpContext context)
+        private static bool GetIsFirstTime(HttpContext context, bool cookies)
         {
-            // If the parameter indicating only the first request should be redirect
-            // is false then return true as the implication is all requests should
-            // be redirected.
-            if (_firstRequestOnly == false)
-                return true;
-
             // Check to see if the Referrer URL contains the same host name
             // as the current page request. If there is a match this request has
             // come from another web page on the same host and is not the 1st request.
@@ -507,7 +527,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                 // different host names. Record the first time details using other
                 // methods to ensure this method returns the correct value when
                 // used with subsequent requests from the same device.
-                RecordFirstTime(context);
+                RecordFirstTime(context, cookies);
                 return false;
             }
 
@@ -527,17 +547,18 @@ namespace FiftyOne.Foundation.Mobile.Redirection
 
                 // Remove our own cookie from the response as it's not 
                 // needed because the session is working.
-                if (context.Request.Cookies[Constants.AlreadyAccessedCookieName] != null)
+                if (cookies && context.Request.Cookies[Constants.AlreadyAccessedCookieName] != null)
                     WipeResponseCookie(context, context.Request.Cookies[Constants.AlreadyAccessedCookieName]);
 
                 return false;
             }
 
-            // Check to see if our cookie is present from a previous request and that 
-            // the expiry time is not passed. If it is present ensure it's expiry time
-            // is updated in the response.
+            // Check to see if our cookie is present from a previous request, that
+            // we're allowed to use cookies and that the expiry time is not passed. 
+            // If it is present ensure it's expiry time is updated in the response.
             HttpCookie alreadyAccessed = context.Request.Cookies[Constants.AlreadyAccessedCookieName];
             if (alreadyAccessed != null &&
+                cookies &&
                 long.Parse(alreadyAccessed.Value) >= DateTime.UtcNow.Ticks)
             {
                 SetResponseCookie(context, alreadyAccessed);
@@ -554,14 +575,14 @@ namespace FiftyOne.Foundation.Mobile.Redirection
             {
                 // Update the cache and other methods in case they can
                 // be used in the future.
-                RecordFirstTime(context);
+                RecordFirstTime(context, cookies);
                 return false;
             }
 
             // The url referrer, session and cookie checks have all failed.
             // Record the device information using the session if available, a cookie and the
             // request history cache file.
-            RecordFirstTime(context);
+            RecordFirstTime(context, cookies);
 
             return true;
         }
@@ -616,8 +637,9 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// the requesting devices first request. This ensures subsequent calls
         /// to IsFirstTime return the correct value.
         /// </summary>
+        /// <param name="cookies">True if response cookies can be used.</param>
         /// <param name="context">The context of the request.</param>
-        private static void RecordFirstTime(HttpContext context)
+        private static void RecordFirstTime(HttpContext context, bool cookies)
         {
             // Add a parameter to the session if available indicating the time that 
             // the device date should be remvoed from the session.
@@ -627,7 +649,8 @@ namespace FiftyOne.Foundation.Mobile.Redirection
             // Add a cookie to the response setting the expiry time to the 
             // redirection timeout.
             // Modified to check for existance of cookie to avoid recreating.
-            SetResponseCookie(context, new HttpCookie(Constants.AlreadyAccessedCookieName));
+            if (cookies)
+                SetResponseCookie(context, new HttpCookie(Constants.AlreadyAccessedCookieName));
 
             // Add to the request history cache.
             _requestHistory.Set(context.Request);

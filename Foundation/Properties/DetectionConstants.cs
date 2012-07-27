@@ -114,14 +114,16 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         /// <summary>
         /// Array of transcoder HTTP headers that represent the useragent string of the
-        /// mobile device rather than the desktop browser.
+        /// mobile device rather than the browser.
+        /// Version 2.1.10.X onwards - commented out as browser capabilities are now
+        /// being seen as more important. Uncomment them to improve hardware detection.
         /// </summary>
         internal static readonly string[] TranscoderUserAgentHeaders = new string[]
-                                                                             {
-                                                                                 "x-Device-User-Agent",
-                                                                                 "X-Device-User-Agent",
-                                                                                 "X-OperaMini-Phone-UA"
-                                                                             };
+            {
+                //"x-Device-User-Agent",
+                //"X-Device-User-Agent",
+                //"X-OperaMini-Phone-UA"
+            };
 
         /// <summary>
         /// The Http header field that contains the user agent.
