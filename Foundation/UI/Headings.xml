@@ -12,10 +12,16 @@
       <heading name="IsEReader"></heading>
       <heading name="IsMobile"></heading>
       <heading name="IsTablet"></heading>
+      <heading name="IsSmartPhone"></heading>
+      <heading name="IsSmallScreen"></heading>
     </heading>
     <heading name="Screen">
       <heading name="ScreenMMHeight"></heading>
       <heading name="ScreenMMWidth"></heading>
+      <heading name="ScreenMMDiagonal"></heading>
+      <heading name="ScreenInchesHeight"></heading>
+      <heading name="ScreenInchesWidth"></heading>
+      <heading name="ScreenInchesDiagonal"></heading>
       <heading name="ScreenPixelsHeight"></heading>
       <heading name="ScreenPixelsWidth"></heading>
       <heading name="BitsPerPixel"></heading>

@@ -14,14 +14,14 @@
 <div class="border">
 <asp:MultiView runat="server" ID="Tabs" ActiveViewIndex="0">
     <asp:View runat="server" ID="CurrentView">
-        <fiftyOne:DeviceExplorer runat="server" ID="Current" Navigation="false" />
+        <fiftyOne:DeviceExplorer runat="server" ID="Current" Navigation="false" CmsCssClass="cms" />
     </asp:View>
     <asp:View runat="server" ID="ExplorerView">
         <fiftyOne:LiteMessage runat="server" ID="Message1" FooterEnabled="false" LogoEnabled="false" />
-        <fiftyOne:DeviceExplorer runat="server" ID="Explorer" Navigation="true" />
+        <fiftyOne:DeviceExplorer runat="server" ID="Explorer" Navigation="true" CmsCssClass="cms" />
     </asp:View>
     <asp:View runat="server" ID="DictionaryView">
-        <fiftyOne:PropertyDictionary runat="server" ID="Dictionary" CssClass="propertyDictionary" />
+        <fiftyOne:PropertyDictionary runat="server" ID="Dictionary" CssClass="propertyDictionary" CmsCssClass="cms" />
     </asp:View>
     <asp:View runat="server" ID="UserAgentTesterView">
         <fiftyOne:UserAgentTester runat="server" ID="UserAgentTester" />        

@@ -9,10 +9,28 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
+using System.Collections.Generic;
 namespace FiftyOne.Foundation.UI
 {
     internal class Constants
     {
+        /// <summary>
+        /// A list of all properties that need to be present in Premium data.
+        /// </summary>
+        internal static readonly string[] Premium = null;
+
+        /// <summary>
+        /// List of properties included in the CMS product.
+        /// </summary>
+        internal static readonly string[] CMS = new string[] {
+            "IsConsole",
+            "IsEReader",
+            "IsTablet",
+            "IsSmartPhone",
+            "IsSmallScreen",
+            "SuggestedLinkSizePixels",
+            "SuggestedLinkSizePoints" };
+
         /// <summary>
         /// List of properties which are associated with the physical hardware.
         /// </summary>
@@ -35,10 +53,16 @@ namespace FiftyOne.Foundation.UI
             "IsEReader",
             "IsMobile",
             "IsTablet",
+            "IsSmartPhone",
+            "IsSmallScreen",
             "ReleaseMonth",
             "ReleaseYear",
             "ScreenMMHeight",
             "ScreenMMWidth",
+            "ScreenMMDiagonal",
+            "ScreenInchesHeight",
+            "ScreenInchesWidth",
+            "ScreenInchesDiagonal",
             "ScreenPixelsHeight",
             "ScreenPixelsWidth",
             "SuggestedImageButtonHeightMms",
@@ -55,7 +79,6 @@ namespace FiftyOne.Foundation.UI
             "PlatformVendor",
             "PlatformName",
             "PlatformVersion",
-            "JavaEnabled",
             "CLDC",
             "MIDP"};
 
@@ -68,9 +91,7 @@ namespace FiftyOne.Foundation.UI
             "BrowserVersion",
             "AjaxRequestType",
             "CookiesCapable",
-            "FramesCapable",
             "HtmlVersion",
-            "JavacriptPreferredGeoLocApi",
             "Javascript",
             "JavascriptCanManipulateCSS",
             "JavascriptCanManipulateDOM",
@@ -81,9 +102,6 @@ namespace FiftyOne.Foundation.UI
             "JavascriptVersion",
             "jQueryMobileSupport",
             "LayoutEngine",
-            "PreferencesForFrames",
-            "TablesCapable",
-            "UserAgentProfile",
             "AnimationTiming",
             "BlobBuilder",
             "CssBackground",
@@ -119,7 +137,6 @@ namespace FiftyOne.Foundation.UI
             "Json",
             "Masking",
             "PostMessage",
-            "PreferencesForFrames",
             "Progress",
             "Prompts",
             "Selector",
@@ -143,5 +160,20 @@ namespace FiftyOne.Foundation.UI
         /// The 51Degrees.mobi thumbnail logo.
         /// </summary>
         internal const string Logo = "http://download.51degrees.mobi/51Degrees%20Logo%20Small.png";
+
+        /// <summary>
+        /// Constructs the static class setting the Premium property
+        /// to include all the other string arrays.
+        /// </summary>
+        static Constants()
+        {
+            List<string> temp = new List<string>();
+            temp.AddRange(Hardware);
+            temp.AddRange(Software);
+            temp.AddRange(Browser);
+            temp.AddRange(Content);
+            temp.Sort();
+            Premium = temp.ToArray();
+        }
     }
 }

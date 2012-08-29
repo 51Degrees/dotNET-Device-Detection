@@ -327,7 +327,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// <param name="context">Context of the request.</param>
         /// <param name="cookies">True if the first time routine is allowed to use response cookies.</param>
         /// <returns>True if this request is the first from the device. Otherwise false.</returns>
-        internal static bool IsFirstTime(HttpContext context, bool cookies)
+        public static bool IsFirstTime(HttpContext context, bool cookies)
         {
             // Try the context collection for the key.
             object isFirstTime = context.Items[Constants.IsFirstTimeKey];

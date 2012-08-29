@@ -75,7 +75,7 @@ namespace FiftyOne.Foundation.UI.Web
                 Resources.FiftyOneDegreesUrl,
                 _retailerUrl,
                 _retailerName);
-            _html.Visible = DataProvider.IsPremium == false;
+            _html.Visible = DataProvider.IsPremium == false && DataProvider.IsCms == false;
             base.OnPreRender(e);
         }
 

@@ -583,7 +583,7 @@ namespace FiftyOne.Foundation.UI.Web
                 _container.Controls.Add(_validationLicenceSummary);
             }
             _container.Controls.Add(_literalInstructions);
-            if (DataProvider.IsPremium == false)
+            if (DataProvider.IsPremium == false && DataProvider.IsCms == false)
             {
                 _container.Controls.Add(_validatorRequired);
                 _container.Controls.Add(_validatorRegEx);
@@ -607,8 +607,8 @@ namespace FiftyOne.Foundation.UI.Web
             _literalInstructions.Visible = _literalInstructions.Visible & InstructionsEnabled;
             _literalUpload.Visible = _literalUpload.Visible & InstructionsEnabled;
             if (String.IsNullOrEmpty(_literalInstructions.Text))
-                _literalInstructions.Text = DataProvider.IsPremium ?
-                    String.Format(ActivatedMessageHtml, SuccessCssClass) :
+                _literalInstructions.Text = (DataProvider.IsPremium || DataProvider.IsCms) ?
+                    String.Format(ActivatedMessageHtml, SuccessCssClass, DataProvider.Provider.DataSetName) :
                     ActivateInstructionsHtml;
             _literalUpload.Text = UploadInstructionsHtml;
             _buttonActivate.Text = ActivateButtonText;

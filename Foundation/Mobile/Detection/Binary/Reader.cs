@@ -102,6 +102,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Binary
             ReadDevices(reader, provider, null);
             ReadPublishedDate(reader, provider);
             ReadManifest(reader, provider);
+            ReadDataSetName(reader, provider);
         }
 
         /// <summary>
@@ -342,6 +343,25 @@ namespace FiftyOne.Foundation.Mobile.Detection.Binary
             return new Version(
                 reader.ReadInt32(),
                 reader.ReadInt32());
+        }
+
+        /// <summary>
+        /// Reads the name of the data set.
+        /// </summary>
+        /// <param name="reader">Data source being processed.</param>
+        /// <param name="provider">Provider the new handler should be assigned to.</param>
+        private static void ReadDataSetName(BinaryReader reader, Provider provider)
+        {
+            try
+            {
+                provider._dataSetName = ReadString(reader);
+            }
+            catch (EndOfStreamException)
+            {
+                // Nothing we can do as data is not included.
+                EventLog.Debug("EndOfStreamException reading data set name.");
+                provider._dataSetName = "Unknown";
+            }
         }
 
         /// <summary>

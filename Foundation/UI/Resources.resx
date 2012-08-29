@@ -112,19 +112,19 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ActivateButtonText" xml:space="preserve">
     <value>Activate</value>
   </data>
   <data name="ActivatedMessageHtml" xml:space="preserve">
-    <value>&lt;div class="{0}"&gt;Premium Data is active. Thank you.&lt;/div&gt;</value>
+    <value>&lt;div class="{0}"&gt;{1} Data is active. Thank you.&lt;/div&gt;</value>
   </data>
   <data name="ActivateInstructionsHtml" xml:space="preserve">
-    <value>&lt;p&gt;Paste your Premium Data licence key into the textbox below. Select "Activate" to use the licence key with this web site.&lt;/p&gt;</value>
+    <value>&lt;p&gt;Paste your data licence key into the textbox below. Select "Activate" to use the licence key with this web site.&lt;/p&gt;</value>
   </data>
   <data name="ActivationFailureCouldNotUpdateConfigHtml" xml:space="preserve">
     <value>&lt;div class="{0}"&gt;&lt;p&gt;The fiftyOne/detection element of the config file '{1}' could not be inserted. Please ensure the following text is present between the fiftyOne tags and try activating the licence key again.&lt;/p&gt;
@@ -167,7 +167,7 @@ The web servers firewall or another firewall is blocking access to the host or t
     <value>&lt;div class="{0}"&gt;&lt;p&gt;The licence key provided failed validation. Please check the license key is validate with your reseller.&lt;/p&gt;&lt;/div&gt;</value>
   </data>
   <data name="ActivationSuccessHtml" xml:space="preserve">
-    <value>&lt;div class="{0}"&gt;&lt;p&gt;Success. Select the "Refresh" button to reload the web page and and start using Premium Device Data.  Note: There may be a short delay as the application restarts.&lt;/p&gt;&lt;/div&gt;</value>
+    <value>&lt;div class="{0}"&gt;&lt;p&gt;Success. Select the "Refresh" button to reload the web page and and start using Device Data.  Note: There may be a short delay as the application restarts.&lt;/p&gt;&lt;/div&gt;</value>
   </data>
   <data name="BackButtonDeviceText" xml:space="preserve">
     <value>Other {0} Devices</value>
@@ -192,20 +192,13 @@ The web servers firewall or another firewall is blocking access to the host or t
   </data>
   <data name="PropertyDictionaryLegend" xml:space="preserve">
     <value>&lt;h1 class="{heading}"&gt;Legend&lt;/h1&gt;
-&lt;table&gt;
-&lt;tr&gt;
-&lt;td class="{property} {lite}" style="width:auto;float:none;"&gt;Property is included in BOTH Lite and Premium data sets.&lt;/td&gt;
-&lt;td class="{property} {premium}" style="width:auto;float:none;"&gt;Property is included ONLY in the Premium data sets.&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td class="{description}" style="width:auto;float:none;"&gt;Description of the property.&lt;/td&gt;
-&lt;td class="{value}" style="width:auto;float:none;"&gt;All possible values the property can have.&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt; 
-&lt;td class="{property}" style="width:auto;float:none;"&gt;[L] = the property can return multiple values as a list.&lt;/td&gt;
-&lt;td class="{property}" style="width:auto;float:none;"&gt;(?) = More information.&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/table&gt;</value>
+&lt;p&gt;&lt;strong&gt;Property Fonts &amp;amp; Colours&lt;/strong&gt;&lt;/p&gt;
+&lt;p class="{property} {lite}" style="width:auto;float:none;"&gt;Property is included in &lt;strong&gt;both&lt;/strong&gt; Lite and Premium data sets.&lt;/p&gt;
+&lt;p class="{property} {cms}" style="width:auto;float:none;"&gt;Property is included in both CMS and the Premium data sets, but not the Lite data set.&lt;/p&gt;
+&lt;p class="{property} {premium}" style="width:auto;float:none;"&gt;Property is included &lt;strong&gt;only&lt;/strong&gt; in the Premium data sets.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Symbols&lt;/strong&gt;&lt;/p&gt;
+&lt;p class="{property}" style="width:auto;float:none;"&gt;[L] = the property can return multiple values as a list.&lt;/p&gt;
+&lt;p class="{property}" style="width:auto;float:none;"&gt;(?) = More information.&lt;/p&gt;</value>
   </data>
   <data name="RelatedDevicesHeading" xml:space="preserve">
     <value>Related Browser &amp; Software Combinations</value>

@@ -14,6 +14,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using FiftyOne.Foundation.Mobile.Detection.Handlers;
+using System;
 
 #endregion
 
@@ -21,13 +22,68 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers
 {
     internal abstract class Request
     {
+        #region Classes
+
+#if VER4
+        /// <summary>
+        /// A simple countdown singalling class derived for .NET 4.
+        /// Used to co-ordinate processing across multiple threads.
+        /// </summary>
+        internal class CountdownEvent : System.Threading.CountdownEvent 
+        {
+            private static readonly int _count = Environment.ProcessorCount;
+            internal CountdownEvent() : base(_count) { }
+        }
+#else
+        /// <summary>
+        /// A simple countdown singalling class.
+        /// Used to co-ordinate processing across multiple threads.
+        /// </summary>
+        internal class CountdownEvent
+        {
+            private static readonly int _count = Environment.ProcessorCount;
+            private int _remain;
+            private EventWaitHandle _event;
+
+            internal CountdownEvent()
+            {
+                _remain = _count;
+                _event = new ManualResetEvent(false);
+            }
+
+            internal int InitialCount
+            {
+                get { return _count; }
+            }
+
+            internal void Signal()
+            {
+                // The last thread to signal also sets the event.
+                if (Interlocked.Decrement(ref _remain) == 0)
+                    _event.Set();
+            }
+
+            /// <summary>
+            /// Blocks the current thread until the timeout has passed or
+            /// the object is signalled.
+            /// </summary>
+            /// <param name="milliSeconds"></param>
+            /// <returns></returns>
+            internal bool Wait(int milliSeconds)
+            {
+                return _event.WaitOne(milliSeconds);
+            }
+        }
+#endif
+
+        #endregion
+
         #region Fields
 
         private readonly Handler _handler;
-        protected AutoResetEvent _completeEvent;
-        protected int _inProcess;
-        protected Queue<BaseDeviceInfo> _queue;
-        protected string _userAgent;
+        protected readonly CountdownEvent _completeEvent;
+        protected readonly Queue<BaseDeviceInfo> _queue;
+        protected readonly string _userAgent;
 
         #endregion
 
@@ -36,11 +92,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers
         internal string UserAgent
         {
             get { return _userAgent; }
-        }
-
-        internal int InProcess
-        {
-            get { return _inProcess; }
         }
 
         internal virtual Handler Handler
@@ -53,6 +104,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers
             get { return _queue.Count; }
         }
 
+        /// <summary>
+        /// Returns the number of threads 
+        /// </summary>
+        internal int ThreadCount
+        {
+            get { return _completeEvent.InitialCount; }
+        }
+
         #endregion
 
         #region Constructors
@@ -62,50 +121,41 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers
             _userAgent = userAgent;
             _queue = CreateQueue(handler);
             _handler = handler;
+            _completeEvent = new CountdownEvent();
         }
-
-        internal Request(string userAgent, Handler handler, AutoResetEvent completeEvent)
-        {
-            _userAgent = userAgent;
-            _queue = CreateQueue(handler);
-            _handler = handler;
-            _completeEvent = completeEvent;
-        }
-
+        
         #endregion
 
         #region Methods
 
-        internal BaseDeviceInfo Next()
+        /// <summary>
+        /// Waits until the time has elapsed, or the process has signaled complete.
+        /// </summary>
+        /// <param name="millisecondsTimeout"></param>
+        /// <returns></returns>
+        internal bool Wait(int millisecondsTimeout)
         {
-            BaseDeviceInfo device = null;
-            lock (_queue)
-            {
-                if (_queue.Count > 0)
-                {
-                    // Increase the counter indicating the number
-                    // of devices currently being processed.
-                    _inProcess++;
-                    // Take the next device from the queue and provide
-                    // it to the calling function.
-                    device = _queue.Dequeue();
-                }
-            }
-            return device;
+            return _completeEvent.Wait(millisecondsTimeout);
         }
 
-        internal void Complete()
+        /// <summary>
+        /// Returns the next device in the queue to be checked.
+        /// </summary>
+        /// <returns></returns>
+        internal BaseDeviceInfo Next()
         {
             lock (_queue)
-            {
-                // Decrease the counter of activie devices being processed.
-                _inProcess--;
-                // If no more devices are being processed, the queue is
-                // empty, and there is a waiting thread signal the waiting 
-                // thread to continue processing.
-                if (_inProcess == 0 && _completeEvent != null && _queue.Count == 0)
-                    _completeEvent.Set();
-            }
+                if (_queue.Count > 0)
+                    return _queue.Dequeue();
+            return null;
+        }
+
+        /// <summary>
+        /// Tells the waiting main thread that this worker thread has finished.
+        /// </summary>
+        internal void Complete()
+        {
+            _completeEvent.Signal();
         }
 
         /// <summary>

@@ -53,25 +53,21 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.EditDistance
 
         private static Results MatchMultiProcessor(string userAgent, Handler handler)
         {
-            // Provide an object to signal when the request has completed.
-            AutoResetEvent waiter = new AutoResetEvent(false);
-
             // Create the request.
-            Request request = new Request(userAgent, handler, waiter);
+            Request request = new Request(userAgent, handler);
             if (request.Count > 0)
             {
                 // For each thread add this to the queue.
-                for (int i = 0; i < Environment.ProcessorCount; i++)
+                for (int i = 0; i < request.ThreadCount; i++)
                     ThreadPool.QueueUserWorkItem(ServiceRequest, request);
 
                 // Wait until a signal is received. Keeping coming back to
                 // this thread so that a request to close the request
                 // can be processed.
-                while (waiter.WaitOne(1, false) == false)
+                while (request.Wait(1) == false)
                 {
                     // Do nothing 
                 }
-                ;
             }
             // Return the results.
             return request.Results;
@@ -108,8 +104,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.EditDistance
                     }
                 }
                 current = request.Next();
-                request.Complete();
             }
+            request.Complete();
         }
     }
 }

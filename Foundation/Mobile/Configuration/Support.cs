@@ -85,9 +85,14 @@ namespace FiftyOne.Foundation.Mobile.Configuration
 
         #endregion
 
-        #region Methods
+        #region Public Methods
 
-        internal static string GetFilePath(string pathSetOnWebConfig)
+        /// <summary>
+        /// Returns a real path from a virtiual path.
+        /// </summary>
+        /// <param name="pathSetOnWebConfig"></param>
+        /// <returns></returns>
+        public static string GetFilePath(string pathSetOnWebConfig)
         {
             if (string.IsNullOrEmpty(pathSetOnWebConfig))
                 return string.Empty;
@@ -113,6 +118,33 @@ namespace FiftyOne.Foundation.Mobile.Configuration
             // Return the original path.
             return pathSetOnWebConfig;
         }
+        
+        /// <summary>
+        /// Returns the configuration section relating to the name provided. If the section
+        /// is present in the web.config file this location is used. If it's present in the
+        /// alternative configuration file then it will be return from there.
+        /// </summary>
+        /// <param name="sectionName">The name of the section to be returned.</param>
+        /// <param name="isManadatory">True if the section is mandatary.</param>
+        /// <exception cref="MobileException">Thrown if the section does not exist and the section is mandatory.</exception>
+        /// <returns>The configuration section requested.</returns>
+        public static ConfigurationSection GetWebApplicationSection(string sectionName, bool isManadatory)
+        {
+            ConfigurationSection configurationSection = WebConfigurationManager.GetWebApplicationSection(sectionName) as ConfigurationSection;
+
+            // If section is not present in default web.config try to get it from the 51Degrees.mobi.config file.
+            if (configurationSection == null || configurationSection.ElementInformation.IsPresent == false)
+                configurationSection = GetConfigurationSectionFromAltConfig(sectionName, isManadatory);
+
+            else
+                EventLog.Debug(string.Format("Getting '{0}' configuration from the web.config file.", sectionName));
+
+            return configurationSection;
+        }
+
+        #endregion
+
+        #region Internal and Private Methods
 
         private static bool DoesDirectoryOrFileExist(string pathSetOnWebConfig)
         {
@@ -137,29 +169,6 @@ namespace FiftyOne.Foundation.Mobile.Configuration
                 partialPath = partialPath.Substring(1, partialPath.Length - 1);
             // Combing with the application root.
             return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, partialPath).Replace("/", "\\");
-        }
-
-        /// <summary>
-        /// Returns the configuration section relating to the name provided. If the section
-        /// is present in the web.config file this location is used. If it's present in the
-        /// alternative configuration file then it will be return from there.
-        /// </summary>
-        /// <param name="sectionName">The name of the section to be returned.</param>
-        /// <param name="isManadatory">True if the section is mandatary.</param>
-        /// <exception cref="MobileException">Thrown if the section does not exist and the section is mandatory.</exception>
-        /// <returns>The configuration section requested.</returns>
-        public static ConfigurationSection GetWebApplicationSection(string sectionName, bool isManadatory)
-        {
-            ConfigurationSection configurationSection = WebConfigurationManager.GetWebApplicationSection(sectionName) as ConfigurationSection;
-
-            // If section is not present in default web.config try to get it from the 51Degrees.mobi.config file.
-            if (configurationSection == null || configurationSection.ElementInformation.IsPresent == false)
-                configurationSection = GetConfigurationSectionFromAltConfig(sectionName, isManadatory);
-
-            else
-                EventLog.Debug(string.Format("Getting '{0}' configuration from the web.config file.", sectionName));
-
-            return configurationSection;
         }
 
         private static System.Configuration.Configuration OpenConfigFileMap(string configFileName)
@@ -187,6 +196,8 @@ namespace FiftyOne.Foundation.Mobile.Configuration
 
         private static ConfigurationSection GetConfigurationSectionFromAltConfig(string sectionName, bool isMandatory)
         {
+
+
             System.Configuration.Configuration fiftyOneConfig = null;
 
             foreach (string file in Constants.ConfigFileNames)

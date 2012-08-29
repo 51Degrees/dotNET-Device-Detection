@@ -57,7 +57,7 @@ namespace FiftyOne.Foundation.UI
 #if VER4 || VER35
                 return Provider.Properties.Where(i =>
                     Constants.Hardware.Contains(i.Name) &&
-                    i.Values.Count > 0).ToList();
+                    i.Values.Count > 0).OrderBy(i => i.Name).ToList();
 #else
                 return GetProperties(Provider.Properties, Constants.Hardware);
 #endif
@@ -74,7 +74,7 @@ namespace FiftyOne.Foundation.UI
 #if VER4 || VER35
                 return Provider.Properties.Where(i =>
                   Constants.Software.Contains(i.Name) &&
-                  i.Values.Count > 0).ToList();
+                  i.Values.Count > 0).OrderBy(i => i.Name).ToList();
 #else
                 return GetProperties(Provider.Properties, Constants.Software);
 #endif
@@ -91,7 +91,7 @@ namespace FiftyOne.Foundation.UI
 #if VER4 || VER35
                 return Provider.Properties.Where(i =>
                   Constants.Browser.Contains(i.Name) &&
-                  i.Values.Count > 0).ToList();
+                  i.Values.Count > 0).OrderBy(i => i.Name).ToList();
 #else
                 return GetProperties(Provider.Properties, Constants.Browser);
 #endif
@@ -108,9 +108,43 @@ namespace FiftyOne.Foundation.UI
 #if VER4 || VER35
                 return Provider.Properties.Where(i =>
                   Constants.Content.Contains(i.Name) &&
-                  i.Values.Count > 0).ToList();
+                  i.Values.Count > 0).OrderBy(i => i.Name).ToList();
 #else
                 return GetProperties(Provider.Properties, Constants.Content);
+#endif
+            }
+        }
+
+        /// <summary>
+        /// Returns true if cms data is being used by the active provider.
+        /// </summary>
+        public static bool IsCms
+        {
+            get
+            {
+                // Try the new data set name property first.
+                if (Provider.DataSetName.Equals("CMS"))
+                    return true;
+
+#if VER4 || VER35
+                return IsPremium == false &&
+                    (from i in Provider.Properties select i.Name).Intersect(UI.Constants.CMS).Count() == UI.Constants.CMS.Length;
+#else
+                if (IsPremium)
+                    return false;
+                int count = 0;
+                foreach (string property in UI.Constants.CMS)
+                {
+                    foreach (Property current in Provider.Properties)
+                    {
+                        if (current.Name.Equals(property, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            count++;
+                            break;
+                        }
+                    }
+                }
+                return count == UI.Constants.CMS.Length;
 #endif
             }
         }
@@ -121,7 +155,33 @@ namespace FiftyOne.Foundation.UI
         /// </summary>
         public static bool IsPremium
         {
-            get { return Provider.Properties.Count > 90; }
+            get
+            {
+                // Try the new data set name property first.
+                if (Provider.DataSetName.Equals("Premium"))
+                    return true;
+
+#if VER4 || VER35
+                string[] shared = (from i in Provider.Properties select i.Name).
+                    Intersect(UI.Constants.Premium).
+                    OrderBy(i => i).ToArray();
+                return shared.Length == UI.Constants.Premium.Length;
+#else
+                int count = 0;
+                foreach (string property in UI.Constants.Premium)
+                {
+                    foreach (Property current in Provider.Properties)
+                    {
+                        if (current.Name.Equals(property, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            count++;
+                            break;
+                        }
+                    }
+                }
+                return count == UI.Constants.Premium.Length;
+#endif
+            }
         }
 
         /// <summary>

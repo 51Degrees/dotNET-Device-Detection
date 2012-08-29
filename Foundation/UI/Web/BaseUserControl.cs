@@ -55,6 +55,7 @@ namespace FiftyOne.Foundation.UI.Web
         private string _descriptionCssClass = "description";
         private string _premiumCssClass = "premium";
         private string _liteCssClass = "lite";
+        private string _cmsCssClass = "premium";
         private string _vendorCssClass = "vendor";
         private string _modelCssClass = "model";
         private string _nameCssClass = "name";
@@ -208,6 +209,15 @@ namespace FiftyOne.Foundation.UI.Web
         }
 
         /// <summary>
+        /// The css class to use when displaying CMS properties. 
+        /// </summary>
+        public string CmsCssClass
+        {
+            get { return _cmsCssClass; }
+            set { _cmsCssClass = value; }
+        }
+
+        /// <summary>
         /// The css class to use when displaying premium properties. 
         /// </summary>
         public string PremiumCssClass
@@ -318,6 +328,7 @@ namespace FiftyOne.Foundation.UI.Web
             AddTag(list, "property", _propertyCssClass);
             AddTag(list, "premium", _premiumCssClass);
             AddTag(list, "lite", _liteCssClass);
+            AddTag(list, "cms", _cmsCssClass);
             AddTag(list, "description", _descriptionCssClass);
             AddTag(list, "value", _valueCssClass);
             return ReplaceTags(source, list);

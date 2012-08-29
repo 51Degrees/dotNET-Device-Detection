@@ -70,7 +70,7 @@ namespace FiftyOne.Foundation.UI {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;div class=&quot;{0}&quot;&gt;Premium Data is active. Thank you.&lt;/div&gt;.
+        ///   Looks up a localized string similar to &lt;div class=&quot;{0}&quot;&gt;{1} Data is active. Thank you.&lt;/div&gt;.
         /// </summary>
         internal static string ActivatedMessageHtml {
             get {
@@ -79,7 +79,7 @@ namespace FiftyOne.Foundation.UI {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;p&gt;Paste your Premium Data licence key into the textbox below. Select &quot;Activate&quot; to use the licence key with this web site.&lt;/p&gt;.
+        ///   Looks up a localized string similar to &lt;p&gt;Paste your data licence key into the textbox below. Select &quot;Activate&quot; to use the licence key with this web site.&lt;/p&gt;.
         /// </summary>
         internal static string ActivateInstructionsHtml {
             get {
@@ -175,7 +175,7 @@ namespace FiftyOne.Foundation.UI {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;div class=&quot;{0}&quot;&gt;&lt;p&gt;Success. Select the &quot;Refresh&quot; button to reload the web page and and start using Premium Device Data.  Note: There may be a short delay as the application restarts.&lt;/p&gt;&lt;/div&gt;.
+        ///   Looks up a localized string similar to &lt;div class=&quot;{0}&quot;&gt;&lt;p&gt;Success. Select the &quot;Refresh&quot; button to reload the web page and and start using Device Data.  Note: There may be a short delay as the application restarts.&lt;/p&gt;&lt;/div&gt;.
         /// </summary>
         internal static string ActivationSuccessHtml {
             get {
@@ -329,16 +329,10 @@ namespace FiftyOne.Foundation.UI {
         
         /// <summary>
         ///   Looks up a localized string similar to &lt;h1 class=&quot;{heading}&quot;&gt;Legend&lt;/h1&gt;
-        ///&lt;table&gt;
-        ///&lt;tr&gt;
-        ///&lt;td class=&quot;{property} {lite}&quot; style=&quot;width:auto;float:none;&quot;&gt;Property is included in BOTH Lite and Premium data sets.&lt;/td&gt;
-        ///&lt;td class=&quot;{property} {premium}&quot; style=&quot;width:auto;float:none;&quot;&gt;Property is included ONLY in the Premium data sets.&lt;/td&gt;
-        ///&lt;/tr&gt;
-        ///&lt;tr&gt;
-        ///&lt;td class=&quot;{description}&quot; style=&quot;width:auto;float:none;&quot;&gt;Description of the property.&lt;/td&gt;
-        ///&lt;td class=&quot;{value}&quot; style=&quot;width:auto;float:none;&quot;&gt;All possible values the property can have.&lt;/td&gt;
-        ///&lt;/tr&gt;
-        ///&lt;tr&gt; [rest of string was truncated]&quot;;.
+        ///&lt;p&gt;&lt;strong&gt;Property Fonts &amp;amp; Colours&lt;/strong&gt;&lt;/p&gt;
+        ///&lt;p class=&quot;{property} {lite}&quot; style=&quot;width:auto;float:none;&quot;&gt;Property is included in &lt;strong&gt;both&lt;/strong&gt; Lite and Premium data sets.&lt;/p&gt;
+        ///&lt;p class=&quot;{property} {cms}&quot; style=&quot;width:auto;float:none;&quot;&gt;Property is included in both CMS and the Premium data sets, but not the Lite data set.&lt;/p&gt;
+        ///&lt;p class=&quot;{property} {premium}&quot; style=&quot;width:auto;float:none;&quot;&gt;Property is included &lt;strong&gt;only&lt;/strong&gt; in the Premium data sets.&lt;/ [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string PropertyDictionaryLegend {
             get {

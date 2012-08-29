@@ -149,7 +149,7 @@ namespace FiftyOne.Foundation.UI.Web
             _literal.Text = String.Format(
                 Html,
                 CssClass,
-                DataProvider.IsPremium ? "Premium" : "Lite",
+                DataProvider.Provider.DataSetName,
                 DataProvider.Provider.PublishedDate,
                 DataProvider.Provider.Properties.Count,
                 Request.Browser[FiftyOne.Foundation.Mobile.Detection.Constants.DetectionTimeProperty]);

@@ -87,7 +87,9 @@ namespace FiftyOne.Foundation.UI.Web
 
                 propertyPanel.CssClass = String.Format("{0} {1}",
                     PropertyCssClass,
-                    property.IsPremium ? PremiumCssClass : LiteCssClass);
+                    property.IsCms ? CmsCssClass :
+                        property.IsPremium ? PremiumCssClass : 
+                            LiteCssClass);
                 descriptionPanel.CssClass = DescriptionCssClass;
             }
         }

@@ -171,6 +171,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
         public const string PublishedDateAttributeName = "date";
 
         /// <summary>
+        /// Attribute name used to provide the data set name in the XML when publishing.
+        /// </summary>
+        public const string DataSetNameAttributeName = "DatasetName";
+
+        /// <summary>
         /// The name of the element used to store the version of the data.
         /// </summary>
         public const string VersionElementName = "version";

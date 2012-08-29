@@ -180,6 +180,11 @@ a:link, a:visited
     color: #222222;
 }
 
+.deviceExplorerDevice .cms, .propertyDictionary .cms
+{
+    color: #008500;
+}
+
 .deviceExplorerDevice .premium, .propertyDictionary .premium
 {
     color: #b22222;

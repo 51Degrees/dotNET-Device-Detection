@@ -168,7 +168,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
                     {
                         if (reader.ReadToDescendant(Constants.TopLevelElementName) &&
                             reader.ReadToDescendant(Constants.ProfilesElementName))
+                        {
                             ProcessDevices(provider, reader.ReadSubtree());
+                            break;
+                        }
                     }
                 }
 
@@ -181,11 +184,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
                     {
                         if (reader.ReadToDescendant(Constants.TopLevelElementName) &&
                             reader.ReadToDescendant(Constants.PropertiesElementName))
+                        {
                             ProcessManifest(provider, reader.ReadSubtree());
+                            break;
+                        }
                     }
                 }
 
-                // Finally read the date the files were created.
+                // Finally read the date the files were created and the name of the dataset.
                 foreach (Stream stream in streams)
                 {
                     // Ensure we're at the start of the stream before reading.
@@ -194,8 +200,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
                     {
                         if (reader.ReadToDescendant(Constants.TopLevelElementName) &&
                             reader.ReadToDescendant(Constants.HeaderElementName))
-                            if (ProcessHeaders(provider, reader))
+                        {
+                            if (ProcessHeaders(provider, reader.ReadSubtree()))
                                 break;
+                        }
                     }
                 }
             } 
@@ -291,7 +299,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
         /// <returns>Returns true if the headers elements are processed correctly.</returns>
         private static bool ProcessHeaders(Provider provider, XmlReader reader)
         {
-            while (reader.Read())
+            int found = 0;
+            while (reader.EOF == false && found < 2)
             {
                 if (reader.NodeType == XmlNodeType.Element)
                 {
@@ -300,11 +309,21 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
                         case Constants.PublishedDateAttributeName:
                             string date = reader.ReadElementContentAsString();
                             DateTime.TryParse(date, out provider._publishedDate);
-                            return true;
+                            found++;
+                            break;
+                        case Constants.DataSetNameAttributeName:
+                            provider._dataSetName = reader.ReadElementContentAsString();
+                            found++;
+                            break;
+                        default:
+                            reader.Read();
+                            break;
                     }
                 }
+                else
+                    reader.Read();
             }
-            return false;
+            return found >= 2;
         }
 
         #endregion

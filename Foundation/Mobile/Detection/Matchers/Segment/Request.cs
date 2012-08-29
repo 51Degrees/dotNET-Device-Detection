@@ -55,13 +55,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Segment
             _results = new Results();
         }
 
-        internal Request(string userAgent, SegmentHandler handler, AutoResetEvent completeEvent)
-            : base(userAgent, handler, completeEvent)
-        {
-            _target = Handler.CreateAllSegments(userAgent);
-            _results = new Results();
-        }
-
         #endregion
     }
 }

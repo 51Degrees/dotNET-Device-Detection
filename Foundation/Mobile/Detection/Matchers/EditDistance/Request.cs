@@ -43,12 +43,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.EditDistance
             _results = new Results();
         }
 
-        internal Request(string userAgent, Handler handler, AutoResetEvent completeEvent) :
-            base(userAgent, handler, completeEvent)
-        {
-            _results = new Results();
-        }
-
         #endregion
     }
 }

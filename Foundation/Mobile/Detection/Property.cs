@@ -11,7 +11,7 @@
 
 using System.Collections.Generic;
 
-#if VER4
+#if VER4 || VER35
 
 using System.Linq;
 
@@ -54,6 +54,25 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Properties
 
         /// <summary>
+        /// Returns true if the property is available in the CMS data set.
+        /// </summary>
+        public bool IsCms
+        {
+            get
+            {
+#if VER4 || VER35               
+                return UI.Constants.CMS.FirstOrDefault(i =>
+                        i == Name) != null;
+#else
+                foreach (string property in UI.Constants.CMS)
+                    if (property == Name)
+                        return true;
+                return false;
+#endif
+            }
+        }
+
+        /// <summary>
         /// Returns true if the property is only available in the Premium
         /// data set.
         /// </summary>
@@ -61,7 +80,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             get 
             {
-#if VER4
+#if VER4 || VER35
                 return Provider.EmbeddedProvider.Properties.FirstOrDefault(i =>
                     i.Name == Name) == null; 
 #else

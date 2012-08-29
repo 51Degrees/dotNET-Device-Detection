@@ -185,6 +185,11 @@ a:link, a:visited
     display: inline-block;
 }
 
+.deviceExplorerDevice .cms, .propertyDictionary .cms
+{
+    color: #008500;
+}
+
 .deviceExplorerDevice .premium, .propertyDictionary .premium
 {
     color: #b22222;

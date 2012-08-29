@@ -63,8 +63,17 @@ namespace FiftyOne.Foundation.Mobile.Detection
             foreach (object key in currentCapabilities.Capabilities.Keys)
                 Capabilities[key] = currentCapabilities.Capabilities[key];
             foreach (object key in overrideCapabilities.Keys)
+                // Do not override the preferredRenderingType if original
+                // .NET mobile controls are being used as values greater 
+                // than html32 result in runtime exceptions.
+#if OBSOLETE_SUPPORT
+                if (key.Equals("preferredRenderingType") == false)
+                {
+#endif
                 Capabilities[key] = overrideCapabilities[key];
-
+#if OBSOLETE_SUPPORT
+                }
+#endif
             // Copy the adapters from the original.
             foreach (object key in currentCapabilities.Adapters.Keys)
                 Adapters.Add(key, currentCapabilities.Adapters[key]);

@@ -459,7 +459,7 @@ namespace FiftyOne.Foundation.UI.Web
                             valuePanel.CssClass = ValueCssClass;
                             namePanel.CssClass = String.Join(" ", new string[] {
                                 PropertyCssClass,
-                                (property.IsPremium ? PremiumCssClass : LiteCssClass) });
+                                (property.IsCms ? CmsCssClass : (property.IsPremium ? PremiumCssClass : LiteCssClass)) });
 
                             string wide = reader.GetAttribute("wide");
                             itemPanel.CssClass = String.IsNullOrEmpty(wide) ? ItemCssClass : WideCssClass;

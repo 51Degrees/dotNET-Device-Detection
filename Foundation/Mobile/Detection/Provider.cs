@@ -59,6 +59,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         internal static Provider _embeddedProvider = null;
 
+        /// <summary>
+        /// The name of the data set the provider is using.
+        /// </summary>
+        internal string _dataSetName = "Unknown";
+
         #endregion
 
         #region Internal Constructors
@@ -121,6 +126,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
         public DateTime PublishedDate
         {
             get { return _publishedDate; }
+        }
+
+        /// <summary>
+        /// Returns the name of the data set used to create the provider.
+        /// </summary>
+        public string DataSetName
+        {
+            get { return _dataSetName; }
         }
 
         #endregion
