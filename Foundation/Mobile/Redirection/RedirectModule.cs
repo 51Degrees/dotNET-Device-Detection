@@ -564,14 +564,16 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                 SetResponseCookie(context, alreadyAccessed);
 
                 // Remove from the devices cache file as cookie can be used.
-                _requestHistory.Remove(context.Request);
+                if (_requestHistory != null)
+                    _requestHistory.Remove(context.Request);
 
                 return false;
             }
 
             // Check to see if the requested IP address and HTTP headers hashcode is
             // on record as having been seen before.
-            if (_requestHistory.IsPresent(context.Request))
+            if (_requestHistory != null &&
+                _requestHistory.IsPresent(context.Request))
             {
                 // Update the cache and other methods in case they can
                 // be used in the future.
@@ -653,7 +655,8 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                 SetResponseCookie(context, new HttpCookie(Constants.AlreadyAccessedCookieName));
 
             // Add to the request history cache.
-            _requestHistory.Set(context.Request);
+            if (_requestHistory != null)
+                _requestHistory.Set(context.Request);
         }
 
         /// <summary>

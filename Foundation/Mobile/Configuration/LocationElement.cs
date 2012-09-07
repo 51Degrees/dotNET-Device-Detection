@@ -124,10 +124,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         /// </summary>
         protected override object GetElementKey(ConfigurationElement element)
         {
-            string key = ((FilterElement)element).Property;
-            if (String.IsNullOrEmpty(key))
-                return ((FilterElement)element).UniqueId;
-            return key;
+            return element.GetHashCode();
         }
 
         #endregion

@@ -41,10 +41,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         /// </summary>
         protected override object GetElementKey(ConfigurationElement element)
         {
-            string key = ((LocationElement)element).Name;
-            if (String.IsNullOrEmpty(key))
-                return ((LocationElement)element).UniqueId;
-            return key;
+            return element.GetHashCode();
         }
 
         #endregion 
