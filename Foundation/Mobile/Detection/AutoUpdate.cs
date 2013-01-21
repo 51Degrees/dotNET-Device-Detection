@@ -34,6 +34,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         private static FileInfo _binaryFile = null;
 
+        /// <summary>
+        /// Used to signal between multiple instances of the update
+        /// threads.
+        /// </summary>
+        private static AutoResetEvent _autoUpdateSignal = new AutoResetEvent(true);
+
         #endregion
 
         #region Internal Properties
@@ -159,23 +165,20 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         internal static void Run(object state)
         {
+            // Wait until any other threads have finished executing.
+            _autoUpdateSignal.WaitOne();
+
             try
             {
-                if (Constants.AutoUpdateDelayedStart.TotalSeconds > 0)
+                // If licence keys are available auto update.
+                if (LicenceKey.Keys.Length > 0)
                 {
-                    // Pause for X seconds to allow the worker process to complete starting up.
-                    Thread.Sleep(Constants.AutoUpdateDelayedStart);
-
-                    // If licence keys are available auto update.
-                    if (LicenceKey.Keys.Length > 0)
+                    // Check the last accessed date of the binary file to determine
+                    // if it should be updated.
+                    if (BinaryFile != null &&
+                        BinaryFile.LastWriteTimeUtc.Add(Constants.AutoUpdateWait) < DateTime.UtcNow)
                     {
-                        // Check the last accessed date of the binary file to determine
-                        // if it should be updated.
-                        if (BinaryFile != null &&
-                            BinaryFile.LastWriteTimeUtc.Add(Constants.AutoUpdateWait) < DateTime.UtcNow)
-                        {
-                            Download();
-                        }
+                        Download();
                     }
                 }
             }
@@ -198,6 +201,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     EventLog.Fatal(ex);
                 }
             }
+
+            // Signal any waiting threads to start.
+            _autoUpdateSignal.Set();
         }
 
         /// <summary>

@@ -69,7 +69,6 @@
     <Content Include="Global.asax" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="51Degrees.mobi.config" />
     <Content Include="Default.aspx" />
     <Content Include="Desktop.png" />
     <Content Include="Licence.txt" />

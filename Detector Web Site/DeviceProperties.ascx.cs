@@ -58,6 +58,8 @@ namespace Detector
                 "tab", Tabs.GetActiveView() == CurrentView ? "active" : String.Empty });
             ExplorerButton.CssClass = String.Join(" ", new[] {
                 "tab", Tabs.GetActiveView() == ExplorerView ? "active" : String.Empty });
+            TopButton.CssClass = String.Join(" ", new[] {
+                "tab", Tabs.GetActiveView() == TopView ? "active" : String.Empty });
             DictionaryButton.CssClass = String.Join(" ", new[] {
                 "tab", Tabs.GetActiveView() == DictionaryView ? "active" : String.Empty });
             UserAgentTesterButton.CssClass = String.Join(" ", new[] {
@@ -74,6 +76,8 @@ namespace Detector
                 cookie = new HttpCookie("tab");
             cookie.Value = Tabs.GetActiveView().ID;
             Response.Cookies.Add(cookie);
+
+            Explorer.ImagesEnabled = true;
 
             base.OnLoad(e);
         }
@@ -96,6 +100,16 @@ namespace Detector
                     Tabs.SetActiveView(ExplorerView);
                     ExplorerButton.CssClass = "active";
                     break;
+#if VER35 || VER4
+                case "TopView":
+                    {
+                        if (TopDevices.SelectedDevice != null)
+                            goto case "ExplorerView";
+                        Tabs.SetActiveView(TopView);
+                        TopButton.CssClass = "active";
+                        break;
+                    }
+#endif
                 case "DictionaryView":
                     Tabs.SetActiveView(DictionaryView);
                     DictionaryButton.CssClass = "active";

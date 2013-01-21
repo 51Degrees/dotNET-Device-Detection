@@ -69,8 +69,31 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Final
                     subset.Add(result.Device);
                 }
             }
+
+            // If only one is found return it.
             if (subset.Count == 1)
                 return subset[0];
+
+            // If there is an exact match return it.
+            if (highestPosition == userAgent.Length)
+            {
+#if VER35 || VER4
+                var res = subset.FirstOrDefault(i => i.UserAgent == userAgent);
+                if (res != null)
+                {
+                    return res;
+                }
+            }
+
+#else
+                foreach (BaseDeviceInfo device in subset)
+                    if (device.UserAgent == userAgent)
+                        return device;
+            }
+#endif
+
+            // If there are more than 1 find the best one based on the end
+            // of the useragent strings.
             if (subset.Count > 1)
                 return MatchTails(userAgent, highestPosition, subset);
             return null;

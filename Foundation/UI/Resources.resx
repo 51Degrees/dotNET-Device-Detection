@@ -189,6 +189,7 @@ The web servers firewall or another firewall is blocking access to the host or t
         e.innerHTML = '-';
     }
 }</value>
+    <comment>Script for the toggle functionality</comment>
   </data>
   <data name="PropertyDictionaryLegend" xml:space="preserve">
     <value>&lt;h1 class="{heading}"&gt;Legend&lt;/h1&gt;
@@ -439,5 +440,99 @@ The web servers firewall or another firewall is blocking access to the host or t
   </data>
   <data name="ShareUsageUrl" xml:space="preserve">
     <value>http://51degrees.mobi/Support/FAQs/UsageData</value>
+  </data>
+  <data name="ImageRotationScript" xml:space="preserve">
+    <value>// constants to control animations
+var tickTime = 50; // time in milliseconds a 'tick' lasts for
+var transitionTime = 500; // time in milliseconds a fade should last for
+var imageDelay = 2000; // time in milliseconds a image will show for without fading
+
+// used to store image data between ticks
+var hoveredImageData = null;
+
+// fired from img onmouseover event. begins transitions.
+function ImageHovered(element, urls) {
+    hoveredImageData = new Object();
+    hoveredImageData.Element = element; // the html img element to change
+    hoveredImageData.Urls = urls; // a string array of image urls in priority order 
+    hoveredImageData.Cycle = 1; // the image displayed, ie index of Urls
+    hoveredImageData.Ticks = 0; // current tick used for animation
+    hoveredImageData.Phase = 'FadeOut'; // the next image will immediately begin loading
+    hoveredImageData.NextImage = new Image(); // used to preload image
+    hoveredImageData.NextImage.src = hoveredImageData.Urls[1];
+    hoveredImageData.IntervalId = setInterval(tick, tickTime); // start ticker and store interval id
+}
+
+// fired from img onmouseoff event. resets image to one with highest priority when unhovered
+function ImageUnHovered(element, url) {
+    element.src = url;
+    UpdateFade(100);
+    clearInterval(hoveredImageData.IntervalId);
+}
+
+function tick() {
+    // switch statement controls which part of the element's animation is in progress and updates it.
+    // phase is updated when the tick count reaches to relevant constant defined above.
+    switch (hoveredImageData.Phase) {
+
+
+        case 'FadeOut':
+            if (hoveredImageData.NextImage.complete == false)
+                return; // return to prevent ticks incrementing
+                // convert ticks to fade
+                UpdateFade(100 - (transitionTime / tickTime) * hoveredImageData.Ticks);
+                if (hoveredImageData.Ticks * tickTime == transitionTime)
+                    ChangePhase('NewImage');
+            break;
+
+        case 'NewImage':
+            hoveredImageData.Element.src = hoveredImageData.NextImage.src;
+            hoveredImageData.Cycle++;
+            // checks if another image is available, going back to beginning if there isn't
+            if (hoveredImageData.Cycle == hoveredImageData.Urls.length)
+                hoveredImageData.Cycle = 0;
+            hoveredImageData.NextImage.src = hoveredImageData.Urls[hoveredImageData.Cycle];
+            ChangePhase('FadeIn');
+            break;
+
+        case 'FadeIn':
+            // convert ticks to fade
+            UpdateFade((transitionTime / tickTime) * hoveredImageData.Ticks);
+            if (hoveredImageData.Ticks * tickTime == transitionTime)
+                ChangePhase('Delay');
+            break;
+
+
+        case 'Delay':
+            // nothing to do except wait for time delay to expire
+            if (hoveredImageData.Ticks * tickTime == imageDelay)
+                ChangePhase('FadeOut');
+            break;
+
+    }
+    hoveredImageData.Ticks++;
+}
+
+function ChangePhase(phase) {
+    hoveredImageData.Phase = phase;
+    // ticks are reset when a phase is changed
+    hoveredImageData.Ticks = 0;
+}
+
+// updates img element's opacity. opacity is a percentage - 100 is fully opaque, 0 is completely transparent
+function UpdateFade(opacity) {
+    // converts opacity to decimal
+    hoveredImageData.Element.style.opacity = opacity / 100;
+}</value>
+    <comment>Script for the image hover and switch functionality.</comment>
+  </data>
+  <data name="SearchBoxButtonText" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="SearchBoxInstructionText" xml:space="preserve">
+    <value>Device Search: </value>
+  </data>
+  <data name="TopDevicesText" xml:space="preserve">
+    <value>&lt;p&gt;Displaying the top {0} latest devices.&lt;/p&gt;</value>
   </data>
 </root>

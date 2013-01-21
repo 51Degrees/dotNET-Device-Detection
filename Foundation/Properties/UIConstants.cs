@@ -38,6 +38,7 @@ namespace FiftyOne.Foundation.UI
             "HardwareVendor",
             "HardwareModel",
             "HardwareName",
+            "HardwareImages",
             "BitsPerPixel",
             "Has3DCamera",
             "Has3DScreen",
@@ -69,7 +70,8 @@ namespace FiftyOne.Foundation.UI
             "SuggestedImageButtonHeightPixels",
             "SuggestedLinkSizePixels",
             "SuggestedLinkSizePoints",
-            "SupportedBearers" };
+            "SupportedBearers",
+            "Popularity"};
 
         /// <summary>
         /// List of properties associated with the operating system

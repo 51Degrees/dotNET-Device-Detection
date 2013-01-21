@@ -5,6 +5,7 @@
       <heading name="HardwareVendor"></heading>
       <heading name="HardwareModel"></heading>
       <heading name="HardwareName"></heading>
+      <heading name="Popularity"></heading>
     </heading>
     <heading name="Device Types">
       <heading name="IsConsole"></heading>

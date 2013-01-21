@@ -92,6 +92,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         internal static readonly TimeSpan AutoUpdateWait =
             new TimeSpan(6, 0, 0, 0);
+
+        /// <summary>
+        /// The length of time to sleep before checking for new device
+        /// data again.
+        /// </summary>
+        internal static readonly TimeSpan AutoUpdateSleep =
+            new TimeSpan(0, 6, 0, 0);
         
         /// <summary>
         /// Length of time in ms the new devices thread should wait for a response from the
@@ -103,7 +110,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Forces the useragent matcher to use a single thread if 
         /// multiple processors are available.
         /// </summary>
-        internal const bool ForceSingleProcessor = false;
+        internal const bool ForceSingleProcessor = true;
 
         /// <summary>
         /// Improves performance of segment handlers by storing the results of 

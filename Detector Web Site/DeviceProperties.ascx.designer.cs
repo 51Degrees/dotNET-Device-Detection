@@ -31,6 +31,15 @@ namespace Detector {
         protected global::System.Web.UI.WebControls.Button ExplorerButton;
         
         /// <summary>
+        /// TopButton control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button TopButton;
+        
+        /// <summary>
         /// DictionaryButton control.
         /// </summary>
         /// <remarks>
@@ -128,6 +137,26 @@ namespace Detector {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::FiftyOne.Foundation.UI.Web.DeviceExplorer Explorer;
+        
+        /// <summary>
+        /// TopView control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.View TopView;
+        
+#if VER4 || VER35
+        /// <summary>
+        /// TopDevices control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::FiftyOne.Foundation.UI.Web.TopDevices TopDevices;
+#endif
         
         /// <summary>
         /// DictionaryView control.

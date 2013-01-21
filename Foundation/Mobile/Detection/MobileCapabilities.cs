@@ -149,7 +149,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             BaseDeviceInfo device = _provider.GetDeviceInfo(headers);
             int detectionTime = Environment.TickCount - start + 1;
 
-            // Add the capabilities.
+            // Add the capabilities.e
             Create(device, capabilities, currentCapabilities);
 
             // Add the detection time to the list of properties.
@@ -211,6 +211,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             // Enhance with the capabilities from the device data.
             if (device != null)
             {
+                
                 // Enhance the default capabilities collection based on the device.
                 Enhance(properties, currentProperties, device);
 
@@ -259,7 +260,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
             SetValue(capabilities, "mobileDeviceModel", GetMobileDeviceModel(device));
             SetValue(capabilities, "mobileDeviceManufacturer", GetMobileDeviceManufacturer(device));
             SetValue(capabilities, "platform", GetPlatform(device));
+            // property enhancement can be removed with this compiler flag
+#if !REMOVE_OVERRIDE_BROWSER
             SetValue(capabilities, "browser", GetBrowser(device));
+#endif
             SetValue(capabilities, "type", capabilities["mobileDeviceManufacturer"]);
             SetValue(capabilities, "screenPixelsHeight", GetScreenPixelsHeight(device) ??
                 GetDefaultValue("screenPixelsHeight", currentCapabilities));

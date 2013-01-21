@@ -47,6 +47,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         private static MobileCapabilities _instance;
 
+        /// <summary>
+        /// The background timer used to update device data.
+        /// </summary>
+        private static Timer _autoUpdateTimer = null;
+
         #endregion
 
         #region Private Properties
@@ -137,7 +142,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
                             _instance = new MobileCapabilities(provider);
 
                             // Start the auto update thread to check for new data files.
-                            ThreadPool.QueueUserWorkItem(new WaitCallback(AutoUpdate.Run));
+                            _autoUpdateTimer = new Timer(
+                                new TimerCallback(AutoUpdate.Run),
+                                null,
+                                Constants.AutoUpdateDelayedStart,
+                                Constants.AutoUpdateSleep);
                         }
                     }
                 }

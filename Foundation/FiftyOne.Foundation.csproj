@@ -199,6 +199,7 @@
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="UI\Web\RelatedDeviceTemplate.cs" />
+	<Compile Include="UI\Web\DeviceImages.cs" />
     <Compile Include="UI\Web\Stats.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>

@@ -2,13 +2,14 @@
 <%@ Register Assembly="FiftyOne.Foundation" Namespace="FiftyOne.Foundation.UI.Web" TagPrefix="fiftyOne" %>
 
 <div class="tabs">
-    <asp:Button runat="server" ID="CurrentButton" CommandName="Tab" CommandArgument="CurrentView" OnCommand="TabChange" Text="Current Device" />
-    <asp:Button runat="server" ID="ExplorerButton" CommandName="Tab" CommandArgument="ExplorerView" OnCommand="TabChange" Text="Explorer Devices" />
-    <asp:Button runat="server" ID="DictionaryButton" CommandName="Tab" CommandArgument="DictionaryView" OnCommand="TabChange" Text="Dictionary" />
-    <asp:Button runat="server" ID="UserAgentTesterButton" CommandName="Tab" CommandArgument="UserAgentTesterView" OnCommand="TabChange" Text="Test UserAgent" />
-    <asp:Button runat="server" ID="RedirectButton" CommandName="Tab" CommandArgument="RedirectView" OnCommand="TabChange" Text="Redirect" />
-    <asp:Button runat="server" ID="DetectionButton" CommandName="Tab" CommandArgument="DetectionView" OnCommand="TabChange" Text="Detection" />
-    <asp:Button runat="server" ID="StandardPropertiesButton" CommandName="Tab" CommandArgument="StandardPropertiesView" OnCommand="TabChange" Text="Standard Properties" />
+    <asp:Button runat="server" ID="CurrentButton" CommandName="Tab" CommandArgument="CurrentView" OnCommand="TabChange" Text="Current Device" PostBackUrl="~/Default.aspx" />
+    <asp:Button runat="server" ID="ExplorerButton" CommandName="Tab" CommandArgument="ExplorerView" OnCommand="TabChange" Text="Device Explorer" PostBackUrl="~/Default.aspx" />
+    <asp:Button runat="server" ID="TopButton" CommandName="Tab" CommandArgument="TopView" OnCommand="TabChange" Text="Top Devices" PostBackUrl="~/Default.aspx" />
+    <asp:Button runat="server" ID="DictionaryButton" CommandName="Tab" CommandArgument="DictionaryView" OnCommand="TabChange" Text="Dictionary" PostBackUrl="~/Default.aspx" />
+    <asp:Button runat="server" ID="UserAgentTesterButton" CommandName="Tab" CommandArgument="UserAgentTesterView" OnCommand="TabChange" Text="Test UserAgent" PostBackUrl="~/Default.aspx" />
+    <asp:Button runat="server" ID="RedirectButton" CommandName="Tab" CommandArgument="RedirectView" OnCommand="TabChange" Text="Redirect" PostBackUrl="~/Default.aspx" />
+    <asp:Button runat="server" ID="DetectionButton" CommandName="Tab" CommandArgument="DetectionView" OnCommand="TabChange" Text="Detection" PostBackUrl="~/Default.aspx"/>
+    <asp:Button runat="server" ID="StandardPropertiesButton" CommandName="Tab" CommandArgument="StandardPropertiesView" OnCommand="TabChange" Text="Standard Properties" PostBackUrl="~/Default.aspx" />
 </div>
 
 <div class="border">
@@ -19,6 +20,9 @@
     <asp:View runat="server" ID="ExplorerView">
         <fiftyOne:LiteMessage runat="server" ID="Message1" FooterEnabled="false" LogoEnabled="false" />
         <fiftyOne:DeviceExplorer runat="server" ID="Explorer" Navigation="true" CmsCssClass="cms" />
+    </asp:View>
+    <asp:View runat="server" ID="TopView">
+        <fiftyOne:TopDevices runat="server" ID="TopDevices" />
     </asp:View>
     <asp:View runat="server" ID="DictionaryView">
         <fiftyOne:PropertyDictionary runat="server" ID="Dictionary" CssClass="propertyDictionary" CmsCssClass="cms" />

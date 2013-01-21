@@ -196,8 +196,6 @@ namespace FiftyOne.Foundation.Mobile.Configuration
 
         private static ConfigurationSection GetConfigurationSectionFromAltConfig(string sectionName, bool isMandatory)
         {
-
-
             System.Configuration.Configuration fiftyOneConfig = null;
 
             foreach (string file in Constants.ConfigFileNames)
@@ -212,12 +210,18 @@ namespace FiftyOne.Foundation.Mobile.Configuration
 
                     // If alternate configuration file loaded successfully go ahead and retrieve requested 
                     // confguration section.
-                    if (fiftyOneConfig != null && fiftyOneConfig.HasFile == true)
+                    if (fiftyOneConfig != null)
                     {
-                        EventLog.Debug(string.Format("Getting '{0}' configuration from file '{1}'.", sectionName, configFileName));
-                        ConfigurationSection section = fiftyOneConfig.GetSection(sectionName);
-                        if (section != null)
-                            return section;
+                        if (fiftyOneConfig.HasFile == true)
+                        {
+                            EventLog.Debug(String.Format("Getting '{0}' configuration from file '{1}'.", sectionName, configFileName));
+                            ConfigurationSection section = fiftyOneConfig.GetSection(sectionName);
+                            EventLog.Debug(String.Format("Got section '{0}'.", section));
+                            if (section != null)
+                                return section;
+                            else
+                                EventLog.Debug(String.Format("Null section for '{0}' configuration from file '{1}'.", sectionName, configFileName));
+                        }
                     }
                 }
             }

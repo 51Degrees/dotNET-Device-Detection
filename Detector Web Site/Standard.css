@@ -140,8 +140,8 @@ a:link, a:visited
     background-color: #EEEEEE;
     margin: 2px;
     padding: 0.5em;
-    height: 3em;
-    width: 100px;
+    height: 15em;
+    width: 150px;
     display: block;
     float: left;
     text-align: center;
@@ -166,6 +166,60 @@ a:link, a:visited
 }
 
 .deviceExplorerDevices .item .name a
+{
+    text-decoration: none;
+    color: #777777;
+    padding-top: 0.5em;
+}
+
+.topDevices .item
+{
+    margin: 0.5em;
+    height: 2.5em;
+    width: 100px;
+    float: left;
+    display: block;
+    overflow: hidden;
+    vertical-align: top;
+}
+
+.topDevices .item .vendor
+{
+    text-align: center;
+    font-weight: bold;
+}
+
+.topDevices .item
+{
+    background-color: #EEEEEE;
+    margin: 2px;
+    padding: 0.5em;
+    height: 15em;
+    width: 150px;
+    display: block;
+    float: left;
+    text-align: center;
+    vertical-align: top;
+    overflow: hidden;
+}
+
+.topDevices .item .model
+{
+    font-weight: bold;
+}
+
+.topDevices .item .model a
+{
+    text-decoration: none;
+    color: Red;
+}
+
+.topDevices .item .name
+{
+    overflow: hidden;
+}
+
+.topDevices .item .name a
 {
     text-decoration: none;
     color: #777777;
@@ -219,6 +273,11 @@ a:link, a:visited
     margin: 0.5em 0px;
     height: 100%;
     vertical-align: middle;
+}
+
+.deviceImageCaption
+{
+    text-align: center;
 }
 
 .deviceExplorerDevice

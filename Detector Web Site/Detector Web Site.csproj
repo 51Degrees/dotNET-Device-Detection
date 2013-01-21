@@ -48,7 +48,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="51Degrees.mobi.config" />
     <Content Include="Default.aspx" />
     <Content Include="Desktop.png" />
     <Content Include="Global.asax" />

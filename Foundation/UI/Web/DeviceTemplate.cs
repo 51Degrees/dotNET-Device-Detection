@@ -35,8 +35,6 @@ namespace FiftyOne.Foundation.UI.Web
             image.ID = "Image";
             name.ID = "Name";
 
-            image.Visible = false;
-
             device.Controls.Add(model);
             device.Controls.Add(image);
             device.Controls.Add(name);

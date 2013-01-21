@@ -63,6 +63,7 @@ namespace FiftyOne.Foundation.UI.Web
         private string _devicesCssClass = "deviceExplorerDevices";
         private string _deviceCssClass = "deviceExplorerDevice";
         private string _itemCssClass = "item";
+        private string _imagesCssClass = "image";
         private string _wideValueCssClass = "wide";
         private string _cssClass = null;
         private string _footerCssClass = "footer";
@@ -125,6 +126,15 @@ namespace FiftyOne.Foundation.UI.Web
         {
             get { return _itemCssClass; }
             set { _itemCssClass = value; }
+        }
+
+        /// <summary>
+        /// The css class used by a device image.
+        /// </summary>
+        public string ImagesCssClass
+        {
+            get { return _imagesCssClass; }
+            set { _imagesCssClass = value; }
         }
 
         /// <summary>
@@ -511,20 +521,61 @@ namespace FiftyOne.Foundation.UI.Web
         /// <returns>A new url containing the parameters provided and the new key and value.</returns>
         protected virtual string GetNewUrl(NameValueCollection parameters, string key, string value)
         {
-            parameters.Remove(key);
-            if (value != null)
-                parameters.Add(key, value);
+            return GetNewUrl(Request.Url.AbsolutePath, parameters, key, value);
+        }
 
+        /// <summary>
+        /// Returns a new url that will replace, or add a parameter
+        /// to the one that is currently being used.
+        /// </summary>
+        /// <param name="absoluteUrl">The root url to add parameters too.</param> 
+        /// <param name="parameters">Existing list of parameters to be altered.</param>
+        /// <returns>A new url containing the parameters provided and the new key and value.</returns>
+        protected virtual string GetNewUrl(string absoluteUrl, NameValueCollection parameters)
+        {
+            return GetNewUrl(absoluteUrl, parameters, String.Empty);
+        }
+
+        /// <summary>
+        /// Returns a new url that will replace, or add a parameter
+        /// to the one that is currently being used.
+        /// </summary>
+        /// <param name="absoluteUrl">The root url to add parameters too.</param> 
+        /// <param name="parameters">Existing list of parameters to be altered.</param>
+        /// <param name="key">A parameter key not to be removed from the list of parameters.</param>
+        /// <returns>A new url containing the parameters provided and the new key and value.</returns>
+        protected virtual string GetNewUrl(string absoluteUrl, NameValueCollection parameters, string key)
+        {
             List<string> list = new List<string>();
-            foreach(string index in parameters.Keys)
-                list.Add(String.Format("{0}={1}", index, HttpUtility.UrlEncode(parameters[index])));
+
+            // keys beginning with an _ will not be added to links, unless it was in the parameter
+            foreach (string index in parameters.Keys)
+                if (index.StartsWith("_") == false || index == key)
+                    list.Add(String.Format("{0}={1}", index, HttpUtility.UrlEncode(parameters[index])));
 
             if (CreateUrl != null)
                 return CreateUrl(list);
 
             return String.Format("{0}?{1}",
-                Request.Url.AbsolutePath,
+                absoluteUrl,
                 String.Join("&", list.ToArray()));
+        }
+
+        /// <summary>
+        /// Returns a new url that will replace, or add a parameter
+        /// to the one that was supplied.
+        /// </summary>
+        /// <param name="absoluteUrl">The root url to add parameters too.</param>
+        /// <param name="parameters">Existing list of parameters to be altered.</param>
+        /// <param name="key">The parameter key.</param>
+        /// <param name="value">The parameter value.</param>
+        /// <returns>A new url containing the parameters provided and the new key and value.</returns>
+        protected virtual string GetNewUrl(string absoluteUrl, NameValueCollection parameters, string key, string value)
+        {
+            parameters.Remove(key);
+            if (value != null)
+                parameters.Add(key, value);
+            return GetNewUrl(absoluteUrl, parameters);
         }
 
         #endregion
