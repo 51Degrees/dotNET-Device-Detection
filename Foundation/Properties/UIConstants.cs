@@ -38,6 +38,7 @@ namespace FiftyOne.Foundation.UI
             "HardwareVendor",
             "HardwareModel",
             "HardwareName",
+            "HardwareFamily",
             "HardwareImages",
             "BitsPerPixel",
             "Has3DCamera",
@@ -71,7 +72,8 @@ namespace FiftyOne.Foundation.UI
             "SuggestedLinkSizePixels",
             "SuggestedLinkSizePoints",
             "SupportedBearers",
-            "Popularity"};
+            "Popularity",
+            "HasNFC"};
 
         /// <summary>
         /// List of properties associated with the operating system
@@ -94,6 +96,7 @@ namespace FiftyOne.Foundation.UI
             "AjaxRequestType",
             "CookiesCapable",
             "HtmlVersion",
+            "IsEmailBrowser",
             "Javascript",
             "JavascriptCanManipulateCSS",
             "JavascriptCanManipulateDOM",

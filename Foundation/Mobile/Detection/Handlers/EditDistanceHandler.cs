@@ -25,7 +25,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
     {
         #region Constructor
 
-        internal EditDistanceHandler(BaseProvider provider, string name, string defaultDeviceId, byte confidence, bool checkUAProfs)
+        internal EditDistanceHandler(Provider provider, string name, string defaultDeviceId, byte confidence, bool checkUAProfs)
             : base(provider, name, defaultDeviceId, confidence, checkUAProfs)
         {
         }

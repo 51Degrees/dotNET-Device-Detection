@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("51 Degrees Mobile Experts Limited")]
 [assembly: AssemblyProduct("Mobile Device Detector Example")]
-[assembly: AssemblyCopyright("Copyright © 51 Degrees Mobile Experts Limited 2009 - 2012")]
+[assembly: AssemblyCopyright("Copyright © 51 Degrees Mobile Experts Limited 2009 - 2013")]
 [assembly: AssemblyTrademark("51degrees.mobi")]
 [assembly: AssemblyCulture("")]
 
@@ -31,6 +31,6 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("2.1.13.5")]
-[assembly: AssemblyFileVersion("2.1.13.5")]
+[assembly: AssemblyVersion("2.1.19.1")]
+[assembly: AssemblyFileVersion("2.1.19.1")]
 [assembly: NeutralResourcesLanguage("en-GB")]

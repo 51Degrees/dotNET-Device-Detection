@@ -29,7 +29,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Binary
         /// <param name="uniqueDeviceID">The unique device name.</param>
         /// <param name="userAgentStringIndex">The string index of the user agent string.</param>
         /// <param name="parent">The parent device, or null if no parent.</param>
-        internal DeviceInfo(BaseProvider provider, string uniqueDeviceID, int userAgentStringIndex, DeviceInfo parent) : 
+        internal DeviceInfo(Provider provider, string uniqueDeviceID, int userAgentStringIndex, DeviceInfo parent) : 
             base(provider,
                 uniqueDeviceID,
                 userAgentStringIndex >= 0 ? provider.Strings.Get(userAgentStringIndex) : String.Empty,
@@ -44,7 +44,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Binary
         /// <param name="provider">The provider the device will be assigned to.</param>
         /// <param name="uniqueDeviceID">The unique device name.</param>
         /// <param name="parent">The parent device, or null if no parent.</param>
-        internal DeviceInfo(BaseProvider provider, string uniqueDeviceID, DeviceInfo parent) :
+        internal DeviceInfo(Provider provider, string uniqueDeviceID, DeviceInfo parent) :
             base(provider,
                 uniqueDeviceID,
                 String.Empty,

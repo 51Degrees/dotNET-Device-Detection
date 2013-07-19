@@ -16,10 +16,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Text.RegularExpressions;
+using FiftyOne.Foundation.Mobile.Detection.Matchers;
 
 #if VER4
 
 using System.Linq;
+
 
 #endif
 
@@ -146,19 +148,35 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
             // Get the device.
             int start = Environment.TickCount;
-            BaseDeviceInfo device = _provider.GetDeviceInfo(headers);
+            Result result = _provider.GetResult(headers);
             int detectionTime = Environment.TickCount - start + 1;
 
-            // Add the capabilities.e
-            Create(device, capabilities, currentCapabilities);
+            // Add the capabilities for the device.
+            Create(result, capabilities, currentCapabilities);
 
-            // Add the detection time to the list of properties.
             if (capabilities[Constants.FiftyOneDegreesProperties] is SortedList<string, List<string>>)
             {
+                // Add the detection time to the list of properties.
                 ((SortedList<string, List<string>>)capabilities[Constants.FiftyOneDegreesProperties])
                     .Add(Constants.DetectionTimeProperty,
                     new List<string>(new string[] {
                     detectionTime.ToString() 
+                }));
+
+                // Add the handler confidence to the list of properties.
+                ((SortedList<string, List<string>>)capabilities[Constants.FiftyOneDegreesProperties])
+                    .Add(Constants.ConfidenceProperty,
+                    new List<string>(new string[] {
+                    result.Confidence.ToString()
+                }));
+
+                // Add the difference to the list of properties.
+                ((SortedList<string, List<string>>)capabilities[Constants.FiftyOneDegreesProperties])
+                    .Add(Constants.DifferenceProperty,
+                    new List<string>(new string[] {
+                    String.Format(
+                        "{0:#.###}",
+                        result.Difference)
                 }));
             }
 
@@ -206,21 +224,21 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         #region Private Methods
 
-        private void Create(BaseDeviceInfo device, IDictionary properties, IDictionary currentProperties)
+        private void Create(Result result, IDictionary properties, IDictionary currentProperties)
         {
             // Enhance with the capabilities from the device data.
-            if (device != null)
+            if (result != null)
             {
                 
                 // Enhance the default capabilities collection based on the device.
-                Enhance(properties, currentProperties, device);
+                Enhance(properties, currentProperties, result);
 
                 // Add the 51Degrees.mobi device properties to the collection.
-                properties.Add(Constants.FiftyOneDegreesProperties, device.GetAllProperties());
+                properties.Add(Constants.FiftyOneDegreesProperties, result.GetAllProperties());
 
                 // If an adapters patch file has been loaded then include this
                 // capability in the exposed list of capabilities.
-                string adapters = GetAdapters(device);
+                string adapters = GetAdapters(result);
                 if (String.IsNullOrEmpty(adapters) == false)
                     SetValue(properties, "adapters", adapters);
             }
@@ -249,33 +267,33 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="capabilities">Dictionary of capabilities to be enhanced.</param>
         /// <param name="currentCapabilities">Dictionary of existing capabilities for the device.</param>
-        /// <param name="device">Device to use for enhancements.</param>
-        private void Enhance(IDictionary capabilities, IDictionary currentCapabilities, BaseDeviceInfo device)
+        /// <param name="result">The match result to use for the enhancement.</param>
+        private void Enhance(IDictionary capabilities, IDictionary currentCapabilities, Result result)
         {
             // Set base capabilities for all mobile devices.
             SetStaticValues(capabilities);
 
-            SetValue(capabilities, "isMobileDevice", GetIsMobileDevice(device));
-            SetValue(capabilities, "crawler", GetIsCrawler(device));
-            SetValue(capabilities, "mobileDeviceModel", GetMobileDeviceModel(device));
-            SetValue(capabilities, "mobileDeviceManufacturer", GetMobileDeviceManufacturer(device));
-            SetValue(capabilities, "platform", GetPlatform(device));
+            SetValue(capabilities, "isMobileDevice", GetIsMobileDevice(result));
+            SetValue(capabilities, "crawler", GetIsCrawler(result));
+            SetValue(capabilities, "mobileDeviceModel", GetMobileDeviceModel(result));
+            SetValue(capabilities, "mobileDeviceManufacturer", GetMobileDeviceManufacturer(result));
+            SetValue(capabilities, "platform", GetPlatform(result));
             // property enhancement can be removed with this compiler flag
 #if !REMOVE_OVERRIDE_BROWSER
-            SetValue(capabilities, "browser", GetBrowser(device));
+            SetValue(capabilities, "browser", GetBrowser(result));
 #endif
             SetValue(capabilities, "type", capabilities["mobileDeviceManufacturer"]);
-            SetValue(capabilities, "screenPixelsHeight", GetScreenPixelsHeight(device) ??
+            SetValue(capabilities, "screenPixelsHeight", GetScreenPixelsHeight(result) ??
                 GetDefaultValue("screenPixelsHeight", currentCapabilities));
-            SetValue(capabilities, "screenPixelsWidth", GetScreenPixelsWidth(device) ??
+            SetValue(capabilities, "screenPixelsWidth", GetScreenPixelsWidth(result) ??
                 GetDefaultValue("screenPixelsWidth", currentCapabilities));
-            SetValue(capabilities, "screenBitDepth", GetBitsPerPixel(device));
-            SetValue(capabilities, "preferredImageMime", GetPreferredImageMime(device));
-            SetValue(capabilities, "isColor", GetIsColor(device));
-            SetValue(capabilities, "supportsCallback", GetSupportsCallback(device));
-            SetValue(capabilities, "SupportsCallback", GetSupportsCallback(device));
-            SetValue(capabilities, "canInitiateVoiceCall", GetIsMobileDevice(device));
-            SetValue(capabilities, "jscriptversion", GetJavascriptVersion(device));
+            SetValue(capabilities, "screenBitDepth", GetBitsPerPixel(result));
+            SetValue(capabilities, "preferredImageMime", GetPreferredImageMime(result));
+            SetValue(capabilities, "isColor", GetIsColor(result));
+            SetValue(capabilities, "supportsCallback", GetSupportsCallback(result));
+            SetValue(capabilities, "SupportsCallback", GetSupportsCallback(result));
+            SetValue(capabilities, "canInitiateVoiceCall", GetIsMobileDevice(result));
+            SetValue(capabilities, "jscriptversion", GetJavascriptVersion(result));
 
             // The following values are set to prevent exceptions being thrown in
             // the standard .NET base classes if the property is accessed.
@@ -286,7 +304,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
             // Use the Version class to find the version. If this fails use the 1st two
             // decimal segments of the string.
-            string versionString = _provider.Strings.Get(device.GetFirstPropertyValueStringIndex(BrowserVersion));
+            string versionString = _provider.Strings.Get(result.GetFirstPropertyValueStringIndex(BrowserVersion));
             if (String.IsNullOrEmpty(versionString) == false)
             {
                 try
@@ -320,7 +338,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
             // All we can determine from the device database is if javascript is supported as a boolean.
             // If the value is not provided then null is returned and the capabilities won't be altered.
-            object javaScript = GetJavascriptSupport(device);
+            object javaScript = GetJavascriptSupport(result);
             if (javaScript is bool)
             {
                 SetJavaScript(capabilities, (bool)javaScript);
@@ -330,14 +348,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
             // Sets the W3C DOM version.
             SetValue(capabilities, "w3cdomversion",
-                GetW3CDOMVersion(device,
+                GetW3CDOMVersion(result,
                     currentCapabilities != null
                         ? (string)currentCapabilities["w3cdomversion"]
                         : String.Empty));
 
             // Update the cookies value if we have additional information.
             SetValue(capabilities, "cookies",
-                    GetCookieSupport(device,
+                    GetCookieSupport(result,
                                      currentCapabilities != null
                                          ? (string)currentCapabilities["cookies"]
                                          : String.Empty));
@@ -347,7 +365,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             if (capabilities.Contains("preferredRenderingType") == false)
             {
                 // Set the rendering type for the response.
-                SetValue(capabilities, "preferredRenderingType", GetPreferredHtmlVersion(device));
+                SetValue(capabilities, "preferredRenderingType", GetPreferredHtmlVersion(result));
 
                 // Set the Mime type of the response.
                 SetValue(capabilities, "preferredRenderingMime", "text/html");
@@ -357,11 +375,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Returns true if the device supports tables.
         /// </summary>
-        /// <param name="device"></param>
+        /// <param name="result">The match result for the current request.</param>
         /// <returns></returns>
-        private object GetTablesCapable(BaseDeviceInfo device)
+        private object GetTablesCapable(Result result)
         {
-            int value = device.GetFirstPropertyValueStringIndex(TablesCapable);
+            int value = result.GetFirstPropertyValueStringIndex(TablesCapable);
             if (value < 0)
                 return null;
 
@@ -370,7 +388,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             return bool.FalseString.ToLowerInvariant(); 
         }
 
-        private string GetPreferredHtmlVersion(BaseDeviceInfo device)
+        private string GetPreferredHtmlVersion(Result result)
         {
             // Working out ASP.NET will support HTML5. Return 4 for the moment.
             return "html4";
@@ -435,11 +453,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
             }
         }
 
-        private string GetCookieSupport(BaseDeviceInfo device, string current)
+        private string GetCookieSupport(Result result, string current)
         {
             bool value = false;
             // Return either the capability or the current value as a boolean string.
-            if (bool.TryParse(_provider.Strings.Get(device.GetFirstPropertyValueStringIndex(CookiesCapable)), out value) == false)
+            if (bool.TryParse(_provider.Strings.Get(result.GetFirstPropertyValueStringIndex(CookiesCapable)), out value) == false)
                 bool.TryParse(current, out value);
             return value.ToString();
         }
@@ -447,11 +465,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Returns true if the device supports callbacks from the browser.
         /// </summary>
-        /// <param name="device">The device to be checked.</param>
+        /// <param name="result">The match result for the current request.</param>
         /// <returns>True if callback is supported.</returns>
-        private string GetSupportsCallback(BaseDeviceInfo device)
+        private string GetSupportsCallback(Result result)
         {
-            List<int> values = device.GetPropertyValueStringIndexes(AjaxRequestType);
+            List<int> values = result.GetPropertyValueStringIndexes(AjaxRequestType);
             if (values != null && values.Contains(AjaxRequestTypeNotSupported))
                 return bool.FalseString.ToLowerInvariant();
             return bool.TrueString.ToLowerInvariant();
@@ -461,10 +479,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Returns version 1.0 if DOM is supported based on Ajax
         /// being supported, otherwise returns false.
         /// </summary>
-        /// <param name="device">The device to be checked.</param>
+        /// <param name="result">The match result for the current request.</param>
         /// <param name="current">The current value of the property.</param>
         /// <returns>1.0, 0.0 or the current value.</returns>
-        private string GetW3CDOMVersion(BaseDeviceInfo device, string current)
+        private string GetW3CDOMVersion(Result result, string current)
         {
             Version version = new Version(0, 0);
 
@@ -479,7 +497,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             }
 
             // Try and set version 1.0 if ajax is supported.
-            List<int> values = device.GetPropertyValueStringIndexes(AjaxRequestType);
+            List<int> values = result.GetPropertyValueStringIndexes(AjaxRequestType);
             if (values != null && values.Contains(AjaxRequestTypeNotSupported) == false)
                 version = new Version("2.0.0.0");
 
@@ -489,11 +507,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// If the device indicates javascript support then return true.
         /// </summary>
-        /// <param name="device">The device to be checked.</param>
+        /// <param name="result">The match result for the current request.</param>
         /// <returns>True if javascript is supported.</returns>
-        private object GetJavascriptSupport(BaseDeviceInfo device)
+        private object GetJavascriptSupport(Result result)
         {
-            int value = device.GetFirstPropertyValueStringIndex(Javascript);
+            int value = result.GetFirstPropertyValueStringIndex(Javascript);
             if (value < 0)
                 return null;
             return value == this.True[0] || value == this.True[1];
@@ -502,11 +520,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Get the javascript version or null if not provided or invalid.
         /// </summary>
-        /// <param name="device"></param>
+        /// <param name="result">The match result for the current request.</param>
         /// <returns></returns>
-        private string GetJavascriptVersion(BaseDeviceInfo device)
+        private string GetJavascriptVersion(Result result)
         {
-            int index = device.GetFirstPropertyValueStringIndex(JavascriptVersion);
+            int index = result.GetFirstPropertyValueStringIndex(JavascriptVersion);
             if (index < 0)
                 return null;
 
@@ -532,14 +550,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
 #endif
         }
 
-        private string GetPlatform(BaseDeviceInfo device)
+        private string GetPlatform(Result result)
         {
-            return _provider.Strings.Get(device.GetFirstPropertyValueStringIndex(PlatformName));
+            return _provider.Strings.Get(result.GetFirstPropertyValueStringIndex(PlatformName));
         }
 
-        private string GetBrowser(BaseDeviceInfo device)
+        private string GetBrowser(Result result)
         {
-            return _provider.Strings.Get(device.GetFirstPropertyValueStringIndex(BrowserName));
+            return _provider.Strings.Get(result.GetFirstPropertyValueStringIndex(BrowserName));
         }
 
         /// <summary>
@@ -547,11 +565,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// If it is present and contains the value true or false then a value
         /// is returned.
         /// </summary>
-        /// <param name="device"></param>
+        /// <param name="result">The match result for the current request.</param>
         /// <returns></returns>
-        private string GetIsCrawler(BaseDeviceInfo device)
+        private string GetIsCrawler(Result result)
         {
-            int value = device.GetFirstPropertyValueStringIndex(IsCrawler);
+            int value = result.GetFirstPropertyValueStringIndex(IsCrawler);
             if (value == this.True[0] || value == this.True[1])
                 return bool.TrueString.ToLowerInvariant();
             if (value == this.False[0] || value == this.False[1])
@@ -559,61 +577,61 @@ namespace FiftyOne.Foundation.Mobile.Detection
             return null;
         }
 
-        private string GetAdapters(BaseDeviceInfo device)
+        private string GetAdapters(Result result)
         {
-            return _provider.Strings.Get(device.GetFirstPropertyValueStringIndex(Adapters));
+            return _provider.Strings.Get(result.GetFirstPropertyValueStringIndex(Adapters));
         }
 
-        private string GetIsMobileDevice(BaseDeviceInfo device)
+        private string GetIsMobileDevice(Result result)
         {
-            int value = device.GetFirstPropertyValueStringIndex(IsMobile);
+            int value = result.GetFirstPropertyValueStringIndex(IsMobile);
             if (value == this.True[0] || value == this.True[1])
                 return bool.TrueString.ToLowerInvariant();
             return bool.FalseString.ToLowerInvariant();
         }
 
-        private string GetScreenPixelsHeight(BaseDeviceInfo device)
+        private string GetScreenPixelsHeight(Result result)
         {
             int size;
-            string value = _provider.Strings.Get(device.GetFirstPropertyValueStringIndex(ScreenPixelsHeight));
+            string value = _provider.Strings.Get(result.GetFirstPropertyValueStringIndex(ScreenPixelsHeight));
             if (int.TryParse(value, out size))
                 return value;
             return null;
         }
 
-        private string GetScreenPixelsWidth(BaseDeviceInfo device)
+        private string GetScreenPixelsWidth(Result result)
         {
             int size;
-            string value = _provider.Strings.Get(device.GetFirstPropertyValueStringIndex(ScreenPixelsWidth));
+            string value = _provider.Strings.Get(result.GetFirstPropertyValueStringIndex(ScreenPixelsWidth));
             if (int.TryParse(value, out size))
                 return value;
             return null;
         }
 
-        private string GetIsColor(BaseDeviceInfo device)
+        private string GetIsColor(Result result)
         {
-            long bitsPerPixel = GetBitsPerPixel(device);
+            long bitsPerPixel = GetBitsPerPixel(result);
             if (bitsPerPixel >= 4)
                 return bool.TrueString.ToLowerInvariant();
             return bool.FalseString.ToLowerInvariant();
         }
 
-        private string GetMobileDeviceModel(BaseDeviceInfo device)
+        private string GetMobileDeviceModel(Result result)
         {
-            string value = _provider.Strings.Get(device.GetFirstPropertyValueStringIndex(HardwareModel));
+            string value = _provider.Strings.Get(result.GetFirstPropertyValueStringIndex(HardwareModel));
             if (String.IsNullOrEmpty(value))
-                value = _provider.Strings.Get(device.GetFirstPropertyValueStringIndex(HardwareName));
+                value = _provider.Strings.Get(result.GetFirstPropertyValueStringIndex(HardwareName));
             return value;
         }
 
-        private string GetMobileDeviceManufacturer(BaseDeviceInfo device)
+        private string GetMobileDeviceManufacturer(Result result)
         {
-            return _provider.Strings.Get(device.GetFirstPropertyValueStringIndex(HardwareVendor));
+            return _provider.Strings.Get(result.GetFirstPropertyValueStringIndex(HardwareVendor));
         }
 
-        private string GetPreferredImageMime(BaseDeviceInfo device)
+        private string GetPreferredImageMime(Result result)
         {
-            List<int> mimeTypes = device.GetPropertyValueStringIndexes(CcppAccept);
+            List<int> mimeTypes = result.GetPropertyValueStringIndexes(CcppAccept);
             // Look at the database and return the 1st one that matches in order
             // of preference.
             if (Contains(mimeTypes, ImagePng))
@@ -646,13 +664,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Returns the number of bits per pixel as a long, or 16 if not found.
         /// </summary>
-        /// <param name="device"></param>
+        /// <param name="result">The match result for the current request.</param>
         /// <returns></returns>
-        private long GetBitsPerPixel(BaseDeviceInfo device)
+        private long GetBitsPerPixel(Result result)
         {
             long bitsPerPixel = 1;
             if (long.TryParse(
-                _provider.Strings.Get(device.GetFirstPropertyValueStringIndex(BitsPerPixel)), 
+                _provider.Strings.Get(result.GetFirstPropertyValueStringIndex(BitsPerPixel)), 
                 out bitsPerPixel))
                 return bitsPerPixel;
             return 16;

@@ -90,10 +90,11 @@ namespace Detector
         [WebMethod(false)]
         public Property[] GetAllProperties()
         {
-            var results = new List<Property>();
+            List<Property> results = new List<Property>();
 
             // Get all the properties and values for the device.
-            var allProperties = Context.Request.Browser.Capabilities["51Degrees.mobi"] as SortedList<string, List<string>>;
+            SortedList<string, List<string>> allProperties = 
+                Context.Request.Browser.Capabilities["51Degrees.mobi"] as SortedList<string, List<string>>;
 
             // Check properties are available in case the device couldn't
             // be determined.
@@ -101,7 +102,7 @@ namespace Detector
             {
                 // Copy all the properties and values to the return format.
                 allProperties.Capacity = allProperties.Count;
-                foreach (var key in allProperties.Keys)
+                foreach (string key in allProperties.Keys)
                     if (allProperties[key].Count > 0)
                         results.Add(new Property(key, allProperties[key].ToArray()));
             }

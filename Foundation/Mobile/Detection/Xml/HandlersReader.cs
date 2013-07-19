@@ -26,7 +26,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
         /// <summary>
         /// Passed an xml string and returns a list of handlers.
         /// </summary>
-        public static IList<Handler> ProcessHandlers(string xml, BaseProvider provider)
+        public static IList<Handler> ProcessHandlers(string xml, Provider provider)
         {
             // Use different code to handle the DTD in the Xml if present.
 #if VER4
@@ -46,7 +46,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
         /// <param name="reader"></param>
         /// <param name="provider"></param>
         /// <returns></returns>
-        public static IList<Handler> ProcessHandlers(XmlReader reader, BaseProvider provider)
+        public static IList<Handler> ProcessHandlers(XmlReader reader, Provider provider)
         {
             List<Handler> handlers = new List<Handler>();
             while (reader.Read())
@@ -153,7 +153,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
         /// <param name="reader">The XML stream reader.</param>
         /// <param name="provider">The provider the handler will be associated with.</param>
         /// <returns>A new handler object.</returns>
-        private static Handler CreateHandler(XmlReader reader, BaseProvider provider)
+        private static Handler CreateHandler(XmlReader reader, Provider provider)
         {
             bool checkUAProf;
             byte confidence;

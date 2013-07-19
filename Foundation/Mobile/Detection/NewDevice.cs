@@ -37,6 +37,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
         // Can be set to false if an exception occurs.
         private static bool _enabled = true;
 
+        // The number of times a timeout occured.
+        private static int _timeoutCount = 0;
+
         // Used to stop the thread.
         private bool _stop = false;
 
@@ -81,15 +84,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         #endregion
 
-        #region Deconstructor
-
-        /// <summary>
-        /// Called when the object is deconstructed.
-        /// </summary>
-        ~NewDevice()
-        {
-            Dispose();
-        }
+        #region Dispose Method
 
         /// <summary>
         /// Disposes of the queue and ensures everything is shutdown.
@@ -226,9 +221,26 @@ namespace FiftyOne.Foundation.Mobile.Detection
                                         EventLog.Debug(content);
 #endif
                                     }
+
+                                    // Reset the timeout counter.
+                                    _timeoutCount = 0;
                                     break;
                                 case HttpStatusCode.RequestTimeout:
-                                    // Could be temporary, do nothing.
+                                    // Could be temporary, increase the count.
+                                    _timeoutCount++;
+                                    
+                                    // If more than X timeouts have occured disable the
+                                    // feature.
+                                    if (_timeoutCount > Constants.NewUrlMaxTimeouts)
+                                    {
+                                        EventLog.Debug(
+                                            String.Format(
+                                                "Stopping usage sharing as remote name '{0}' timeout count exceeded '{1}'.",
+                                                _newDevicesUrl,
+                                                Constants.NewUrlMaxTimeouts));
+                                        _enabled = false;
+                                        _stop = true;
+                                    }
                                     break;
                                 default:
                                     // Turn off functionality.

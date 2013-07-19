@@ -12,14 +12,10 @@
     <AssemblyName>FiftyOne.Foundation</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SccProjectName>
-    </SccProjectName>
-    <SccLocalPath>
-    </SccLocalPath>
-    <SccAuxPath>
-    </SccAuxPath>
-    <SccProvider>
-    </SccProvider>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
     <ApplicationIcon>PDA.ico</ApplicationIcon>
     <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>
@@ -177,7 +173,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="UI\Web\Activate.cs" >
+    <Compile Include="UI\Web\Activate.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="UI\Web\ShareUsage.cs">
@@ -190,7 +186,7 @@
     <Compile Include="UI\Web\BaseDataControl.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-	<Compile Include="UI\Web\DeviceImages.cs" />
+    <Compile Include="UI\Web\DeviceImages.cs" />
     <Compile Include="UI\Web\BaseUserControl.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
@@ -216,7 +212,7 @@
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="UI\Web\RelatedDeviceTemplate.cs" />
-	<Compile Include="UI\Web\TopDevices.cs" />
+    <Compile Include="UI\Web\TopDevices.cs" />
     <Compile Include="UI\Web\Upload.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>

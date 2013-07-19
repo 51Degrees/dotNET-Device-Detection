@@ -44,7 +44,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.ReducedInitialString
                     }
                 }
             }
-            return maxInitialString >= tolerance ? new Results(bestMatch) : null;
+            return maxInitialString >= tolerance ?
+                new Results(bestMatch, handler, (uint)maxInitialString, userAgent) : 
+                null;
         }
 
         /// <summary>

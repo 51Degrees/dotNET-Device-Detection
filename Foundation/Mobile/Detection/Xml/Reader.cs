@@ -191,7 +191,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
                     }
                 }
 
-                // Finally read the date the files were created and the name of the dataset.
+                // Read the date the files were created and the name of the dataset.
                 foreach (Stream stream in streams)
                 {
                     // Ensure we're at the start of the stream before reading.
@@ -206,6 +206,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
                         }
                     }
                 }
+
+                // Set the components properties relate to.
+                provider.SetDefaultComponents();
             } 
             catch (System.Xml.XmlException ex)
             {
@@ -264,7 +267,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
                     {
                         case Constants.PropertyElementName:
                             if (property != null)
-                                provider.Properties.Add(property);
+                                provider.Properties.Add(property.NameStringIndex, property);
                             property = new Property(
                                 provider,
                                 reader.GetAttribute(Constants.NameAttributeName),
@@ -284,7 +287,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
                     }
                 }
             }
-            provider.Properties.Add(property);
+            provider.Properties.Add(property.NameStringIndex, property);
         }
 
         #endregion

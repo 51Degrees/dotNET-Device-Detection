@@ -14,7 +14,7 @@
  * 
  * The Initial Developer of the Original Code is owned by 
  * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees
- * Mobile Experts Limited are Copyright (C) 2009 - 2012. All Rights Reserved.
+ * Mobile Experts Limited are Copyright (C) 2009 - 2013. All Rights Reserved.
  * 
  * Contributor(s):
  *     James Rosewell <james@51degrees.mobi>
@@ -476,4 +476,21 @@ div.error, div.success
 .redirect .ddl
 {
     width: 150px;
+}
+
+.match
+{
+    margin-left: 1em;
+}
+
+.match th
+{
+    font-weight: bold;
+    text-align: left;
+}
+
+.match td
+{
+    padding-left: 1em;
+    font-family: Courier;
 }

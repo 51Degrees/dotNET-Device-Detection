@@ -97,7 +97,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         /// <summary>
         /// The provider instance the handler is associated with.
         /// </summary>
-        private readonly BaseProvider _provider;
+        private readonly Provider _provider;
 
         #endregion
 
@@ -109,6 +109,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         public string Name
         {
             get { return _name; }
+        }
+
+        /// <summary>
+        /// Returns the number of devices assigned to the handler.
+        /// </summary>
+        public int Count
+        {
+            get { return Devices.Count; }
         }
         
         /// <summary>
@@ -149,7 +157,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         /// <summary>
         /// Returns the provider the handler is associated to.
         /// </summary>
-        internal BaseProvider Provider
+        internal Provider Provider
         {
             get { return _provider; }
         }
@@ -182,7 +190,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         /// <param name="defaultDeviceId">The default device ID to return if no match is possible.</param>
         /// <param name="confidence">The confidence this handler should be given compared to others.</param>
         /// <param name="checkUAProfs">True if UAProfs should be checked.</param>
-        internal Handler(BaseProvider provider, string name, string defaultDeviceId, byte confidence, bool checkUAProfs)
+        internal Handler(Provider provider, string name, string defaultDeviceId, byte confidence, bool checkUAProfs)
         {
             if (String.IsNullOrEmpty(name))
                 throw new ArgumentNullException(name);
@@ -293,7 +301,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
             {
                 // Add the devices to the list of results and return.
                 Results results = new Results();
-                results.AddRange(devices);
+                results.AddRange(devices, this, 0, string.Empty);
                 return results;
             }
             return null;
@@ -325,7 +333,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         /// <returns>True if this handler could be able to match the device otherwise false.</returns>
         internal virtual bool CanHandle(NameValueCollection headers)
         {
-            bool canHandle = CanHandle(BaseProvider.GetUserAgent(headers));
+            bool canHandle = CanHandle(Provider.GetUserAgent(headers));
             if (_checkUAProfs && canHandle == false && _uaProfDomains.Count > 0)
             {
                 Uri url = null;
@@ -352,10 +360,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         internal virtual Results Match(NameValueCollection headers)
         {
             // Check for an exact match of the user agent string.
-            string userAgent = BaseProvider.GetUserAgent(headers);
+            string userAgent = Provider.GetUserAgent(headers);
             BaseDeviceInfo device = GetDeviceInfo(userAgent);
             if (device != null)
-                return new Results(device);
+                return new Results(device, this, 0, userAgent);
 
             // Check to see if we have a uaprof header parameter that will produce
             // an exact match.
@@ -509,7 +517,5 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         }
 
         #endregion
-        
-
     }
 }

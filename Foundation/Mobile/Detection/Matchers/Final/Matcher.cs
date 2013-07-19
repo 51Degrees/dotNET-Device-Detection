@@ -33,12 +33,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Final
         /// </summary>
         /// <param name="userAgent">userAgent to be found</param>
         /// <param name="results">list of possible devices to match against</param>
-        /// <returns>The closest matching device</returns>
-        internal static BaseDeviceInfo Match(string userAgent, Results results)
+        /// <returns>The closest matching result</returns>
+        internal static Result Match(string userAgent, Results results)
         {
             int pos = 0;
             int highestPosition = 0;
-            List<BaseDeviceInfo> subset = new List<BaseDeviceInfo>();
+            List<Result> subset = new List<Result>();
             foreach (Result result in results)
             {
                 // Find the shortest length and compare characters
@@ -60,13 +60,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Final
                 {
                     highestPosition = pos;
                     subset.Clear();
-                    subset.Add(result.Device);
+                    subset.Add(result);
                 }
                 // If the position is the same as the best one found so far
                 // then add it to the results.
                 else if (pos == highestPosition)
                 {
-                    subset.Add(result.Device);
+                    subset.Add(result);
                 }
             }
 
@@ -78,7 +78,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Final
             if (highestPosition == userAgent.Length)
             {
 #if VER35 || VER4
-                var res = subset.FirstOrDefault(i => i.UserAgent == userAgent);
+                var res = subset.FirstOrDefault(i => i.Device.UserAgent == userAgent);
                 if (res != null)
                 {
                     return res;
@@ -86,9 +86,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Final
             }
 
 #else
-                foreach (BaseDeviceInfo device in subset)
-                    if (device.UserAgent == userAgent)
-                        return device;
+                foreach (Result result in subset)
+                    if (result.Device.UserAgent == userAgent)
+                        return result;
             }
 #endif
 
@@ -99,7 +99,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Final
             return null;
         }
 
-        private static BaseDeviceInfo MatchTails(string userAgent, int pos, List<BaseDeviceInfo> devices)
+        private static Result MatchTails(string userAgent, int pos, List<Result> results)
         {
             int longestSubset = 0;
             Queue<string> tails = new Queue<string>();
@@ -107,16 +107,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Final
             // Get the tails of all the strings and add them to the queue.
 #if VER4 || VER35
             foreach (string tail in
-                devices.Select(device => device.UserAgent.Substring(pos, device.UserAgent.Length - pos)))
+                results.Select(i => 
+                    i.Device.UserAgent.Substring(pos, i.Device.UserAgent.Length - pos)))
             {
                 tails.Enqueue(tail);
                 if (tail.Length > longestSubset)
                     longestSubset = tail.Length;
             }
 #else
-            foreach (BaseDeviceInfo device in devices)
+            foreach (Result res in results)
             {
-                string tail = device.UserAgent.Substring(pos, device.UserAgent.Length - pos);
+                string tail = res.Device.UserAgent.Substring(pos, res.Device.UserAgent.Length - pos);
                 tails.Enqueue(tail);
                 if (tail.Length > longestSubset)
                     longestSubset = tail.Length;
@@ -144,19 +145,20 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Final
             }
 
             // Find the 1st matching useragent and return.
-            BaseDeviceInfo result = null;
+            Result result = null;
 #if VER35 || VER4
-            result = devices.Find(device => device.UserAgent.EndsWith(closestTail));
+            result = results.Find(i => 
+                i.Device.UserAgent.EndsWith(closestTail));
 #else
-            foreach (BaseDeviceInfo device in devices)
-                if (device.UserAgent.EndsWith(closestTail))
-                    result = device;
+            foreach (Result res in results)
+                if (res.Device.UserAgent.EndsWith(closestTail))
+                    result = res;
 #endif
             if (result != null)
                 return result;
 
             // Give up and return the 1st element!
-            return devices[0];
+            return results[0];
         }
     }
 }

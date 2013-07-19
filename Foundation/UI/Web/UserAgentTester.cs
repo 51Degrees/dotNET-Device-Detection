@@ -96,6 +96,7 @@ namespace FiftyOne.Foundation.UI.Web
             _container.Controls.Add(_instructions);
             _container.Controls.Add(_textBoxUserAgent);
             _container.Controls.Add(_buttonTest);
+            _textBoxUserAgent.Text = Request.UserAgent;
         }
 
         /// <summary>
@@ -105,18 +106,19 @@ namespace FiftyOne.Foundation.UI.Web
         protected override void OnPreRender(EventArgs e)
         {
             base.OnPreRender(e);
-            _deviceExplorer.Visible = _deviceExplorer.DeviceID != null;
+            _deviceExplorer.Visible =
+                _deviceExplorer.DeviceID != null || 
+                String.IsNullOrEmpty(_deviceExplorer.UserAgent) == false;
             _textBoxUserAgent.CssClass = TextBoxCssClass;
             _buttonTest.CssClass = ButtonCssClass;
             _instructions.Text = UserAgentTesterInstructions;
             _buttonTest.Text = UserAgentTesterButton;
+            _container.DefaultButton = _buttonTest.UniqueID;
         }
 
         private void ButtonTest_Click(object sender, EventArgs e)
         {
-            BaseDeviceInfo device = DataProvider.Provider.GetDeviceInfo(_textBoxUserAgent.Text);
-            if (device != null)
-                _deviceExplorer.DeviceID = device.DeviceId;
+            _deviceExplorer.UserAgent = _textBoxUserAgent.Text;
         }
 
         #endregion

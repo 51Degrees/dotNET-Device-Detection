@@ -40,6 +40,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         private static AutoResetEvent _autoUpdateSignal = new AutoResetEvent(true);
 
+        private static AutoResetEvent _autoFileUpdateSignal = new AutoResetEvent(true);
+
+        private static AutoResetEvent _autoDownloadUpdateSignal = new AutoResetEvent(true);
+
         #endregion
 
         #region Internal Properties
@@ -53,8 +57,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             {
                 if (_binaryFile == null)
                 {
-                    if (String.IsNullOrEmpty(Manager.BinaryFilePath) == false)
-                        _binaryFile = new FileInfo(Manager.BinaryFilePath);
+                    _binaryFile = DataOnDisk();
                 }
                 return _binaryFile;
             }
@@ -63,6 +66,18 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #endregion
 
         #region Static Methods
+
+        /// <summary>
+        /// Gets FileInfo on the data file currently on disk. Returns null if no file was found.
+        /// </summary>
+        /// <returns></returns>
+        private static FileInfo DataOnDisk()
+        {
+            EventLog.Debug("Examining disk for newer data file.");
+            if (String.IsNullOrEmpty(Manager.BinaryFilePath) == false)
+                return new FileInfo(Manager.BinaryFilePath);
+            return null;
+        }
 
         private static string GetMd5Hash(byte[] value)
         {
@@ -163,13 +178,69 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         #region Thread Methods
 
-        internal static void Run(object state)
+        /// <summary>
+        /// Checks if a newer file is on disk than the one in memory, forcing an update 
+        /// if it is. This method is designed to run a seperate thread from the one
+        /// performing detection.
+        /// </summary>
+        /// <param name="state">Not used. Can be null.</param>
+        internal static void CheckForNewFile(object state)
         {
-            // Wait until any other threads have finished executing.
-            _autoUpdateSignal.WaitOne();
-
             try
             {
+                // Wait until any other threads have finished executing.
+                _autoFileUpdateSignal.WaitOne();
+
+                // get file info of data currently on disk and compare it to currently loaded data.
+                FileInfo diskFile = DataOnDisk();
+
+                if (diskFile != null && BinaryFile != null)
+                {
+                    // update active provider if data is newer
+                    if (diskFile.LastWriteTimeUtc != BinaryFile.LastWriteTimeUtc)
+                        Factory.ForceDataUpdate();
+                }
+            }
+            catch (ThreadAbortException ex)
+            {
+                EventLog.Warn(new MobileException(
+                    "Auto local file check thread aborted",
+                    ex));
+            }
+            catch (Exception ex)
+            {
+                if (BinaryFile != null && BinaryFile.FullName != null)
+                {
+                    EventLog.Warn(new MobileException(String.Format(
+                        "Exception local file check thread binary data file '{0}'.",
+                        BinaryFile.FullName), ex));
+                }
+                else
+                {
+                    EventLog.Fatal(ex);
+                }
+            }
+            finally
+            {
+                // signal any waiting threads to start
+                _autoFileUpdateSignal.Set();
+            }
+        }
+
+        /// <summary>
+        /// Checks if a new data file is available for download and if it is newer than
+        /// the current data on disk, if enough time has passed between now and the write 
+        /// time of the current data in memory. See Constants.AutoUpdateWait. This method 
+        /// is designed to be used in a seperate thread from the one performing detection.
+        /// </summary>
+        /// <param name="state">Not used. Can be null.</param>
+        internal static void CheckForUpdate(object state)
+        {
+            try
+            {
+                // Wait until any other threads have finished executing.
+                _autoDownloadUpdateSignal.WaitOne();
+
                 // If licence keys are available auto update.
                 if (LicenceKey.Keys.Length > 0)
                 {
@@ -178,14 +249,15 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     if (BinaryFile != null &&
                         BinaryFile.LastWriteTimeUtc.Add(Constants.AutoUpdateWait) < DateTime.UtcNow)
                     {
-                        Download();
+                        if (Download())
+                            Factory.ForceDataUpdate();
                     }
                 }
             }
             catch (ThreadAbortException ex)
             {
                 EventLog.Warn(new MobileException(
-                    "Auto update thread aborted",
+                    "Auto update download thread aborted",
                     ex));
             }
             catch (Exception ex)
@@ -193,7 +265,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 if (BinaryFile != null && BinaryFile.FullName != null)
                 {
                     EventLog.Warn(new MobileException(String.Format(
-                        "Exception auto updating binary data file '{0}'.",
+                        "Exception auto update download binary data file '{0}'.",
                         BinaryFile.FullName), ex));
                 }
                 else
@@ -201,15 +273,17 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     EventLog.Fatal(ex);
                 }
             }
-
-            // Signal any waiting threads to start.
-            _autoUpdateSignal.Set();
+            finally
+            {
+                // Signal any waiting threads to start.
+                _autoDownloadUpdateSignal.Set();
+            }
         }
 
         /// <summary>
         /// Downloads and updates the premium data file.
         /// </summary>
-        internal static void Download()
+        internal static bool Download()
         {
             // Download the latest data.
             WebClient client = new WebClient();
@@ -231,15 +305,15 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 // Sets the last modified time of the file downloaded.
                 BinaryFile.LastWriteTimeUtc = provider.PublishedDate;
 
-                // Reset the worker processes.
-                Reset();
-
                 EventLog.Info(String.Format(
                     "Automatically updated binary data file '{0}' with version " +
                     "published on the '{1:d}'.",
                     BinaryFile.FullName,
-                    Factory.ActiveProvider.PublishedDate));
+                    provider.PublishedDate));
+
+                return true;
             }
+            return false;
         }
 
         /// <summary>

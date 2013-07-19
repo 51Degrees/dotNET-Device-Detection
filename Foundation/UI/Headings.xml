@@ -5,6 +5,7 @@
       <heading name="HardwareVendor"></heading>
       <heading name="HardwareModel"></heading>
       <heading name="HardwareName"></heading>
+      <heading name="HardwareFamily"></heading>
       <heading name="Popularity"></heading>
     </heading>
     <heading name="Device Types">
@@ -51,6 +52,7 @@
     </heading>
     <heading name="Data">
       <heading name="SupportedBearers" wide="true"></heading>
+      <heading name="HasNFC" wide="false"></heading>
     </heading>
   </heading>
   <heading name="Software">
@@ -67,6 +69,7 @@
     <heading name="BrowserVersion"></heading>
     <heading name="LayoutEngine"></heading>
     <heading name="HtmlVersion"></heading>
+    <heading name="IsEmailBrowser"></heading>
     <heading name="SupportsTls/Ssl"></heading>
     <heading name="Javascript Properties">
       <heading name="AjaxRequestType"></heading>

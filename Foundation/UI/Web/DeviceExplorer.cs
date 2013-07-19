@@ -18,6 +18,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Xml;
 using FiftyOne.Foundation.Mobile.Detection;
+using FiftyOne.Foundation.Mobile.Detection.Matchers;
 
 #if VER4 || VER35
 
@@ -38,12 +39,14 @@ namespace FiftyOne.Foundation.UI.Web
         private DataList _models;
         private DataList _related;
         private Panel _device;
+        private Panel _match;
         private Panel _search;
 
         private string _vendor;
         private string _model;
         private string _deviceID;
         private string _searchText;
+        private string _userAgent;
 
         private string _backButtonCssClass = "back";
         private string _pagerCssClass = "pager";
@@ -51,13 +54,14 @@ namespace FiftyOne.Foundation.UI.Web
         private string _searchTextCssClass = "searchText";
         private string _searchBoxCssClass = "searchBox";
         private string _searchButtonCssClass = "searchButton";
+        private string _matchCssClass = "match";
         
-
         private bool _navigation = true;
 
         private Literal _literalInstruction;
 
         private TextBox _searchBox;
+        private Button _searchButton;
 
         private string _deviceExplorerDeviceHtml = Resources.DeviceExplorerDeviceInstructionsHtml;
         private string _deviceExplorerVendorsHtml = Resources.DeviceExplorerVendorsHtml;
@@ -67,12 +71,16 @@ namespace FiftyOne.Foundation.UI.Web
         private string _devicesVendorHeading = Resources.DevicesVendorHeading;
         private string _relatedDevicesHeading = Resources.RelatedDevicesHeading;
         private string _searchInstructionsText = Resources.SearchBoxInstructionText;
-        private string _searchBoxText = Resources.SearchBoxButtonText;
+        private string _searchButtonText = Resources.SearchBoxButtonText;
+        private string _matchCaption = Resources.MatchCaption;
 
         private HyperLink _linkBackTop;
         private HyperLink _linkBackBottom;
         private Panel _panelBackTop;
         private Panel _panelBackBottom;
+        private Panel _searchPanel;
+        private Panel _instructions;
+        private Literal _instructionText;
 
         private bool _imagesEnabled = false;
         private int _devicesLimit = 30;
@@ -80,6 +88,31 @@ namespace FiftyOne.Foundation.UI.Web
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// The user agent of the device to be displayed.
+        /// </summary>
+        public string UserAgent
+        {
+            get 
+            {
+                if (_userAgent == null)
+                {
+                    _userAgent = Request.QueryString["UserAgent"];
+                }
+                return _userAgent; 
+            }
+            set { _userAgent = value; }
+        }
+
+        /// <summary>
+        /// The caption of the results section if displayed.
+        /// </summary>
+        public string MatchCaption
+        {
+            get { return _matchCaption; }
+            set { _matchCaption = value; }
+        }
 
         /// <summary>
         /// The heading used to indicate a list of related devices.
@@ -155,6 +188,16 @@ namespace FiftyOne.Foundation.UI.Web
         {
             get { return _navigation; }
             set { _navigation = value; }
+        }
+
+        /// <summary>
+        /// The CssClass used to display the caption indicating the 
+        /// results of the user agent test.
+        /// </summary>
+        public string MatchCssClass
+        {
+            get { return _matchCssClass; }
+            set { _matchCssClass = value; }
         }
 
         /// <summary>
@@ -322,8 +365,8 @@ namespace FiftyOne.Foundation.UI.Web
         /// </summary>
         public string SearchButtonText
         {
-            get { return _searchBoxText; }
-            set { _searchBoxText = value; }
+            get { return _searchButtonText; }
+            set { _searchButtonText = value; }
         }
 
         #endregion
@@ -348,6 +391,7 @@ namespace FiftyOne.Foundation.UI.Web
             _related = CreateRelatedDeviceDataList();
             _search = CreateSearch();
             _device = new Panel();
+            _match = new Panel();
             _panelBackBottom = new Panel();
             _linkBackBottom = new HyperLink();
             
@@ -359,13 +403,13 @@ namespace FiftyOne.Foundation.UI.Web
             _container.Controls.Add(clearTop);
             _container.Controls.Add(_vendors);
             _container.Controls.Add(_models);
+            _container.Controls.Add(_match);
             _container.Controls.Add(_device);
             _container.Controls.Add(_related);
             _container.Controls.Add(clearBottom);
             _panelBackBottom.Controls.Add(_linkBackBottom);
             _container.Controls.Add(_panelBackBottom);
             _container.Controls.Add(DeviceImages.GetImageRotationScript());
-            
         }
 
         /// <summary>
@@ -376,10 +420,25 @@ namespace FiftyOne.Foundation.UI.Web
         {
             base.OnPreRender(e);
 
+
+            _searchPanel.CssClass = SearchCssClass;
+
+            _instructions.CssClass = SearchTextCssClass;
+            _instructionText.Text = SearchInstructionsText;
+
+            _searchButton.Text = SearchButtonText;
+            _searchButton.CssClass = SearchButtonCssClass;
+
+            _searchBox.Text = SearchText;
+            _searchBox.CssClass = SearchBoxCssClass;
+
             _models.HeaderTemplate = new HeaderTemplate(String.Format(DevicesVendorHeading, Vendor), 1);
             _related.HeaderTemplate = new HeaderTemplate(RelatedDevicesHeading, 1);
 
+            _match.Visible = String.IsNullOrEmpty(UserAgent) == false;
+
             _device.Visible =
+                _match.Visible ||
                 (String.IsNullOrEmpty(Vendor) == false && String.IsNullOrEmpty(Model) == false) ||
                 String.IsNullOrEmpty(DeviceID) == false;
 
@@ -438,20 +497,36 @@ namespace FiftyOne.Foundation.UI.Web
             if (_device.Visible)
             {
                 Device device = null;
+
+                // Try the device id if present to get the device.
                 if (DeviceID != null)
                     device = DataProvider.GetDeviceFromDeviceID(DeviceID);
 
+                // The device id isn't provided, or didn't return a device
+                // so try the vendor and model if present.
                 if (device == null &&
                     String.IsNullOrEmpty(Vendor) == false &&
                     String.IsNullOrEmpty(Model) == false)
                     device = DataProvider.GetDeviceFromModel(Vendor, Model);
+
+                // A device hasn't been found via the DeviceId, Vendor and Model
+                // if the user agent is provided then use this to get the device.
+                if (device == null &&
+                    String.IsNullOrEmpty(UserAgent) == false)
+                {
+#pragma warning disable
+                    Result result = DataProvider.Provider.GetResult(UserAgent);
+#warning warning restore
+                    ConstructResultContent(result);
+                    device = DataProvider.GetDeviceFromDeviceID(result.Device.DeviceId);
+                }
 
                 if (device != null)
                 {
                     _literalInstruction.Text = DeviceExplorerDeviceHtml;
                     if (_imagesEnabled)
                     {
-                        var imagesPanel = DeviceImages.GetImagesPanel(device);
+                        Panel imagesPanel = DeviceImages.GetImagesPanel(device);
                         if (imagesPanel != null)
                             _device.Controls.Add(imagesPanel);
                     }
@@ -469,6 +544,7 @@ namespace FiftyOne.Foundation.UI.Web
                     NameValueCollection parameters = new NameValueCollection(Request.QueryString);
                     parameters.Remove("Model");
                     parameters.Remove("DeviceID");
+                    parameters.Remove("UserAgent");
                     parameters.Remove("Search");
                     _panelBackBottom.Visible = _panelBackTop.Visible = _navigation;
                     _linkBackBottom.Text = _linkBackTop.Text = String.Format(BackButtonDeviceText, device.HardwareVendor);
@@ -476,7 +552,32 @@ namespace FiftyOne.Foundation.UI.Web
                 }
             }
 
+            _container.DefaultButton = _searchButton.ID;
+
             _panelBackTop.CssClass = _panelBackBottom.CssClass = BackButtonCssClass;
+        }
+
+        private void ConstructResultContent(Result result)
+        {
+            Literal heading = CreateHeading(1, _matchCaption);
+            _match.Controls.Add(heading);
+
+            Literal table = new Literal();
+            table.Text = String.Format(
+                "<table class=\"{0}\">" +
+                "<tr><th colspan=\"2\">UserAgents</th></tr>" +
+                "<tr><th>&nbsp;&nbsp;Requested</th><td>{1}</td></tr>" +
+                "<tr><th>&nbsp;&nbsp;Found</th><td>{2}</td></tr>" +
+                "<tr><th>Confidence</th><td>{3}</td></tr>" +
+                "<tr><th>Difference</th><td>{4:0.###}</td></tr>" +
+                "</table>",
+                MatchCssClass,
+                UserAgent,
+                result.Device.UserAgent,
+                result.Confidence.ToString(),
+                result.Difference);
+
+            _match.Controls.Add(table);
         }
 
         /// <summary>
@@ -510,7 +611,7 @@ namespace FiftyOne.Foundation.UI.Web
                 if (!String.IsNullOrEmpty(Vendor))
                 {
                     List<Device> vendorModels = new List<Device>();
-                    foreach (var model in models)
+                    foreach (Device model in models)
                     {
                         if (model.HardwareVendor == Vendor)
                             vendorModels.Add(model);
@@ -525,7 +626,7 @@ namespace FiftyOne.Foundation.UI.Web
                         searchTerms[i] = searchTerms[i].ToLowerInvariant();
 
                     List<Device> searchModels = new List<Device>();
-                    foreach (var model in models)
+                    foreach (Device model in models)
                     {
                         if (MatchesSearch(searchTerms, model))
                             searchModels.Add(model);
@@ -793,7 +894,7 @@ namespace FiftyOne.Foundation.UI.Web
 
                 // if a device has been searched for the vendor query won't be there and has to be added now.
                 // search will also be removed
-                var queryStrings = new NameValueCollection(Request.QueryString);
+                NameValueCollection queryStrings = new NameValueCollection(Request.QueryString);
                 if (Vendor == null)
                     queryStrings.Add("Vendor", device.HardwareVendor);
                 if (SearchText != null)
@@ -808,7 +909,7 @@ namespace FiftyOne.Foundation.UI.Web
 
                 if (_imagesEnabled)
                 {
-                    var image = DeviceImages.GetDeviceImageRotater(device, linkModel.NavigateUrl);
+                    WebControl image = DeviceImages.GetDeviceImageRotater(device, linkModel.NavigateUrl);
                     if (image != null)
                         panelImage.Controls.Add(image);
                 }
@@ -844,34 +945,28 @@ namespace FiftyOne.Foundation.UI.Web
         /// <returns></returns>
         private Panel CreateSearch()
         {
-            Panel searchPanel = new Panel();
-            searchPanel.CssClass = SearchCssClass;
+            _searchPanel = new Panel();
 
             // create instructions
-            Panel instructions = new Panel();
-            instructions.CssClass = SearchTextCssClass;
-            Literal instructionText = new Literal();
-            instructionText.Text = SearchInstructionsText;
-            instructions.Controls.Add(instructionText);
-            searchPanel.Controls.Add(instructions);
+            _instructions = new Panel();
+            _instructionText = new Literal();
+            _instructions.Controls.Add(_instructionText);
+            _searchPanel.Controls.Add(_instructions);
 
             // create search box
             _searchBox = new TextBox();
             // needed to preserve text during post back
             _searchBox.ID = "search_box";
             _searchBox.TextChanged += new EventHandler(SearchBox_TextChanged);
-            _searchBox.Text = SearchText;
-            _searchBox.CssClass = _searchBoxCssClass;
+            
             Page.RegisterRequiresPostBack(_searchBox);
-            searchPanel.Controls.Add(_searchBox);
+            _searchPanel.Controls.Add(_searchBox);
 
             // create search button
-            Button button = new Button();
-            button.Text = _searchBoxText;
-            button.CssClass = SearchButtonCssClass;
-            searchPanel.Controls.Add(button);
+            _searchButton = new Button();
+            _searchPanel.Controls.Add(_searchButton);
 
-            return searchPanel;
+            return _searchPanel;
         }
 
         
@@ -885,7 +980,7 @@ namespace FiftyOne.Foundation.UI.Web
         /// <returns>Returns true if the device is a match.</returns>
         private static bool MatchesSearch(string[] searchTerms, Device d)
         {
-            foreach (var sub in searchTerms)
+            foreach (string sub in searchTerms)
             {
                 if ((MatchesSearchTerm(sub, d.HardwareVendor) ||
                                 MatchesSearchTerm(sub, d.HardwareModel) ||
@@ -939,7 +1034,5 @@ namespace FiftyOne.Foundation.UI.Web
         }
 
         #endregion
-
-        
     }
 }

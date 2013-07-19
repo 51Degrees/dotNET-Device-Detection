@@ -54,6 +54,16 @@ namespace FiftyOne.Foundation.Mobile.Detection
         public const string DetectionTimeProperty = "DetectionTime";
 
         /// <summary>
+        /// The confidence of the results found.
+        /// </summary>
+        public const string ConfidenceProperty = "MatchConfidence";
+
+        /// <summary>
+        /// The difference between the user agent requested and the one found.
+        /// </summary>
+        public const string DifferenceProperty = "MatchDifference";
+
+        /// <summary>
         /// The name of the unique property key used to return the device id.
         /// </summary>
         public const string DeviceId = "Id";
@@ -98,8 +108,21 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// data again.
         /// </summary>
         internal static readonly TimeSpan AutoUpdateSleep =
-            new TimeSpan(0, 6, 0, 0);
-        
+            new TimeSpan(0, 0, 6, 0);
+
+        /// <summary>
+        /// The length of time to wait before setting the local data file
+        /// check process.
+        /// </summary>
+        internal static readonly TimeSpan FileUpdateDelayedStart =
+            new TimeSpan(0, 0, 2, 0);
+
+        /// <summary>
+        /// The length of time between local data file checks.
+        /// </summary>
+        internal static readonly TimeSpan FileUpdateSleep =
+            new TimeSpan(0, 0, 2, 0);
+
         /// <summary>
         /// Length of time in ms the new devices thread should wait for a response from the
         /// web server used to record new device information.
@@ -107,10 +130,16 @@ namespace FiftyOne.Foundation.Mobile.Detection
         internal const int NewUrlTimeOut = 10000;
 
         /// <summary>
+        /// The maximum number of continous timeouts that are allowed
+        /// before the new device function is disabled.
+        /// </summary>
+        internal const int NewUrlMaxTimeouts = 10;
+
+        /// <summary>
         /// Forces the useragent matcher to use a single thread if 
         /// multiple processors are available.
         /// </summary>
-        internal const bool ForceSingleProcessor = true;
+        internal const bool ForceSingleProcessor = false;
 
         /// <summary>
         /// Improves performance of segment handlers by storing the results of 
@@ -120,16 +149,15 @@ namespace FiftyOne.Foundation.Mobile.Detection
         internal const bool StoreSegmentResults = true;
 
         /// <summary>
-        /// Array of transcoder HTTP headers that represent the useragent string of the
-        /// mobile device rather than the browser.
-        /// Version 2.1.10.X onwards - commented out as browser capabilities are now
-        /// being seen as more important. Uncomment them to improve hardware detection.
+        /// Array of HTTP headers that represent the useragent string of the
+        /// device rather than the browser.
         /// </summary>
-        internal static readonly string[] TranscoderUserAgentHeaders = new string[]
+        internal static readonly string[] DeviceUserAgentHeaders = new string[]
             {
-                //"x-Device-User-Agent",
-                //"X-Device-User-Agent",
-                //"X-OperaMini-Phone-UA"
+                "Device-Stock-UA",
+                "x-Device-User-Agent",
+                "X-Device-User-Agent",
+                "X-OperaMini-Phone-UA"
             };
 
         /// <summary>

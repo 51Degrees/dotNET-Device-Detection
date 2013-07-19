@@ -50,7 +50,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// The background timer used to update device data.
         /// </summary>
-        private static Timer _autoUpdateTimer = null;
+        private static Timer _autoUpdateDownloadTimer = null;
+
+        private static Timer _autoUpdateFileTimer = null;
 
         #endregion
 
@@ -70,83 +72,24 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     {
                         if (_instance == null)
                         {
-                            Provider provider = null;
+                            ForceDataUpdate();
 
-                            try
+                            if (LicenceKey.Keys.Length > 0)
                             {
-                                // Does a binary file exist?
-                                if (Manager.BinaryFilePath != null &&
-                                    File.Exists(Manager.BinaryFilePath))
-                                {
-                                    EventLog.Info(String.Format("Creating provider from binary data file '{0}'.",
-                                        Manager.BinaryFilePath));
-                                    provider = Binary.Reader.Create(Manager.BinaryFilePath);
-                                    EventLog.Info(String.Format("Created provider from binary data file '{0}'.",
-                                        Manager.BinaryFilePath));
-                                }
-
-                                // Do XML files exist?
-                                if (Manager.XmlFiles != null &&
-                                    Manager.XmlFiles.Length > 0)
-                                {
-                                    if (provider == null)
-                                    {
-                                        EventLog.Info(String.Format("Creating provider from XML data files '{0}'.",
-                                            String.Join(", ", Manager.XmlFiles)));
-                                        provider = Xml.Reader.Create(Manager.XmlFiles);
-                                        EventLog.Info(String.Format("Created provider from XML data files '{0}'.",
-                                            String.Join(", ", Manager.XmlFiles)));
-                                    }
-                                    else
-                                    {
-                                        EventLog.Info(String.Format("Adding to existing provider from XML data files '{0}'.",
-                                            String.Join(", ", Manager.XmlFiles)));
-                                        Xml.Reader.Add(provider, Manager.XmlFiles);
-                                        EventLog.Info(String.Format("Added to existing provider from XML data files '{0}'.",
-                                            String.Join(", ", Manager.XmlFiles)));
-                                    }
-                                }
+                                // Start the auto update thread to check for new data files.
+                                _autoUpdateDownloadTimer = new Timer(
+                                    new TimerCallback(AutoUpdate.CheckForUpdate),
+                                    null,
+                                    Constants.AutoUpdateDelayedStart,
+                                    Constants.AutoUpdateSleep);
                             }
-                            catch (Exception ex)
-                            {
-                                // Record the exception in the log file.
-                                EventLog.Fatal(
-                                    new MobileException(String.Format(
-                                        "Exception processing device data from binary file '{0}', and XML files '{1}'. " +
-                                        "Enable debug level logging and try again to help identify cause.",
-                                        Manager.BinaryFilePath, String.Join(", ", Manager.XmlFiles)),
-                                        ex));
-                                // Reset the provider to enable it to be created from the embedded data.
-                                provider = null;
-                            }
-                            finally
-                            {
-                                // Does the provider exist and has data been loaded?
-                                if (provider == null || provider.Handlers.Count == 0)
-                                {
-                                    // No so initialise it with the embeddded binary data so at least we can do something.
-                                    provider = Provider.EmbeddedProvider;
 
-                                    // Do XML files exist?
-                                    if (Manager.XmlFiles != null &&
-                                        Manager.XmlFiles.Length > 0)
-                                    {
-                                        EventLog.Info(String.Format("Adding to existing provider from XML data files '{0}'.",
-                                            String.Join(", ", Manager.XmlFiles)));
-                                        Xml.Reader.Add(provider, Manager.XmlFiles);
-                                        EventLog.Info(String.Format("Added to existing provider from XML data files '{0}'.",
-                                            String.Join(", ", Manager.XmlFiles)));
-                                    }
-                                }
-                            }
-                            _instance = new MobileCapabilities(provider);
-
-                            // Start the auto update thread to check for new data files.
-                            _autoUpdateTimer = new Timer(
-                                new TimerCallback(AutoUpdate.Run),
+                            // start a thread that will check if a newer data file on disk is available.
+                            _autoUpdateFileTimer = new Timer(
+                                new TimerCallback(AutoUpdate.CheckForNewFile),
                                 null,
-                                Constants.AutoUpdateDelayedStart,
-                                Constants.AutoUpdateSleep);
+                                Constants.FileUpdateDelayedStart,
+                                Constants.FileUpdateSleep);
                         }
                     }
                 }
@@ -165,6 +108,82 @@ namespace FiftyOne.Foundation.Mobile.Detection
         public static Provider ActiveProvider
         {
             get { return Instance.Provider; }
+        }
+
+        /// <summary>
+        /// Forces the factory to update current ActiveProvider with new data.
+        /// </summary>
+        public static void ForceDataUpdate()
+        {
+            Provider provider = null;
+            try
+            {
+                // Does a binary file exist?
+                if (Manager.BinaryFilePath != null &&
+                    File.Exists(Manager.BinaryFilePath))
+                {
+                    EventLog.Info(String.Format("Creating provider from binary data file '{0}'.",
+                        Manager.BinaryFilePath));
+                    provider = Binary.Reader.Create(Manager.BinaryFilePath);
+                    EventLog.Info(String.Format("Created provider from binary data file '{0}'.",
+                        Manager.BinaryFilePath));
+                }
+
+                // Do XML files exist?
+                if (Manager.XmlFiles != null &&
+                    Manager.XmlFiles.Length > 0)
+                {
+                    if (provider == null)
+                    {
+                        EventLog.Info(String.Format("Creating provider from XML data files '{0}'.",
+                            String.Join(", ", Manager.XmlFiles)));
+                        provider = Xml.Reader.Create(Manager.XmlFiles);
+                        EventLog.Info(String.Format("Created provider from XML data files '{0}'.",
+                            String.Join(", ", Manager.XmlFiles)));
+                    }
+                    else
+                    {
+                        EventLog.Info(String.Format("Adding to existing provider from XML data files '{0}'.",
+                            String.Join(", ", Manager.XmlFiles)));
+                        Xml.Reader.Add(provider, Manager.XmlFiles);
+                        EventLog.Info(String.Format("Added to existing provider from XML data files '{0}'.",
+                            String.Join(", ", Manager.XmlFiles)));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Record the exception in the log file.
+                EventLog.Fatal(
+                    new MobileException(String.Format(
+                        "Exception processing device data from binary file '{0}', and XML files '{1}'. " +
+                        "Enable debug level logging and try again to help identify cause.",
+                        Manager.BinaryFilePath, String.Join(", ", Manager.XmlFiles)),
+                        ex));
+                // Reset the provider to enable it to be created from the embedded data.
+                provider = null;
+            }
+            finally
+            {
+                // Does the provider exist and has data been loaded?
+                if (provider == null || provider.Handlers.Count == 0)
+                {
+                    // No so initialise it with the embeddded binary data so at least we can do something.
+                    provider = Provider.EmbeddedProvider;
+
+                    // Do XML files exist?
+                    if (Manager.XmlFiles != null &&
+                        Manager.XmlFiles.Length > 0)
+                    {
+                        EventLog.Info(String.Format("Adding to existing provider from XML data files '{0}'.",
+                            String.Join(", ", Manager.XmlFiles)));
+                        Xml.Reader.Add(provider, Manager.XmlFiles);
+                        EventLog.Info(String.Format("Added to existing provider from XML data files '{0}'.",
+                            String.Join(", ", Manager.XmlFiles)));
+                    }
+                }
+            }
+            _instance = new MobileCapabilities(provider);
         }
 
         #endregion

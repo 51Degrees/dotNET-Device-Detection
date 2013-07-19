@@ -55,7 +55,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
         /// <param name="confidence">The confidence this handler should be given compared to others.</param>
         /// <param name="checkUAProfs">True if UAProfs should be checked.</param>
         /// <param name="tolerance">Regex used to calculate how many characters should be matched at the beginning of the useragent.</param>
-        internal ReducedInitialStringHandler(BaseProvider provider, string name, string defaultDeviceId, byte confidence, bool checkUAProfs, string tolerance)
+        internal ReducedInitialStringHandler(Provider provider, string name, string defaultDeviceId, byte confidence, bool checkUAProfs, string tolerance)
             : base(provider, name, defaultDeviceId, confidence, checkUAProfs)
         {
             _tolerance = new Regex(tolerance, RegexOptions.Compiled);

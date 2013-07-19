@@ -30,6 +30,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         private bool _isList = false;
         private bool _isMandatory = false;
         private bool _showValues = false;
+        private Provider.Components _component = Provider.Components.Unknown;
 
         #endregion
 
@@ -51,7 +52,35 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         #endregion
 
-        #region Properties
+        #region Internal Methods
+
+        /// <summary>
+        /// Sets the value of the component the property relates to. Used 
+        /// by the extension to the data structures to include component
+        /// information in the data file.
+        /// </summary>
+        /// <param name="component">The type of component the property relates to.</param>
+        internal void SetComponent(Provider.Components component)
+        {
+            _component = component;
+        }
+
+        #endregion
+
+        #region Internal Properties
+        
+        /// <summary>
+        /// Returns the type of the component the property relates to. Values include;
+        /// Hardware, Software, Browser and Crawler.
+        /// </summary>
+        internal Provider.Components Component
+        {
+            get { return _component; }
+        }
+
+        #endregion 
+
+        #region Public Properties
 
         /// <summary>
         /// Returns true if the property is available in the CMS data set.
@@ -81,10 +110,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
             get 
             {
 #if VER4 || VER35
-                return Provider.EmbeddedProvider.Properties.FirstOrDefault(i =>
+                return Provider.EmbeddedProvider.Properties.Values.FirstOrDefault(i =>
                     i.Name == Name) == null; 
 #else
-                foreach (Property property in Provider.EmbeddedProvider.Properties)
+                foreach (Property property in Provider.EmbeddedProvider.Properties.Values)
                     if (property.Name == Name)
                         return false;
                 return true;
@@ -127,7 +156,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             get { return _showValues; }
         }
-
+               
         #endregion
     }
 }

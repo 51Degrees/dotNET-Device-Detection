@@ -103,6 +103,56 @@ namespace FiftyOne.Foundation.Mobile.Detection.Binary
             ReadPublishedDate(reader, provider);
             ReadManifest(reader, provider);
             ReadDataSetName(reader, provider);
+            ReadComponents(reader, provider);
+        }
+
+        /// <summary>
+        /// Reads details about the components and properties updating
+        /// the properties loaded earlier in the file.
+        /// </summary>
+        /// <param name="reader">BinaryReader of the input stream.</param>
+        /// <param name="provider">The provider the device will be added to.</param>
+        private static void ReadComponents(BinaryReader reader, Provider provider)
+        {
+            try
+            {
+                int count = reader.ReadInt32();
+                for (int i = 0; i < count; i++)
+                {
+                    // Get the names of the property and component.
+                    int propertyIndex = reader.ReadInt32();
+                    int componentIndex = reader.ReadInt32();
+
+                    // If the property and component names are valid then 
+                    // find the property object and set the component name.
+                    if (propertyIndex >= 0 &&
+                        componentIndex >= 0)
+                    {
+                        // Find the propety and update it's component.
+                        Property property = null;
+                        if (provider.Properties.TryGetValue(propertyIndex, out property))
+                        {
+                            Provider.Components component = Provider.Components.Unknown;
+                            switch (provider.Strings.Get(componentIndex))
+                            {
+                                case "HardwarePlatform": component = Provider.Components.Hardware; break;
+                                case "SoftwarePlatform": component = Provider.Components.Software; break;
+                                case "BrowserUA": component = Provider.Components.Browser; break;
+                                case "Crawler": component = Provider.Components.Crawler; break;
+                            }
+                            property.SetComponent(component);
+                        }
+                    }
+                }
+            }
+            catch (EndOfStreamException)
+            {
+                // Nothing we can do as data is not included.
+                EventLog.Debug("EndOfStreamException reading components.");
+
+                // Set the properties components to hard coded values.
+                provider.SetDefaultComponents();
+            }
         }
 
         /// <summary>
@@ -421,7 +471,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Binary
                     }
 
                     // Finally add the property to the list of properties.
-                    provider.Properties.Add(property);
+                    provider.Properties.Add(property.NameStringIndex, property);
                 }
             }
             catch (EndOfStreamException)

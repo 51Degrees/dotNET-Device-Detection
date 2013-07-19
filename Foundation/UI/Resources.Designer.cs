@@ -328,6 +328,15 @@ namespace FiftyOne.Foundation.UI {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to UserAgent Test Results.
+        /// </summary>
+        internal static string MatchCaption {
+            get {
+                return ResourceManager.GetString("MatchCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;p&gt;The list of properties and descriptions explain how to use the available device data. Use the [+] icon to display possible values associated with the property. Use the (?) icons to find out more information about the property or value.&lt;/p&gt;.
         /// </summary>
         internal static string PropertyDictionaryInstructions {

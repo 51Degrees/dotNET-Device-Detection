@@ -27,6 +27,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Segment
         {
             if (handler.Devices.Count > 0)
             {
+#pragma warning disable 162
                 if (Environment.ProcessorCount > 1 &&
                     Detection.Constants.ForceSingleProcessor == false)
                 {
@@ -36,6 +37,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Segment
                 {
                     return MatchSingleProcessor(userAgent, handler);
                 }
+#pragma warning restore 162
             }
             return null;
         }
@@ -136,13 +138,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.Segment
                     {
                         if (runningScore == request.Results.LowestScore)
                         {
-                            request.Results.Add(current);
+                            request.Results.Add(
+                                current, request.Handler, runningScore, request.UserAgent);
                         }
                         else if (runningScore < request.Results.LowestScore)
                         {
                             request.Results.LowestScore = runningScore;
                             request.Results.Clear();
-                            request.Results.Add(current);
+                            request.Results.Add(
+                                current, request.Handler, runningScore, request.UserAgent);
                         }
                     }
                 }

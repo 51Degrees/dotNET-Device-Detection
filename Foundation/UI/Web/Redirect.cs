@@ -142,7 +142,7 @@ namespace FiftyOne.Foundation.UI.Web
                 _customValidatorMatchExpression = new CustomValidator();
 
                 List<string> list = new List<string>();
-                foreach (Property property in DataProvider.Provider.Properties)
+                foreach (Property property in DataProvider.Provider.Properties.Values)
                     list.Add(property.Name);
                 list.Sort();
                 _ddlProperties.DataSource = list;
@@ -183,11 +183,11 @@ namespace FiftyOne.Foundation.UI.Web
             {
                 // Get the currently selected property.
 #if VER4 || VER35
-                var property = DataProvider.Provider.Properties.FirstOrDefault(i =>
+                var property = DataProvider.Provider.Properties.Values.FirstOrDefault(i =>
                     i.Name == _data.Property);
 #else
                 FiftyOne.Foundation.Mobile.Detection.Property property = null;
-                foreach (Property item in DataProvider.Provider.Properties)
+                foreach (Property item in DataProvider.Provider.Properties.Values)
                 {
                     if (item.Name == _data.Property)
                     {

@@ -123,6 +123,9 @@
   <data name="ActivatedMessageHtml" xml:space="preserve">
     <value>&lt;div class="{0}"&gt;{1} Data is active. Thank you.&lt;/div&gt;</value>
   </data>
+  <data name="MatchCaption" xml:space="preserve">
+    <value>UserAgent Test Results</value>
+  </data>
   <data name="ActivateInstructionsHtml" xml:space="preserve">
     <value>&lt;p&gt;Paste your data licence key into the textbox below. Select "Activate" to use the licence key with this web site.&lt;/p&gt;</value>
   </data>

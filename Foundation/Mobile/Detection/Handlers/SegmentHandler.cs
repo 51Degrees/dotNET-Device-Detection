@@ -27,7 +27,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Handlers
     {
         #region Constructor
 
-        internal SegmentHandler(BaseProvider provider, string name, string defaultDeviceId, byte confidence, bool checkUAProfs)
+        internal SegmentHandler(Provider provider, string name, string defaultDeviceId, byte confidence, bool checkUAProfs)
             : base(provider, name, defaultDeviceId, confidence, checkUAProfs)
         {
         }

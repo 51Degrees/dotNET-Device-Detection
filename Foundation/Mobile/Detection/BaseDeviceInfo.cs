@@ -64,7 +64,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// A reference to the provider associated with this device.
         /// </summary>
-        protected BaseProvider _provider;
+        protected Provider _provider;
 
         /// <summary>
         /// The useragent string of the device.
@@ -158,7 +158,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Returns the provider associated with the device.
         /// </summary>
-        internal BaseProvider Provider
+        internal Provider Provider
         {
             get { return _provider; }
         }
@@ -283,7 +283,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="devices">A reference to the complete index of devices.</param>
         /// <param name="parent">The parent device if one exists.</param>
         internal BaseDeviceInfo(
-            BaseProvider devices,
+            Provider devices,
             string deviceId,
             string userAgent,
             BaseDeviceInfo parent)
@@ -298,7 +298,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="deviceId">A unique Identifier of the device.</param>
         /// <param name="devices">A reference to the complete index of devices.</param>
         internal BaseDeviceInfo(
-            BaseProvider devices,
+            Provider devices,
             string deviceId,
             string userAgent)
         {
@@ -311,14 +311,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="deviceId">A unique Identifier of the device.</param>
         /// <param name="devices">A reference to the complete index of devices.</param>
         internal BaseDeviceInfo(
-            BaseProvider devices,
+            Provider devices,
             string deviceId)
         {
             Init(devices, deviceId);
         }
 
         private void Init(
-            BaseProvider devices,
+            Provider devices,
             string deviceId)
         {
             if (string.IsNullOrEmpty(deviceId))
@@ -333,7 +333,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
 
         private void Init(
-            BaseProvider devices,
+            Provider devices,
             string deviceId,
             string userAgent,
             BaseDeviceInfo parent)
@@ -343,7 +343,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
         
         private void Init(
-            BaseProvider devices,
+            Provider devices,
             string deviceId,
             string userAgent)
         {

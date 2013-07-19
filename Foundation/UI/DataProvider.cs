@@ -55,11 +55,11 @@ namespace FiftyOne.Foundation.UI
             get
             {
 #if VER4 || VER35
-                return Provider.Properties.Where(i =>
+                return Provider.Properties.Values.Where(i =>
                     Constants.Hardware.Contains(i.Name) &&
                     i.Values.Count > 0).OrderBy(i => i.Name).ToList();
 #else
-                return GetProperties(Provider.Properties, Constants.Hardware);
+                return GetProperties(Provider.Properties.Values, Constants.Hardware);
 #endif
             }
         }
@@ -72,11 +72,11 @@ namespace FiftyOne.Foundation.UI
             get
             {
 #if VER4 || VER35
-                return Provider.Properties.Where(i =>
+                return Provider.Properties.Values.Where(i =>
                   Constants.Software.Contains(i.Name) &&
                   i.Values.Count > 0).OrderBy(i => i.Name).ToList();
 #else
-                return GetProperties(Provider.Properties, Constants.Software);
+                return GetProperties(Provider.Properties.Values, Constants.Software);
 #endif
             }
         }
@@ -89,11 +89,11 @@ namespace FiftyOne.Foundation.UI
             get
             {
 #if VER4 || VER35
-                return Provider.Properties.Where(i =>
+                return Provider.Properties.Values.Where(i =>
                   Constants.Browser.Contains(i.Name) &&
                   i.Values.Count > 0).OrderBy(i => i.Name).ToList();
 #else
-                return GetProperties(Provider.Properties, Constants.Browser);
+                return GetProperties(Provider.Properties.Values, Constants.Browser);
 #endif
             }
         }
@@ -106,11 +106,11 @@ namespace FiftyOne.Foundation.UI
             get
             {
 #if VER4 || VER35
-                return Provider.Properties.Where(i =>
+                return Provider.Properties.Values.Where(i =>
                   Constants.Content.Contains(i.Name) &&
                   i.Values.Count > 0).OrderBy(i => i.Name).ToList();
 #else
-                return GetProperties(Provider.Properties, Constants.Content);
+                return GetProperties(Provider.Properties.Values, Constants.Content);
 #endif
             }
         }
@@ -128,14 +128,14 @@ namespace FiftyOne.Foundation.UI
 
 #if VER4 || VER35
                 return IsPremium == false &&
-                    (from i in Provider.Properties select i.Name).Intersect(UI.Constants.CMS).Count() == UI.Constants.CMS.Length;
+                    (from i in Provider.Properties.Values select i.Name).Intersect(UI.Constants.CMS).Count() == UI.Constants.CMS.Length;
 #else
                 if (IsPremium)
                     return false;
                 int count = 0;
                 foreach (string property in UI.Constants.CMS)
                 {
-                    foreach (Property current in Provider.Properties)
+                    foreach (Property current in Provider.Properties.Values)
                     {
                         if (current.Name.Equals(property, StringComparison.InvariantCultureIgnoreCase))
                         {
@@ -162,7 +162,7 @@ namespace FiftyOne.Foundation.UI
                     return true;
 
 #if VER4 || VER35
-                string[] shared = (from i in Provider.Properties select i.Name).
+                string[] shared = (from i in Provider.Properties.Values select i.Name).
                     Intersect(UI.Constants.Premium).
                     OrderBy(i => i).ToArray();
                 return shared.Length == UI.Constants.Premium.Length;
@@ -170,7 +170,7 @@ namespace FiftyOne.Foundation.UI
                 int count = 0;
                 foreach (string property in UI.Constants.Premium)
                 {
-                    foreach (Property current in Provider.Properties)
+                    foreach (Property current in Provider.Properties.Values)
                     {
                         if (current.Name.Equals(property, StringComparison.InvariantCultureIgnoreCase))
                         {
@@ -222,7 +222,7 @@ namespace FiftyOne.Foundation.UI
                         {
                             _vendors = new SortedList<Value, List<Device>>();
 #if VER4 || VER35
-                            var property = Provider.Properties.FirstOrDefault(i =>
+                            var property = Provider.Properties.Values.FirstOrDefault(i =>
                                 i.Name == "HardwareVendor");
                             if (property != null)
                             {
@@ -232,7 +232,7 @@ namespace FiftyOne.Foundation.UI
                                     _vendors.Add(value, GetVendorDevices(value));
                             }
 #else
-                            Property property = GetFirstWhereNameEquals(Provider.Properties, "HardwareVendor");
+                            Property property = GetFirstWhereNameEquals(Provider.Properties.Values, "HardwareVendor");
                             if (property != null)
                             {
                                 foreach (Value value in property.Values)
@@ -273,10 +273,10 @@ namespace FiftyOne.Foundation.UI
         public static Property GetProperty(string name)
         {
 #if VER4 || VER35
-            return Factory.ActiveProvider.Properties.FirstOrDefault(i =>
+            return Factory.ActiveProvider.Properties.Values.FirstOrDefault(i =>
                 i.Name == name);
 #else
-            return GetFirstWhereNameEquals(Factory.ActiveProvider.Properties, name);
+            return GetFirstWhereNameEquals(Factory.ActiveProvider.Properties.Values, name);
 #endif
         }
 
@@ -287,7 +287,10 @@ namespace FiftyOne.Foundation.UI
         /// <returns></returns>
         public static Device GetDeviceFromDeviceID(string deviceID)
         {
-            return new Device(Provider.GetDeviceInfoByID(deviceID));
+            BaseDeviceInfo device = Provider.GetDeviceInfoByID(deviceID);
+            if (device != null)
+                return new Device(device);
+            return null;
         }
 
         /// <summary>
@@ -400,9 +403,12 @@ namespace FiftyOne.Foundation.UI
             if (device.HardwareModel != null)
             {
 #if VER4 || VER35
-                foreach (var item in Provider.FindDevices("HardwareModel", device.HardwareModel).Where(i =>
-                    CompareRelatedDevices(new Device(i), device)))
-                    list.Add(new Device(item));
+                var related = (from i in Provider.FindDevices("HardwareModel", device.HardwareModel) 
+                              where i.DeviceId != device.DeviceID 
+                              select new Device(i)).ToArray();
+                foreach (var item in related.Where(i =>
+                    CompareRelatedDevices(i, device)))
+                    list.Add(item);
 #else
                 foreach (BaseDeviceInfo item in Provider.FindDevices("HardwareModel", device.HardwareModel))
                 {
@@ -543,11 +549,11 @@ namespace FiftyOne.Foundation.UI
         /// <param name="properties">A list of properties to be compared</param>
         /// <param name="matches"></param>
         /// <returns></returns>
-        private static IList<Property> GetProperties(List<Property> properties, string[] matches)
+        private static IList<Property> GetProperties(IList<Property> properties, string[] matches)
         {
             List<Property> list = new List<Property>();
             List<string> matchesList = new List<string>(matches);
-            foreach (Property property in Provider.Properties)
+            foreach (Property property in Provider.Properties.Values)
                 if (matchesList.Contains(property.Name))
                     list.Add(property);
             return list;
@@ -559,7 +565,7 @@ namespace FiftyOne.Foundation.UI
         /// <param name="properties">List of properties.</param>
         /// <param name="name">Property name required.</param>
         /// <returns></returns>
-        private static Property GetFirstWhereNameEquals(List<Property> properties, string name)
+        private static Property GetFirstWhereNameEquals(IList<Property> properties, string name)
         {
             foreach (Property property in properties)
                 if (property.Name == name)

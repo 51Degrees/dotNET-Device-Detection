@@ -29,7 +29,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
         /// <param name="deviceId">A unique Identifier of the device.</param>
         /// <param name="provider">A reference to the complete index of devices.</param>
         internal DeviceInfo(
-            BaseProvider provider,
+            Provider provider,
             string deviceId,
             string userAgent)
             : base(provider, deviceId, userAgent)
@@ -42,7 +42,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Xml
         /// <param name="deviceId">A unique Identifier of the device.</param>
         /// <param name="provider">A reference to the complete index of devices.</param>
         internal DeviceInfo(
-            BaseProvider provider,
+            Provider provider,
             string deviceId)
             : base(provider, deviceId)
         {

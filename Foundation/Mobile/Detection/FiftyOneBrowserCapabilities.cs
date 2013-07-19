@@ -57,11 +57,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
         public FiftyOneBrowserCapabilities(HttpBrowserCapabilities currentCapabilities, IDictionary overrideCapabilities)
         {
             // Initialise the hashtable for capabilities.
-            Capabilities = new Hashtable();
+            Capabilities = new Hashtable(StringComparer.InvariantCultureIgnoreCase);
 
             // Copy the keys from both the original and new capabilities.
             foreach (object key in currentCapabilities.Capabilities.Keys)
                 Capabilities[key] = currentCapabilities.Capabilities[key];
+
+            
             foreach (object key in overrideCapabilities.Keys)
                 // Do not override the preferredRenderingType if original
                 // .NET mobile controls are being used as values greater 
@@ -74,6 +76,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
 #if OBSOLETE_SUPPORT
                 }
 #endif
+            
             // Copy the adapters from the original.
             foreach (object key in currentCapabilities.Adapters.Keys)
                 Adapters.Add(key, currentCapabilities.Adapters[key]);

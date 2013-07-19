@@ -30,6 +30,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.EditDistance
         /// <returns>best match userAgent</returns>
         internal static Results Match(string userAgent, Handler handler)
         {
+#pragma warning disable 162
             if (Environment.ProcessorCount > 1 &&
                 Detection.Constants.ForceSingleProcessor == false)
             {
@@ -39,6 +40,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.EditDistance
             {
                 return MatchSingleProcessor(userAgent, handler);
             }
+#pragma warning restore 162
         }
 
         private static Results MatchSingleProcessor(string userAgent, Handler handler)
@@ -95,11 +97,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Matchers.EditDistance
                         {
                             request.Results.MinDistance = distance;
                             request.Results.Clear();
-                            request.Results.Add(current);
+                            request.Results.Add(current, request.Handler, (uint)distance, userAgent);
                         }
                         else if (distance == request.Results.MinDistance)
                         {
-                            request.Results.Add(current);
+                            request.Results.Add(current, request.Handler, (uint)distance, userAgent);
                         }
                     }
                 }

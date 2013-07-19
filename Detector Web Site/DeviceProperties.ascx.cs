@@ -14,7 +14,7 @@
  * 
  * The Initial Developer of the Original Code is owned by 
  * 51 Degrees Mobile Experts Limited. Portions created by 51 Degrees
- * Mobile Experts Limited are Copyright (C) 2009 - 2012. All Rights Reserved.
+ * Mobile Experts Limited are Copyright (C) 2009 - 2013. All Rights Reserved.
  * 
  * Contributor(s):
  *     James Rosewell <james@51degrees.mobi>
@@ -71,15 +71,13 @@ namespace Detector
             StandardPropertiesButton.CssClass = String.Join(" ", new[] {
                 "tab", Tabs.GetActiveView() == StandardPropertiesView ? "active" : String.Empty });
 
-            var cookie = Request.Cookies["tab"];
+            HttpCookie cookie = Request.Cookies["tab"];
             if (cookie == null)
                 cookie = new HttpCookie("tab");
             cookie.Value = Tabs.GetActiveView().ID;
             Response.Cookies.Add(cookie);
 
-            Explorer.ImagesEnabled = true;
-
-            base.OnLoad(e);
+            base.OnPreRender(e);
         }
 
         protected void TabChange(object sender, CommandEventArgs e)
@@ -100,7 +98,6 @@ namespace Detector
                     Tabs.SetActiveView(ExplorerView);
                     ExplorerButton.CssClass = "active";
                     break;
-#if VER35 || VER4
                 case "TopView":
                     {
                         if (TopDevices.SelectedDevice != null)
@@ -109,7 +106,6 @@ namespace Detector
                         TopButton.CssClass = "active";
                         break;
                     }
-#endif
                 case "DictionaryView":
                     Tabs.SetActiveView(DictionaryView);
                     DictionaryButton.CssClass = "active";
