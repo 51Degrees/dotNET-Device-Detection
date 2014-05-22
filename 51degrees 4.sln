@@ -1,0 +1,62 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Detector Web Site 4", "Detector Web Site\Detector Web Site 4.csproj", "{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FiftyOne.Foundation 4", "FoundationV3\FiftyOne.Foundation 4.csproj", "{9D658044-FB65-4939-8449-A3A1DEBBB31A}"
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 3
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs06
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = Detector\u0020Web\u0020Site\\Detector\u0020Web\u0020Site\u00204.csproj
+		SccProjectName1 = Detector\u0020Web\u0020Site
+		SccLocalPath1 = Detector\u0020Web\u0020Site
+		SccProjectUniqueName2 = FoundationV3\\FiftyOne.Foundation\u00204.csproj
+		SccProjectName2 = FoundationV3
+		SccLocalPath2 = FoundationV3
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}.Release|x64.ActiveCfg = Release|Any CPU
+		{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}.Release|x86.ActiveCfg = Release|Any CPU
+		{9D658044-FB65-4939-8449-A3A1DEBBB31A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D658044-FB65-4939-8449-A3A1DEBBB31A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D658044-FB65-4939-8449-A3A1DEBBB31A}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{9D658044-FB65-4939-8449-A3A1DEBBB31A}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{9D658044-FB65-4939-8449-A3A1DEBBB31A}.Debug|x64.ActiveCfg = Debug|x64
+		{9D658044-FB65-4939-8449-A3A1DEBBB31A}.Debug|x64.Build.0 = Debug|x64
+		{9D658044-FB65-4939-8449-A3A1DEBBB31A}.Debug|x86.ActiveCfg = Debug|x64
+		{9D658044-FB65-4939-8449-A3A1DEBBB31A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D658044-FB65-4939-8449-A3A1DEBBB31A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D658044-FB65-4939-8449-A3A1DEBBB31A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{9D658044-FB65-4939-8449-A3A1DEBBB31A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{9D658044-FB65-4939-8449-A3A1DEBBB31A}.Release|x64.ActiveCfg = Release|x64
+		{9D658044-FB65-4939-8449-A3A1DEBBB31A}.Release|x64.Build.0 = Release|x64
+		{9D658044-FB65-4939-8449-A3A1DEBBB31A}.Release|x86.ActiveCfg = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
