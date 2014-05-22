@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<siteMap xmlns="http://schemas.microsoft.com/AspNet/SiteMap-File-1.0" >
+  <siteMapNode url="Default.aspx" title="Samples" description="51Degrees Examples">
+    <siteMapNode url="Tester.aspx" title="Tester" description="Test UserAgents"/>
+    <siteMapNode url="Dictionary.aspx" title="Properties" description="All Available Properties"/>
+    <siteMapNode url="Devices.aspx" title="Explore Devices" description="Find Devices"/>
+    <siteMapNode url="TopDevices.aspx" title="Top Devices" description="See Top Devices"/>
+    <siteMapNode url="Gallery.aspx" title="Image Gallery" description="Image Optimisation"/>
+    <siteMapNode url="dotNet.aspx" title="dotNet" description=".NET Properties"/>
+    <siteMapNode url="Redirect.aspx" title="Redirect" description="Redirect Settings"/>
+    <siteMapNode url="Network.aspx" title="Network" description="Network Conditions"/>
+    <siteMapNode url="Activate.aspx" title="Activate" description="Upgrade"/>
+  </siteMapNode>
+</siteMap>

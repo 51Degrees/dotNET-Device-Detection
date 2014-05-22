@@ -1,0 +1,414 @@
+﻿@media (max-device-width : 1024px) 
+{
+    body { background-color: #252525; }
+    body, p, h1, h2, h3, h4, h5, h6, h7, h8, h9, table, .Normal, .NormalDisabled, .NormalDelete, .NormalBold { color: #FFFFFF; }    
+    body, p, a, .Normal, .NormalDisabled, .NormalDelete, .NormalBold, li, ul, table, td, th, tr, tbody { font-size: 9pt; }
+    p { margin: 0.1em; }
+}
+@media (min-device-width : 1024px) 
+{
+    body { background-color: #FFFFFF; }
+    body, p, h1, h2, h3, h4, h5, h6, h7, h8, h9, table, .Normal, .NormalDisabled, .NormalDelete, .NormalBold { color: #252525; }    
+    body, p, a, .Normal, .NormalDisabled, .NormalDelete, .NormalBold, li, ul, table, td, th, tr, tbody { font-size: 11pt; }
+    p { margin: 0.2em; }
+}
+
+body, p, h1, h2, h3, h4, h5, h6, h7, h8, h9, a, table, .Normal, .NormalDisabled, .NormalDelete { font-family: 'Droid Sans', sans-serif; }
+a, a:visited, a:link { color: #cd2b27; text-decoration: none; }
+a:hover { color: #cd2b27; text-decoration: underline; }
+a, img { border: 0 none; }
+h1 { font-size: 1.4em; }
+h2 { font-size: 1.3em; }
+h3 { font-size: 1.2em; }
+h4 { font-size: 1.1em; }
+h5 { font-size: 1.0em; }
+
+/* Main Style */
+.main { width: 100%; }
+
+/* Header Styles */
+.main .header { width: 100%; margin-top: 1em; }
+.main .header .logo { float: left; clear: left; margin: 1em; }
+.main .header .controls { float: right; clear: right; margin: 1em; font-size: 11pt; color: #cd2b27; font-weight: bold; }
+
+/* Footer Styles */
+.main .footer { width: 100%; clear: both; border-top: 2px solid #252525; padding-top: 0.5em; }
+.main .footer .left { float: left; clear: left; margin-left: 1em; }
+.main .footer .left div { float: left; }
+.main .footer .right { float: right; clear: right; margin-right: 1em;}
+.main .footer .right div { float: left; }
+.stats { color: #757575; font-size: 9pt; }
+.stats span { display: block; float: left; margin: 0.5em; }
+
+/* Menu Styles */
+@media (max-device-width : 768px) 
+{
+    /* Menus for Mobile */
+    .main .header .menu { clear: both; margin: 0em 1em; }    
+    .menu { margin: 0; line-height: 100%; text-align: left; width: 100%; clear: both; }
+    .menu ul { margin: 0; padding: 0; list-style-type: none; }
+    .menu li { list-style: none; display: block; padding: 0.5em; background-color: #353535; margin: 0.5em; }
+    .menu a { font-weight: bold; color: #FFFFFF; text-decoration: none; display: block; margin: 0; font-size: 14pt; }
+}
+@media (min-device-width : 768px) and (max-device-width : 1024px) {
+    /* Menus for Tablet */
+    .main .header .menu { clear: both; margin: 0em 1em; }    
+    .menu { margin: 0; line-height: 100%; text-align: left; width: 100%; clear: both; }
+    .menu ul { margin: 0; padding: 0; list-style-type: none; }
+    .menu li { list-style: none; display: block; padding: 0.5em; background-color: #353535; margin: 0.5em; }
+    .menu a { font-weight: bold; color: #FFFFFF; text-decoration: none; display: block; margin: 0; font-size: 14pt; }
+}
+@media (min-device-width : 1024px) {
+    /* Menus for Non Mobile */
+    .main .header .menu { float: right; clear: right; margin: 0em 1em; }    
+    .menu { float: right; clear: both; margin: 0 1em; }
+    .menu ul { margin: 0; padding: 0; line-height: 100%; font-size: 14pt; text-transform:uppercase; float: left; }
+    .menu li { position: relative; list-style: none; text-align: left; display: inline-block; margin-left: 2em; }
+    .menu a { font-weight: bold; color: #252525; text-decoration: none; display: block; margin: 0; }
+    .menu .selected { border-bottom: 3px solid #cd2b27; padding-bottom: 0.2em; }
+    .menu li:hover > ul { display: block; }
+    .menu li:hover > ul > li { display: block; margin-bottom: 1em; }
+    .menu li:hover > ul > li:last-child { margin-bottom: 0; }
+}
+
+/* Control Styles */
+.button, .searchButton
+{
+    background-color: #cd2b27;
+    padding: 0.5em;
+    text-decoration: none;
+    color: #FFFFFF;
+    border-width: 0;
+    border-radius: 0;
+    box-shadow: none;
+    text-shadow: none;
+    font-weight: bold;
+}
+
+.checkbox 
+{
+    display: block;
+    margin: 1em;
+}
+
+/* Content Styles */
+.content { margin: 1em; padding-top: 1em; clear: both; }
+
+/* 51Degrees Control Styles */
+.tester .textbox { width: 100%; }
+.tester .button { clear: both; margin: 1em 0em; }
+.tester .link { margin: 1em; }
+
+.redirect .buttons .button { margin: 0 1em 0 0; }
+
+.topDevices .item { width: 138px;}
+.topDevices .item , .deviceExplorerDevices .item { margin: 2px; padding: 0.5em; height: 178px; float: left; text-align: center; vertical-align: top; overflow: hidden; }
+.topDevices .item .model, .deviceExplorerDevices .item  { font-weight: bold; margin-bottom: 4px; }
+.topDevices .item .model a, .deviceExplorerDevices .item .model a { text-decoration: none; color: Red; margin-bottom: 4px; }
+.topDevices .item .item .name, .deviceExplorerDevices .item .name { overflow: hidden; margin-top: 4px; }
+.topDevices .item .name a, .deviceExplorerDevices .item .name a { text-decoration: none; color: #777777; padding-top: 0.5em; }
+
+
+.activate .textbox, .userAgentTester .textbox { width: 100%; }
+.activate .button, .userAgentTester .button { margin: 0.5em 0px; display: block; }
+
+.message p, .activate p, .userAgentTester p, .propertyDictionary p, .deviceExplorerVendors p, .deviceExplorerDevices p, .deviceExplorerDevice p { margin: 1em 0px; padding: 0px; }
+
+.topDevices { display: block; clear: both; height: 200px; }
+
+.userAgentTester input { font-size: 1.1em; }
+
+.match { margin-left: 1em; }
+.match th { font-weight: bold; text-align: left; }
+.match td { padding-left: 1em; font-family: Courier; }
+
+/* Image Gallary Styles */
+.gallery { padding: 0; margin: 0 auto; max-width: 600px; width: 100%; }
+
+.adButtons input
+{
+    font-family: 'Droid Sans', sans-serif;
+    border: 0px;
+    background-color: white;
+    font-size: 14pt;
+}
+
+.adButtons input.selected
+{
+    border-bottom: 3px;
+    border-bottom-color: #cd2b27;
+    border-bottom-style: solid;
+}
+
+.adControl
+{
+    width: 60%;
+    padding: 20px;
+}
+.adControl div
+{
+    padding: 10px;
+}
+.api input
+{
+    width: 100%;
+}
+
+.back
+{
+    clear: both;
+    margin: 1em 0;
+}
+
+.back a
+{
+    padding: 0.5em;
+    background-color: #252525;
+    color: #FFF !important;
+    text-decoration: none;
+}
+
+.deviceExplorer .search 
+{ 
+    text-align: center;
+    margin: 1em 0;
+    display: block; 
+    line-height: 1.2em;
+    clear: both;
+}
+
+.deviceExplorer .search .searchText 
+{ 
+    height: 1.2em;
+    width: 300px; 
+}
+
+.deviceExplorer .search .searchButton
+{
+    height: 100%;
+}
+
+.deviceExplorer ul, .propertyDictionary ul 
+{
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.deviceExplorer .vendorLetters, .deviceExplorer .pager
+{
+    display: block;
+    clear: both;
+}
+
+.deviceExplorer .vendorLetters ul, .deviceExplorer .pager ul
+{
+    text-align: center;
+}
+
+.deviceExplorer .vendorLetters li, .deviceExplorer .pager ul li
+{
+    display: inline-block;
+    margin: 0.5em;
+}
+
+.deviceExplorer .vendorLetters ul li a, .deviceExplorer .pager ul li a
+{
+    padding: 0.5em;
+    background-color: #252525;
+    color: #FFF !important;
+    text-decoration: none;
+}
+
+.deviceExplorer .vendors
+{
+    margin: 1em 0;
+}
+
+.deviceExplorer .vendors ul li ul li
+{
+    display: inline-block;
+    width: 150px;
+}
+
+.deviceExplorer .vendors ul li ul li span
+{
+    margin-left: 0.5em;
+}
+
+.deviceExplorer .devices
+{
+    clear: both;
+    text-align: center;
+}
+
+.deviceExplorer .devices li
+{
+    display: inline-block;
+    width: 128px;
+    text-align: center;
+    margin: 1em;
+    vertical-align: top;
+}
+
+.deviceExplorer .device
+{
+    display: table;
+    margin: 1em 0;
+}
+
+.deviceExplorer .device ul
+{
+    display: table-row;
+}
+
+.deviceExplorer .device ul li
+{
+    display: table-cell;
+    vertical-align: top;
+}
+
+.deviceExplorer .device .image ul
+{
+    display: block;
+    float: right;
+}
+
+.deviceExplorer .device .image ul li
+{
+    display: block;
+}
+
+.deviceExplorer .device ul li .category
+{
+    display: table;
+}
+
+.deviceExplorer .device ul li .category li
+{
+    display: table-row;
+}
+
+.deviceExplorer .device ul li .category li ul, .deviceExplorer .device ul li .category li h2
+{
+    display: table-cell;
+    padding: 1em;
+}
+
+.deviceExplorer .device .category .property
+{
+    display: table;
+}
+
+.deviceExplorer .device .category .property li
+{
+    display: table-row;
+}
+
+.deviceExplorer .device .category .property li h3, .deviceExplorer .device .category .property li ul
+{
+    display: table-cell;
+    padding: 0.5em;
+}
+
+.deviceExplorer .device .category .property li ul li
+{
+    display: inline;
+}
+
+.deviceExplorer .device .category .property .value:after
+{
+    content:", ";
+}
+
+.deviceExplorer .device .category .property .value:last-child:after
+{
+    content:"";
+}
+
+.propertyDictionary .item 
+{
+    display: table;
+}
+
+.propertyDictionary .item .property 
+{
+    display: table-row;
+}
+
+.propertyDictionary .item .property>div
+{
+    display: table-cell;
+    padding: 1em;
+}
+
+@media all and (max-width : 480px) 
+{
+    .propertyDictionary .item 
+    {
+        display: block;
+    }
+
+    .propertyDictionary .item .property 
+    {
+        display: block;
+        padding-bottom: 1em;
+    }
+
+    .propertyDictionary .item .property>div
+    {
+        display: block;
+        padding: 0;
+    }
+}
+
+.propertyDictionary .item .property .name
+{
+    margin: 0;
+}
+
+.propertyDictionary .item .property .description span
+{
+    padding-left: 0.5em;
+} 
+
+.propertyDictionary .item .property .description .value
+{
+    padding: 1em 0;
+    font-style: italic;
+}
+
+.propertyDictionary .item .property .description .value li
+{
+    display: inline;
+} 
+
+.propertyDictionary .item .property .description .value li:last-child:after
+{
+    content: ""
+} 
+
+.propertyDictionary .item .property .description .value li:after
+{
+    content: ", "
+} 
+
+.propertyDictionary .datasets 
+{
+    color: #3da32e;
+}
+
+.propertyDictionary .item .property .icons span:first-child
+{
+    margin-left: 0;
+}
+
+.propertyDictionary .item .property .icons span
+{
+    margin-left: 1em;
+}
+
+.propertyDictionary .type
+{
+    color: Blue;
+}
