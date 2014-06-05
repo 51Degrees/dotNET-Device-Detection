@@ -378,7 +378,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             bool? value = results.GetBool("CookiesCapable");
             if (value.HasValue)
                 return value.Value.ToString();
-            return false.ToString();
+            return true.ToString();
         }
 
         /// <summary>

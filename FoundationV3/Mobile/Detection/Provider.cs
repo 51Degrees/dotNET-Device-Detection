@@ -29,6 +29,7 @@ using System.Reflection;
 using FiftyOne.Foundation.Mobile.Detection.Readers;
 using System.IO.Compression;
 using FiftyOne.Foundation.Mobile.Detection.Factories;
+using System;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
@@ -243,7 +244,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             MatchState state;
 
-            if (_userAgentCache != null)
+            if (_userAgentCache != null &&
+                String.IsNullOrEmpty(targetUserAgent) == false)
             {
                 if (_userAgentCache.TryGetValue(targetUserAgent, out state) == false)
                 {

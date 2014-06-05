@@ -446,6 +446,19 @@ namespace FiftyOne.Foundation.Mobile.Detection
         internal int _stringsRead;
 
         /// <summary>
+        /// Returns the profile Ids or device Id as a byte array.
+        /// </summary>
+        public byte[] DeviceIdAsByteArray
+        {
+            get
+            {
+                return ProfileIds.OrderBy(i =>
+                        i.Key).SelectMany(i =>
+                            BitConverter.GetBytes(i.Value)).ToArray();
+            }
+        }
+
+        /// <summary>
         /// The unique id of the Device based on the profiles.
         /// </summary>
         public string DeviceId

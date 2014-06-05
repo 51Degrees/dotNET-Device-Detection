@@ -28,6 +28,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
     internal static class ProfileOverride
     {
         /// <summary>
+        /// Name of the cookie used to return information about overridden
+        /// profile ids.
+        /// </summary>
+        private const string COOKIE_NAME = "51D_ProfileIds";
+
+        /// <summary>
         /// String array used to split the profile ids returned from the javascript.
         /// </summary>
         private static readonly char[] _split = new char[] { '|' };
@@ -71,8 +77,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
                         return String.Format(
                             "function FODPO() {{ var profileIds = new Array(); " +
                             "{0} " +
-                            "document.cookie = \"51D_ProfileIds=\" + profileIds.join(\"|\"); }}",
-                            String.Join("\r", javascript));
+                            "document.cookie = \"{1}=\" + profileIds.join(\"|\"); }}",
+                            String.Join("\r", javascript),
+                            COOKIE_NAME);
                     }
                 }
             }
@@ -143,20 +150,21 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
             var cookie = context.Request.Cookies["51D_ProfileIds"];
             if (cookie != null)
             {
-                if (WebProvider.ActiveProvider != null)
+                // Get the profile Ids from the cookie.
+                foreach (var profileId in cookie.Value.Split(_split))
                 {
-                    var dataSet = WebProvider.ActiveProvider.DataSet;
-
-                    // Get the profile Ids from the cookie.
-                    var profileIds = cookie.Value.Split(_split);
-                    foreach (var profileId in profileIds)
+                    // Convert the profile Id into an integer value.
+                    int value;
+                    if (int.TryParse(profileId, out value))
                     {
-                        // Convert the profile Id into an integer value.
-                        int value;
-                        if (int.TryParse(profileId, out value))
-                        {
-                            match.UpdateProfile(value);
-                        }
+                        match.UpdateProfile(value);
+                    }
+                    else
+                    {
+                        EventLog.Debug(String.Format(
+                            "'{0}' cookie contained invalid values '{1}'",
+                            "51D_ProfileIds",
+                            cookie.Value));
                     }
                 }
             }

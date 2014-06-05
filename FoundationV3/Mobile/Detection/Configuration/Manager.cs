@@ -48,6 +48,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
         static Manager()
         {
             _configurationSection = Support.GetWebApplicationSection("fiftyOne/detection", false) as DetectionSection;
+            if (_configurationSection == null)
+                _configurationSection = new DetectionSection();
         }
 
         #endregion

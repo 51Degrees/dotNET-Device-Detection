@@ -11,12 +11,12 @@ Global
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs06
 		SccLocalPath0 = .
-		SccProjectUniqueName1 = FoundationV3\\FiftyOne.Foundation\u00204.csproj
-		SccProjectName1 = FoundationV3
-		SccLocalPath1 = FoundationV3
-		SccProjectUniqueName2 = Detector\u0020Web\u0020Site\\Detector\u0020Web\u0020Site\u00204.csproj
-		SccProjectName2 = Detector\u0020Web\u0020Site
-		SccLocalPath2 = Detector\u0020Web\u0020Site
+		SccProjectUniqueName1 = Detector\u0020Web\u0020Site\\Detector\u0020Web\u0020Site\u00204.csproj
+		SccProjectName1 = Detector\u0020Web\u0020Site
+		SccLocalPath1 = Detector\u0020Web\u0020Site
+		SccProjectUniqueName2 = FoundationV3\\FiftyOne.Foundation\u00204.csproj
+		SccProjectName2 = FoundationV3
+		SccLocalPath2 = FoundationV3
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
