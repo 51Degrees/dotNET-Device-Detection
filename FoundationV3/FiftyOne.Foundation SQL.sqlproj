@@ -1,0 +1,157 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <PermissionSet>UNSAFE</PermissionSet>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <PostConversionRemoveFromScc>
+    </PostConversionRemoveFromScc>
+    <PostConversionAddToScc>
+    </PostConversionAddToScc>
+    <DacVersion>3.0.8.4</DacVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <OutputType>Database</OutputType>
+    <NoStandardLibraries>false</NoStandardLibraries>
+    <AssemblyName>FiftyOne.Foundation.SQL</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+    <ConnectionString>
+    </ConnectionString>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql110DatabaseSchemaProvider</DSP>
+    <Name>FiftyOne.Founction SQL</Name>
+    <ProjectVersion>4.0</ProjectVersion>
+    <ProjectGuid>{334a1d9f-82f5-41c0-8583-76823d8bf2b1}</ProjectGuid>
+    <IncludeSchemaNameInFileName>False</IncludeSchemaNameInFileName>
+    <GenerateDatabaseFile>False</GenerateDatabaseFile>
+    <GenerateCreateScript>True</GenerateCreateScript>
+    <ModelCollation>1033,CI</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <DefaultSchema>dbo</DefaultSchema>
+    <SqlServerVerification>False</SqlServerVerification>
+    <TargetLanguage>CS</TargetLanguage>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+    <DefineConstants>
+    </DefineConstants>
+    <WarningLevel>4</WarningLevel>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugSymbols>false</DebugSymbols>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+    <DefineConstants>
+    </DefineConstants>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RootNamespace>FiftyOne.Foundation</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.XML" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Mobile\Detection\Entities\RankedSignatureIndex.cs" />  
+    <Compile Include="Mobile\Detection\Cache.cs" />	
+    <Compile Include="Mobile\Detection\Controller.cs" />
+    <Compile Include="Mobile\Detection\DataSet.cs" />
+    <Compile Include="Mobile\Detection\Entities\AsciiString.cs" />
+    <Compile Include="Mobile\Detection\Entities\BaseEntity.cs" />
+    <Compile Include="Mobile\Detection\Entities\Component.cs" />
+    <Compile Include="Mobile\Detection\Entities\Headers\Header.cs" />
+    <Compile Include="Mobile\Detection\Entities\Map.cs" />
+    <Compile Include="Mobile\Detection\Entities\Memory\MemoryBaseList.cs" />
+    <Compile Include="Mobile\Detection\Entities\Memory\MemoryFixedList.cs" />
+    <Compile Include="Mobile\Detection\Entities\Memory\MemoryVariableList.cs" />
+    <Compile Include="Mobile\Detection\Entities\Node.cs" />
+    <Compile Include="Mobile\Detection\Entities\NodeIndex.cs" />
+    <Compile Include="Mobile\Detection\Entities\NodeNumericIndex.cs" />
+    <Compile Include="Mobile\Detection\Entities\Profile.cs" />
+    <Compile Include="Mobile\Detection\Entities\ProfileOffset.cs" />
+    <Compile Include="Mobile\Detection\Entities\Property.cs" />
+    <Compile Include="Mobile\Detection\Entities\Signature.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\BaseList.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\Cache.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\FixedList.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\ICacheList.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\Pool.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\Source.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\VariableList.cs" />
+    <Compile Include="Mobile\Detection\Entities\Value.cs" />
+    <Compile Include="Mobile\Detection\Entities\Values.cs" />
+    <Compile Include="Mobile\Detection\Factories\EntityFactories.cs" />
+    <Compile Include="Mobile\Detection\Factories\MemoryFactory.cs" />
+    <Compile Include="Mobile\Detection\Factories\StreamFactory.cs" />
+    <Compile Include="Mobile\Detection\IMatch.cs" />
+    <Compile Include="Mobile\Detection\IReadonlyList.cs" />
+    <Compile Include="Mobile\Detection\Match.cs" />
+    <Compile Include="Mobile\Detection\MatchMethods.cs" />
+    <Compile Include="Mobile\Detection\NewDeviceDetails.cs" />
+    <Compile Include="Mobile\Detection\Provider.cs" />
+    <Compile Include="Mobile\Detection\Readers\Reader.cs" />
+    <Compile Include="Mobile\Detection\SQL.cs" />
+    <Compile Include="Mobile\MobileException.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\BinaryConstants.cs" />
+    <Compile Include="Properties\Constants.cs" />
+    <Compile Include="Properties\DetectionConstants.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Mobile\Detection\Dataset\" />
+    <Folder Include="Mobile\" />
+    <Folder Include="Mobile\Detection\" />
+    <Folder Include="Mobile\Detection\Entities\" />
+    <Folder Include="Mobile\Detection\Entities\Headers\" />
+    <Folder Include="Mobile\Detection\Entities\Memory\" />
+    <Folder Include="Mobile\Detection\Entities\Stream\" />
+    <Folder Include="Mobile\Detection\Factories\" />
+    <Folder Include="Mobile\Detection\Readers\" />
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <PropertyGroup>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
