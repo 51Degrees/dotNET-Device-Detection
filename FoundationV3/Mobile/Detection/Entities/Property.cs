@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using System.Text;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Entities
 {
@@ -141,6 +142,30 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             }
         }
         private IList<string> _maps;
+
+        /// <summary>
+        /// The name of the property to use when adding to Javascript as a property name.
+        /// Unacceptable characters such as / are removed.
+        /// </summary>
+        public string JavaScriptName
+        {
+            get
+            {
+                if (_javascriptName == null)
+                {
+                    lock (this)
+                    {
+                        if (_javascriptName == null)
+                        {
+                            _javascriptName = new String(Name.Where(i =>
+                                char.IsLetterOrDigit(i)).ToArray());
+                        }
+                    }
+                }
+                return _javascriptName;
+            }
+        }
+        private string _javascriptName = null;
 
         /// <summary>
         /// The name of the property.

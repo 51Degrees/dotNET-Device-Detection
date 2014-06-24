@@ -42,6 +42,13 @@ namespace FiftyOne.Foundation.UI.Web
         #region Fields
 
         /// <summary>
+        /// An array of the free data set names.
+        /// </summary>
+        private static readonly IList<string> FreeDataSetNames = new string[] {
+            "Lite"
+        };
+
+        /// <summary>
         /// An array of ordered captions that dictate what order an image should appear in.
         /// </summary>
         private static readonly IList<string> Captions = new string[] { 
@@ -101,11 +108,11 @@ namespace FiftyOne.Foundation.UI.Web
         #region Properties
 
         /// <summary>
-        /// Returns true if a premium version of device data is being used.
+        /// Returns true if a paid for version of the data set is being used.
         /// </summary>
         internal protected bool IsPaidFor
         {
-            get { return DataSet.Name == "Premium" || DataSet.Name == "Ultimate" || DataSet.Name == "Enterprise"; }
+            get { return FreeDataSetNames.Contains(DataSet.Name) == false; }
         }
 
         /// <summary>

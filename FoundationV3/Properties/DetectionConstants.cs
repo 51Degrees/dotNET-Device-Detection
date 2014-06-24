@@ -34,12 +34,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// The default path to use for the binary data file.
         /// </summary>
-        public const string DefaultBinaryFilePath = "~/App_Data/51Degrees-Premium.dat";
+        public const string DefaultBinaryFilePath = "~/App_Data/51Degrees.dat";
 
         /// <summary>
         /// The preferred name of the licence key file.
         /// </summary>
-        public const string LicenceKeyFileName = "51Degrees.mobi.lic";
+        public const string LicenceKeyFileName = "51Degrees.lic";
 
         /// <summary>
         /// The character used to seperate property values when concatenated as a single string.

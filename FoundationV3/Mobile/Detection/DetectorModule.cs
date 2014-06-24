@@ -693,7 +693,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         {
                             features.Add(String.Format(
                                 "{0}:{1}",
-                                property.Name,
+                                property.JavaScriptName,
                                 valueBool ? "true" : "false"));
                         }
                         break;
@@ -703,7 +703,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         {
                             features.Add(String.Format(
                                 "{0}:{1}",
-                                property.Name,
+                                property.JavaScriptName,
                                 valueInteger));
                         }
                         break;
@@ -713,19 +713,68 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         {
                             features.Add(String.Format(
                                 "{0}:{1}",
-                                property.Name,
+                                property.JavaScriptName,
                                 valueDouble));
                         }
                         break;
-                    default: 
+                    default:
                         features.Add(String.Format(
                             "{0}:\"{1}\"",
-                            property.Name,
-                            String.Join(Constants.ValueSeperator, values)));
+                            property.JavaScriptName,
+#if VER4
+                            HttpUtility.JavaScriptStringEncode(String.Join(Constants.ValueSeperator, values))));
+#else
+                            JavaScriptStringEncode(String.Join(Constants.ValueSeperator, values))));
+#endif
                         break;
                 }
             }
         }
+
+#if !VER4
+        private static string JavaScriptStringEncode(string value)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (char c in Encoding.ASCII.GetBytes(value))
+            {
+                switch (c)
+                {
+                    case '\"':
+                        sb.Append("\\\"");
+                        break;
+                    case '\\':
+                        sb.Append("\\\\");
+                        break;
+                    case '\b':
+                        sb.Append("\\b");
+                        break;
+                    case '\f':
+                        sb.Append("\\f");
+                        break;
+                    case '\n':
+                        sb.Append("\\n");
+                        break;
+                    case '\r':
+                        sb.Append("\\r");
+                        break;
+                    case '\t':
+                        sb.Append("\\t");
+                        break;
+                    default:
+                        if (c < 32 || c > 127)
+                        {
+                            sb.AppendFormat("\\u{0:X04}", (int)c);
+                        }
+                        else
+                        {
+                            sb.Append(c);
+                        }
+                        break;
+                }
+            }
+            return sb.ToString();
+        }
+#endif
         
         /// <summary>
         /// Checks for a png or jpg being requested with a w or h query string

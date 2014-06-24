@@ -663,7 +663,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// </summary>
         /// <param name="profileId">Id of the profile to be found</param>
         /// <returns>Profile related to the id, or null if none found</returns>
-        internal Profile FindProfile(int profileId)
+        public Profile FindProfile(int profileId)
         {
             var lower = 0;
             var upper = ProfileOffsets.Count - 1;
