@@ -82,6 +82,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
             }
         }
 
+        [Serializable]
         private class Stat : IComparable<Stat>
         {
             // Set when the server starts to send the headers.
@@ -194,6 +195,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
             }
         }
 
+        [Serializable]
         private class Stats : List<Stat>
         {
             internal long LastId = 0;
