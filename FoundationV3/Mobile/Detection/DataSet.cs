@@ -528,11 +528,23 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// </param>
         internal DataSet(BinaryReader reader)
         {
-            Version = new Version(
-                reader.ReadInt32(),
-                reader.ReadInt32(),
-                reader.ReadInt32(),
-                reader.ReadInt32());
+            // Check for an exception which would indicate the file is the 
+            // wrong type for the API.
+            try
+            {
+                Version = new Version(
+                    reader.ReadInt32(),
+                    reader.ReadInt32(),
+                    reader.ReadInt32(),
+                    reader.ReadInt32());
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                throw new MobileException(String.Format(
+                    "Data file is invalid. Check that the data file is " +
+                    "decompressed and is the latest version '{0}' format.",
+                    BinaryConstants.FormatVersion), ex);
+            }
 
             // Throw exception if the data file does not have the correct
             // version in formation.

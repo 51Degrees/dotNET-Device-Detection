@@ -187,7 +187,7 @@ namespace FiftyOne.Foundation.UI.Web
             
             if (property.Url != null)
             {
-                BuildExternalLink(writer, property.Url);
+                BuildExternalLink(writer, property.Url, property.Description);
             }
             writer.WriteString(property.Name);
             if (property.Url != null)
@@ -267,13 +267,12 @@ namespace FiftyOne.Foundation.UI.Web
             foreach (var value in property.Values)
             {
                 writer.WriteStartElement("li");
-                if (String.IsNullOrEmpty(value.Description) == false)
-                {
-                    writer.WriteAttributeString("title", value.Description);
-                }
                 if (value.Url != null)
                 {
-                    BuildExternalLink(writer, value.Url);
+                    BuildExternalLink(writer, value.Url, 
+                        String.IsNullOrEmpty(value.Description) ?
+                        String.Format("External information about '{0}'", value.Name) :
+                        value.Description);
                 }
                 writer.WriteString(value.Name);
                 if (value.Url != null)

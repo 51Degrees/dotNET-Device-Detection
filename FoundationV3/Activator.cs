@@ -59,18 +59,19 @@ namespace FiftyOne.Foundation
                         new FiftyOne.Foundation.Mobile.Detection.MobileCapabilitiesProvider();
                 }
 
-                // Include the redirection module if the Microsoft.Web.Infrastructure assembly is
-                // available.
+                // Include the detection module if the Microsoft.Web.Infrastructure assembly is
+                // available. This is needed to perform background actions such as automatic
+                // updates.
                 try
                 {
                     RegisterModule();
                 }
                 catch (Exception ex)
                 {
-                    EventLog.Warn("Redirection module could not automatically be registered. " +
-                        "Redirection services will not be available unless the HttpModule is " +
-                        "included explicitly in the web.config file or Microsoft.Web.Infrastructure " +
-                        "is installed.");
+                    EventLog.Warn("Detection module could not automatically be registered. " +
+                        "Some detection and redirection services will not be available unless the " +
+                        "HttpModule is included explicitly in the web.config file or " +
+                        "Microsoft.Web.Infrastructure is installed.");
                     if (EventLog.IsDebug)
                         EventLog.Debug(ex);
                 }
@@ -79,12 +80,17 @@ namespace FiftyOne.Foundation
         }
 
         /// <summary>
-        /// Registers the HttpModule for redirection.
+        /// Registers the HttpModule for detection and redirection.
         /// </summary>
+        /// <remarks>
+        /// The detection module inherits from the redirection module due to maintaining
+        /// compaitability with legacy code. The functionality of the modules is controlled
+        /// via the 51Degrees.config file.
+        /// </remarks>
         private static void RegisterModule()
         {
             Microsoft.Web.Infrastructure.DynamicModuleHelper.DynamicModuleUtility.RegisterModule(
-                typeof(FiftyOne.Foundation.Mobile.Redirection.RedirectModule));
+                typeof(FiftyOne.Foundation.Mobile.Detection.DetectorModule));
         }
     }
 }

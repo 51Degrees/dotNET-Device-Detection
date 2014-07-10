@@ -320,7 +320,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
         {
             if (GetIsEnabled(context))
             {
-                context.Items.Add("51D_Stats_StartTime", DateTime.UtcNow);
+                if (context.Items.Contains("51D_Stats_StartTime") == false)
+                {
+                    context.Items.Add("51D_Stats_StartTime", DateTime.UtcNow);
+                }
             }
         }
 

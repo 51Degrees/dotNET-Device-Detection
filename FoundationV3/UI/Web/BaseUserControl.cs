@@ -39,6 +39,44 @@ namespace FiftyOne.Foundation.UI.Web
     /// </summary>
     public abstract class BaseUserControl : UserControl
     {
+        #region Classes
+
+        /// <summary>
+        /// Used to represent a hardware image with all it's attributes.
+        /// </summary>
+        internal struct HardwareImage
+        {
+            /// <summary>
+            /// Used as the alternative text for the image.
+            /// </summary>
+            internal readonly string Title;
+
+            /// <summary>
+            /// The key for the image from the dataset.
+            /// </summary>
+            internal readonly string Key;
+
+            /// <summary>
+            /// The URL of the image.
+            /// </summary>
+            internal readonly Uri ImageUrl;
+
+            /// <summary>
+            /// Creates a new structure.
+            /// </summary>
+            /// <param name="title"></param>
+            /// <param name="key"></param>
+            /// <param name="imageUrl"></param>
+            internal HardwareImage (string title, string key, Uri imageUrl) 
+            {
+                Title = title;
+                Key = key;
+                ImageUrl = imageUrl;
+            }
+        }
+
+        #endregion
+
         #region Fields
 
         /// <summary>
@@ -443,10 +481,11 @@ namespace FiftyOne.Foundation.UI.Web
                 images.Length > 0)
             {
                 // Get the image urls surrounded by quotes.
-                string[] imageUrls = images.Select(i => String.Format("'{0}'", i.Value)).ToArray();
+                string[] imageUrls = images.Select(i => String.Format("'{0}'", i.ImageUrl)).ToArray();
 
                 writer.WriteStartElement("img");
-                writer.WriteAttributeString("src", images[0].Value.ToString());
+                writer.WriteAttributeString("alt", images[0].Title);
+                writer.WriteAttributeString("src", images[0].ImageUrl.ToString());
 
                 if (imageUrls.Count() > 1)
                 {
@@ -467,7 +506,7 @@ namespace FiftyOne.Foundation.UI.Web
                     // loaded when the cursor leaves the image
                     string mouseOff = String.Format(
                         "ImageUnHovered(this, '{0}')",
-                        images[0].Value.ToString());
+                        images[0].ImageUrl.ToString());
                     
                     writer.WriteAttributeString("onmouseover", mouseOver.Replace("\\", "\\\\"));
                     writer.WriteAttributeString("onmouseout", mouseOff.Replace("\\", "\\\\"));
@@ -481,9 +520,9 @@ namespace FiftyOne.Foundation.UI.Web
         /// </summary>
         /// <param name="profile"></param>
         /// <returns></returns>
-        protected KeyValuePair<string, Uri>[] GetHardwareImages(Profile profile)
+        internal HardwareImage[] GetHardwareImages(Profile profile)
         {
-            var hardwareImages = new List<KeyValuePair<string, Uri>>();
+            var hardwareImages = new List<HardwareImage>();
 
             if (profile["HardwareImages"] != null)
             {
@@ -499,14 +538,17 @@ namespace FiftyOne.Foundation.UI.Web
                                 "https://51degrees.cachefly.net") : sections[1], 
                             UriKind.Absolute, out imageUrl))
                         {
-                            hardwareImages.Add(new KeyValuePair<string, Uri>(
-                                sections[0], imageUrl));
+                            hardwareImages.Add(new HardwareImage(
+                                String.Format("{0} - {1}", profile, sections[0]),
+                                sections[0], 
+                                imageUrl));
                         }
                     }
                 }
             }
 
-            return hardwareImages.OrderBy(i => Captions.IndexOf(i.Key) >= 0 ? Captions.IndexOf(i.Key) : int.MaxValue).ToArray();
+            return hardwareImages.OrderBy(i => 
+                Captions.IndexOf(i.Key) >= 0 ? Captions.IndexOf(i.Key) : int.MaxValue).ToArray();
         }
 
         /// <summary>
@@ -550,9 +592,11 @@ namespace FiftyOne.Foundation.UI.Web
         /// </summary>
         /// <param name="writer"></param>
         /// <param name="url"></param>
-        protected void BuildExternalLink(XmlWriter writer, Uri url)
+        /// <param name="title"></param>
+        protected void BuildExternalLink(XmlWriter writer, Uri url, string title)
         {
             writer.WriteStartElement("a");
+            writer.WriteAttributeString("title", title);
             writer.WriteAttributeString("href", url.ToString());
             writer.WriteAttributeString("rel", "nofollow");
             writer.WriteAttributeString("target", "_blank");
