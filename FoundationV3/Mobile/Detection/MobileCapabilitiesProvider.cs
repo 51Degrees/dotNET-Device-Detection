@@ -94,7 +94,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             System.Web.HttpBrowserCapabilities baseCapabilities = GetBaseCapabilities(request);
 
             // Get the new and overridden capabilities.
-            var results = WebProvider.GetResults(HttpContext.Current);
+            var results = WebProvider.GetResults(HttpContext.Current, request);
             IDictionary enhancedCapabilities = MobileCapabilitiesOverride.EnhancedCapabilities(
                 results, baseCapabilities);
 

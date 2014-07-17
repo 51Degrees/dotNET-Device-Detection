@@ -287,36 +287,56 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
 
         /// <summary>
-        /// Returns the match results for the current context, or if one does not
-        /// already exist creates a new one.
+        /// Returns the match results for the current context, or creates one if one
+        /// does not already exist.
         /// </summary>
         /// <param name="context">Context needing to find the matching device</param>
         /// <returns></returns>
         internal static SortedList<string, string[]> GetResults(HttpContext context)
         {
+            return GetResults(context, context.Request);
+        }
+
+        /// <summary>
+        /// Returns the match results for the request, or creates one if one does not
+        /// already exist. This method allows detection if the request is not related
+        /// to the context, ie SetOverridenBrowser has been used.
+        /// </summary>
+        /// <param name="context">Context needing to find the matching device</param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        internal static SortedList<string, string[]> GetResults(HttpContext context, HttpRequest request)
+        {
+            var matchKey = Constants.MatchKey + request.UserAgent.GetHashCode().ToString();
             var hasOverrides = Feature.ProfileOverride.HasOverrides(context);
             var items = context.Items;
-            var results = items[Constants.MatchKey] as SortedList<string, string[]>;
+            var results = items[matchKey] as SortedList<string, string[]>;
             var session = context.Session;
 
             if (results == null || hasOverrides)
             {
                 lock (context)
                 {
-                    results = items[Constants.MatchKey] as SortedList<string, string[]>;
+                    results = items[matchKey] as SortedList<string, string[]>;
                     if (results == null || hasOverrides)
                     {
                         // See if the results are in the session.
                         if (session != null && hasOverrides == false)
                         {
-                            results = session[Constants.MatchKey] as SortedList<string, string[]>;
+                            results = session[matchKey] as SortedList<string, string[]>;
                         }
 
                         if (results == null)
                         {
                             // Get the match and store the list of properties and values 
                             // in the context and session.
-                            var match = ActiveProvider.Match(context.Request.Headers);
+
+                            // A useragent might be url encoded if SetOverrideBrowser is used.
+                            // A new header collection is required so that they can be modified.
+                            var headers = new System.Collections.Specialized.NameValueCollection(request.Headers.Count, request.Headers);
+                            headers[Constants.UserAgentHeader] = Uri.UnescapeDataString(headers[Constants.UserAgentHeader]).Replace('+', ' ');
+
+                            var match = ActiveProvider.Match(headers);
                             if (match != null)
                             {
                                 // Allow other feature detection methods to override profiles.
@@ -325,8 +345,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
                                 // Store the match results for future checks during the same
                                 // request.
                                 if (session != null)
-                                    session[Constants.MatchKey] = match.Results;
-                                items[Constants.MatchKey] = match.Results;
+                                    session[matchKey] = match.Results;
+                                items[matchKey] = match.Results;
                                 results = match.Results;
                             }
                         }
@@ -336,7 +356,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             else if (session != null)
             {
                 // Update the results in the session.
-                session[Constants.MatchKey] = results;
+                session[matchKey] = results;
             }
             return results;
         }
