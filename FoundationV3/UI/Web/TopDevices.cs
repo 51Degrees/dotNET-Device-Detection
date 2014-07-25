@@ -279,7 +279,10 @@ namespace FiftyOne.Foundation.UI.Web
                 HyperLink linkModel = new HyperLink();
                 HyperLink linkName = new HyperLink();
 
-                linkModel.Text = profile["HardwareModel"].ToString();
+                linkModel.Text = String.Format(
+                    "{0} - {1}",
+                    profile["HardwareVendor"],
+                    profile["HardwareModel"]);
 
                 linkModel.NavigateUrl = deviceUrl;
                 linkName.NavigateUrl = deviceUrl;
@@ -297,6 +300,7 @@ namespace FiftyOne.Foundation.UI.Web
                     }))
                     {
                         writer.WriteStartElement("a");
+                        writer.WriteAttributeString("title", profile.ToString());
                         writer.WriteAttributeString("href", ResolveClientUrl(deviceUrl));
                         BuildHardwareImages(writer, profile);
                         writer.WriteEndElement();
@@ -306,8 +310,13 @@ namespace FiftyOne.Foundation.UI.Web
                     panelImage.Controls.Add(literal);
                 }
 
+                panelModel.Controls.Add(new Literal() { Text = "<h2>" });
                 panelModel.Controls.Add(linkModel);
+                panelModel.Controls.Add(new Literal() { Text = "</h2>" });
+
+                panelName.Controls.Add(new Literal() { Text = "<h3>" });
                 panelName.Controls.Add(linkName);
+                panelName.Controls.Add(new Literal() { Text = "</h3>" });
 
                 panelModel.CssClass = ModelCssClass;
                 panelName.CssClass = NameCssClass;

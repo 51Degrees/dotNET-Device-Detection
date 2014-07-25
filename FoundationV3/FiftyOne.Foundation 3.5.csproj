@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FiftyOne.Foundation</RootNamespace>
     <AssemblyName>FiftyOne.Foundation</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>
     </SccProjectName>
@@ -51,32 +51,32 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug4\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;VER4</DefineConstants>
+    <OutputPath>bin\Debug35\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug4\FiftyOne.Foundation.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug35\FiftyOne.Foundation.xml</DocumentationFile>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Release4\</OutputPath>
-    <DefineConstants>TRACE;VER4</DefineConstants>
+    <OutputPath>bin\Release35\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release4\FiftyOne.Foundation.xml</DocumentationFile>
+    <DocumentationFile>bin\Release35\FiftyOne.Foundation.xml</DocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x64\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;VER4</DefineConstants>
-    <DocumentationFile>bin\Debug4\FiftyOne.Foundation.xml</DocumentationFile>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DocumentationFile>bin\Debug35\FiftyOne.Foundation.xml</DocumentationFile>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <CodeAnalysisLogFile>bin\Debug4\FiftyOne.Foundation.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisLogFile>bin\Debug35\FiftyOne.Foundation.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
     <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
     <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
     <ErrorReport>prompt</ErrorReport>
@@ -86,12 +86,12 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
-    <DefineConstants>TRACE;VER4</DefineConstants>
-    <DocumentationFile>bin\Release4\FiftyOne.Foundation.xml</DocumentationFile>
+    <DefineConstants>TRACE</DefineConstants>
+    <DocumentationFile>bin\Release35\FiftyOne.Foundation.xml</DocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x64</PlatformTarget>
-    <CodeAnalysisLogFile>bin\Release4\FiftyOne.Foundation.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisLogFile>bin\Release35\FiftyOne.Foundation.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
     <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
     <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
     <ErrorReport>prompt</ErrorReport>
@@ -102,9 +102,6 @@
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Microsoft.WindowsAzure.CloudDrive, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.WindowsAzure.Diagnostics, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.WindowsAzure.ServiceRuntime, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
@@ -120,21 +117,20 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Activator.cs" />
     <Compile Include="Image\Processor.cs" />
     <Compile Include="Mobile\Configuration\ImageOptimisationSection.cs" />
     <Compile Include="Mobile\Detection\AutoUpdate.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Mobile\Detection\Entities\RankedSignatureIndex.cs" />	
-    <Compile Include="Mobile\Detection\Cache.cs" />
+    <Compile Include="Mobile\Detection\Entities\RankedSignatureIndex.cs" />
+	<Compile Include="Mobile\Detection\Cache.cs" />
     <Compile Include="Mobile\Detection\Entities\Map.cs" />
     <Compile Include="Mobile\Detection\Entities\NodeNumericIndex.cs" />
     <Compile Include="Mobile\Detection\Factories\EntityFactories.cs" />
-    <Compile Include="Mobile\Detection\IReadonlyList.cs" />
-    <Compile Include="Mobile\Detection\Factories\MemoryFactory.cs" />
     <Compile Include="Mobile\Detection\Factories\TrieFactory.cs" />
     <Compile Include="Mobile\Detection\TrieProvider.cs" />
+    <Compile Include="Mobile\Detection\IReadonlyList.cs" />
+    <Compile Include="Mobile\Detection\Factories\MemoryFactory.cs" />
     <Compile Include="Mobile\Detection\Entities\ProfileOffset.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\ICacheList.cs" />
     <Compile Include="Mobile\Detection\Factories\StreamFactory.cs" />

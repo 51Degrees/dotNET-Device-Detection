@@ -591,8 +591,8 @@ namespace FiftyOne.Foundation.UI.Web
         /// Adds a hyperlink prefix to the XML.
         /// </summary>
         /// <param name="writer"></param>
-        /// <param name="url"></param>
-        /// <param name="title"></param>
+        /// <param name="url">A URL to the external link</param>
+        /// <param name="title">The title attribute for the external link</param>
         protected void BuildExternalLink(XmlWriter writer, Uri url, string title)
         {
             writer.WriteStartElement("a");

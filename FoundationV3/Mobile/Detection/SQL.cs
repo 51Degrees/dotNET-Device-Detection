@@ -27,6 +27,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using FiftyOne.Foundation.Mobile.Detection.Entities;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
@@ -42,6 +43,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// the cache.
         /// </summary>
         private const int DEFAULT_CACHE_EXPIRY_SECONDS = 60;
+
+        /// <summary>
+        /// Characters used to seperate the profile Ids in the device id.
+        /// </summary>
+        private static readonly string[] ProfileSeperator = new string[] {
+            FiftyOne.Foundation.Mobile.Detection.Constants.ProfileSeperator };
 
         #endregion
 
@@ -108,11 +115,35 @@ namespace FiftyOne.Foundation.Mobile.Detection
             /// </summary>
             internal readonly byte[] Id;
 
+            internal InternalResult(IDictionary<string, string> values, IList<int> profileIds)
+            {
+                this.Values = values;
+                int index = 0;
+                Id = new byte[profileIds.Count * sizeof(int)];
+                for (int i = 0; i < profileIds.Count; i++)
+                {
+                    foreach (byte b in BitConverter.GetBytes(profileIds[i]))
+                    {
+                        Id[index++] = b;
+                    }
+                }
+            }
+
             internal InternalResult(IDictionary<string, string> values, byte[] id)
             {
                 this.Values = values;
                 this.Id = id;
             }
+        }
+
+        /// <summary>
+        /// Dynamic properties that can be requested.
+        /// </summary>
+        enum DynamicProperties
+        {
+            Id,
+            Difference,
+            Method
         }
 
         #endregion
@@ -125,9 +156,19 @@ namespace FiftyOne.Foundation.Mobile.Detection
         private static Provider _provider;
 
         /// <summary>
-        /// Array of property names to be returned for a table result.
+        /// List of comonent Ids, and their respective property Ids.
         /// </summary>
-        private static string[] _requiredProperties;
+        private static readonly SortedList<Component, List<Property>> _requiredProperties = new SortedList<Component,List<Property>>();
+
+        /// <summary>
+        /// A list of the dynamic properties required.
+        /// </summary>
+        private static readonly List<DynamicProperties> _dynamicProperties = new List<DynamicProperties>();
+
+        /// <summary>
+        /// The total number of properties to be returned.
+        /// </summary>
+        private static int _numberOfProperties = 0;
 
         /// <summary>
         /// The user agent cache.
@@ -144,47 +185,127 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Private Methods
 
         /// <summary>
+        /// Iterates through the profile Ids that the device Id contains returning
+        /// each id in turn.
+        /// </summary>
+        /// <param name="id">The device Id</param>
+        /// <returns>Each integer profile Id contained in the device id</returns>
+        private static IEnumerator<int> IterateProfileIds(string id)
+        {
+            int value;
+            foreach (var profileId in id.Split(ProfileSeperator, StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (int.TryParse(profileId, out value))
+                {
+                    yield return value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Iterates through the profile Ids that the device Id contains returning
+        /// each id in turn.
+        /// </summary>
+        /// <param name="id">The device Id</param>
+        /// <returns>Each integer profile Id contained in the device id</returns>
+        private static IEnumerator<int> IterateProfileIds(byte[] id)
+        {
+            var profileIds = new int[id.Length / sizeof(int)];
+            for (int i = 0, b = 0; b < id.Length; i++, b += sizeof(int))
+            {
+                yield return BitConverter.ToInt32(id, b);
+            }
+        }
+
+        /// <summary>
+        /// Returns a match for the profile integers returned by the iterator.
+        /// </summary>
+        /// <param name="iterator"></param>
+        /// <returns></returns>
+        private static InternalResult GetMatch(IEnumerator<int> iterator)
+        {
+            List<Property> properties;
+            var profileIds = new List<int>(_requiredProperties.Count);
+
+            // Construct the results for the values and the profile Ids.
+            var resultValues = new SortedList<string, string>(_numberOfProperties);
+
+            while (iterator.MoveNext())
+            {
+                // Add the profile Id to the list of profile Ids.
+                if (profileIds != null)
+                {
+                    profileIds.Add(iterator.Current);
+                }
+
+                // Get the profile based on the unique id.
+                var profile = _provider.DataSet.FindProfile(iterator.Current);
+
+                // Check that the profile Id exists and that we require 
+                // properties from it.
+                if (profile != null &&
+                    _requiredProperties.TryGetValue(profile.Component, out properties))
+                {
+                    // Load the values into the results.
+                    foreach (var property in properties)
+                    {
+                        var values = profile[property];
+                        if (values != null)
+                            resultValues.Add(property.Name, values.ToString());
+                    }
+                }
+            }
+
+            // Add the device Id as a string if required.
+            if (_dynamicProperties.Contains(DynamicProperties.Id))
+            {
+                resultValues.Add("Id", String.Join(
+                    Constants.ProfileSeperator,
+                    profileIds.Select(i => i.ToString())));
+            }
+
+            return new InternalResult(resultValues, profileIds);
+        }
+
+        /// <summary>
         /// Gets the match from the cache for the id or if not
-        /// present in the cache from the detection provider. Matches 
+        /// present in the cache from the detection provider. Matched
         /// from the device id will not populate the Difference or Method
         /// values.
         /// </summary>
         /// <param name="id">The device id whose properties are needed</param>
         /// <returns>A results object for the device id</returns>
-        private static InternalResult GetMatch(byte[] id)
+        private static InternalResult GetMatchById(string id)
+        {
+            InternalResult result;
+            if (_cacheUserAgent.TryGetValue(id, out result) == false)
+            {
+                result = GetMatch(IterateProfileIds(id));
+
+                // Add the results to the cache.
+                _cacheUserAgent.SetActive(id, result);
+            }
+
+            // Ensure the result is added to the background cache.
+            _cacheUserAgent.SetBackground(id, result);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the match from the cache for the id or if not
+        /// present in the cache from the detection provider. Matched
+        /// from the device id will not populate the Difference or Method
+        /// values.
+        /// </summary>
+        /// <param name="id">The device id whose properties are needed</param>
+        /// <returns>A results object for the device id</returns>
+        private static InternalResult GetMatchById(byte[] id)
         {
             InternalResult result;
             if (_cacheId.TryGetValue(id, out result) == false)
             {
-                // Construct the results for the values and the profile Ids.
-                result = new InternalResult(
-                    new SortedList<string, string>(_requiredProperties.Length),
-                    id);
-
-                var profileIds = new int[id.Length / sizeof(int)];
-                for (int i = 0, b = 0; b < id.Length; i++, b += sizeof(int))
-                {
-                    profileIds[i] = BitConverter.ToInt32(id, b);
-
-                    // Get the profile based on the unique id.
-                    var profile = _provider.DataSet.FindProfile(profileIds[i]);
-
-                    // Load the values into the results.
-                    foreach (var property in _requiredProperties)
-                    {
-                        var values = profile[property];
-                        if (values != null)
-                            result.Values.Add(property, values.ToString());
-                    }
-                }
-
-                // Add the device Id as a string if required.
-                if (_requiredProperties.Contains("Id"))
-                {
-                    result.Values.Add("Id", String.Join(
-                        Constants.ProfileSeperator,
-                        profileIds.Select(i => i.ToString())));
-                }
+                result = GetMatch(IterateProfileIds(id));
 
                 // Add the results to the cache.
                 _cacheId.SetActive(id, result);
@@ -202,7 +323,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="userAgent">The user agent whose properties are needed</param>
         /// <returns>A results object for the user agent</returns>
-        private static InternalResult GetMatch(string userAgent)
+        private static InternalResult GetMatchByUserAgent(string userAgent)
         {
             InternalResult result;
             if (_cacheUserAgent.TryGetValue(userAgent, out result) == false)
@@ -212,35 +333,40 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
                 // Construct the results for the values and the profile Ids.
                 result = new InternalResult(
-                    new SortedList<string, string>(_requiredProperties.Length),
+                    new SortedList<string, string>(_numberOfProperties),
                     match.ProfileIds.OrderBy(i =>
                         i.Key).SelectMany(i =>
                             BitConverter.GetBytes(i.Value)).ToArray());
 
                 // Load the values into the results.
-                foreach (var property in _requiredProperties)
+                foreach (var property in _requiredProperties.SelectMany(i =>
+                    i.Value))
                 {
                     var values = match[property];
                     if (values != null)
-                        result.Values.Add(property, values.ToString());
-                    else
                     {
-                        // Add special properties for the detection.
-                        switch (property)
-                        {
-                            case "Id":
-                                result.Values.Add("Id", String.Join(
-                                    Constants.ProfileSeperator,
-                                    match.ProfileIds.OrderBy(i =>
-                                        i.Key).Select(i => i.Value.ToString())));
-                                break;
-                            case "Difference":
-                                result.Values.Add("Difference", match.Difference.ToString());
-                                break;
-                            case "Method":
-                                result.Values.Add("Method", match.Method.ToString());
-                                break;
-                        }
+                        result.Values.Add(property.Name, values.ToString());
+                    }
+                }
+
+                // Load the dynamic values into the results.
+                foreach(var dynamicProperty in _dynamicProperties)
+                {
+                    // Add special properties for the detection.
+                    switch (dynamicProperty)
+                    {
+                        case DynamicProperties.Id:
+                            result.Values.Add("Id", String.Join(
+                                Constants.ProfileSeperator,
+                                match.ProfileIds.OrderBy(i =>
+                                    i.Key).Select(i => i.Value.ToString())));
+                            break;
+                        case DynamicProperties.Difference:
+                            result.Values.Add("Difference", match.Difference.ToString());
+                            break;
+                        case DynamicProperties.Method:
+                            result.Values.Add("Method", match.Method.ToString());
+                            break;
                     }
                 }
 
@@ -275,7 +401,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Initialises the device detection service with the filename provided and the
         /// list of properties to be returned.
         /// </summary>
-        /// <param name="filename">The pattern formatted filename with 51Degrees data</param>
+        /// <param name="filename">The pattern format file containing 51Degrees data</param>
         /// <param name="properties">A space seperated list of properties to be returned 
         /// from calls to <see cref="GetDeviceProperties"/>GetDeviceProperties</see></param>
         /// <param name="expirySeconds">The number of seconds between cache services</param>
@@ -285,44 +411,99 @@ namespace FiftyOne.Foundation.Mobile.Detection
         [Microsoft.SqlServer.Server.SqlFunction]
         public static SqlBoolean InitialiseDeviceDetection(SqlString filename, SqlString properties, SqlInt32 expirySeconds, SqlBoolean memoryMode)
         {
-            if (File.Exists(filename.Value))
+            if (filename.IsNull || File.Exists(filename.Value) == false)
             {
-                // Dispose of the old providers dataset if not null.
-                if (_provider != null)
-                    _provider.DataSet.Dispose();
-
-                // Create the provider using the file provided.
-                _provider = new Provider(memoryMode.Value ?
-                    Factories.MemoryFactory.Create(filename.Value) :
-                    Factories.StreamFactory.Create(filename.Value));
-
-                if (_provider != null)
-                {
-                    // Clear the caches to flush out old results.
-                    var serviceInternal = expirySeconds.IsNull ?
-                                DEFAULT_CACHE_EXPIRY_SECONDS : expirySeconds.Value;
-                    _cacheUserAgent = new Cache<string, InternalResult>(serviceInternal);
-                    _cacheId = new Cache<byte[], InternalResult>(new ByteArrayEqualityComparer(), serviceInternal);
-
-                    // Set the properties that the functions should be returning.
-                    if (String.IsNullOrEmpty(properties.Value))
-                    {
-                        // Use all the available properties that the provider supports.
-                        _requiredProperties = _provider.DataSet.Properties.Select(i =>
-                            i.Name).ToArray();
-                    }
-                    else
-                    {
-                        // Get the array of properties that should be returned from the match where
-                        // the property is contained in the providers data set.
-                        _requiredProperties = properties.Value.Split(
-                            new string[] { " ", ",", "|", "\t" },
-                            StringSplitOptions.RemoveEmptyEntries).Distinct().ToArray();
-                    }
-
-                    return true;
-                }
+                throw new FileNotFoundException(String.Format(
+                    "Device data file '{0}' could not be found",
+                    filename.Value));
             }
+
+            // Dispose of the old providers dataset if not null.
+            if (_provider != null)
+            {
+                _provider.DataSet.Dispose();
+            }
+
+            // Create the provider using the file provided.
+            try
+            {
+                _provider = new Provider(
+                    memoryMode.IsNull || memoryMode.Value == false ?
+                    Factories.StreamFactory.Create(filename.Value) :
+                    Factories.MemoryFactory.Create(filename.Value));
+            }
+            catch(Exception ex)
+            {
+                throw new MobileException(String.Format(
+                    "Could not create data set from file '{0}'. Check the file is uncompressed and in the correct format.",
+                    filename.Value), ex);
+            }
+
+            if (_provider != null)
+            {
+                // Clear the caches to flush out old results.
+                var serviceInternal = expirySeconds.IsNull ?
+                            DEFAULT_CACHE_EXPIRY_SECONDS : expirySeconds.Value;
+                _cacheUserAgent = new Cache<string, InternalResult>(serviceInternal);
+                _cacheId = new Cache<byte[], InternalResult>(new ByteArrayEqualityComparer(), serviceInternal);
+
+                // Set the properties that the functions should be returning.
+                _numberOfProperties = 0;
+                _requiredProperties.Clear();
+                _dynamicProperties.Clear();
+                if (properties.IsNull || String.IsNullOrEmpty(properties.Value))
+                {
+                    // Use all the available properties that the provider supports.
+                    foreach(var component in _provider.DataSet.Components)
+                    {
+                        _requiredProperties.Add(component, component.Properties.ToList());
+                        _numberOfProperties += component.Properties.Length;
+                    }
+                    _dynamicProperties.Add(DynamicProperties.Id);
+                    _dynamicProperties.Add(DynamicProperties.Difference);
+                    _dynamicProperties.Add(DynamicProperties.Method);
+                }
+                else
+                {
+                    // Get the array of properties that should be returned from the match where
+                    // the property is contained in the providers data set.
+                    foreach (var propertyName in properties.Value.Split(
+                        new string[] { " ", ",", "|", "\t" },
+                        StringSplitOptions.RemoveEmptyEntries).Select(i => i.Trim()).Distinct())
+                    {
+                        switch(propertyName)
+                        { 
+                            case "Id":
+                                _dynamicProperties.Add(DynamicProperties.Id);
+                                _numberOfProperties++;
+                                break;
+                            case "Method":
+                                _dynamicProperties.Add(DynamicProperties.Method);
+                                _numberOfProperties++;
+                                break;
+                            case "Difference":
+                                _dynamicProperties.Add(DynamicProperties.Difference);
+                                _numberOfProperties++;
+                                break;
+                            default:
+                                var property = _provider.DataSet.GetProperty(propertyName);
+                                if (property != null)
+                                {
+                                    if (_requiredProperties.ContainsKey(property.Component) == false)
+                                    {
+                                        _requiredProperties.Add(property.Component, new List<Property>());
+                                    }
+                                    _requiredProperties[property.Component].Add(property);
+                                    _numberOfProperties++;
+                                }
+                                break;
+                        }
+                    }
+                }
+
+                return true;
+            }
+
             return false;
         }
 
@@ -336,7 +517,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         [Microsoft.SqlServer.Server.SqlFunction]
         public static SqlBinary DeviceIdAsByteArray(SqlString userAgent)
         {
-            return GetMatch(userAgent.Value).Id;
+            return GetMatchByUserAgent(userAgent.Value).Id;
         }
 
         /// <summary>
@@ -361,7 +542,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         [Microsoft.SqlServer.Server.SqlFunction]
         public static SqlString DevicePropertyByUserAgent(SqlString userAgent, SqlString propertyName)
         {
-            var result = GetMatch(userAgent.Value);
+            var result = GetMatchByUserAgent(userAgent.Value);
             string value;
             if (result.Values.TryGetValue(propertyName.Value, out value))
                 return value;
@@ -378,7 +559,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         [SqlFunction(FillRowMethodName = "Fill", TableDefinition = "Property NVARCHAR(100), Value NVARCHAR(MAX)")]
         public static IEnumerable DevicePropertiesById(SqlBinary id)
         {
-            var result = GetMatch(id.Value);
+            var result = GetMatchById(id.Value);
             try
             {
                 return result.Values.AsParallel().WithDegreeOfParallelism(Math.Min(System.Environment.ProcessorCount, 64)).Select(i =>
@@ -390,7 +571,28 @@ namespace FiftyOne.Foundation.Mobile.Detection
             }
         }
 
-
+        /// <summary>
+        /// Returns the enumeration where each record represents a required property
+        /// provided in the intialiser. The key for the properties is a device id
+        /// in the string form A-B-C-D where each letter is a number.
+        /// </summary>
+        /// <param name="id">Id of the device in hyphen seperated string form</param>
+        /// <returns>An enumerator of property names and values</returns>
+        [SqlFunction(FillRowMethodName = "Fill", TableDefinition = "Property NVARCHAR(100), Value NVARCHAR(MAX)")]
+        public static IEnumerable DevicePropertiesByStringId(SqlString id)
+        {
+            var result = GetMatchById(id.Value);
+            try
+            {
+                return result.Values.AsParallel().WithDegreeOfParallelism(Math.Min(System.Environment.ProcessorCount, 64)).Select(i =>
+                    new InternalDeviceProperty(i.Key, String.Join(", ", i.Value)));
+            }
+            catch
+            {
+                return null;
+            }
+        }
+        
         /// <summary>
         /// Returns the en enumeration where each record represents a required property
         /// provided in the intialiser. The key is a user agent.
@@ -400,7 +602,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         [SqlFunction(FillRowMethodName = "Fill", TableDefinition = "Property NVARCHAR(100), Value NVARCHAR(MAX)")]
         public static IEnumerable DevicePropertiesByUserAgent(SqlString userAgent)
         {
-            var result = GetMatch(userAgent.Value);
+            var result = GetMatchByUserAgent(userAgent.Value);
             try
             {
                 return result.Values.AsParallel().WithDegreeOfParallelism(Math.Min(System.Environment.ProcessorCount, 64)).Select(i =>

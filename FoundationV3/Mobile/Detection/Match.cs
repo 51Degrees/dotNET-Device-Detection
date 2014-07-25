@@ -489,7 +489,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     {
                         if (_profiles == null)
                         {
-                            _profiles = _signature.Profiles;
+                            _profiles = new Profile[_signature.Profiles.Length];
+                            Array.Copy(_signature.Profiles, _profiles, _profiles.Length);
                         }
                     }
                 }
@@ -572,7 +573,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
             _elapsed = state._elapsed;
             _method = state._method;
             _nodesEvaluated = state._nodesEvaluated;
-            _profiles = state._profiles;
+            _profiles = new Profile[state._profiles.Length];
+            Array.Copy(state._profiles, _profiles, _profiles.Length);
             _rootNodesEvaluated = state._rootNodesEvaluated;
             _signature = state._signature;
             _signaturesCompared = state._signaturesCompared;
@@ -924,7 +926,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
             _elapsed = match._elapsed;
             _method = match._method;
             _nodesEvaluated = match._nodesEvaluated;
-            _profiles = match.Profiles;
+            _profiles = new Profile[match.Profiles.Length];
+            Array.Copy(match.Profiles, _profiles, _profiles.Length);
             _rootNodesEvaluated = match._rootNodesEvaluated;
             _signature = match._signature;
             _signaturesCompared = match._signaturesCompared;

@@ -67,20 +67,42 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     IsKeyFormatValid(Constants.PremiumLicenceKey))
                     list.Add(Constants.PremiumLicenceKey);
 
-                // Now try the bin folder for license key files.
+                // See if we can get licence keys from the 51Degrees preferred licence
+                // key file.
                 foreach (string fileName in Directory.GetFiles(
-                    HostingEnvironment.ApplicationPhysicalPath + "bin", "*.lic"))
+                    HostingEnvironment.ApplicationPhysicalPath + "bin", Constants.LicenceKeyFileName))
                 {
-                    string alltext = File.ReadAllText(fileName);
-                    foreach(string key in alltext.Split(
-                        new string[] { "\r\n", "\r", "\n" },
-                        StringSplitOptions.RemoveEmptyEntries))
-                        if (IsKeyFormatValid(key))
-                            list.Add(key);
+                    AddKeysFromFile(list, fileName);
+                }
+
+                // If there are no licence keys found so far then now try the bin 
+                // folder for any license key files.
+                if (list.Count == 0)
+                {
+                    foreach (string fileName in Directory.GetFiles(
+                        HostingEnvironment.ApplicationPhysicalPath + "bin", "*.lic"))
+                    {
+                        AddKeysFromFile(list, fileName);
+                    }
                 }
 
                 return list.ToArray();
             }
+        }
+
+        /// <summary>
+        /// Adds the valid licence keys from the files provided.
+        /// </summary>
+        /// <param name="list">A list of the licence </param>
+        /// <param name="fileName"></param>
+        private static void AddKeysFromFile(List<string> list, string fileName)
+        {
+            string alltext = File.ReadAllText(fileName);
+            foreach (string key in alltext.Split(
+                new string[] { "\r\n", "\r", "\n" },
+                StringSplitOptions.RemoveEmptyEntries))
+                if (IsKeyFormatValid(key))
+                    list.Add(key);
         }
         
         #endregion
