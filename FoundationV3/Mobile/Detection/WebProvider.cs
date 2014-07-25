@@ -307,7 +307,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns></returns>
         internal static SortedList<string, string[]> GetResults(HttpContext context, HttpRequest request)
         {
-            var matchKey = Constants.MatchKey + request.UserAgent.GetHashCode().ToString();
+            var matchKey = Constants.MatchKey + request.UserAgent != null ? request.UserAgent.GetHashCode().ToString() : "";
             var hasOverrides = Feature.ProfileOverride.HasOverrides(context);
             var items = context.Items;
             var results = items[matchKey] as SortedList<string, string[]>;
@@ -334,8 +334,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
                             // A useragent might be url encoded if SetOverrideBrowser is used.
                             // A new header collection is required so that they can be modified.
                             var headers = new System.Collections.Specialized.NameValueCollection(request.Headers.Count, request.Headers);
-                            headers[Constants.UserAgentHeader] = Uri.UnescapeDataString(headers[Constants.UserAgentHeader]).Replace('+', ' ');
-
+                            if (headers[Constants.UserAgentHeader] != null)
+                                headers[Constants.UserAgentHeader] = Uri.UnescapeDataString(headers[Constants.UserAgentHeader]).Replace('+', ' ');
+                            
                             var match = ActiveProvider.Match(headers);
                             if (match != null)
                             {

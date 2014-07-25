@@ -716,6 +716,7 @@ namespace FiftyOne.Foundation.UI.Web
                     var profiles = vendorValue.Profiles.Intersect(modelValue.Profiles);
                     foreach(var profile in profiles)
                     {
+                        DeviceID = profile.ProfileId.ToString();
                         BuildBackButton(writer, String.Format("Back to {0}", vendorName), new NameValueCollection {
                             { "vendor", vendorName }
                         }, String.Format("All {0} Models", vendorName));
