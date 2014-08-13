@@ -95,6 +95,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Internal Constants
 
         /// <summary>
+        /// The copyright message to add to all javascript. This message can not 
+        /// be altered by 3rd parties.
+        /// </summary>
+        internal const string ClientSidePropertyCopyright = "// Copyright 51 Degrees Mobile Experts Limited";
+
+        /// <summary>
         /// The name of the 1x1 pixel empty gif image.
         /// </summary>
         internal const string EmptyImageResourceName = "FiftyOne.Foundation.Image.E.gif";
