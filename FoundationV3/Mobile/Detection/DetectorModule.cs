@@ -536,7 +536,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         // Response is different so send with all the cache details set.
                         DateTime expires = DateTime.MinValue;
                         var content = new StringBuilder();
-                        content.AppendLine("// Copyright 51 Degrees Mobile Experts Limited");
+                        content.AppendLine(Constants.ClientSidePropertyCopyright);
                         switch (fileName)
                         {
                             case "51Degrees.features.js":
