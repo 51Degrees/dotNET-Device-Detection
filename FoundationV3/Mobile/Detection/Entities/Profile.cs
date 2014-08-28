@@ -317,14 +317,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
 
         /// <summary>
-        /// Returns an array of signatures the profile relates to.
+        /// Gets the signatures related to the profile.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Array of signatures related to the profile.</returns>
         private Signature[] GetSignatures()
         {
             var signatures = new Signature[SignatureIndexes.Length];
             for (int i = 0; i < SignatureIndexes.Length; i++)
-                signatures[i] = DataSet.Signatures[i];
+            {
+                signatures[i] = DataSet.Signatures[SignatureIndexes[i]];
+            }
             return signatures;
         }
 
