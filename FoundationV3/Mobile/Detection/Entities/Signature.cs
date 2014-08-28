@@ -75,6 +75,34 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Public Properties
 
         /// <summary>
+        /// Gets the rank, where a lower number means the signature is more popular, of
+        /// the signature compared to other signatures.
+        /// </summary>
+        /// <remarks>
+        /// As the property uses the ranked signature indexes list to obtain the rank
+        /// it will be comparatively slow compared to other methods the firs time
+        /// the property is accessed.
+        /// </remarks>
+        public int Rank
+        {
+            get
+            {
+                if (_rank == null)
+                {
+                    lock(this)
+                    {
+                        if (_rank == null)
+                        {
+                            _rank = GetSignatureRank();
+                        }
+                    }
+                }
+                return _rank.Value;
+            }
+        }
+        internal int? _rank;
+
+        /// <summary>
         /// The length in bytes of the signature.
         /// </summary>
         public int Length
@@ -376,7 +404,23 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
 
             return values;
         }
-        
+
+        /// <summary>
+        /// Gets the signature rank by iterating through the list of signature ranks.
+        /// </summary>
+        /// <returns>Rank compared to other signatures starting at 0.</returns>
+        private int GetSignatureRank()
+        {
+            for (var rank = 0; rank < DataSet.RankedSignatureIndexes.Count; rank++)
+            {
+                if (DataSet.RankedSignatureIndexes[rank].SignatureIndex == this.Index)
+                {
+                    return rank;
+                }
+            }
+            return int.MaxValue;
+        }
+
         /// <summary>
         /// Returns an array of profiles associated with the signature.
         /// </summary>

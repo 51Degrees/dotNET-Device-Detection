@@ -62,5 +62,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
         
         #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Sets the associated signatures rank property.
+        /// </summary>
+        internal void Init()
+        {
+            DataSet.Signatures[_signatureIndex]._rank = Index;
+        }
+
+        #endregion
     }
 }

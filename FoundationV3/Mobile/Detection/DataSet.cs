@@ -602,7 +602,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                 entity.Init();
             foreach (var entity in Nodes)
                 entity.Init();
-            foreach (var entity in _signatures)
+            foreach (var entity in Signatures)
+                entity.Init();
+            foreach (var entity in RankedSignatureIndexes)
                 entity.Init();
             
             // We no longer need the strings data structure as all dependent
