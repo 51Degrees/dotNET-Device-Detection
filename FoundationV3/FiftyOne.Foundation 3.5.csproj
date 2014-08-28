@@ -12,14 +12,10 @@
     <AssemblyName>FiftyOne.Foundation</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SccProjectName>
-    </SccProjectName>
-    <SccLocalPath>
-    </SccLocalPath>
-    <SccAuxPath>
-    </SccAuxPath>
-    <SccProvider>
-    </SccProvider>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
     <ApplicationIcon>PDA.ico</ApplicationIcon>
     <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>
@@ -123,7 +119,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Mobile\Detection\Entities\RankedSignatureIndex.cs" />
-	<Compile Include="Mobile\Detection\Cache.cs" />
+    <Compile Include="Mobile\Detection\Cache.cs" />
     <Compile Include="Mobile\Detection\Entities\Map.cs" />
     <Compile Include="Mobile\Detection\Entities\NodeNumericIndex.cs" />
     <Compile Include="Mobile\Detection\Factories\EntityFactories.cs" />
