@@ -515,44 +515,47 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 // Record the start time of the request for network
                 // conditions monitoring.
                 Feature.Bandwidth.BeginRequest(context);
-
-                var fileName = Path.GetFileName(context.Request.CurrentExecutionFilePath);
-                if (fileName == "51Degrees.features.js" ||
-                    fileName == "51Degrees.core.js")
+                var invalidChars = Path.GetInvalidPathChars();
+                if (context.Request.CurrentExecutionFilePath.Any(c => invalidChars.Contains(c)) == false)
                 {
-                    context.Response.Clear();
-                    context.Response.ClearHeaders();
-
-                    // Get the hash code without performing a match.
-                    var hash = GetHashCode(context);
-
-                    if (hash == context.Request.Headers["If-None-Match"])
+                    var fileName = Path.GetFileName(context.Request.CurrentExecutionFilePath);
+                    if (fileName == "51Degrees.features.js" ||
+                        fileName == "51Degrees.core.js")
                     {
-                        // The response hasn't changed so respond with a 304.
-                        context.Response.StatusCode = 304;
-                    }
-                    else
-                    {
-                        // Response is different so send with all the cache details set.
-                        DateTime expires = DateTime.MinValue;
-                        var content = new StringBuilder();
-                        content.AppendLine(Constants.ClientSidePropertyCopyright);
-                        switch (fileName)
+                        context.Response.Clear();
+                        context.Response.ClearHeaders();
+
+                        // Get the hash code without performing a match.
+                        var hash = GetHashCode(context);
+
+                        if (hash == context.Request.Headers["If-None-Match"])
                         {
-                            case "51Degrees.features.js":
-                                content.Append(GetFeatureJavaScript(context));
-                                expires = DateTime.UtcNow.AddMinutes(
-                                    context.Session != null ? context.Session.Timeout : _redirectTimeout);
-                                break;
-                            case "51Degrees.core.js":
-                                AppendCoreJavaScript(context, content);
-                                expires = WebProvider.ActiveProvider.DataSet.NextUpdate;
-                                break;
+                            // The response hasn't changed so respond with a 304.
+                            context.Response.StatusCode = 304;
                         }
-                        SendJavaScript(context, hash, content.ToString(), expires, WebProvider.ActiveProvider.DataSet.Published);
-                    }
+                        else
+                        {
+                            // Response is different so send with all the cache details set.
+                            DateTime expires = DateTime.MinValue;
+                            var content = new StringBuilder();
+                            content.AppendLine(Constants.ClientSidePropertyCopyright);
+                            switch (fileName)
+                            {
+                                case "51Degrees.features.js":
+                                    content.Append(GetFeatureJavaScript(context));
+                                    expires = DateTime.UtcNow.AddMinutes(
+                                        context.Session != null ? context.Session.Timeout : _redirectTimeout);
+                                    break;
+                                case "51Degrees.core.js":
+                                    AppendCoreJavaScript(context, content);
+                                    expires = WebProvider.ActiveProvider.DataSet.NextUpdate;
+                                    break;
+                            }
+                            SendJavaScript(context, hash, content.ToString(), expires, WebProvider.ActiveProvider.DataSet.Published);
+                        }
 
-                    context.Response.End();
+                        context.Response.End();
+                    }
                 }
             }
         }
