@@ -1,11 +1,25 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30501.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Detector Web Site 3.5", "Detector Web Site\Detector Web Site 3.5.csproj", "{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FiftyOne.Foundation 3.5", "FoundationV3\FiftyOne.Foundation 3.5.csproj", "{9D658044-FB65-4939-8449-A3A1DEBBB31A}"
 EndProject
 Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 3
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs06
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = Detector\u0020Web\u0020Site\\Detector\u0020Web\u0020Site\u00203.5.csproj
+		SccProjectName1 = Detector\u0020Web\u0020Site
+		SccLocalPath1 = Detector\u0020Web\u0020Site
+		SccProjectUniqueName2 = FoundationV3\\FiftyOne.Foundation\u00203.5.csproj
+		SccProjectName2 = FoundationV3
+		SccLocalPath2 = FoundationV3
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64
