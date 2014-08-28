@@ -410,7 +410,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// already assigned by Microsoft and returns a new capabilities provider.
         /// </summary>
         /// <param name="currentCapabilities">Current properties assigned by Microsoft</param>
-        /// <param name="overrideCapabilities">Properties enhanced from the original Microsoft values</param>
         /// <param name="fiftyOneCapabilities">Properties and values returned from 51Degrees</param>
         protected static HttpBrowserCapabilities CreateNewCapabilitiesProvider(
             SortedList<string, string[]> fiftyOneCapabilities,
