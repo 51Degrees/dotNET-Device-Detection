@@ -311,7 +311,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
             var hasOverrides = Feature.ProfileOverride.HasOverrides(context);
             var items = context.Items;
             var results = items[matchKey] as SortedList<string, string[]>;
-            var session = context.Session;
 
             if (results == null || hasOverrides)
             {
@@ -320,44 +319,26 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     results = items[matchKey] as SortedList<string, string[]>;
                     if (results == null || hasOverrides)
                     {
-                        // See if the results are in the session.
-                        if (session != null && hasOverrides == false)
-                        {
-                            results = session[matchKey] as SortedList<string, string[]>;
-                        }
+                        // Get the match and store the list of properties and values 
+                        // in the context and session.
 
-                        if (results == null)
-                        {
-                            // Get the match and store the list of properties and values 
-                            // in the context and session.
-
-                            // A useragent might be url encoded if SetOverrideBrowser is used.
-                            // A new header collection is required so that they can be modified.
-                            var headers = new System.Collections.Specialized.NameValueCollection(request.Headers.Count, request.Headers);
-                            if (headers[Constants.UserAgentHeader] != null)
-                                headers[Constants.UserAgentHeader] = Uri.UnescapeDataString(headers[Constants.UserAgentHeader]).Replace('+', ' ');
+                        // A useragent might be url encoded if SetOverrideBrowser is used.
+                        // A new header collection is required so that they can be modified.
+                        var headers = new System.Collections.Specialized.NameValueCollection(request.Headers.Count, request.Headers);
+                        if (headers[Constants.UserAgentHeader] != null)
+                            headers[Constants.UserAgentHeader] = Uri.UnescapeDataString(headers[Constants.UserAgentHeader]).Replace('+', ' ');
                             
-                            var match = ActiveProvider.Match(headers);
-                            if (match != null)
-                            {
-                                // Allow other feature detection methods to override profiles.
-                                Feature.ProfileOverride.Override(context, match);
+                        var match = ActiveProvider.Match(headers);
+                        if (match != null)
+                        {
+                            // Allow other feature detection methods to override profiles.
+                            Feature.ProfileOverride.Override(context, match);
 
-                                // Store the match results for future checks during the same
-                                // request.
-                                if (session != null)
-                                    session[matchKey] = match.Results;
-                                items[matchKey] = match.Results;
-                                results = match.Results;
-                            }
+                            items[matchKey] = match.Results;
+                            results = match.Results;
                         }
                     }
                 }
-            }
-            else if (session != null)
-            {
-                // Update the results in the session.
-                session[matchKey] = results;
             }
             return results;
         }
