@@ -113,6 +113,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     Guid.NewGuid()));
         }
 
+        private static DateTime GetDataFileDate(FileInfo fileInfo)
+        {
+            var dataset = StreamFactory.Create(fileInfo.FullName);
+            return dataset.Published;
+        }
+
         /// <summary>
         /// Copies the source data file for use with a stream provider.
         /// </summary>
@@ -120,15 +126,39 @@ namespace FiftyOne.Foundation.Mobile.Detection
         private static string GetTempWorkingFile()
         {
             string tempFileName = null;
-            var file = new FileInfo(Manager.BinaryFilePath);
-            if (file.Exists)
+            var masterFile = new FileInfo(Manager.BinaryFilePath);
+            if (masterFile.Exists)
             {
-                // Create a working temp file in the App_Data folder to enable the source
-                // file to be updated without stopping the web site.
+                // Get the publish date of the master data file.
+                var masterDate = GetDataFileDate(masterFile);
+
+                // Check if there are any other tmp files.
+                var fileNames = Directory.GetFiles(Mobile.Configuration.Support.GetFilePath("~/App_Data"));
+                foreach (var fileName in fileNames)
+                {
+                    var file = new FileInfo(fileName);
+                    if(file.FullName != masterFile.FullName &&
+                    file.Name.StartsWith(masterFile.Name) &&
+                        file.Extension == "tmp")
+                    {
+                        // Check if temp file matches date of the master file.
+                        try
+                        {
+                            var tempDate = GetDataFileDate(file);
+                            if (tempDate == masterDate)
+                                return fileName;
+                        }
+                        catch { } // Exception may occur if file is not a 51Degrees file, no action is needed.
+                    }
+                }
+                
+                // No suitable temp file was found, create one in the
+                //App_Data folder to enable the source file to be updated
+                // without stopping the web site.
                 tempFileName = GetTempFileName();
 
                 // Copy the file to enable other processes to update it.
-                File.Copy(file.FullName, tempFileName);
+                File.Copy(masterFile.FullName, tempFileName);
             }
             return tempFileName;
         }
