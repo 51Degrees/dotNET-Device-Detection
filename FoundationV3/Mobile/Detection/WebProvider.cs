@@ -344,6 +344,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
             if (results == null || hasOverrides)
             {
+                // A lock is needed in case 2 simultaneous operations are done on the
+                // context at once. This is a rare use case but ensures robustness.
                 lock (context)
                 {
                     results = items[matchKey] as SortedList<string, string[]>;
