@@ -179,7 +179,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     // Check the Next Update date of the data set to determine if we should
                     // check for an update.
                     if (BinaryFile != null &&
-                        WebProvider.ActiveProvider.DataSet.NextUpdate < DateTime.UtcNow)
+                        (WebProvider.ActiveProvider.DataSet.NextUpdate < DateTime.UtcNow ||
+                        WebProvider.ActiveProvider.DataSet.Name == "Lite"))
                     {
                         if (Download() == LicenceKeyResults.Success)
                             WebProvider.Refresh();
