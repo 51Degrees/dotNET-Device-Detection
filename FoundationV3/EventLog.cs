@@ -249,40 +249,44 @@ namespace FiftyOne
         /// Records the message in the log file if debug logging is enabled.
         /// </summary>
         /// <param name="message">The text message to record in the log file.</param>
-        public static void Debug(string message)
+        /// <param name="args">Objects to put in the message. Follows the syntax of String.Format.</param>
+        public static void Debug(string message, params object[] args)
         {
             if (IsDebug)
-                Write("Debug", message);
+                Write("Debug", String.Format(message, args));
         }
 
         /// <summary>
         /// Records the message in the log file if info logging is enabled.
         /// </summary>
         /// <param name="message">The text message to record in the log file.</param>
-        public static void Info(string message)
+        /// <param name="args">Objects to put in the message. Follows the syntax of String.Format.</param>
+        public static void Info(string message, params object[] args)
         {
             if (IsInfo)
-                Write("Info", message);
+                Write("Info", String.Format(message, args));
         }
 
         /// <summary>
         /// Records the message in the log file if warn logging is enabled.
         /// </summary>
         /// <param name="message">The text message to record in the log file.</param>
-        public static void Warn(string message)
+        /// <param name="args">Objects to put in the message. Follows the syntax of String.Format.</param>
+        public static void Warn(string message, params object[] args)
         {
             if (IsWarn)
-                Write("Warn", message);
+                Write("Warn", String.Format(message, args));
         }
 
         /// <summary>
         /// Records the message in the log file if fatal logging is enabled.
         /// </summary>
         /// <param name="message">The text message to record in the log file.</param>
-        public static void Fatal(string message)
+        /// <param name="args">Objects to put in the message. Follows the syntax of String.Format.</param>
+        public static void Fatal(string message, params object[] args)
         {
             if (IsFatal)
-                Write("Fatal", message);
+                Write("Fatal", String.Format(message, args));
         }
 
         private static int GetProcessId()
