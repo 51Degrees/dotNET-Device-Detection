@@ -120,7 +120,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
 
         /// <summary>
-        /// Copies the source data file for use with a stream provider.
+        /// Gets the file path of a temporary data file for use with a
+        /// stream provider. This method will create a file if one does
+        /// not already exist.
         /// </summary>
         /// <returns></returns>
         private static string GetTempWorkingFile()
@@ -139,16 +141,22 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     var file = new FileInfo(fileName);
                     if(file.FullName != masterFile.FullName &&
                     file.Name.StartsWith(masterFile.Name) &&
-                        file.Extension == "tmp")
+                        file.Extension == ".tmp")
                     {
                         // Check if temp file matches date of the master file.
                         try
                         {
                             var tempDate = GetDataFileDate(file);
                             if (tempDate == masterDate)
+                            {
+                                EventLog.Info("Using existing temp data file with published data {0} - \"{1}\"", tempDate.ToShortDateString(), file.FullName);
                                 return fileName;
+                            }
                         }
-                        catch { } // Exception may occur if file is not a 51Degrees file, no action is needed.
+                        catch (Exception ex) // Exception may occur if file is not a 51Degrees file, no action is needed.
+                        {
+                            EventLog.Info("Error while reading temporary data file \"{0}\": {1}", file.FullName, ex.Message);
+                        }
                     }
                 }
                 
@@ -159,6 +167,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
                 // Copy the file to enable other processes to update it.
                 File.Copy(masterFile.FullName, tempFileName);
+                EventLog.Info("Created temp data file - \"{0}\"", tempFileName);
             }
             return tempFileName;
         }
