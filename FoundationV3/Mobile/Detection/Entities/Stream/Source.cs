@@ -116,7 +116,20 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 
             // If the file is a temporary one ensure it's deleted.
             if (_fileName.EndsWith("tmp"))
-                File.Delete(_fileName);
+            {
+                try
+                {
+                    File.Delete(_fileName);
+                }
+                catch (IOException ex)
+                {
+                    EventLog.Info(String.Format(
+                        "Exception '{0}' deleting temporary file '{1}'.",
+                        ex.Message,
+                        _fileName));
+                }
+            }
+
         }
 
         #endregion
