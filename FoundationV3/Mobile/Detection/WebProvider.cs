@@ -346,7 +346,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns></returns>
         internal static SortedList<string, string[]> GetResults(HttpContext context, HttpRequest request)
         {
-            var matchKey = Constants.MatchKey + request.UserAgent != null ? request.UserAgent.GetHashCode().ToString() : "";
+            var matchKey = Constants.MatchKey + (request.UserAgent != null ? request.UserAgent.GetHashCode().ToString() : "");
             var hasOverrides = Feature.ProfileOverride.HasOverrides(context);
             var items = context.Items;
             var results = items[matchKey] as SortedList<string, string[]>;
