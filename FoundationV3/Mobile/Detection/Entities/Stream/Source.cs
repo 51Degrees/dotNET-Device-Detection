@@ -123,10 +123,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
                 }
                 catch (IOException ex)
                 {
-                    EventLog.Info(String.Format(
+                    EventLog.Info(
                         "Exception '{0}' deleting temporary file '{1}'.",
                         ex.Message,
-                        _fileName));
+                        _fileName);
                 }
             }
 
