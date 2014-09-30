@@ -110,11 +110,6 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// </summary>
         private static IRequestHistory _requestHistory;
 
-        /// <summary>
-        /// Class used to record new devices.
-        /// </summary>
-        private NewDevice _newDevice;
-
         #endregion
 
         #region Initialisers
@@ -141,10 +136,6 @@ namespace FiftyOne.Foundation.Mobile.Redirection
             }
             
             RegisterEventHandlersInit(application);
-            
-            _newDevice = new NewDevice(
-                Detection.Constants.NewDevicesUrl,
-                Detection.Constants.NewDeviceDetail);
         }
 
         /// <summary>
@@ -355,7 +346,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         public virtual void Dispose()
         {
             EventLog.Debug("Disposing Redirection Module");
-            _newDevice.Dispose();
+            NewDevice.Send();
         }
 
         #endregion
@@ -371,12 +362,12 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         {
             try
             {
-                if (_newDevice.Enabled &&
+                if (NewDevice.Enabled &&
                     context.Request.HttpMethod == "GET" &&
                     context.Handler != null &&
                     IsPageType(context.Handler.GetType()) &&
                     IsFirstTime(context, false))
-                    _newDevice.RecordNewDevice(context.Request);
+                    NewDevice.RecordNewDevice(context.Request);
             }
             catch (Exception ex)
             {
