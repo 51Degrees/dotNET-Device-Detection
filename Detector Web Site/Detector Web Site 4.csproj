@@ -83,7 +83,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Default.aspx" />
-    <Content Include="Ingeniux.aspx" />
     <Content Include="Licence.txt" />
     <Content Include="Mobile\Default.aspx" />
     <Content Include="MobileDevice.asmx" />
@@ -171,13 +170,6 @@
     </Compile>
     <Compile Include="GalleryImage.aspx.designer.cs">
       <DependentUpon>GalleryImage.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ingeniux.aspx.cs">
-      <DependentUpon>Ingeniux.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Ingeniux.aspx.designer.cs">
-      <DependentUpon>Ingeniux.aspx</DependentUpon>
     </Compile>
     <Compile Include="Mobile\Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
