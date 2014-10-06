@@ -424,7 +424,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
             if (GetIsEnabled(context))
             {
                 var stats = GetStats(context);
-                if (stats != null)
+                if (stats != null && context.Response.IsClientConnected)
                 {
                     // Create the stats for this request.
                     var stat = new Stat()
