@@ -539,7 +539,10 @@ namespace FiftyOne.Foundation.UI.Web
             }
 
             // Display the found signatures rank.
-            BuildRowForResult(writer, "Rank", result.Signature.Rank.ToString());
+            if (result.Signature != null)
+            {
+                BuildRowForResult(writer, "Rank", result.Signature.Rank.ToString());
+            }
 
             // Add the confidence of the match.
             BuildRowForResult(writer, "Difference", result.Difference.ToString());
