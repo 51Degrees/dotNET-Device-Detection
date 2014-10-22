@@ -20,6 +20,7 @@
  * ********************************************************************* */
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
@@ -27,12 +28,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
 {
     internal static class ProfileOverride
     {
-        /// <summary>
-        /// Name of the cookie used to return information about overridden
-        /// profile ids.
-        /// </summary>
-        private const string COOKIE_NAME = "51D_ProfileIds";
-
         /// <summary>
         /// String array used to split the profile ids returned from the javascript.
         /// </summary>
@@ -47,15 +42,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
         {
             if (Configuration.Manager.FeatureDetectionEnabled == false)
             {
-                application["51D_Profile"] = new bool?(false);
+                application[Constants.ProfileOverrideCookieName] = new bool?(false);
             }
             else
             {
                 var property = WebProvider.ActiveProvider.DataSet.Properties.FirstOrDefault(i =>
                     i.Name == "JavascriptHardwareProfile");
-                application["51D_Profile"] = new bool?(property != null);
+                application[Constants.ProfileOverrideCookieName] = new bool?(property != null);
             }
-            EventLog.Debug(String.Format("Profile Override '{0}'", application["51D_Profile"]));
+            EventLog.Debug(String.Format("Profile Override '{0}'", application[Constants.ProfileOverrideCookieName]));
         }
 
         /// <summary>
@@ -79,7 +74,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
                             "{0} " +
                             "document.cookie = \"{1}=\" + profileIds.join(\"|\"); }}",
                             String.Join("\r", javascript),
-                            COOKIE_NAME);
+                            Constants.ProfileOverrideCookieName);
                     }
                 }
             }
@@ -94,7 +89,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
         /// <returns></returns>
         private static bool GetIsEnabled(HttpContext context)
         {
-            var enabled = context.Application["51D_Profile"] as bool?;
+            var enabled = context.Application[Constants.ProfileOverrideCookieName] as bool?;
             if (enabled.HasValue && enabled.Value)
             {
                 // If the profile javascript is present for this device then it's enabled.
@@ -136,18 +131,20 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
         /// <returns></returns>
         internal static bool HasOverrides(HttpContext context)
         {
-            var cookie = context.Request.Cookies["51D_ProfileIds"];
+            var cookie = context.Request.Cookies[Constants.ProfileOverrideCookieName];
             return cookie != null && cookie.Values.Count > 0;
         }
 
         /// <summary>
-        /// Overrides profile IDs with ones in the cookie if present.
+        /// Gets all profile IDs that should override the detected match. Returns
+        /// an empty array if no overrides have been set.
         /// </summary>
         /// <param name="context"></param>
-        /// <param name="match"></param>
-        internal static void Override(HttpContext context, Match match)
+        /// <returns></returns>
+        internal static int[] GetOverrideProfileIds(HttpRequest request)
         {
-            var cookie = context.Request.Cookies["51D_ProfileIds"];
+            var ids = new List<int>();
+            var cookie = request.Cookies[Constants.ProfileOverrideCookieName];
             if (cookie != null)
             {
                 // Get the profile Ids from the cookie.
@@ -157,19 +154,35 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
                     int value;
                     if (int.TryParse(profileId, out value))
                     {
-                        match.UpdateProfile(value);
+                        ids.Add(value);
                     }
                     else
                     {
                         EventLog.Debug(String.Format(
                             "'{0}' cookie contained invalid values '{1}'",
-                            "51D_ProfileIds",
+                            Constants.ProfileOverrideCookieName,
                             cookie.Value));
                     }
                 }
             }
+            return ids.ToArray();
         }
 
+        /// <summary>
+        /// Overrides profile IDs with ones in the cookie if present.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="match"></param>
+        internal static void Override(HttpContext context, Match match)
+        {
+            // Get the profile Ids from the cookie.
+            var profileIds = GetOverrideProfileIds(context.Request);
+            
+            foreach (var profileId in profileIds)
+            {
+                match.UpdateProfile(profileId);
+            }
+        }
         
     }
 }
