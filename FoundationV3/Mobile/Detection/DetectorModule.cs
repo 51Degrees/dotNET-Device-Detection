@@ -525,7 +525,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         context.Response.ClearHeaders();
 
                         // Get the hash code without performing a match.
-                        var hash = GetHashCode(context);
+                        var hash = GetHashCode(context.Request);
 
                         if (hash == context.Request.Headers["If-None-Match"])
                         {
@@ -629,17 +629,24 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// matching device. This is quicker than hashing the result as it avoids
         /// executing the match.
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="request"></param>
         /// <returns></returns>
-        private static string GetHashCode(HttpContext context)
+        private static string GetHashCode(HttpRequest request)
         {
             var provider = WebProvider.ActiveProvider;
             var hashBuffer = new List<byte>();
             hashBuffer.AddRange(BitConverter.GetBytes(provider.DataSet.Published.Year));
             hashBuffer.AddRange(BitConverter.GetBytes(provider.DataSet.Published.Month));
             hashBuffer.AddRange(BitConverter.GetBytes(provider.DataSet.Published.Day));
-            hashBuffer.AddRange(Encoding.ASCII.GetBytes(context.Request.UserAgent));
-            hashBuffer.AddRange(Encoding.ASCII.GetBytes(context.Request.QueryString.ToString()));
+            if (String.IsNullOrEmpty(request.UserAgent) == false)
+            {
+                hashBuffer.AddRange(Encoding.ASCII.GetBytes(request.UserAgent));
+            }
+            hashBuffer.AddRange(Encoding.ASCII.GetBytes(request.QueryString.ToString()));
+            hashBuffer.AddRange(
+                Feature.ProfileOverride.GetOverrideProfileIds(request)
+                .SelectMany(id => BitConverter.GetBytes(id)));
+            hashBuffer.AddRange(Encoding.ASCII.GetBytes(request.QueryString.ToString()));
             return Convert.ToBase64String(MD5.Create().ComputeHash(hashBuffer.ToArray()));
         }
 

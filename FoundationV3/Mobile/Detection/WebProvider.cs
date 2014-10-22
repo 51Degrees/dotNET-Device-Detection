@@ -26,6 +26,7 @@ using FiftyOne.Foundation.Mobile.Detection.Configuration;
 using FiftyOne.Foundation.Mobile.Detection.Entities;
 using System.Collections.Generic;
 using FiftyOne.Foundation.Mobile.Detection.Factories;
+using System.Collections.Specialized;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
@@ -363,12 +364,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         // Get the match and store the list of properties and values 
                         // in the context and session.
 
-                        // A useragent might be url encoded if SetOverrideBrowser is used.
-                        // A new header collection is required so that they can be modified.
-                        var headers = new System.Collections.Specialized.NameValueCollection(request.Headers.Count, request.Headers);
-                        if (headers[Constants.UserAgentHeader] != null)
-                            headers[Constants.UserAgentHeader] = Uri.UnescapeDataString(headers[Constants.UserAgentHeader]).Replace('+', ' ');
-                            
+                        var headers = GetRequiredHeaders(context, request);
+
                         var match = ActiveProvider.Match(headers);
                         if (match != null)
                         {
@@ -382,6 +379,39 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 }
             }
             return results;
+        }
+
+        /// <summary>
+        /// Gets the required headers. Headers from HttpContext and HttpRequest may not be the same
+        /// if the MVC method SetBrowserOverride has been use.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        private static NameValueCollection GetRequiredHeaders(HttpContext context, HttpRequest request)
+        {
+            // A useragent might be url encoded if SetOverrideBrowser was used in a previous request.
+            // A new header collection is required so that they can be modified.
+            NameValueCollection headers;
+            if (request.UserAgent != context.Request.UserAgent)
+            {
+                // Requests after SetOverrideBrowser are still expected to use the overriden alias.
+                // The override useragent is stored in cookie which ASP.NET unpacks automatically, however
+                // it is url encoded with pluses instead of spaces. This code transforms the useragent back,
+                // but a new NameValueCollection is needed as the original collection cannot be modified.
+                headers = new NameValueCollection(request.Headers.Count, request.Headers);
+                if (headers[Constants.UserAgentHeader] != null)
+                {
+                    headers[Constants.UserAgentHeader] =
+                        Uri.UnescapeDataString(headers[Constants.UserAgentHeader]).Replace('+', ' ');
+                }
+            }
+            else
+            {
+                // Use the original headers as there's no override in place.
+                headers = request.Headers;
+            }
+            return headers;
         }
         
         #endregion
