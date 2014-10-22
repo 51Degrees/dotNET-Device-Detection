@@ -32,6 +32,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Public Constants
 
         /// <summary>
+        /// The dafult name of the profile override cookie.
+        /// </summary>
+        public const string ProfileOverrideCookieName = "51D_ProfileIds";
+
+        /// <summary>
         /// The default path to use for the binary data file.
         /// </summary>
         public const string DefaultBinaryFilePath = "~/App_Data/51Degrees.dat";
