@@ -192,7 +192,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             try
             {
-                if (String.IsNullOrWhiteSpace(Manager.BinaryFilePath))
+                if (String.IsNullOrEmpty(Manager.BinaryFilePath))
                     return;
 
                 var fileInfo = new FileInfo(Manager.BinaryFilePath);
