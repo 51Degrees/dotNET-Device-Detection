@@ -505,7 +505,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 Feature.Bandwidth.AddScript((System.Web.UI.Page)page);
             }
         }
-        
+
         private void OnBeginRequestJavascript(object sender, EventArgs e)
         {
             HttpContext context = ((HttpApplication)sender).Context;
@@ -552,8 +552,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                             }
                             SendJavaScript(context, hash, content.ToString(), expires, WebProvider.ActiveProvider.DataSet.Published);
                         }
-
-                        context.Response.End();
+                        context.ApplicationInstance.CompleteRequest();
                     }
                 }
             }
