@@ -108,10 +108,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns></returns>
         internal static string GetTempFileName()
         {
-            return Mobile.Configuration.Support.GetFilePath(String.Format(
-                    "~/App_Data/{0}.{1}.tmp",
-                    new FileInfo(Manager.BinaryFilePath).Name,
-                    Guid.NewGuid()));
+            var fileInfo = new FileInfo(Manager.BinaryFilePath);
+
+            var fileName = String.Format(
+                "{0}.{1}.tmp",
+                fileInfo.Name,
+                Guid.NewGuid());
+
+            return Path.Combine(fileInfo.DirectoryName, fileName);
         }
 
         private static DateTime GetDataFileDate(FileInfo fileInfo)
@@ -167,8 +171,15 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 tempFileName = GetTempFileName();
 
                 // Copy the file to enable other processes to update it.
-                File.Copy(masterFile.FullName, tempFileName);
-                EventLog.Info("Created temp data file - \"{0}\"", tempFileName);
+                try
+                {
+                    File.Copy(masterFile.FullName, tempFileName);
+                    EventLog.Info("Created temp data file - \"{0}\"", tempFileName);
+                }
+                catch (IOException ex)
+                {
+                    throw new MobileException(String.Format("Could not create temporary file. Check worker process has write permissions to '{0}'. For medium trust environments ensure data file is located in App_Data.", tempFileName), ex);
+                }
             }
             return tempFileName;
         }
@@ -181,9 +192,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             try
             {
+                if (String.IsNullOrWhiteSpace(Manager.BinaryFilePath))
+                    return;
+
+                var fileInfo = new FileInfo(Manager.BinaryFilePath);
+
                 var files = Directory.GetFiles(
-                    Mobile.Configuration.Support.GetFilePath("~/App_Data"),
-                    String.Format("{0}.*.tmp", new FileInfo(Manager.BinaryFilePath).Name));
+                    fileInfo.DirectoryName,
+                    String.Format("{0}.*.tmp", fileInfo.Name));
                 foreach (var file in files)
                 {
                     try
@@ -217,28 +233,37 @@ namespace FiftyOne.Foundation.Mobile.Detection
             try
             {
                 // Does a binary file exist?
-                if (Manager.BinaryFilePath != null &&
-                    File.Exists(Manager.BinaryFilePath))
+                if (Manager.BinaryFilePath != null)
                 {
-                    binaryFileLastModified = new FileInfo(Manager.BinaryFilePath).LastWriteTimeUtc;
-                    if (Manager.MemoryMode)
+                    if (File.Exists(Manager.BinaryFilePath))
                     {
+                        binaryFileLastModified = new FileInfo(Manager.BinaryFilePath).LastWriteTimeUtc;
+                        if (Manager.MemoryMode)
+                        {
+                            EventLog.Info(String.Format(
+                                "Creating memory provider from binary data file '{0}'.",
+                                Manager.BinaryFilePath));
+                            provider = new WebProvider(MemoryFactory.Create(Manager.BinaryFilePath));
+                        }
+                        else
+                        {
+                            var tempFile = GetTempWorkingFile();
+                            EventLog.Info(String.Format(
+                                "Creating stream provider from binary data file '{0}'.",
+                                tempFile));
+                            provider = new WebProvider(StreamFactory.Create(tempFile));
+                        }
                         EventLog.Info(String.Format(
-                            "Creating memory provider from binary data file '{0}'.",
+                            "Created provider from binary data file '{0}'.",
                             Manager.BinaryFilePath));
-                        provider = new WebProvider(MemoryFactory.Create(Manager.BinaryFilePath));
                     }
                     else
                     {
-                        var tempFile = GetTempWorkingFile();
-                        EventLog.Info(String.Format(
-                            "Creating stream provider from binary data file '{0}'.",
-                            tempFile));
-                        provider = new WebProvider(StreamFactory.Create(tempFile));
+                        EventLog.Info("Data file at '{0}' could not be found. Either it does not exist or " +
+                            "there is insufficient permission to read it. Check the AppPool has read permissions " +
+                            "and the application is not running in medium trust if the data file is not in the " +
+                            "application directory.", Manager.BinaryFilePath);
                     }
-                    EventLog.Info(String.Format(
-                        "Created provider from binary data file '{0}'.",
-                        Manager.BinaryFilePath));
                 }
             }
             catch (Exception ex)
