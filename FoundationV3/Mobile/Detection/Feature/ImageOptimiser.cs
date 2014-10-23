@@ -194,7 +194,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
                 context.Response.OutputStream.Write(
                     Feature.ImageOptimiser.EmptyImage, 0, Feature.ImageOptimiser.EmptyImage.Length);
             }
-            context.Response.End();
+            context.ApplicationInstance.CompleteRequest();
         }
 
         internal static void OptimisedImageResponse(HttpContext context)
