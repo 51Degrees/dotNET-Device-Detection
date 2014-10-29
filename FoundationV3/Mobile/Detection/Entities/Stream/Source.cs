@@ -121,12 +121,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
                 {
                     File.Delete(_fileName);
                 }
-                catch (IOException ex)
+                catch (IOException)
                 {
-                    EventLog.Info(
-                        "Exception '{0}' deleting temporary file '{1}'.",
-                        ex.Message,
-                        _fileName);
+                    // Do nothing as there's nothing we can do. The developer
+                    // will need to delete the file manually. 
                 }
             }
 

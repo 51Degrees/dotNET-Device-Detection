@@ -359,45 +359,78 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns></returns>
         internal static SortedList<string, string[]> GetResults(HttpContext context)
         {
-            return GetResults(context, context.Request);
+            return GetResults(context.Request);
+        }
+
+        /// <summary>
+        /// Returns a collection that can be used to persist data across the request. If 
+        /// using .NET 4 or above the HttpRequest context items collection is used. If lower
+        /// versions then the current context, if it exists is used. If there is no collection
+        /// available then null is returned and the requesting routine will need to work
+        /// without the benefit of persisting the detection result across the request.
+        /// </summary>
+        /// <remarks>
+        /// The implementation varies by .NET version.
+        /// </remarks>
+        /// <param name="request"></param>
+        /// <returns>A collection for storing data across the request or null</returns>
+        internal static System.Collections.IDictionary GetContextItems(HttpRequest request)
+        {
+            System.Collections.IDictionary items = null;
+#if VER4
+            if (request.RequestContext != null &&
+                request.RequestContext.HttpContext !=null)
+            {
+                items = request.RequestContext.HttpContext.Items;
+            }
+#else
+            if (HttpContext.Current != null)
+            {
+                items = HttpContext.Current.Items;
+            }
+#endif
+            return items;
         }
 
         /// <summary>
         /// Returns the match results for the request, or creates one if one does not
-        /// already exist. This method allows detection if the request is not related
-        /// to the context, ie SetOverridenBrowser has been used.
+        /// already exist.
         /// </summary>
-        /// <param name="context">Context needing to find the matching device</param>
         /// <param name="request"></param>
         /// <returns></returns>
-        internal static SortedList<string, string[]> GetResults(HttpContext context, HttpRequest request)
+        internal static SortedList<string, string[]> GetResults(HttpRequest request)
         {
             var matchKey = Constants.MatchKey + (request.UserAgent != null ? request.UserAgent.GetHashCode().ToString() : "");
-            var hasOverrides = Feature.ProfileOverride.HasOverrides(context);
-            var items = context.Items;
-            var results = items[matchKey] as SortedList<string, string[]>;
+            var hasOverrides = Feature.ProfileOverride.HasOverrides(request);
+            
+            // Get a collection to store data across the request. One may not be returned
+            // depending of the configuration of the server or the current stage in the 
+            // pipeline.
+            var items = GetContextItems(request);
+
+            // Get the results from the items collection if if exists already.
+            var results = items != null ? items[matchKey] as SortedList<string, string[]> : null;
 
             if (results == null || hasOverrides)
             {
                 // A lock is needed in case 2 simultaneous operations are done on the
-                // context at once. This is a rare use case but ensures robustness.
-                lock (context)
+                // request at the sametime. This is a rare use case but ensures robustness.
+                lock (request)
                 {
-                    results = items[matchKey] as SortedList<string, string[]>;
+                    results = items != null ? items[matchKey] as SortedList<string, string[]> : null;
                     if (results == null || hasOverrides)
                     {
                         // Get the match and store the list of properties and values 
                         // in the context and session.
-
-                        var headers = GetRequiredHeaders(context, request);
-
-                        var match = ActiveProvider.Match(headers);
+                        var match = ActiveProvider.Match(GetRequiredHeaders(request));
                         if (match != null)
                         {
                             // Allow other feature detection methods to override profiles.
-                            Feature.ProfileOverride.Override(context, match);
-
-                            items[matchKey] = match.Results;
+                            Feature.ProfileOverride.Override(request, match);
+                            if (items != null)
+                            {
+                                items[matchKey] = match.Results;
+                            }
                             results = match.Results;
                         }
                     }
@@ -407,18 +440,26 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
 
         /// <summary>
-        /// Gets the required headers. Headers from HttpContext and HttpRequest may not be the same
-        /// if the MVC method SetBrowserOverride has been use.
+        /// Gets the required headers. If the MVC method SetBrowserOverride has been used
+        /// the user agent will be escapted and may contain + characters which need to 
+        /// be removed.
         /// </summary>
-        /// <param name="context"></param>
+        /// <remarks>
+        /// Requests after SetOverrideBrowser are still expected to use the overriden alias.
+        /// The override useragent is stored in cookie which ASP.NET unpacks automatically, however
+        /// it is url encoded with pluses instead of spaces. This code transforms the useragent back,
+        /// but a new NameValueCollection is needed as the original collection cannot be modified.
+        /// </remarks>
         /// <param name="request"></param>
-        /// <returns></returns>
-        private static NameValueCollection GetRequiredHeaders(HttpContext context, HttpRequest request)
+        /// <returns>A clean header collection ready for device detection</returns>
+        private static NameValueCollection GetRequiredHeaders(HttpRequest request)
         {
             // A useragent might be url encoded if SetOverrideBrowser was used in a previous request.
-            // A new header collection is required so that they can be modified.
+            // This is checked by comparing the escaped string is different against the original.
+
             NameValueCollection headers;
-            if (request.UserAgent != context.Request.UserAgent)
+            var escapedUA = Uri.UnescapeDataString(request.UserAgent).Replace('+', ' ');
+            if (escapedUA != request.UserAgent)
             {
                 // Requests after SetOverrideBrowser are still expected to use the overriden alias.
                 // The override useragent is stored in cookie which ASP.NET unpacks automatically, however
@@ -427,13 +468,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 headers = new NameValueCollection(request.Headers.Count, request.Headers);
                 if (headers[Constants.UserAgentHeader] != null)
                 {
-                    headers[Constants.UserAgentHeader] =
-                        Uri.UnescapeDataString(headers[Constants.UserAgentHeader]).Replace('+', ' ');
+                    headers[Constants.UserAgentHeader] = escapedUA;
                 }
             }
             else
             {
-                // Use the original headers as there's no override in place.
+                // No MVC defect so use the headers unaltered.
                 headers = request.Headers;
             }
             return headers;

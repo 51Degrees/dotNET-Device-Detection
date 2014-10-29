@@ -362,7 +362,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         {
             try
             {
-                if (NewDevice.Enabled &&
+                 if (NewDevice.Enabled &&
                     context.Request.HttpMethod == "GET" &&
                     context.Handler != null &&
                     IsPageType(context.Handler.GetType()) &&
