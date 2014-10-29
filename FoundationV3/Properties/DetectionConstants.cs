@@ -99,6 +99,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         #region Internal Constants
 
+        internal const string MvcBrowserOverrideCookie = ".ASPXBrowserOverride";
+
         /// <summary>
         /// The copyright message to add to all javascript. This message can not 
         /// be altered by 3rd parties.

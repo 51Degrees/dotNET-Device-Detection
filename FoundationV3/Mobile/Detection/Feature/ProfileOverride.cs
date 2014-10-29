@@ -127,11 +127,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
         /// <summary>
         /// Determines if the request contains overrides for any existing values.
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="request"></param>
         /// <returns></returns>
-        internal static bool HasOverrides(HttpContext context)
+        internal static bool HasOverrides(HttpRequest request)
         {
-            var cookie = context.Request.Cookies[Constants.ProfileOverrideCookieName];
+            var cookie = request.Cookies[Constants.ProfileOverrideCookieName];
             return cookie != null && cookie.Values.Count > 0;
         }
 
@@ -171,12 +171,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
         /// <summary>
         /// Overrides profile IDs with ones in the cookie if present.
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="request"></param>
         /// <param name="match"></param>
-        internal static void Override(HttpContext context, Match match)
+        internal static void Override(HttpRequest request, Match match)
         {
             // Get the profile Ids from the cookie.
-            var profileIds = GetOverrideProfileIds(context.Request);
+            var profileIds = GetOverrideProfileIds(request);
             
             foreach (var profileId in profileIds)
             {
