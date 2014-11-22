@@ -38,6 +38,6 @@ using System.Security;
 //      Revision
 
 [assembly: AssemblyVersion("3.1.8.2")]
-[assembly: AssemblyFileVersion("3.1.8.1")]
+[assembly: AssemblyFileVersion("3.1.8.2")]
 [assembly: NeutralResourcesLanguage("en-GB")]
 [assembly: AllowPartiallyTrustedCallers]
