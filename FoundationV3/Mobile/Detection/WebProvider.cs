@@ -458,7 +458,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
             // This is checked by comparing the escaped string is different against the original.
 
             NameValueCollection headers;
-            var escapedUA = Uri.UnescapeDataString(request.UserAgent).Replace('+', ' ');
+            var escapedUA = request.UserAgent != null ?
+                Uri.UnescapeDataString(request.UserAgent).Replace('+', ' ') :
+                null;
             if (escapedUA != request.UserAgent)
             {
                 // Requests after SetOverrideBrowser are still expected to use the overriden alias.
