@@ -16,7 +16,7 @@ using System.Security;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("51 Degrees Mobile Experts Limited")]
 [assembly: AssemblyProduct("51degrees - Foundation")]
-[assembly: AssemblyCopyright("Copyright 51 Degrees Mobile Experts Limited 2009 - 2014")]
+[assembly: AssemblyCopyright("Copyright 51 Degrees Mobile Experts Limited 2009 - 2015")]
 [assembly: AssemblyTrademark("51Degrees")]
 [assembly: AssemblyCulture("")]
 
@@ -37,7 +37,7 @@ using System.Security;
 //      Build Number
 //      Revision
 
-[assembly: AssemblyVersion("3.1.8.3")]
-[assembly: AssemblyFileVersion("3.1.8.3")]
+[assembly: AssemblyVersion("3.1.9.1")]
+[assembly: AssemblyFileVersion("3.1.9.1")]
 [assembly: NeutralResourcesLanguage("en-GB")]
 [assembly: AllowPartiallyTrustedCallers]
