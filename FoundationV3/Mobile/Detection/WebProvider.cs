@@ -120,8 +120,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         private static DateTime GetDataFileDate(FileInfo fileInfo)
         {
-            var dataset = StreamFactory.Create(fileInfo.FullName);
-            return dataset.Published;
+            using (var dataset = StreamFactory.Create(fileInfo.FullName))
+            {
+                var date = dataset.Published;
+                return date;
+            }
         }
 
         /// <summary>
