@@ -744,7 +744,7 @@ namespace FiftyOne.Foundation.UI.Web
             if (ImagesEnabled)
             {
                 var images = GetHardwareImages(profile);
-                if (images != null)
+                if (images != null && images.Length > 0)
                 {
                     // Sets the 1st item in the unordered list to be the images
                     // associated with the profile.
@@ -835,7 +835,11 @@ namespace FiftyOne.Foundation.UI.Web
             if (properties.Count() > 0)
             {
                 writer.WriteStartElement("li");
-                writer.WriteAttributeString("id", category);
+                writer.WriteAttributeString("id", 
+                    _removeBadCharacters.Replace(String.Format(
+                        "{0}_{1}", 
+                        profile.Component.Name, 
+                        category), ""));
                 writer.WriteStartElement("h2");
                 writer.WriteString(category);
                 writer.WriteEndElement();
@@ -858,14 +862,14 @@ namespace FiftyOne.Foundation.UI.Web
             if (values.Count() > 0)
             {
                 writer.WriteStartElement("li");
-                writer.WriteAttributeString("id", Regex.Replace(property.Name, @"[^\w\d-]", ""));
+                writer.WriteAttributeString("id", _removeBadCharacters.Replace(property.Name, ""));
                 writer.WriteStartElement("h3");
-                writer.WriteAttributeString("title", property.Description);
+                writer.WriteAttributeString("title", property.Description.Trim());
                 writer.WriteString(property.Name);
                 writer.WriteEndElement();
 
                 writer.WriteStartElement("ul");
-                switch(property.Name)
+                switch (property.Name)
                 {
                     case "HardwareImages":
                         foreach (var value in values)
@@ -955,7 +959,7 @@ namespace FiftyOne.Foundation.UI.Web
 
             if (pages > 1)
             {
-                BuildModelsPager(writer, key, value, pages, PageIndex, title);
+                BuildModelsPager(writer, key, value, pages, PageIndex, title, "top");
             }
 
             writer.WriteStartElement("div");
@@ -973,11 +977,11 @@ namespace FiftyOne.Foundation.UI.Web
 
             if (pages > 1)
             {
-                BuildModelsPager(writer, key, value, pages, PageIndex, title);
+                BuildModelsPager(writer, key, value, pages, PageIndex, title,"bottom");
             }
         }
 
-        private void BuildModelsPager(XmlWriter writer, string key, string value, int pages, int page, string title)
+        private void BuildModelsPager(XmlWriter writer, string key, string value, int pages, int page, string title, string idPrefix)
         {
             writer.WriteStartElement("div");
             writer.WriteAttributeString("class", PagerCssClass);
@@ -990,7 +994,7 @@ namespace FiftyOne.Foundation.UI.Web
                 page,
                 0,
                 "<<",
-                "first",
+                String.Format("{0}_first", idPrefix),
                 String.Format("{0} results page 1", title));
             BuildModelPagerLink(
                 writer,
@@ -999,7 +1003,7 @@ namespace FiftyOne.Foundation.UI.Web
                 page,
                 page == 0 ? 0 : page - 1,
                 "<",
-                "previous",
+                String.Format("{0}_previous", idPrefix),
                 String.Format("{0} previous results", title));
 
             for (int index = 0; index < pages; index++)
@@ -1011,7 +1015,7 @@ namespace FiftyOne.Foundation.UI.Web
                     page,
                     index,
                     String.Format("{0}", index + 1),
-                    String.Format("pager{0}", index),
+                    String.Format("{0}_pager{1}", idPrefix, index),
                     String.Format("{0} results {1} to {2}", 
                         title, 
                         (index * DevicesLimit) + 1, 
@@ -1023,16 +1027,16 @@ namespace FiftyOne.Foundation.UI.Web
                 key,
                 value,
                 page, 
-                page == pages - 1 ? pages - 1 : page + 1, ">", 
-                "next",
+                page == pages - 1 ? pages - 1 : page + 1, ">",
+                String.Format("{0}_next", idPrefix),
                 String.Format("{0} next results", title));
             BuildModelPagerLink(
                 writer,
                 key,
                 value,
                 page,
-                pages - 1, ">>", 
-                "last",
+                pages - 1, ">>",
+                String.Format("{0}_last", idPrefix),
                 String.Format("{0} last page", title));
 
             writer.WriteEndElement();
@@ -1042,7 +1046,7 @@ namespace FiftyOne.Foundation.UI.Web
         private void BuildModelPagerLink(XmlWriter writer, string key, string value, int Page, int index, string text, string id, string title)
         {
             writer.WriteStartElement("li");
-            writer.WriteAttributeString("id", Regex.Replace(id, @"[^\w\d-]", ""));
+            writer.WriteAttributeString("id", _removeBadCharacters.Replace(id, ""));
             if (index != Page)
             {
                 writer.WriteStartElement("a");
@@ -1080,29 +1084,11 @@ namespace FiftyOne.Foundation.UI.Web
 
         private void BuildModelSummary(XmlWriter writer, string key, string value, Profile profile)
         {
-            var link = MakeQueryString(new NameValueCollection() {
+            WriteDeviceProfile(writer, profile, MakeQueryString(new NameValueCollection() {
                 { key, value },
                 { "model", profile["HardwareModel"].ToString() },
                 { "deviceId", profile.ProfileId.ToString() },
-            });
-            writer.WriteStartElement("li");
-            writer.WriteStartElement("a");
-            writer.WriteAttributeString("href", link);
-            if (profile["HardwareName"] != null)
-            {
-                writer.WriteAttributeString("title", String.Join(
-                    ", ", 
-                    profile["HardwareName"].Select(i => i.Name).ToArray()));
-            }
-            writer.WriteStartElement("div");
-            writer.WriteString(profile["HardwareModel"].ToString());
-            writer.WriteEndElement();
-            BuildHardwareImages(writer, profile);
-            writer.WriteStartElement("div");
-            writer.WriteString(profile["HardwareFamily"].ToString());
-            writer.WriteEndElement();
-            writer.WriteEndElement();
-            writer.WriteEndElement();
+            }));
         }
 
         private void BuildVendors(XmlWriter writer)
@@ -1167,7 +1153,7 @@ namespace FiftyOne.Foundation.UI.Web
         {
             writer.WriteStartElement("li");
             writer.WriteAttributeString("style", "display: none;");
-            writer.WriteAttributeString("id", Regex.Replace(String.Format("{0}Values", c), @"[^\w\d-]", ""));
+            writer.WriteAttributeString("id", _removeBadCharacters.Replace(String.Format("{0}Values", c), ""));
             writer.WriteStartElement("ul");
             foreach (var vendor in vendors)
             {

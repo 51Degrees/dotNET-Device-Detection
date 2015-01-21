@@ -62,7 +62,6 @@ namespace FiftyOne.Foundation.UI.Web
         private static object _lock = new object();
         private static List<Profile> _topModels = null;
 
-        private DataList _models;
         private bool _imagesEnabled = true;
         private int _deviceAmount = 5;
         private string _vendorKey = "Vendor";
@@ -183,46 +182,33 @@ namespace FiftyOne.Foundation.UI.Web
         protected override void OnPreRender(EventArgs e)
         {
             base.OnPreRender(e);
-            if (String.IsNullOrEmpty(Description) == false)
+
+            var xml = new StringBuilder();
+            using (var writer = XmlWriter.Create(xml, new XmlWriterSettings()
             {
-                _container.Controls.Add(CreateHeaderPanel());
+                OmitXmlDeclaration = true,
+                Encoding = Response.HeaderEncoding,
+                ConformanceLevel = ConformanceLevel.Fragment
+            }))
+            {
+                writer.WriteStartElement("ul");
+                foreach(var profile in TopModels)
+                {
+                    WriteDeviceProfile(writer, profile, GetDeviceLink(profile));
+                }
+                writer.WriteEndElement();
             }
-            _models = CreateDeviceDataList();
-            _container.Controls.Add(_models);
-            // data info in footer is not required
+            _container.Controls.Add(new Literal() { Text = xml.ToString() });
+            
+            // Data info in footer is not required
             base.FooterEnabled = false;
-            _models.DataSource = TopModels;
-            _models.DataBind();
 
             _container.CssClass = TopDevicesCssClass;
         }
-
+        
         #endregion
 
         #region Private Methods
-
-        private DataList CreateDeviceDataList()
-        {
-            DataList dataList = new DataList();
-            dataList.ItemDataBound += new DataListItemEventHandler(DeviceDataList_ItemDataBound);
-            dataList.ItemTemplate = new DeviceTemplate();
-            dataList.RepeatLayout = RepeatLayout.Flow;
-            dataList.RepeatDirection = RepeatDirection.Horizontal;
-            return dataList;
-        }
-
-        private Panel CreateHeaderPanel()
-        {
-            Panel panel = new Panel();
-            panel.CssClass = DescriptionCssClass;
-            panel.DefaultButton = null;
-
-            Literal headerText = new Literal();
-            headerText.Text = String.Format(Description, DeviceAmount);
-
-            panel.Controls.Add(headerText);
-            return panel;
-        }
 
         /// <summary>
         /// Gets a list of devices to show, ordering by popularity and returning only as many devices as necessary.
@@ -258,80 +244,17 @@ namespace FiftyOne.Foundation.UI.Web
                 return _topModels;
             }
         }
-
-        private static int _maxDate = DateTime.UtcNow.Year * 12 + DateTime.UtcNow.Month;
-
-        private void DeviceDataList_ItemDataBound(object sender, DataListItemEventArgs e)
-        {
-            if (e.Item.DataItem != null &&
-                e.Item.DataItem is Profile)
-            {
-                Profile profile = e.Item.DataItem as Profile;
-
-                Panel panelContainer = e.Item.FindControl("Device") as Panel;
-                Panel panelModel = e.Item.FindControl("Model") as Panel;
-                Panel panelImage = e.Item.FindControl("Image") as Panel;
-                Panel panelName = e.Item.FindControl("Name") as Panel;
-
-                // the url of the page this device will link to
-                string deviceUrl = GetDeviceLink(profile);
-
-                HyperLink linkModel = new HyperLink();
-                HyperLink linkName = new HyperLink();
-
-                linkModel.Text = String.Format(
-                    "{0} - {1}",
-                    profile["HardwareVendor"],
-                    profile["HardwareModel"]);
-
-                linkModel.NavigateUrl = deviceUrl;
-                linkName.NavigateUrl = deviceUrl;
-                linkName.Text = profile["HardwareName"].ToString();
-
-
-                if (_imagesEnabled)
-                {
-                    var xml = new StringBuilder();
-                    using (var writer = XmlWriter.Create(xml, new XmlWriterSettings()
-                    {
-                        OmitXmlDeclaration = true,
-                        Encoding = Response.HeaderEncoding,
-                        ConformanceLevel = ConformanceLevel.Fragment
-                    }))
-                    {
-                        writer.WriteStartElement("a");
-                        writer.WriteAttributeString("title", profile.ToString());
-                        writer.WriteAttributeString("href", ResolveClientUrl(deviceUrl));
-                        BuildHardwareImages(writer, profile);
-                        writer.WriteEndElement();
-                    }
-                    var literal = new Literal();
-                    literal.Text = xml.ToString();
-                    panelImage.Controls.Add(literal);
-                }
-
-                panelModel.Controls.Add(new Literal() { Text = "<h2>" });
-                panelModel.Controls.Add(linkModel);
-                panelModel.Controls.Add(new Literal() { Text = "</h2>" });
-
-                panelName.Controls.Add(new Literal() { Text = "<h3>" });
-                panelName.Controls.Add(linkName);
-                panelName.Controls.Add(new Literal() { Text = "</h3>" });
-
-                panelModel.CssClass = ModelCssClass;
-                panelName.CssClass = NameCssClass;
-                panelImage.CssClass = ImagesCssClass;
-                panelContainer.CssClass = ItemCssClass;
-            }
-        }
-
+        
+        /// <summary>
+        /// Gets a URL for the device provided.
+        /// </summary>
+        /// <param name="profile"></param>
+        /// <returns></returns>
         private string GetDeviceLink(Profile profile)
         {
-            // add device query strings
             NameValueCollection queryStrings = new NameValueCollection();
             queryStrings.Add(_vendorKey, profile["HardwareVendor"].ToString());
             queryStrings.Add(_modelKey, profile["HardwareModel"].ToString());
-
             string baseUrl = DeviceUrl == null ? Request.Url.AbsolutePath : DeviceUrl;
             return GetNewUrl(baseUrl, queryStrings);
         }
