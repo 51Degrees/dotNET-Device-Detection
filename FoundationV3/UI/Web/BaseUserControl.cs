@@ -30,6 +30,7 @@ using FiftyOne.Foundation.Mobile.Detection.Entities;
 using FiftyOne.Foundation.Mobile.Detection;
 using System.Linq;
 using System.Xml;
+using System.Text.RegularExpressions;
 
 namespace FiftyOne.Foundation.UI.Web
 {
@@ -78,6 +79,12 @@ namespace FiftyOne.Foundation.UI.Web
         #endregion
 
         #region Fields
+        
+        /// <summary>
+        /// Used to remove white space and other characters that aren't valid 
+        /// ID attributes in HTML.
+        /// </summary>
+        protected static readonly Regex _removeBadCharacters = new Regex(@"[^\w\d-]", RegexOptions.Compiled);
 
         /// <summary>
         /// An array of the free data set names.
@@ -454,6 +461,7 @@ namespace FiftyOne.Foundation.UI.Web
             if (_logoEnabled)
             {
                 System.Web.UI.WebControls.Image image = new System.Web.UI.WebControls.Image();
+                image.AlternateText = Constants.LogoAltText;
                 image.Style.Add("border", "none");
                 image.Style.Add("margin", "5px");
                 image.Style.Add("float", "right");
@@ -467,6 +475,46 @@ namespace FiftyOne.Foundation.UI.Web
         #endregion
 
         #region Methods
+        
+        /// <summary>
+        /// Writes the hardware profile to the writer.
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="profile"></param>
+        /// <param name="deviceUrl"></param>
+        protected void WriteDeviceProfile(XmlWriter writer, Profile profile, string deviceUrl)
+        {
+            writer.WriteStartElement("li");
+            writer.WriteAttributeString("class", ItemCssClass);
+
+            // Write the model of the device.
+            writer.WriteStartElement("h2");
+            writer.WriteAttributeString("class", ModelCssClass);
+            WriteLinkStart(writer, profile, deviceUrl, String.Format("{0} - {1}",
+                profile["HardwareVendor"],
+                profile["HardwareModel"]));
+            writer.WriteEndElement();
+            writer.WriteEndElement();
+
+            // Write the image.
+            writer.WriteStartElement("div");
+            writer.WriteAttributeString("class", ImagesCssClass);
+            writer.WriteStartElement("a");
+            writer.WriteAttributeString("href", deviceUrl);
+            writer.WriteAttributeString("title", profile.ToString());
+            BuildHardwareImages(writer, profile);
+            writer.WriteEndElement();
+            writer.WriteEndElement();
+
+            // Write the name of the device.
+            writer.WriteStartElement("h3");
+            writer.WriteAttributeString("class", NameCssClass);
+            WriteLinkStart(writer, profile, deviceUrl, profile["HardwareName"].ToString());
+            writer.WriteEndElement();
+            writer.WriteEndElement();
+
+            writer.WriteEndElement();
+        }
 
         /// <summary>
         /// Adds thee HTML for the rotating images for the profile to the writer.
@@ -572,6 +620,15 @@ namespace FiftyOne.Foundation.UI.Web
         #endregion
 
         #region Static Methods
+
+
+        private static void WriteLinkStart(XmlWriter writer, Profile profile, string deviceUrl, string text)
+        {
+            writer.WriteStartElement("a");
+            writer.WriteAttributeString("href", deviceUrl);
+            writer.WriteAttributeString("title", profile.ToString());
+            writer.WriteValue(text);
+        }
 
         /// <summary>
         /// Replaces the tag with the value in the text provided.

@@ -22,7 +22,6 @@
 using System;
 using System.Linq;
 using System.Web.UI.WebControls;
-using FiftyOne.Foundation.Mobile.Detection;
 using FiftyOne.Foundation.Mobile.Detection.Entities;
 using System.Text;
 using System.Xml;
@@ -37,9 +36,24 @@ namespace FiftyOne.Foundation.UI.Web
     {
         #region Fields
 
-        private Literal _legend = new Literal();
-        private Literal _instructions = new Literal();
+        /// <summary>
+        /// The HTML for the legend at the top of the page.
+        /// </summary>
+        private readonly Literal _legend = new Literal();
+        
+        /// <summary>
+        /// The HTML for the instructions on using the page.
+        /// </summary>
+        private readonly Literal _instructions = new Literal();
+
+        /// <summary>
+        /// CSS class used for the category.
+        /// </summary>
         private string _categoryCssClass = "category";
+
+        /// <summary>
+        /// CSS class used for the type of property.
+        /// </summary>
         private string _typeCssClass = "type";
 
         #endregion
@@ -133,17 +147,18 @@ namespace FiftyOne.Foundation.UI.Web
                     i.Name);
             if (generalProperties.Count() > 0)
             {
-                BuildGeneralProperties(writer, generalProperties);
+                BuildGeneralProperties(writer, component, generalProperties);
             }
 
             writer.WriteEndElement();
             writer.WriteEndElement();
         }
 
-        private void BuildGeneralProperties(XmlWriter writer, IOrderedEnumerable<Property> generalProperties)
+        private void BuildGeneralProperties(XmlWriter writer, Component component, IOrderedEnumerable<Property> generalProperties)
         {
             writer.WriteStartElement("li");
-            writer.WriteAttributeString("id", "Miscellaneous");
+            writer.WriteAttributeString("id",
+                _removeBadCharacters.Replace(String.Format("{0}_Miscellaneous", component.Name), ""));
             writer.WriteAttributeString("class", CategoryCssClass);
             writer.WriteStartElement("h2");
             writer.WriteString("Miscellaneous");
@@ -160,7 +175,8 @@ namespace FiftyOne.Foundation.UI.Web
         private void BuildProperties(XmlWriter writer, Component component, string category)
         {
             writer.WriteStartElement("li");
-            writer.WriteAttributeString("id", category);
+            writer.WriteAttributeString("id",
+                _removeBadCharacters.Replace(String.Format("{0}_{1}", component.Name, category), ""));
             writer.WriteAttributeString("class", CategoryCssClass);
             writer.WriteStartElement("h2");
             writer.WriteString(category);
@@ -182,7 +198,7 @@ namespace FiftyOne.Foundation.UI.Web
             writer.WriteStartElement("div");
 
             writer.WriteStartElement("h3");
-            writer.WriteAttributeString("id", Regex.Replace(property.Name, @"[^\w\d-]", ""));
+            writer.WriteAttributeString("id", _removeBadCharacters.Replace(property.Name, ""));
             writer.WriteAttributeString("class", NameCssClass);
             
             if (property.Url != null)
