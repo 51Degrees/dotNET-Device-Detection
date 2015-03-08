@@ -503,7 +503,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="match">Information about the detection</param>
         private static void Evaluate(Match match)
         {
-            while (match.NextCharacterPositionIndex > 0)
+            while (match.NextCharacterPositionIndex >= 0)
             {
                 match._rootNodesEvaluated++;
                 var node = match.DataSet.RootNodes[match.NextCharacterPositionIndex].GetCompleteNode(match);
