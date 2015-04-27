@@ -27,6 +27,7 @@ using System.Linq;
 using FiftyOne.Foundation.Mobile.Detection.Entities;
 using System.Text;
 using System.Xml;
+using System.Collections;
 
 namespace FiftyOne.Foundation.UI.Web
 {
@@ -36,7 +37,27 @@ namespace FiftyOne.Foundation.UI.Web
     public class TopDevices : BaseDataControl
     {
         #region Classes
-        
+
+        /// <summary>
+        /// Used to ensure only one model from each family is included in the results.
+        /// </summary>
+        private class ProfileDistinctEqualityComparer : IEqualityComparer<Profile>
+        {
+            public bool Equals(Profile x, Profile y)
+            {
+                if (x["HardwareFamily"] != null && y["HardwareFamily"] != null)
+                {
+                    return x["HardwareFamily"].ToString().Equals(y["HardwareFamily"].ToString());
+                }
+                return true;
+            }
+
+            public int GetHashCode(Profile obj)
+            {
+                return obj["HardwareFamily"].ToString().GetHashCode();
+            }
+        }
+
         /// <summary>
         /// Used to order the list of devices to determine which ones
         /// are top.
@@ -59,6 +80,8 @@ namespace FiftyOne.Foundation.UI.Web
 
         #region Fields
 
+        private static ProfileComparer _profileComparer = new ProfileComparer();
+        private static ProfileDistinctEqualityComparer _profileEqualityComparer = new ProfileDistinctEqualityComparer();
         private static object _lock = new object();
         private static List<Profile> _topModels = null;
 
@@ -231,11 +254,11 @@ namespace FiftyOne.Foundation.UI.Web
                                     i["IsMobile"].ToBool() == true &&
                                     i["HardwareVendor"] != null &&
                                     i["HardwareVendor"].Contains(DataSet.GetProperty("HardwareVendor").DefaultValue) == false &&
-                                    i["HardwareModel"] != null &&
-                                    i["HardwareModel"].Contains(DataSet.GetProperty("HardwareModel").DefaultValue) == false &&
+                                    i["HardwareFamily"] != null &&
+                                    i["HardwareFamily"].Contains(DataSet.GetProperty("HardwareFamily").DefaultValue) == false &&
                                     i["HardwareImages"] != null &&
-                                    i["HardwareImages"].Any(v => v.Name.StartsWith("Image Unavailable")) == false).ToList();
-                                list.Sort(new ProfileComparer());
+                                    i["HardwareImages"].Any(v => v.Name.StartsWith("Image Unavailable")) == false).Distinct(_profileEqualityComparer).ToList();
+                                list.Sort(_profileComparer);
                                 _topModels = list.Take(DeviceAmount).ToList();
                             }
                         }
