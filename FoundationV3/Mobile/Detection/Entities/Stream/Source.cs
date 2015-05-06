@@ -86,7 +86,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         {
             if (_buffer != null)
                 return new MemoryStream(_buffer);
-            return File.OpenRead(_fileName);
+            return new FileStream(_fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
         }
 
         /// <summary>
@@ -111,26 +111,30 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
             if (_readers != null)
             {
                 foreach (var reader in _readers)
+                {
                     reader.Close();
+                }
             }
+            DeleteFile();
+        }
 
-            // If the file is a temporary one ensure it's deleted.
-            if (_fileName.EndsWith("tmp"))
+        /// <summary>
+        /// Delete the file if it's a temporary file.
+        /// </summary>
+        private void DeleteFile()
+        {
+            if (!string.IsNullOrEmpty(_fileName) && _fileName.Contains(".tmp"))
             {
                 try
                 {
                     File.Delete(_fileName);
                 }
-                catch (IOException ex)
+                catch (IOException)
                 {
-                    var message = String.Format(
-                        "Exception '{0}' deleting temporary file '{1}'.",
-                        ex.Message,
-                        _fileName);
-                    throw new MobileException(message, ex);
+                    // Do nothing as the cause is likely to be because the
+                    // file is in use by another process.
                 }
             }
-
         }
 
         #endregion
