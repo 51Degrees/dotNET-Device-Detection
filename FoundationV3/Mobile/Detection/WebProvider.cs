@@ -434,6 +434,26 @@ namespace FiftyOne.Foundation.Mobile.Detection
                             {
                                 items[matchKey] = match.Results;
                             }
+
+                            // Add info on match method, rank and difference where 
+                            // the match method is not equal to none.
+                            match.Results.Add("MatchMethod",
+                                new string[] { match.Method.ToString() });
+                            if (match.Method != MatchMethods.None)
+                            {
+                                match.Results.Add("MatchDifference",
+                                    new string[] { match.Difference.ToString() });
+                                match.Results.Add("MatchSignatureRank",
+                                    new string[] { match.Signature.Rank.ToString() });
+                            }
+                            else
+                            {
+                                match.Results.Add("MatchDifference",
+                                    new string[] { "N/A" });
+                                match.Results.Add("MatchSignatureRank",
+                                    new string[] { "N/A" });
+                            }
+
                             results = match.Results;
                         }
                     }
