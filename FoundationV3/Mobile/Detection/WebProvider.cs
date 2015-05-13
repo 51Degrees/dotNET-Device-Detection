@@ -118,6 +118,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
             return Path.Combine(fileInfo.DirectoryName, fileName);
         }
 
+        /// <summary>
+        /// Creates a stream data set for the file provided and 
+        /// returns the published data of the file. Throws an 
+        /// exception if there's a problem accessing the file.
+        /// </summary>
+        /// <param name="fileInfo"></param>
+        /// <returns></returns>
         private static DateTime GetDataFileDate(FileInfo fileInfo)
         {
             using (var dataset = StreamFactory.Create(fileInfo.FullName))
@@ -128,14 +135,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
 
         /// <summary>
-        /// Gets the file path of a temporary data file for use with a
-        /// stream provider. This method will create a file if one does
-        /// not already exist.
+        /// Returns a data set initialised with a temporary data file.
+        /// If an existing one is present that can be used then it will
+        /// be favoured. If a new one is needed then one will be created.
         /// </summary>
         /// <returns></returns>
-        private static string GetTempWorkingFile()
+        private static DataSet GetTempFileDataSet()
         {
-            string tempFileName = null;
+            DataSet dataSet = null;
             var masterFile = new FileInfo(Manager.BinaryFilePath);
             if (masterFile.Exists)
             {
@@ -143,48 +150,72 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 var masterDate = GetDataFileDate(masterFile);
 
                 // Check if there are any other tmp files.
-                var fileNames = Directory.GetFiles(Mobile.Configuration.Support.GetFilePath("~/App_Data"));
+                var fileNames = Directory.GetFiles(
+                    Mobile.Configuration.Support.GetFilePath("~/App_Data"), 
+                    "*.tmp");
                 foreach (var fileName in fileNames)
                 {
                     var file = new FileInfo(fileName);
-                    if(file.FullName != masterFile.FullName &&
-                    file.Name.StartsWith(masterFile.Name) &&
-                        file.Extension == ".tmp")
+                    if( file.Exists &&
+                        file.FullName != masterFile.FullName &&
+                        file.Name.StartsWith(masterFile.Name))
                     {
                         // Check if temp file matches date of the master file.
                         try
                         {
-                            var tempDate = GetDataFileDate(file);
-                            if (tempDate == masterDate)
+                            dataSet = StreamFactory.Create(file.FullName);
+                            if (dataSet.Published == masterDate)
                             {
-                                EventLog.Info("Using existing temp data file with published data {0} - \"{1}\"", tempDate.ToShortDateString(), file.FullName);
-                                return fileName;
+                                EventLog.Info(
+                                    "Using existing temp data file with published data {0} - \"{1}\"",
+                                    dataSet.Published.ToShortDateString(),
+                                    file.FullName);
+                                return dataSet;
+                            }
+                            else
+                            {
+                                // The data set must be disposed of to release
+                                // any file handles.
+                                dataSet.Dispose();
                             }
                         }
                         catch (Exception ex) // Exception may occur if file is not a 51Degrees file, no action is needed.
                         {
                             EventLog.Info("Error while reading temporary data file \"{0}\": {1}", file.FullName, ex.Message);
+                            // Ensure an open data set is disposed of properly
+                            // so that any file handles are released.
+                            if (dataSet != null)
+                            {
+                                dataSet.Dispose();
+                            }
                         }
                     }
                 }
                 
                 // No suitable temp file was found, create one in the
-                //App_Data folder to enable the source file to be updated
+                // App_Data folder to enable the source file to be updated
                 // without stopping the web site.
-                tempFileName = GetTempFileName();
+                var tempFileName = GetTempFileName();
 
                 // Copy the file to enable other processes to update it.
                 try
                 {
                     File.Copy(masterFile.FullName, tempFileName);
                     EventLog.Info("Created temp data file - \"{0}\"", tempFileName);
+                    dataSet = StreamFactory.Create(tempFileName);
                 }
                 catch (IOException ex)
                 {
+                    // Ensure an open data set is disposed of properly
+                    // so that any file handles are released.
+                    if (dataSet != null)
+                    {
+                        dataSet.Dispose();
+                    }
                     throw new MobileException(String.Format("Could not create temporary file. Check worker process has write permissions to '{0}'. For medium trust environments ensure data file is located in App_Data.", tempFileName), ex);
                 }
             }
-            return tempFileName;
+            return dataSet;
         }
 
         /// <summary>
@@ -250,11 +281,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         }
                         else
                         {
-                            var tempFile = GetTempWorkingFile();
-                            EventLog.Info(String.Format(
-                                "Creating stream provider from binary data file '{0}'.",
-                                tempFile));
-                            provider = new WebProvider(StreamFactory.Create(tempFile));
+                            provider = new WebProvider(GetTempFileDataSet());
                         }
                         EventLog.Info(String.Format(
                             "Created provider from binary data file '{0}'.",

@@ -666,9 +666,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                 Nodes.Dispose();
             if (RootNodes != null)
                 RootNodes.Dispose();
-
-
-
         }
 
         /// <summary>

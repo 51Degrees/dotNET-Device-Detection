@@ -214,12 +214,15 @@ namespace FiftyOne.Foundation.UI.Web
                 ConformanceLevel = ConformanceLevel.Fragment
             }))
             {
-                writer.WriteStartElement("ul");
-                foreach(var profile in TopModels)
+                if (TopModels != null)
                 {
-                    WriteDeviceProfile(writer, profile, GetDeviceLink(profile));
+                    writer.WriteStartElement("ul");
+                    foreach (var profile in TopModels)
+                    {
+                        WriteDeviceProfile(writer, profile, GetDeviceLink(profile));
+                    }
+                    writer.WriteEndElement();
                 }
-                writer.WriteEndElement();
             }
             _container.Controls.Add(new Literal() { Text = xml.ToString() });
             
