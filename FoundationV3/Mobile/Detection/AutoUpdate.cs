@@ -249,7 +249,25 @@ namespace FiftyOne.Foundation.Mobile.Detection
             }
             catch (WebException ex)
             {
-                EventLog.Info("No device data was returned, probably because no newer data is available.");
+                // Use the server response text if available. Otherwise the exception
+                // message being handled.
+                string responseText;
+                try
+                {
+                    responseText = new StreamReader(ex.Response.GetResponseStream()).ReadToEnd();
+                    if (String.IsNullOrEmpty(responseText))
+                    {
+                        responseText = ex.Message;
+                    }
+                }
+                catch(Exception)
+                {
+                    responseText = ex.Message;
+                }
+                EventLog.Info(String.Format(
+                    "No device data was returned, probably because no newer data is available. " +
+                    "The server responded with the message '{0}'.",
+                    responseText));
                 EventLog.Debug(ex);
                 return LicenceKeyResults.Https;
             }
