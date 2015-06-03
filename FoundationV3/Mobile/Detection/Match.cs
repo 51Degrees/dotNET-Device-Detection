@@ -507,11 +507,22 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             get 
             {
-                return Profiles.ToDictionary(
-                    key => key.Component.ComponentId,
-                    value => value.ProfileId); 
+                if (_profileIds == null)
+                {
+                    lock(this)
+                    {
+                        if (_profileIds == null)
+                        {
+                            _profileIds = Profiles.ToDictionary(
+                                key => key.Component.ComponentId,
+                                value => value.ProfileId); 
+                        }
+                    }
+                }
+                return _profileIds;
             }
         }
+        private Dictionary<int, int> _profileIds;
 
         /// <summary>
         /// The user agent of the matching device with irrelevant 
@@ -659,6 +670,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             _signatures.Clear();
             Nodes.Clear();
             _profiles = null;
+            _profileIds = null;
 
             Init(targetUserAgent);
         }

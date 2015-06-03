@@ -181,7 +181,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         }
                         catch (Exception ex) // Exception may occur if file is not a 51Degrees file, no action is needed.
                         {
-                            EventLog.Info("Error while reading temporary data file \"{0}\": {1}", file.FullName, ex.Message);
+                            EventLog.Info(
+                                "Error while reading temporary data file \"{0}\": {1}", 
+                                file.FullName, ex.Message);
                             // Ensure an open data set is disposed of properly
                             // so that any file handles are released.
                             if (dataSet != null)
@@ -466,17 +468,29 @@ namespace FiftyOne.Foundation.Mobile.Detection
                             // the match method is not equal to none.
                             match.Results.Add("MatchMethod",
                                 new string[] { match.Method.ToString() });
+                            
+                            // If the match method is not null then the difference
+                            // will be relevent to the result so include it.
                             if (match.Method != MatchMethods.None)
                             {
                                 match.Results.Add("MatchDifference",
                                     new string[] { match.Difference.ToString() });
-                                match.Results.Add("MatchSignatureRank",
-                                    new string[] { match.Signature.Rank.ToString() });
                             }
                             else
                             {
                                 match.Results.Add("MatchDifference",
                                     new string[] { "N/A" });
+                            }
+
+                            // The signature rank is relevent so include it in
+                            // the result.
+                            if (match.Signature != null)
+                            {
+                                match.Results.Add("MatchSignatureRank",
+                                    new string[] { match.Signature.Rank.ToString() });
+                            }
+                            else
+                            {
                                 match.Results.Add("MatchSignatureRank",
                                     new string[] { "N/A" });
                             }

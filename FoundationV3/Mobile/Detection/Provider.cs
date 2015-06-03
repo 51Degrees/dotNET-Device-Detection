@@ -30,6 +30,7 @@ using FiftyOne.Foundation.Mobile.Detection.Readers;
 using System.IO.Compression;
 using FiftyOne.Foundation.Mobile.Detection.Factories;
 using System;
+using System.Threading;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
@@ -280,7 +281,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
             match.Reset(targetUserAgent);
 
             if (RecordDetectionTime)
+            {
                 match.Timer.Start();
+            }
 
             Controller.Match(match);
 
@@ -292,7 +295,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             }
 
             // Update the counts for the provider.
-            _detectionCount++;
+            Interlocked.Increment(ref _detectionCount);
             lock (MethodCounts)
             {
                 MethodCounts[match.Method]++;
