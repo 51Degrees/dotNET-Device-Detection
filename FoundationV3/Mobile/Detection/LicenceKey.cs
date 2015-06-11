@@ -153,16 +153,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             {
                 using (MemoryStream ms = new MemoryStream())
                 {
-#if VER4
                     stream.CopyTo(ms);
-#else
-                    int value = stream.ReadByte();
-                    while (value >= 0)
-                    {
-                        ms.WriteByte((byte)value);
-                        value = stream.ReadByte();
-                    }
-#endif
                     data = ms.ToArray();
                 }
             }

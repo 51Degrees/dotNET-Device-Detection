@@ -157,7 +157,7 @@ namespace FiftyOne.Foundation.UI.Web
         /// </summary>
         internal protected bool IsPaidFor
         {
-            get { return FreeDataSetNames.Contains(DataSet.Name) == false; }
+            get { return DataSet != null && FreeDataSetNames.Contains(DataSet.Name) == false; }
         }
 
         /// <summary>
@@ -173,7 +173,10 @@ namespace FiftyOne.Foundation.UI.Web
                     {
                         if (_dataSet == null)
                         {
-                            _dataSet = WebProvider.ActiveProvider.DataSet;
+                            if (WebProvider.ActiveProvider != null)
+                            {
+                                _dataSet = WebProvider.ActiveProvider.DataSet;
+                            }
                         }
                     }
                 }

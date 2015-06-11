@@ -26,6 +26,7 @@ using System.Web;
 using System;
 using System.Drawing;
 using FiftyOne.Foundation.Mobile.Configuration;
+using FiftyOne.Foundation.Mobile.Detection.Entities;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Feature
 {
@@ -50,7 +51,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
         /// <param name="application"></param>
         internal static void Init(HttpApplicationState application)
         {
-            application["51D_ImageOptimiser"] = new bool?(Manager.ImageOptimisation.Enabled);
+            application["51D_ImageOptimiser"] = new bool?(Manager.ImageOptimisation.Enabled &&
+                WebProvider.ActiveProvider != null);
             EventLog.Debug(String.Format("Image Optimisation '{0}'", application["51D_ImageOptimiser"]));
         }
 
@@ -80,18 +82,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
         /// <returns></returns>
         internal static string GetJavascript(HttpContext context)
         {
-            if (GetIsJavaScriptEnabled(context))
-            {
-                var results = WebProvider.GetResults(context);
-                if (results != null)
-                {
-                    string[] javascript;
-                    if (results.TryGetValue("JavascriptImageOptimiser", out javascript) &&
-                        javascript.Length == 1)
-                        return javascript[0];
-                }
-            }
-            return null;
+            var javascript = GetJavascriptValues(context.Request);
+            return javascript != null && javascript.Count == 1 ?
+                javascript[0].ToString() : null;
         }
 
         private static string WidthParameter
@@ -108,6 +101,26 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
             {
                 return Manager.ImageOptimisation.HeightParam;
             }
+        }
+
+        /// <summary>
+        /// Returns the javascript for the feature.
+        /// </summary>
+        /// <param name="request">Request the javascript is needed for</param>
+        /// <returns>Javascript to support the feature if present</returns>
+        private static Values GetJavascriptValues(HttpRequest request)
+        {
+            Values values = null;
+            var match = WebProvider.GetMatch(request);
+            if (match != null)
+            {
+                var javascript = match["JavascriptImageOptimiser"];
+                if (javascript != null && javascript.Count > 0)
+                {
+                    values = javascript;
+                }
+            }
+            return values;
         }
 
         /// <summary>
@@ -135,8 +148,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
             if (enabled.HasValue && enabled.Value)
             {
                 // If the image optimiser javascript is present for this device then it's enabled.
-                var results = WebProvider.GetResults(context);
-                return results != null && results.ContainsKey("JavascriptImageOptimiser");
+                return GetJavascriptValues(context.Request) != null;
             }
             return false;
         }
@@ -203,17 +215,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
 
             if (size.Width == 0 && size.Height == 0)
             {
-                var results = WebProvider.GetResults(context);
+                var match = WebProvider.GetMatch(context.Request);
 
                 // Get the screen width and height.
                 int value;
-                if (results["ScreenPixelsWidth"] != null &&
-                    results["ScreenPixelsWidth"].Length > 0 &&
-                    int.TryParse(results["ScreenPixelsWidth"][0], out value))
+                if (match["ScreenPixelsWidth"] != null &&
+                    match["ScreenPixelsWidth"].Count > 0 &&
+                    int.TryParse(match["ScreenPixelsWidth"][0].ToString(), out value))
                     size.Width = value;
-                if (results["ScreenPixelsHeight"] != null &&
-                    results["ScreenPixelsHeight"].Length > 0 &&
-                    int.TryParse(results["ScreenPixelsHeight"][0], out value))
+                if (match["ScreenPixelsHeight"] != null &&
+                    match["ScreenPixelsHeight"].Count > 0 &&
+                    int.TryParse(match["ScreenPixelsHeight"][0].ToString(), out value))
                     size.Height = value;
 
                 // Use the larger of the two values as the width as there is no

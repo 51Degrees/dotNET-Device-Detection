@@ -19,8 +19,6 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
-#if VER4
-
 using System;
 using System.Collections;
 using System.Web;
@@ -37,8 +35,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// </summary>
     public class MobileCapabilitiesProvider : HttpCapabilitiesDefaultProvider
     {
-        private HttpCapabilitiesDefaultProvider _parent = null;
-
         /// <summary>
         /// Constructs an instance of <cref see="MobileCapabilitiesProvider"/>.
         /// Sets the cache key length to a value of 256 to allow for mobile
@@ -54,25 +50,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
             base.UserAgentCacheKeyLength = 256;
         }
 
+#if DEBUG
         /// <summary>
-        /// Constructs an instance of <cref see="MobileCapabilitiesProvider"/>.
-        /// Sets the cache key length to a value of 256 to allow for mobile
-        /// useragents that can often be longer than the default 64 characters.
+        /// If in debug compilation record the stack trace as this class is constructed
+        /// before the debugger can become active.
         /// </summary>
-        public MobileCapabilitiesProvider(HttpCapabilitiesDefaultProvider parent)
-            : base(parent)
-        {
-            EventLog.Debug("Constructing MobileCapabilitiesProvider - HttpCapabilitiesDefaultProvider");
-#if DEBUG
-            LogStackTrace();
-#endif
-            _parent = parent;
-            base.UserAgentCacheKeyLength = 256;
-        }
-
-        // If in debug compilation record the stack trace as this class is constructed
-        // before the debugger can become active.
-#if DEBUG
         private void LogStackTrace()
         {
             StringBuilder trace = new StringBuilder().AppendLine("Constructor Stack Trace:");
@@ -90,34 +72,22 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// sources from 51Degrees.mobi.</returns>
         public override HttpBrowserCapabilities GetBrowserCapabilities(HttpRequest request)
         {
-            // Get the base capabilities.
-            System.Web.HttpBrowserCapabilities baseCapabilities = GetBaseCapabilities(request);
-
-            // Get the new and overridden capabilities.
-            var results = WebProvider.GetResults(request);
-            IDictionary enhancedCapabilities = MobileCapabilitiesOverride.EnhancedCapabilities(
-                results, baseCapabilities);
-
-            if (enhancedCapabilities != null)
-                // Create a new browser capabilities instance combining the two.
-                return new FiftyOneBrowserCapabilities(results, baseCapabilities, enhancedCapabilities);
-
-            // We couldn't get any new values so return the current ones unaltered.
-            return baseCapabilities;
-        }
-
-        /// <summary>
-        /// Returns the .NET base browser capabilities.
-        /// </summary>
-        /// <param name="request">An HttpRequest that provides information about the source device.</param>
-        /// <returns>.NET base browser capabilities</returns>
-        protected virtual System.Web.HttpBrowserCapabilities GetBaseCapabilities(HttpRequest request)
-        {
-            return
-                _parent == null
-                    ? base.GetBrowserCapabilities(request)
-                    : _parent.GetBrowserCapabilities(request);
+            var match = WebProvider.GetMatch(request);
+            if (match != null)
+            {
+                // A provider is present so 51Degrees can be used to override
+                // some of the returned values.
+                return new FiftyOneBrowserCapabilities(
+                    base.GetBrowserCapabilities(request), 
+                    request,
+                    match);
+            }
+            else
+            {
+                // No 51Degrees active provider is present so we have to use
+                // the base capabilities only.
+                return base.GetBrowserCapabilities(request);
+            }
         }
     }
 }
-#endif

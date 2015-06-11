@@ -80,40 +80,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Constructor
 
         /// <summary>
-        /// Constructs a new provider using the embedded data set.
-        /// </summary>
-        public Provider()
-            : this (GetEmbeddedDataSet())
-        {
-        }
-
-        /// <summary>
-        /// Constructs a new provider using the embedded data set.
-        /// <param name="cacheServiceInternal">True to enable caching for the provider</param>
-        /// </summary>
-        public Provider(int cacheServiceInternal)
-            : this(GetEmbeddedDataSet(), cacheServiceInternal)
-        {
-        }
-
-        /// <summary>
-        /// Returns the embedded data set.
-        /// </summary>
-        /// <returns></returns>
-        private static DataSet GetEmbeddedDataSet()
-        {
-            using (Stream stream = Assembly.GetExecutingAssembly()
-                .GetManifestResourceStream(
-                BinaryConstants.EmbeddedDataResourceName))
-            {
-                using (var reader = new Reader(new GZipStream(stream, CompressionMode.Decompress)))
-                {
-                    return MemoryFactory.Read(reader, false);
-                }
-            }
-        }
-
-        /// <summary>
         /// Constructs a new provider using the data set.
         /// </summary>
         /// <param name="dataSet">Data set to use for device detection</param>
@@ -125,9 +91,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Constructs a new provider using the data set.
         /// </summary>
         /// <param name="dataSet">Data set to use for device detection</param>
-        /// <param name="cacheServiceInternal">True to enable caching for the provider</param>
-        public Provider(DataSet dataSet, int cacheServiceInternal)
-            : this(dataSet, false, cacheServiceInternal)
+        /// <param name="cacheSize">Size of the cache used with the provider</param>
+        public Provider(DataSet dataSet, int cacheSize)
+            : this(dataSet, false, cacheSize)
         {
         }
 
@@ -136,8 +102,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="dataSet">Data set to use for device detection</param>
         /// <param name="recordDetectionTime">True if the detection time should be recorded</param>
-        /// <param name="cacheServiceInternal">True to enable caching for the provider</param>
-        public Provider(DataSet dataSet, bool recordDetectionTime, int cacheServiceInternal)
+        /// <param name="cacheSize">Size of the cache used with the provider</param>
+        public Provider(DataSet dataSet, bool recordDetectionTime, int cacheSize)
         {
             DataSet = dataSet;
             MethodCounts = new SortedList<MatchMethods, long>();
@@ -147,13 +113,40 @@ namespace FiftyOne.Foundation.Mobile.Detection
             MethodCounts.Add(MatchMethods.Numeric, 0);
             MethodCounts.Add(MatchMethods.None, 0);
             RecordDetectionTime = recordDetectionTime;
-            _userAgentCache = cacheServiceInternal > 0 ? new Cache<string, MatchState>(cacheServiceInternal) : null;
+            _userAgentCache = cacheSize > 0 ? new Cache<string, MatchState>(cacheSize) : null;
+        }
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// The percentage of requests for user agents which were not already
+        /// contained in the cache.
+        /// </summary>
+        public double PercentageCacheMisses
+        {
+            get
+            {
+                return _userAgentCache != null ? _userAgentCache.PercentageMisses : 0;
+            }
+        }
+
+        /// <summary>
+        /// Number of times the useragents cache was switched.
+        /// </summary>
+        public long CacheSwitches
+        {
+            get
+            {
+                return _userAgentCache != null ? _userAgentCache.Switches : 0;
+            }
         }
 
         #endregion
 
         #region Methods
-        
+
         /// <summary>
         /// Resets the match object provided and performs the detection
         /// using that object rather than creating a new match.
@@ -248,7 +241,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
             if (_userAgentCache != null &&
                 String.IsNullOrEmpty(targetUserAgent) == false)
             {
-                if (_userAgentCache.TryGetValue(targetUserAgent, out state) == false)
+                // Increase the cache requests.
+                Interlocked.Increment(ref _userAgentCache.Requests);
+
+                if (_userAgentCache._itemsActive.TryGetValue(targetUserAgent, out state) == false)
                 {
                     // The user agent has not been checked previously. Therefore perform
                     // the match and store the results in the cache.
@@ -256,7 +252,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
                     // Record the match state in the cache for next time.
                     state = new MatchState(match);
-                    _userAgentCache.SetActive(targetUserAgent, state);
+                    _userAgentCache._itemsActive[targetUserAgent] = state;
+
+                    // Increase the cache misses.
+                    Interlocked.Increment(ref _userAgentCache.Misses);
                 }
                 else
                 {
@@ -264,14 +263,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     // be configured based on the results of the previous state.
                     match.SetState(state);
                 }
-                _userAgentCache.SetBackground(targetUserAgent, state);
+                _userAgentCache.AddRecent(targetUserAgent, state);
             }
             else
             {
                 // The cache does not exist so call the non caching method.
                 MatchNoCache(targetUserAgent, match);
             }
-            
+
             return match;
         }
 

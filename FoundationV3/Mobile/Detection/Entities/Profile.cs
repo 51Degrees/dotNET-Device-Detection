@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using System.Diagnostics;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Entities
 {
@@ -33,7 +34,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// <para>
     /// Each <see cref="Signature"/> relates to one profile for each component.
     /// </para>
-    public class Profile : BaseEntity, IComparable<Profile>
+    public abstract class Profile : BaseEntity, IComparable<Profile>
     {
         #region Fields
 
@@ -41,11 +42,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// Unique Id of the profile. Does not change between different data sets.
         /// </summary>
         public readonly int ProfileId;
-
-        /// <summary>
-        /// A array of the indexes of the values associated with the profile.
-        /// </summary>
-        internal int[] ValueIndexes;
 
         #endregion
 
@@ -90,6 +86,20 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         
         #endregion
 
+        #region Abstract Properties
+
+        /// <summary>
+        /// A array of the indexes of the values associated with the profile.
+        /// </summary>
+        protected internal abstract int[] ValueIndexes { get; }
+
+        /// <summary>
+        /// An array of the signature indexes associated with the profile.
+        /// </summary>
+        protected internal abstract int[] SignatureIndexes { get; }
+
+        #endregion
+
         #region Public Properties
 
         /// <summary>
@@ -108,11 +118,42 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         {
             get
             {
-                if (property != null)
-                    return this[property.Name];
-                return null;
+                Values values = null;
+                if (PropertyIndexToValues.TryGetValue(property.Index, out values) == false)
+                {
+                    lock(this)
+                    {
+                        if (PropertyIndexToValues.TryGetValue(property.Index, out values) == false)
+                        {
+                            values = new Entities.Values(
+                                property,
+                                GetPropertyValuesEnumerable(property));
+                            _propertyIndexToValues.Add(property.Index, values);
+                        }
+                    }
+                }
+                return values;
             }
         }
+
+        private IDictionary<int, Values> PropertyIndexToValues
+        {
+            get
+            {
+                if (_propertyIndexToValues == null)
+                {
+                    lock(this)
+                    {
+                        if (_propertyIndexToValues == null)
+                        {
+                            _propertyIndexToValues = new SortedList<int, Values>();
+                        }
+                    }
+                }
+                return _propertyIndexToValues;
+            }
+        }
+        private IDictionary<int, Values> _propertyIndexToValues;
 
         /// <summary>
         /// Gets the values associated with the property name.
@@ -130,42 +171,29 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         {
             get
             {
-                // Does the storage structure already exist?
-                if (_nameToValues == null)
+                Values values = null;
+                if (_nameToValues == null ||
+                    _nameToValues.TryGetValue(propertyName, out values) == false)
                 {
                     lock (this)
                     {
-                        if (_nameToValues == null)
+                        if (_nameToValues == null ||
+                            _nameToValues.TryGetValue(propertyName, out values) == false)
                         {
-                            _nameToValues = new SortedList<string, Values>();
+                            var property = DataSet.Properties[propertyName];
+                            if (property != null)
+                            {
+                                values = this[property];
+                            }
+                            if (_nameToValues == null)
+                            {
+                                _nameToValues = new SortedList<string, Values>();
+                            }
+                            _nameToValues.Add(propertyName, values);
                         }
                     }
                 }
-
-                // Do the values already exist for the property?
-                lock (_nameToValues)
-                {
-                    Values values;
-                    if (_nameToValues.TryGetValue(propertyName, out values))
-                        return values;
-                                        
-                    // Does not exist already so get the property.
-                    var property = DataSet.Properties.FirstOrDefault(i =>
-                        i.Name == propertyName);
-
-                    // Create the list of values.
-                    values = new Values(
-                        property,
-                        Values.Where(i => i.Property == property));
-
-                    if (values.Count == 0)
-                        values = null;
-
-                    // Store for future reference.
-                    _nameToValues.Add(propertyName, values);
-
-                    return values;
-                }
+                return values;
             }
         }
         private SortedList<string, Values> _nameToValues;
@@ -191,7 +219,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             }
         }
         private Signature[] _signatures;
-        internal int[] SignatureIndexes;
 
         /// <summary>
         /// The component the profile belongs to.
@@ -229,7 +256,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                     {
                         if (_values == null)
                         {
-                            _values = GetValues();
+                            _values = GetValues().ToArray();
                         }
                     }
                 }
@@ -283,10 +310,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         {
             _componentIndex = reader.ReadByte();
             ProfileId = reader.ReadInt32();
-            var valueIndexesCount = reader.ReadInt32();
-            var signatureIndexesCount = reader.ReadInt32();
-            ValueIndexes = BaseEntity.ReadIntegerArray(reader, valueIndexesCount);
-            SignatureIndexes = BaseEntity.ReadIntegerArray(reader, signatureIndexesCount);
         }
 
         #endregion
@@ -298,22 +321,68 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// any further initialisation steps that require other items in
         /// the data set can be completed.
         /// </summary>
-        internal void Init()
+        internal virtual void Init()
         {
             if (_properties == null)
                 _properties = GetProperties();
             if (_values == null)
             {
-                _values = GetValues();
-                ValueIndexes = null;
+                _values = GetValues().ToArray();
             }
             if (_signatures == null)
             {
                 _signatures = GetSignatures();
-                SignatureIndexes = null;
             }
             if (_component == null)
                 _component = DataSet.Components[_componentIndex];
+        }
+
+        private int GetValuesIndex(int valueIndex, int lower = 0)
+        {
+            var upper = ValueIndexes.Length - 1;
+            int middle = 0;
+
+            while (lower <= upper)
+            {
+                middle = lower + (upper - lower) / 2;
+                var comparisonResult = ValueIndexes[middle].CompareTo(valueIndex);
+                if (comparisonResult == 0)
+                    return middle;
+                else if (comparisonResult > 0)
+                    upper = middle - 1;
+                else
+                    lower = middle + 1;
+            }
+
+            return ~middle;
+        }
+
+
+        /// <summary>
+        /// Gets the values associated with the property for this profile.
+        /// </summary>
+        /// <param name="property"></param>
+        /// <returns>Iterator providing access to the values for the property for this profile</returns>
+        private IEnumerable<Value> GetPropertyValuesEnumerable(Property property)
+        {
+            var start = GetValuesIndex(property.FirstValueIndex);
+            if (start < 0) start = ~start;
+            var end = GetValuesIndex(property.LastValueIndex, start);
+            if (end < 0) end = ~end;
+
+            Debug.Assert(start == 0 ||
+                DataSet.Values[ValueIndexes[start - 1]].Property.Index != property.Index);
+            Debug.Assert(end == ValueIndexes.Length - 1 ||
+                DataSet.Values[ValueIndexes[end + 1]].Property.Index != property.Index);
+
+            for (int i = start; i <= end; i++)
+            {
+                var value = DataSet.Values[ValueIndexes[i]];
+                if (value.Property.Index == property.Index)
+                {
+                    yield return DataSet.Values[ValueIndexes[i]];
+                }
+            }
         }
 
         /// <summary>
@@ -347,15 +416,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
 
         /// <summary>
-        /// Returns an array of values the profile relates to.
+        /// Returns an iterator of values the profile relates to.
         /// </summary>
         /// <returns></returns>
-        private Value[] GetValues()
+        private IEnumerable<Value> GetValues()
         {
-            var values = new Value[ValueIndexes.Length];
-            for (int i = 0; i < ValueIndexes.Length; i++)
-                values[i] = DataSet.Values[ValueIndexes[i]];
-            return values;
+            return ValueIndexes.Select(i =>
+                DataSet.Values[i]);
         }
 
         /// <summary>
@@ -411,7 +478,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// string version of the ProfileId is returned.
         /// </para>
         /// <para>
-        /// For more information see http://51degrees.com/Support/Documentation/Net.aspx
+        /// For more information see https://51degrees.com/Support/Documentation/Net
         /// </para>
         public override string ToString()
         {

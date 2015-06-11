@@ -33,5 +33,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// Returns the percentage of cache misses.
         /// </summary>
         double PercentageMisses { get; }
+
+        /// <summary>
+        /// The number of times the lists have been switched.
+        /// </summary>
+        long Switches { get; }
     }
 }

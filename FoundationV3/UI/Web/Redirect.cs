@@ -1214,51 +1214,55 @@ namespace FiftyOne.Foundation.UI.Web
         {
             base.OnInit(e);
 
-            Page.MaintainScrollPositionOnPostBack = true;
-
-            _container.Controls.Add(_panelMessages);
-            _panelMessages.Controls.Add(_literalMessage);
-            _panelMessages.Controls.Add(_validationSummary);
-            _container.Controls.Add(_panelBasic);
-            _panelBasic.Controls.Add(_literalBasic);
-            _panelBasic.Controls.Add(_tableBasic);
-            AddTableRow(_panelEnabled, _checkBoxEnabled);
-            AddTableRow(_panelFirstRequestOnly, _checkBoxFirstRequestOnly);
-            AddTableRow(_panelOriginalUrlAsQueryString, _checkBoxOriginalUrlAsQueryString);
-            AddTableRow(_panelTimeout, _textBoxTimeout);
-            AddTableRowSingle(_panelMobileHomePageUrl, _textBoxMobileHomePageUrl);
-            AddTableRowSingle(_panelMobilePagesRegex, _textBoxMobilePagesRegex);
-            AddTableRowSingle(_panelDevicesFile, _textBoxDevicesFile);
-            _container.Controls.Add(_panelLocations);
-            _panelLocations.Controls.Add(_literalLocations);
-            _container.Controls.Add(_panelButtons);
-            _panelButtons.Controls.Add(_buttonUpdate);
-            _panelButtons.Controls.Add(_buttonReset);
-            _panelButtons.Controls.Add(_buttonAdd);
-            _container.Controls.Add(_regularExpressionValidatorDevicesFile);
-            _container.Controls.Add(_regularExpressionValidatorTimeout);
-            _container.Controls.Add(_regularExpressionValidatorUrl);
-            _container.Controls.Add(_customValidatorRegex);
-                        
-            Page.RegisterRequiresControlState(this);
-
-            if (!Page.IsPostBack)
+            if (DataSet != null)
             {
-                _data = new RedirectData(FiftyOne.Foundation.Mobile.Configuration.Manager.Redirect);
-                LoadData();
+
+                Page.MaintainScrollPositionOnPostBack = true;
+
+                _container.Controls.Add(_panelMessages);
+                _panelMessages.Controls.Add(_literalMessage);
+                _panelMessages.Controls.Add(_validationSummary);
+                _container.Controls.Add(_panelBasic);
+                _panelBasic.Controls.Add(_literalBasic);
+                _panelBasic.Controls.Add(_tableBasic);
+                AddTableRow(_panelEnabled, _checkBoxEnabled);
+                AddTableRow(_panelFirstRequestOnly, _checkBoxFirstRequestOnly);
+                AddTableRow(_panelOriginalUrlAsQueryString, _checkBoxOriginalUrlAsQueryString);
+                AddTableRow(_panelTimeout, _textBoxTimeout);
+                AddTableRowSingle(_panelMobileHomePageUrl, _textBoxMobileHomePageUrl);
+                AddTableRowSingle(_panelMobilePagesRegex, _textBoxMobilePagesRegex);
+                AddTableRowSingle(_panelDevicesFile, _textBoxDevicesFile);
+                _container.Controls.Add(_panelLocations);
+                _panelLocations.Controls.Add(_literalLocations);
+                _container.Controls.Add(_panelButtons);
+                _panelButtons.Controls.Add(_buttonUpdate);
+                _panelButtons.Controls.Add(_buttonReset);
+                _panelButtons.Controls.Add(_buttonAdd);
+                _container.Controls.Add(_regularExpressionValidatorDevicesFile);
+                _container.Controls.Add(_regularExpressionValidatorTimeout);
+                _container.Controls.Add(_regularExpressionValidatorUrl);
+                _container.Controls.Add(_customValidatorRegex);
+
+                Page.RegisterRequiresControlState(this);
+
+                if (!Page.IsPostBack)
+                {
+                    _data = new RedirectData(FiftyOne.Foundation.Mobile.Configuration.Manager.Redirect);
+                    LoadData();
+                }
+
+                _textBoxDevicesFile.TextChanged += new EventHandler(_textBoxDevicesFile_TextChanged);
+                _checkBoxEnabled.CheckedChanged += new EventHandler(_checkBoxEnabled_CheckedChanged);
+                _checkBoxFirstRequestOnly.CheckedChanged += new EventHandler(_checkBoxFirstRequestOnly_CheckedChanged);
+                _textBoxMobileHomePageUrl.TextChanged += new EventHandler(_textBoxMobileHomePageUrl_TextChanged);
+                _textBoxMobilePagesRegex.TextChanged += new EventHandler(_textBoxMobilePagesRegex_TextChanged);
+                _checkBoxOriginalUrlAsQueryString.CheckedChanged += new EventHandler(_checkBoxOriginalUrlAsQueryString_CheckedChanged);
+                _textBoxTimeout.TextChanged += new EventHandler(_textBoxTimeout_TextChanged);
+                _buttonAdd.Click += new EventHandler(_buttonAdd_Click);
+                _buttonReset.Click += new EventHandler(_buttonReset_Click);
+                _buttonUpdate.Click += new EventHandler(_buttonUpdate_Click);
+                _customValidatorRegex.ServerValidate += new ServerValidateEventHandler(_customValidatorRegex_ServerValidate);
             }
-            
-            _textBoxDevicesFile.TextChanged += new EventHandler(_textBoxDevicesFile_TextChanged);
-            _checkBoxEnabled.CheckedChanged += new EventHandler(_checkBoxEnabled_CheckedChanged);
-            _checkBoxFirstRequestOnly.CheckedChanged += new EventHandler(_checkBoxFirstRequestOnly_CheckedChanged);
-            _textBoxMobileHomePageUrl.TextChanged += new EventHandler(_textBoxMobileHomePageUrl_TextChanged);
-            _textBoxMobilePagesRegex.TextChanged += new EventHandler(_textBoxMobilePagesRegex_TextChanged);
-            _checkBoxOriginalUrlAsQueryString.CheckedChanged += new EventHandler(_checkBoxOriginalUrlAsQueryString_CheckedChanged);
-            _textBoxTimeout.TextChanged += new EventHandler(_textBoxTimeout_TextChanged);
-            _buttonAdd.Click += new EventHandler(_buttonAdd_Click);
-            _buttonReset.Click += new EventHandler(_buttonReset_Click);
-            _buttonUpdate.Click += new EventHandler(_buttonUpdate_Click);
-            _customValidatorRegex.ServerValidate += new ServerValidateEventHandler(_customValidatorRegex_ServerValidate);
         }
 
         /// <summary>
@@ -1269,86 +1273,89 @@ namespace FiftyOne.Foundation.UI.Web
         {
             base.OnPreRender(e);
 
-            AddLabel(_panelDevicesFile, 
-                this.RedirectLabelDevicesFileText,
-                this.RedirectDevicesFileToolTip, 
-                null, null);
-            AddLabel(_panelEnabled,
-                this.RedirectLabelEnabledText,
-                this.RedirectEnabledToolTip,
-                null, null);
-            AddLabel(_panelFirstRequestOnly,
-                this.RedirectLabelFirstRequestOnlyText,
-                this.RedirectFirstRequestOnlyToolTip,
-                null, null);
-            AddLabel(_panelMobileHomePageUrl,
-                this.RedirectLabelMobileHomePageUrlText,
-                this.RedirectMobileRedirectUrlToolTip,
-                null, null);
-            AddLabel(_panelMobilePagesRegex,
-                this.RedirectLabelMobilePagesRegexText,
-                this.RedirectMobilePagesRegexToolTip,
-                null, null);
-            AddLabel(_panelOriginalUrlAsQueryString,
-                this.RedirectLabelOriginalUrlAsQueryStringText,
-                this.RedirectOriginalUrlAsQueryStringToolTip,
-                null, null);
-            AddLabel(_panelTimeout,
-                this.RedirectLabelTimeoutText,
-                this.RedirectTimeoutToolTip,
-                null, null);
-
-            AddCssClass(_panelBasic, CssClassBasic);
-            AddCssClass(_panelLocations, CssClassLocations);
-            if (String.IsNullOrEmpty(_panelMessages.CssClass))
-                AddCssClass(_panelMessages, ErrorCssClass);
-            AddCssClass(_panelDevicesFile, LabelCssClass);
-            AddCssClass(_panelEnabled, LabelCssClass);
-            AddCssClass(_panelFirstRequestOnly, LabelCssClass);
-            AddCssClass(_panelMobileHomePageUrl, LabelCssClass);
-            AddCssClass(_panelMobilePagesRegex, LabelCssClass);
-            AddCssClass(_panelOriginalUrlAsQueryString, LabelCssClass);
-            AddCssClass(_panelTimeout, LabelCssClass);
-            AddCssClass(_textBoxDevicesFile, TextBoxCssClass);
-            AddCssClass(_textBoxMobileHomePageUrl, TextBoxCssClass);
-            AddCssClass(_textBoxMobilePagesRegex, TextBoxCssClass);
-            AddCssClass(_textBoxTimeout, TextBoxCssClass);
-            AddCssClass(_checkBoxEnabled, CheckBoxCssClass);
-            AddCssClass(_checkBoxFirstRequestOnly, CheckBoxCssClass);
-            AddCssClass(_checkBoxOriginalUrlAsQueryString, CheckBoxCssClass);
-            AddCssClass(_buttonAdd, ButtonCssClass);
-            AddCssClass(_buttonUpdate, ButtonCssClass);
-            AddCssClass(_buttonReset, ButtonCssClass);
-            AddCssClass(_panelButtons, CssClassButtons);
-
-            _literalBasic.Text = this.RedirectBasicHeadingHtml;
-            _literalLocations.Text = this.RedirectLocationsHeadingHtml;
-
-            _buttonReset.Text = this.RedirectButtonResetText;
-            _buttonUpdate.Text = this.RedirectButtonUpdateText;
-            _buttonAdd.Text = this.RedirectButtonNewLocationText;
-
-            _customValidatorRegex.ErrorMessage = this.RedirectErrorMessageMobileHomePageRegexText;
-            _regularExpressionValidatorDevicesFile.ErrorMessage = this.RedirectErrorMessageDevicesFileText;
-            _regularExpressionValidatorTimeout.ErrorMessage = this.RedirectErrorMessageTimeOutText;
-            _regularExpressionValidatorUrl.ErrorMessage = this.RedirectErrorMessageMobileHomePageUrlText;
-
-            SetError(_regularExpressionValidatorDevicesFile, _textBoxDevicesFile, ErrorCssClass);
-            SetError(_regularExpressionValidatorTimeout, _textBoxTimeout, ErrorCssClass);
-            SetError(_regularExpressionValidatorUrl, _textBoxMobileHomePageUrl, ErrorCssClass);
-            SetError(_customValidatorRegex, _textBoxMobilePagesRegex, ErrorCssClass);
-
-            bool invalid = false;
-            foreach (IValidator validator in Page.GetValidators(VALIDATION_GROUP))
+            if (DataSet != null)
             {
-                if (validator.IsValid == false)
+                AddLabel(_panelDevicesFile,
+                    this.RedirectLabelDevicesFileText,
+                    this.RedirectDevicesFileToolTip,
+                    null, null);
+                AddLabel(_panelEnabled,
+                    this.RedirectLabelEnabledText,
+                    this.RedirectEnabledToolTip,
+                    null, null);
+                AddLabel(_panelFirstRequestOnly,
+                    this.RedirectLabelFirstRequestOnlyText,
+                    this.RedirectFirstRequestOnlyToolTip,
+                    null, null);
+                AddLabel(_panelMobileHomePageUrl,
+                    this.RedirectLabelMobileHomePageUrlText,
+                    this.RedirectMobileRedirectUrlToolTip,
+                    null, null);
+                AddLabel(_panelMobilePagesRegex,
+                    this.RedirectLabelMobilePagesRegexText,
+                    this.RedirectMobilePagesRegexToolTip,
+                    null, null);
+                AddLabel(_panelOriginalUrlAsQueryString,
+                    this.RedirectLabelOriginalUrlAsQueryStringText,
+                    this.RedirectOriginalUrlAsQueryStringToolTip,
+                    null, null);
+                AddLabel(_panelTimeout,
+                    this.RedirectLabelTimeoutText,
+                    this.RedirectTimeoutToolTip,
+                    null, null);
+
+                AddCssClass(_panelBasic, CssClassBasic);
+                AddCssClass(_panelLocations, CssClassLocations);
+                if (String.IsNullOrEmpty(_panelMessages.CssClass))
+                    AddCssClass(_panelMessages, ErrorCssClass);
+                AddCssClass(_panelDevicesFile, LabelCssClass);
+                AddCssClass(_panelEnabled, LabelCssClass);
+                AddCssClass(_panelFirstRequestOnly, LabelCssClass);
+                AddCssClass(_panelMobileHomePageUrl, LabelCssClass);
+                AddCssClass(_panelMobilePagesRegex, LabelCssClass);
+                AddCssClass(_panelOriginalUrlAsQueryString, LabelCssClass);
+                AddCssClass(_panelTimeout, LabelCssClass);
+                AddCssClass(_textBoxDevicesFile, TextBoxCssClass);
+                AddCssClass(_textBoxMobileHomePageUrl, TextBoxCssClass);
+                AddCssClass(_textBoxMobilePagesRegex, TextBoxCssClass);
+                AddCssClass(_textBoxTimeout, TextBoxCssClass);
+                AddCssClass(_checkBoxEnabled, CheckBoxCssClass);
+                AddCssClass(_checkBoxFirstRequestOnly, CheckBoxCssClass);
+                AddCssClass(_checkBoxOriginalUrlAsQueryString, CheckBoxCssClass);
+                AddCssClass(_buttonAdd, ButtonCssClass);
+                AddCssClass(_buttonUpdate, ButtonCssClass);
+                AddCssClass(_buttonReset, ButtonCssClass);
+                AddCssClass(_panelButtons, CssClassButtons);
+
+                _literalBasic.Text = this.RedirectBasicHeadingHtml;
+                _literalLocations.Text = this.RedirectLocationsHeadingHtml;
+
+                _buttonReset.Text = this.RedirectButtonResetText;
+                _buttonUpdate.Text = this.RedirectButtonUpdateText;
+                _buttonAdd.Text = this.RedirectButtonNewLocationText;
+
+                _customValidatorRegex.ErrorMessage = this.RedirectErrorMessageMobileHomePageRegexText;
+                _regularExpressionValidatorDevicesFile.ErrorMessage = this.RedirectErrorMessageDevicesFileText;
+                _regularExpressionValidatorTimeout.ErrorMessage = this.RedirectErrorMessageTimeOutText;
+                _regularExpressionValidatorUrl.ErrorMessage = this.RedirectErrorMessageMobileHomePageUrlText;
+
+                SetError(_regularExpressionValidatorDevicesFile, _textBoxDevicesFile, ErrorCssClass);
+                SetError(_regularExpressionValidatorTimeout, _textBoxTimeout, ErrorCssClass);
+                SetError(_regularExpressionValidatorUrl, _textBoxMobileHomePageUrl, ErrorCssClass);
+                SetError(_customValidatorRegex, _textBoxMobilePagesRegex, ErrorCssClass);
+
+                bool invalid = false;
+                foreach (IValidator validator in Page.GetValidators(VALIDATION_GROUP))
                 {
-                    invalid = true;
-                    break;
+                    if (validator.IsValid == false)
+                    {
+                        invalid = true;
+                        break;
+                    }
                 }
+                _panelMessages.Visible =
+                    String.IsNullOrEmpty(_literalMessage.Text) == false || invalid;
             }
-            _panelMessages.Visible =
-                String.IsNullOrEmpty(_literalMessage.Text) == false || invalid;
         }
 
         private void _customValidatorRegex_ServerValidate(object source, ServerValidateEventArgs args)

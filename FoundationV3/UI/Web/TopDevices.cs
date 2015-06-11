@@ -187,7 +187,7 @@ namespace FiftyOne.Foundation.UI.Web
         {
             base.OnInit(e);
             
-            if(ImagesEnabled)
+            if(ImagesEnabled && DataSet != null)
             {
                 if (Page.ClientScript.IsClientScriptBlockRegistered(GetType(), "imageRotator") == false)
                     Page.ClientScript.RegisterClientScriptBlock(
@@ -206,30 +206,33 @@ namespace FiftyOne.Foundation.UI.Web
         {
             base.OnPreRender(e);
 
-            var xml = new StringBuilder();
-            using (var writer = XmlWriter.Create(xml, new XmlWriterSettings()
+            if (DataSet != null)
             {
-                OmitXmlDeclaration = true,
-                Encoding = Response.HeaderEncoding,
-                ConformanceLevel = ConformanceLevel.Fragment
-            }))
-            {
-                if (TopModels != null)
+                var xml = new StringBuilder();
+                using (var writer = XmlWriter.Create(xml, new XmlWriterSettings()
                 {
-                    writer.WriteStartElement("ul");
-                    foreach (var profile in TopModels)
+                    OmitXmlDeclaration = true,
+                    Encoding = Response.HeaderEncoding,
+                    ConformanceLevel = ConformanceLevel.Fragment
+                }))
+                {
+                    if (TopModels != null)
                     {
-                        WriteDeviceProfile(writer, profile, GetDeviceLink(profile));
+                        writer.WriteStartElement("ul");
+                        foreach (var profile in TopModels)
+                        {
+                            WriteDeviceProfile(writer, profile, GetDeviceLink(profile));
+                        }
+                        writer.WriteEndElement();
                     }
-                    writer.WriteEndElement();
                 }
-            }
-            _container.Controls.Add(new Literal() { Text = xml.ToString() });
-            
-            // Data info in footer is not required
-            base.FooterEnabled = false;
+                _container.Controls.Add(new Literal() { Text = xml.ToString() });
 
-            _container.CssClass = TopDevicesCssClass;
+                // Data info in footer is not required
+                base.FooterEnabled = false;
+
+                _container.CssClass = TopDevicesCssClass;
+            }
         }
         
         #endregion

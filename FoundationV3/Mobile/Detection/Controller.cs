@@ -84,7 +84,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// formats in use will be less accurate.
     /// </remarks>
     /// <para>
-    /// For more information see http://51degrees.com/Support/Documentation/Net.aspx
+    /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
     internal static class Controller
     {

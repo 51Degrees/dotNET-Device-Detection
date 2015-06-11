@@ -126,7 +126,9 @@ namespace FiftyOne.Foundation.UI.Web
             try
             {
                 if (AutoUpdate.Download() == LicenceKeyResults.Success)
+                {
                     WebProvider.Refresh();
+                }
             }
             catch (Exception ex)
             {
@@ -147,8 +149,9 @@ namespace FiftyOne.Foundation.UI.Web
             _buttonRefresh.Visible = ButtonVisible && LicenceKey.Keys != null && LicenceKey.Keys.Length > 0;
 
             // Enable the button if there's a chance new data could be available.
-            _buttonRefresh.Enabled = WebProvider.ActiveProvider.DataSet.Published.Add(
-                FiftyOne.Foundation.Mobile.Detection.Constants.AutoUpdateWait) < DateTime.UtcNow;
+            var provider = WebProvider.ActiveProvider;
+            _buttonRefresh.Enabled = provider != null ? provider.DataSet.Published.Add(
+                FiftyOne.Foundation.Mobile.Detection.Constants.AutoUpdateWait) < DateTime.UtcNow : true;
         }
 
         /// <summary>
@@ -158,13 +161,13 @@ namespace FiftyOne.Foundation.UI.Web
         /// <param name="e"></param>
         protected void Page_PreRenderComplete(object sender, EventArgs e)
         {
-            var dataSet = WebProvider.ActiveProvider.DataSet;
+            var dataSet = WebProvider.ActiveProvider != null ? WebProvider.ActiveProvider.DataSet : null;
             _literal.Text = String.Format(
                 Html,
                 CssClass,
-                dataSet.Name,
-                dataSet.Published,
-                dataSet.Properties.Count,
+                dataSet != null ? dataSet.Name : "Not Present",
+                dataSet != null ? dataSet.Published : DateTime.MinValue,
+                dataSet != null ? dataSet.Properties.Count : 0,
                 Request.Browser[FiftyOne.Foundation.Mobile.Detection.Constants.DetectionTimeProperty],
                 Context.Items["51D_AverageResponseTime"] == null ? "NA" : Context.Items["51D_AverageResponseTime"],
                 Context.Items["51D_AverageCompletionTime"] == null ? "NA" : Context.Items["51D_AverageCompletionTime"]);

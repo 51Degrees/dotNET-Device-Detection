@@ -48,7 +48,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug4\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;VER4</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Debug4\FiftyOne.Foundation.xml</DocumentationFile>
@@ -59,7 +59,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Release4\</OutputPath>
-    <DefineConstants>TRACE;VER4</DefineConstants>
+    <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release4\FiftyOne.Foundation.xml</DocumentationFile>
@@ -123,10 +123,20 @@
     <Compile Include="Mobile\Detection\AutoUpdate.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Mobile\Detection\Cache.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mobile\Detection\Entities\Memory\EntityFactories.cs" />
+    <Compile Include="Mobile\Detection\Entities\Memory\Node.cs" />
+    <Compile Include="Mobile\Detection\Entities\Memory\Profile.cs" />
+    <Compile Include="Mobile\Detection\Entities\Memory\PropertiesList.cs" />
     <Compile Include="Mobile\Detection\Entities\RankedSignatureIndex.cs" />
-    <Compile Include="Mobile\Detection\Cache.cs" />
     <Compile Include="Mobile\Detection\Entities\Map.cs" />
     <Compile Include="Mobile\Detection\Entities\NodeNumericIndex.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\DataSet.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\EntityFactories.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\Node.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\Profile.cs" />
     <Compile Include="Mobile\Detection\Factories\EntityFactories.cs" />
     <Compile Include="Mobile\Detection\IReadonlyList.cs" />
     <Compile Include="Mobile\Detection\Factories\MemoryFactory.cs" />
@@ -210,7 +220,6 @@
     <Compile Include="Properties\DetectionConstants.cs" />
     <Compile Include="Properties\RetailerConstants.cs" />
     <Compile Include="Properties\UIConstants.cs" />
-    <Compile Include="Mobile\Detection\MobileCapabilitiesOverride.cs" />
     <Compile Include="UI\DataProvider.cs" />
     <Compile Include="UI\Device.cs" />
     <Compile Include="UI\RedirectData.cs" />
@@ -290,9 +299,6 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Mobile\Detection\51Degrees-Lite.dat.gz" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

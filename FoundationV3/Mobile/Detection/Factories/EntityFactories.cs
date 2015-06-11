@@ -219,7 +219,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         }
     }
     
-    internal class NodeFactory : BaseEntityFactory<Node>
+    internal abstract class NodeFactory : BaseEntityFactory<Node>
     {
         #region Constants
 
@@ -241,6 +241,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
 
         #endregion
 
+        protected abstract Node Construct(DataSet dataSet, int offset, Reader reader);
+
         /// <summary>
         /// Creates a new instance of <see cref="Node"/>
         /// </summary>
@@ -256,7 +258,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// <returns>A new instance of a <see cref="Node"/></returns>
         internal override Node Create(DataSet dataSet, int offset, Reader reader)
         {
-            return new Node(dataSet, offset, reader);
+            return Construct(dataSet, offset, reader);
         }
 
         /// <summary>
@@ -304,7 +306,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         }
     }
 
-    internal class ProfileFactory : BaseEntityFactory<Profile>
+    internal abstract class ProfileFactory : BaseEntityFactory<Profile>
     {
         #region Constants
 
@@ -314,6 +316,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         private const int MinLength = sizeof(byte) + sizeof(int) + sizeof(int) + sizeof(int);
 
         #endregion
+
+        protected abstract Profile Construct(DataSet dataSet, int offset, Reader reader);
 
         /// <summary>
         /// Creates a new instance of <see cref="Profile"/>
@@ -330,7 +334,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// <returns>A new instance of an <see cref="Profile"/></returns>
         internal override Profile Create(DataSet dataSet, int offset, Reader reader)
         {
-            return new Profile(dataSet, offset, reader);
+            return Construct(dataSet, offset, reader);
         }
 
         /// <summary>

@@ -22,72 +22,41 @@
 using System.IO;
 using System;
 using FiftyOne.Foundation.Mobile.Detection.Readers;
+using System.IO.MemoryMappedFiles;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 {
     /// <summary>
-    /// Encapsulates either a byte array or a file containing the uncompressed
+    /// Providers the base for a data source containing the uncompressed
     /// data structures used by the data set.
     /// </summary>
     /// <remarks>
-    /// Must be disposed to ensure that the readers are closed and the file
-    /// free for other uses. Does not need to be disposed if a byte array is
-    /// used.
+    /// Must be disposed to ensure that the readers are closed and any resources
+    /// free for other uses.
     /// </remarks>
-    internal class Source : IDisposable
+    internal abstract class SourceBase : IDisposable
     {
         #region Fields
 
         /// <summary>
-        /// The file containing the source data.
+        /// List of binary readers opened against the data source. 
         /// </summary>
-        private readonly string _fileName;
-
-        /// <summary>
-        /// The buffer containing the source data.
-        /// </summary>
-        private readonly byte[] _buffer;
-
-        // List of binary readers opened against the file.
         private readonly System.Collections.Generic.List<Reader> _readers = 
             new System.Collections.Generic.List<Reader>();
 
         #endregion
 
-        #region Constructors
-
-        /// <summary>
-        /// Creates the source from the file provided.
-        /// </summary>
-        /// <param name="fileName">File source of the data</param>
-        internal Source(string fileName)
-        {
-            _fileName = fileName;
-        }
-
-        /// <summary>
-        /// Creates the source from the byte array provided.
-        /// </summary>
-        /// <param name="buffer">Byte array source of the data</param>
-        internal Source(byte[] buffer)
-        {
-            _buffer = buffer;
-        }
-
-        #endregion
-
-        #region Methods
+        #region Abstract Members
 
         /// <summary>
         /// Creates a new stream from the data source.
         /// </summary>
         /// <returns>A freshly opened stream to the data source</returns>
-        private System.IO.Stream CreateStream()
-        {
-            if (_buffer != null)
-                return new MemoryStream(_buffer);
-            return new FileStream(_fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
-        }
+        internal abstract System.IO.Stream CreateStream();
+
+        #endregion
+
+        #region Methods
 
         /// <summary>
         /// Creates a new reader and stores a reference to it.
@@ -104,30 +73,103 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         }
 
         /// <summary>
-        /// Closes any file references.
+        /// Releases the reference to memory and forces garbage collection.
         /// </summary>
-        public void Dispose()
+        public virtual void Dispose()
         {
-            if (_readers != null)
+            lock (_readers)
             {
                 foreach (var reader in _readers)
                 {
-                    reader.Close();
+                    reader.Dispose();
                 }
+                _readers.Clear();
             }
-            DeleteFile();
         }
 
+        #endregion
+    }
+
+    /// <summary>
+    /// Encapsulates a byte array containing the uncompressed
+    /// data structures used by the data set.
+    /// </summary>
+    internal class SourceMemory : SourceBase
+    {
+        #region Fields
+
         /// <summary>
-        /// Delete the file if it's a temporary file.
+        /// The buffer containing the source data.
         /// </summary>
-        private void DeleteFile()
+        private readonly byte[] _buffer;
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Creates the source from the byte array provided.
+        /// </summary>
+        /// <param name="buffer">Byte array source of the data</param>
+        internal SourceMemory(byte[] buffer)
         {
-            if (!string.IsNullOrEmpty(_fileName) && _fileName.Contains(".tmp"))
+            _buffer = buffer;
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Creates a new stream from the data source.
+        /// </summary>
+        /// <returns>A freshly opened stream to the data source</returns>
+        internal override System.IO.Stream CreateStream()
+        {
+            return new MemoryStream(_buffer);
+        }
+
+        #endregion
+    }
+
+    internal abstract class SourceFileBase : SourceBase
+    {
+        #region Fields
+
+        /// <summary>
+        /// The file containing the source data.
+        /// </summary>
+        protected readonly FileInfo _fileInfo;
+
+        #endregion
+
+        #region Constructor
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fileName">File source of the data</param>
+        internal SourceFileBase(string fileName)
+        {
+            _fileInfo = new FileInfo(fileName);
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Delete the file if it's a temporary file and it 
+        /// still exists.
+        /// </summary>
+        protected void DeleteFile()
+        {
+            if (".tmp".Equals(_fileInfo.Extension) &&
+                _fileInfo.Exists)
             {
                 try
                 {
-                    File.Delete(_fileName);
+                    _fileInfo.Delete();
                 }
                 catch (IOException)
                 {
@@ -137,6 +179,121 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
             }
         }
 
+        #endregion
+    }
+
+    /// <summary>
+    /// Encapsulates either a file containing the uncompressed
+    /// data structures used by the data set.
+    /// </summary>
+    internal class SourceFile : SourceFileBase
+    {
+        #region Constructors
+
+        /// <summary>
+        /// Creates the source from the file provided.
+        /// </summary>
+        /// <param name="fileName">File source of the data</param>
+        internal SourceFile(string fileName)
+            : base(fileName)
+        {
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Creates a new stream from the data source.
+        /// </summary>
+        /// <returns>A freshly opened stream to the data source</returns>
+        internal override System.IO.Stream CreateStream()
+        {
+            return _fileInfo.OpenRead();
+        }
+
+        /// <summary>
+        /// Closes any file references and then checks
+        /// to delete the file.
+        /// </summary>
+        public override void Dispose()
+        {
+            base.Dispose();
+            DeleteFile();
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Encapsulates a file containing an uncompressed data structure.
+    /// </summary>
+    internal class SourceMemoryMappedFile : SourceFileBase
+    {
+        #region Fields
+
+        /// <summary>
+        /// The memory mapped file to use as the source.
+        /// </summary>
+        private readonly MemoryMappedFile _file;
+
+        /// <summary>
+        /// Controls the security of the memory mapped file.
+        /// </summary>
+        private readonly MemoryMappedFileSecurity _security;
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Creates the source from the file provided.
+        /// </summary>
+        /// <param name="fileName">File source of the data</param>
+        internal SourceMemoryMappedFile(string fileName) : base(fileName)
+        {
+            _security = new MemoryMappedFileSecurity();
+
+            // The mapname must not be the same as the file name.
+            var mapName = String.Format(
+                "{0}-{1}",
+                GetType().Name,
+                new FileInfo(fileName).Name);
+
+            _file = MemoryMappedFile.CreateFromFile(
+                File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read),
+                mapName,
+                _fileInfo.Length,
+                MemoryMappedFileAccess.Read,
+                _security,
+                HandleInheritability.Inheritable,
+                true);
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Creates a new stream from the data source.
+        /// </summary>
+        /// <returns>A freshly opened stream to the data source</returns>
+        internal override System.IO.Stream CreateStream()
+        {
+            return _file.CreateViewStream(0, _fileInfo.Length, MemoryMappedFileAccess.Read);
+        }
+
+        /// <summary>
+        /// Closes any file references and then checks
+        /// to delete the file.
+        /// </summary>
+        public override void Dispose()
+        {
+            base.Dispose();
+            _file.Dispose();
+            DeleteFile();
+        }
+        
         #endregion
     }
 }

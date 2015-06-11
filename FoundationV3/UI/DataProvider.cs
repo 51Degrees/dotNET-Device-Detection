@@ -227,8 +227,7 @@ namespace FiftyOne.Foundation.UI
         [Obsolete("DataProvider is deprecated. All data access should use DataSet.")]
         public static bool GetIsPremium(Property property)
         {
-            return WebProvider.EmbeddedProvider.DataSet.Properties.Any(i =>
-                i.Name == property.Name) == false;
+            return "Lite".Equals(WebProvider.ActiveProvider.DataSet.Name) == false;
         }
 
         /// <summary>

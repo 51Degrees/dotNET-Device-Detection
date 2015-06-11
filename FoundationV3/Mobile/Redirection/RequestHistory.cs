@@ -27,12 +27,7 @@ using System.IO;
 using System.Threading;
 using System.Web;
 using FiftyOne.Foundation.Mobile.Configuration;
-
-#if VER4
-
 using System.Linq;
-
-#endif
 
 #endregion
 
@@ -237,7 +232,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                     {
                         ((RequestRecord) record).Write(stream);
                         stream.Flush();
-                        stream.Close();
+                       
                     }
                 }
             }
@@ -325,7 +320,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                             repeatProcess = length != stream.Length;
 
                             reader.Close();
-                            stream.Close();
+
                         }
                     }
                 }
@@ -426,7 +421,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                         EventLog.Info(String.Format("Trimmed request history file '{0}' by removing {1} bytes.",
                                                     _syncFilePath, originalLength - buffer.Length));
                     }
-                    stream.Close();
+     //               stream.Close();
                 }
             }
 

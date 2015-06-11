@@ -177,11 +177,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                             if (String.IsNullOrEmpty(Manager.Redirect.MobilePagesRegex) == false)
                                 _mobilePageRegex = new Regex(Manager.Redirect.MobilePagesRegex,
                                                              RegexOptions.Compiled | RegexOptions.IgnoreCase);
-#if VER4
                             _formsLoginUrl = FormsAuthentication.IsEnabled ? FormsAuthentication.LoginUrl : String.Empty;
-#else
-                            _formsLoginUrl = FormsAuthentication.LoginUrl;
-#endif
                             _originalUrlAsQueryString = Manager.Redirect.OriginalUrlAsQueryString;
 
                             foreach (LocationElement homePage in Manager.Redirect.Locations)

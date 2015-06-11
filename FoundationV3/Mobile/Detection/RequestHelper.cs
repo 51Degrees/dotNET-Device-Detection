@@ -193,16 +193,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>True if from the local host IP address.</returns>
         private static bool IsLocalHost(IPAddress address)
         {
-#if VER4
             return LOCALHOSTS.Any(host => host.Equals(address));
-#else
-            foreach (IPAddress host in LOCALHOSTS)
-            {
-                if (host.Equals(address))
-                    return true;
-            }
-            return false;
-#endif
         }
 
         /// <summary>

@@ -44,7 +44,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// file are closed elegantly.
     /// </remarks>
     /// <para>
-    /// For more information see http://51degrees.com/Support/Documentation/Net.aspx
+    /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
     public class DataSet : IDisposable
     {
@@ -124,6 +124,105 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             get
             {
                 return PercentageMisses(Values);
+            }
+        }
+
+        /// <summary>
+        /// The percentage of requests for ranked signatures which were not already
+        /// contained in the cache.
+        /// </summary>
+        /// <remarks>
+        /// A value is only returned when operating in Stream mode.
+        /// </remarks>
+        public double PercentageRankedSignatureCacheMisses
+        {
+            get
+            {
+                return PercentageMisses(RankedSignatureIndexes);
+            }
+        }
+
+        /// <summary>
+        /// Number of times the signature cache was switched.
+        /// </summary>
+        /// <remarks>
+        /// A value is only returned when operating in Stream mode.
+        /// </remarks>
+        public long SignatureCacheSwitches
+        {
+            get
+            {
+                return Switches(Signatures);
+            }
+        }
+
+        /// <summary>
+        /// Number of times the node cache was switched.
+        /// </summary>
+        /// <remarks>
+        /// A value is only returned when operating in Stream mode.
+        /// </remarks>
+        public long NodeCacheSwitches
+        {
+            get
+            {
+                return Switches(Nodes);
+            }
+        }
+
+        /// <summary>
+        /// Number of times the strings cache was switched.
+        /// </summary>
+        /// <remarks>
+        /// A value is only returned when operating in Stream mode.
+        /// </remarks>
+        public long StringsCacheSwitches
+        {
+            get
+            {
+                return Switches(Strings);
+            }
+        }
+
+        /// <summary>
+        /// Number of times the profiles cache was switched.
+        /// </summary>
+        /// <remarks>
+        /// A value is only returned when operating in Stream mode.
+        /// </remarks>
+        public long ProfilesCacheSwitches
+        {
+            get
+            {
+                return Switches(Profiles);
+            }
+        }
+
+        /// <summary>
+        /// Number of times the values cache was switched.
+        /// </summary>
+        /// <remarks>
+        /// A value is only returned when operating in Stream mode.
+        /// </remarks>
+        public long ValuesCacheSwitches
+        {
+            get
+            {
+                return Switches(Values);
+            }
+        }
+
+        /// <summary>
+        /// Number of times the ranked signature cache was switched.
+        /// </summary>
+        /// <remarks>
+        /// A value is only returned when operating in Stream mode.
+        /// </remarks>
+        public long RankedSignatureCacheSwitches
+        {
+            get
+            {
+                return Switches(RankedSignatureIndexes);
             }
         }
         
@@ -447,11 +546,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// A list of all properties the data set contains.
         /// </summary>
-        public MemoryFixedList<Property> Properties
+        public PropertiesList Properties
         {
             get { return _properties; }
         }
-        internal MemoryFixedList<Property> _properties;
+        internal PropertiesList _properties;
 
         /// <summary>
         /// A list of all property values the data set contains.
@@ -609,7 +708,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             
             // We no longer need the strings data structure as all dependent
             // data has been taken from it.
-            Strings.Dispose();
             Strings = null;
         }
 
@@ -640,6 +738,23 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             }
         }
 
+        /// <summary>
+        /// Returns the number of times the cache lists were switched.
+        /// </summary>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        private static long Switches(object list)
+        {
+            if (list is Stream.ICacheList)
+            {
+                return ((Stream.ICacheList)list).Switches;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
         #endregion
         
         #region Public Methods
@@ -647,26 +762,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Disposes of all the lists that form the dataset.
         /// </summary>
-        public void Dispose()
+        public virtual void Dispose()
         {
             _disposed = true;
-            if (Strings != null)
-                Strings.Dispose();
-            if (Components != null)
-                Components.Dispose();
-            if (Properties != null)
-                Properties.Dispose();
-            if (Values != null)
-                Values.Dispose();
-            if (Signatures != null)
-                Signatures.Dispose();
-            if (Profiles != null)
-                Profiles.Dispose();
-            if (Nodes != null)
-                Nodes.Dispose();
-            if (RootNodes != null)
-                RootNodes.Dispose();
         }
+
 
         /// <summary>
         /// Searches the list of profile Ids and returns the profile if the profile 
@@ -711,13 +811,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <returns><see cref="Property"/> object associated with the name</returns>
         public Property GetProperty(string propertyName)
         {
-            var property = _properties.FirstOrDefault(i => i.Name == propertyName);
-            if (property != null)
-                return property;
-            return null;
+            return _properties[propertyName];
         }
-
-
+        
         #endregion
     }
 }
