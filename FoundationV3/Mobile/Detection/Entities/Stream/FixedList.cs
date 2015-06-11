@@ -75,14 +75,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// </summary>
         /// <param name="dataSet">The <see cref="DataSet"/> being created</param>
         /// <param name="reader">Reader connected to the source data structure and positioned to start reading</param>
-        /// <param name="source">Reference to the underlying data structure</param>
         /// <param name="entityFactory">Used to create new instances of the entity</param>
+        /// <param name="cacheSize">Number of items in list to have capacity to cache</param>
         internal FixedList(
             DataSet dataSet, 
             Reader reader, 
-            Source source,
-            BaseEntityFactory<T> entityFactory)
-            : base(dataSet, reader, source, entityFactory)
+            BaseEntityFactory<T> entityFactory,
+            int cacheSize)
+            : base(dataSet, reader, entityFactory, cacheSize)
         {
         }
 

@@ -42,6 +42,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
         public const string DefaultBinaryFilePath = "~/App_Data/51Degrees.dat";
 
         /// <summary>
+        /// The location to create and manage temporary files.
+        /// </summary>
+        public const string TemporaryFilePath = "~/App_Data/51Degrees";
+
+        /// <summary>
         /// The preferred name of the licence key file.
         /// </summary>
         public const string LicenceKeyFileName = "51Degrees.lic";
@@ -113,10 +118,39 @@ namespace FiftyOne.Foundation.Mobile.Detection
         internal const string EmptyImageResourceName = "FiftyOne.Foundation.Image.E.gif";
 
         /// <summary>
-        /// The number of seconds to elapse between cache services
-        /// when operating in stream mode.
+        /// The number of user agents to cache.
         /// </summary>
-        internal const int CacheServiceInterval = 60;
+        internal const int UserAgentCacheSize = 1000;
+
+        /// <summary>
+        /// The number of signatures that it should be possible to cache.
+        /// </summary>
+        internal const int SignaturesCacheSize = 16000;
+
+        /// <summary>
+        /// The number of ranked signatures that it should be possible to cache.
+        /// </summary>
+        internal const int RankedSignaturesCacheSize = 16000;
+
+        /// <summary>
+        /// The number of node that it should be possible to cache.
+        /// </summary>
+        internal const int NodesCacheSize = 30000;
+        
+        /// <summary>
+        /// The number of values that it should be possible to cache.
+        /// </summary>
+        internal const int ValuesCacheSize = 3000;
+        
+        /// <summary>
+        /// The number of profiles that it should be possible to cache.
+        /// </summary>
+        internal const int ProfilesCacheSize = 300;
+
+        /// <summary>
+        /// The number of strings that it should be possible to cache.
+        /// </summary>
+        internal const int StringsCacheSize = 3000;
 
         /// <summary>
         /// If premium data is being used with Foundation the licence key
@@ -213,17 +247,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// transmission.
         /// </summary>
         internal const int NewDeviceQueueLength = 50;
-
-        /// <summary>
-        /// An array of default values for properties where they can't be found
-        /// and a value must be provided.
-        /// </summary>
-        internal static readonly string[,] DefaultPropertyValues = new string[,] {
-            { "screenPixelsHeight", "480" },
-            { "screenPixelsWidth", "640" },
-            { "screenCharactersHeight", "40" },
-            { "screenCharactersWidth", "80" } };
-
+               
         /// <summary>
         /// The number of minutes to store request stats for before
         /// they are disgarded. Used by the bandwidth feature.

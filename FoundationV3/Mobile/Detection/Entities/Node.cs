@@ -51,9 +51,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// the user agent.
     /// </para>
     /// <para>
-    /// For more information see http://51degrees.com/Support/Documentation/Net.aspx
+    /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
-    internal class Node : BaseEntity, IComparable<Node>
+    internal abstract class Node : BaseEntity, IComparable<Node>
     {
         #region Classes
 
@@ -117,14 +117,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Fields
 
         /// <summary>
-        /// An array of all the numeric children.
+        /// Number of numeric children associated with the node.
         /// </summary>
-        internal protected readonly NodeNumericIndex[] NumericChildren = null;
+        protected short _numericChildrenCount;
 
         /// <summary>
-        /// A list of all the signature indexes that relate to this node.
+        /// Number of ranked signatures associated with the node.
         /// </summary>
-        internal readonly int[] RankedSignatureIndexes;
+        protected int _rankedSignatureCount;
 
         /// <summary>
         /// The next character position to the left of this node
@@ -250,6 +250,20 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         
         #endregion
 
+        #region Abstract Properties
+
+        /// <summary>
+        /// An array of all the numeric children.
+        /// </summary>
+        internal protected abstract NodeNumericIndex[] NumericChildren { get; }
+
+        /// <summary>
+        /// A list of all the signature indexes that relate to this node.
+        /// </summary>
+        internal abstract int[] RankedSignatureIndexes { get; }
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
@@ -274,11 +288,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             _parentOffset = reader.ReadInt32();
             CharacterStringOffset = reader.ReadInt32();
             var childrenCount = reader.ReadInt16();
-            var numericChildrenCount = reader.ReadInt16();
-            var rankedSignatureCount = reader.ReadInt32();
+            _numericChildrenCount = reader.ReadInt16();
+            _rankedSignatureCount = reader.ReadInt32();
             Children = ReadNodeIndexes(dataSet, reader, offset + NodeFactory.MinLength, childrenCount);
-            NumericChildren = ReadNodeNumericIndexes(dataSet, reader, numericChildrenCount);
-            RankedSignatureIndexes = BaseEntity.ReadIntegerArray(reader, rankedSignatureCount);
         }
 
         /// <summary>
@@ -295,7 +307,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// The number of node indexes that need to be read.
         /// </param>
         /// <returns></returns>
-        private NodeNumericIndex[] ReadNodeNumericIndexes(Entities.DataSet dataSet, BinaryReader reader, short count)
+        protected NodeNumericIndex[] ReadNodeNumericIndexes(Entities.DataSet dataSet, BinaryReader reader, short count)
         {
             var array = new NodeNumericIndex[count];
             for (int i = 0; i < array.Length; i++)

@@ -169,9 +169,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         private static void SendData(Stream stream, Queue<byte[]> queue)
         {
-            using (GZipStream compressed = new GZipStream(stream, CompressionMode.Compress))
-            {
-                using (XmlWriter writer = XmlWriter.Create(compressed, GetXmlSettings()))
+            
+           
+                using (XmlWriter writer = XmlWriter.Create(new GZipStream(stream, CompressionMode.Compress), GetXmlSettings()))
                 {
                     writer.WriteStartDocument();
                     writer.WriteStartElement("Devices");
@@ -186,9 +186,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         }
                     }
                     writer.WriteEndElement();
-                    writer.WriteEndDocument();
+                    
                 }
-            }
+            
         }
 
         /// <summary>

@@ -33,7 +33,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// used by multiple entities.
     /// </para>
     /// <para>
-    /// For more information see http://51degrees.com/Support/Documentation/Net.aspx
+    /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
     public abstract class BaseEntity : IComparable<BaseEntity>
     {

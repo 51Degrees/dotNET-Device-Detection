@@ -52,7 +52,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// easilly extract strongly typed values.
     /// </para>
     /// <para>
-    /// For more information see http://51degrees.com/Support/Documentation/Net.aspx
+    /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
     public class Property : BaseEntity,  IComparable<Property>
     {

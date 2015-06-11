@@ -100,9 +100,12 @@ namespace FiftyOne.Foundation.UI.Web
         {
             base.OnInit(e);
 
-            _container.Controls.Add(_legend);
-            _container.Controls.Add(_instructions);
-            _container.Controls.Add(BuildProperties());
+            if (DataSet != null)
+            {
+                _container.Controls.Add(_legend);
+                _container.Controls.Add(_instructions);
+                _container.Controls.Add(BuildProperties());
+            }
         }
 
         private Literal BuildProperties()
@@ -299,17 +302,18 @@ namespace FiftyOne.Foundation.UI.Web
             }
             writer.WriteEndElement();
         }
-
-
-
+        
         /// <summary>
         /// Adds html to the control displaying the upgrade message.
         /// </summary>
         /// <param name="e"></param>
         protected override void OnPreRender(EventArgs e)
         {
-            _instructions.Text = Resources.PropertyDictionaryInstructions;
-            _legend.Text = ReplaceTags(Resources.PropertyDictionaryLegend);
+            if (DataSet != null)
+            {
+                _instructions.Text = Resources.PropertyDictionaryInstructions;
+                _legend.Text = ReplaceTags(Resources.PropertyDictionaryLegend);
+            }
 
             base.OnPreRender(e);
         }

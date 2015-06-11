@@ -47,7 +47,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
     /// the initial detections. The default setting is to initialise the data set.
     /// </remarks>
     /// <para>
-    /// For more information see http://51degrees.com/Support/Documentation/Net.aspx
+    /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
     public static class MemoryFactory
     {
@@ -71,13 +71,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// <returns>A <see cref="DataSet"/> filled with data from the array</returns>
         public static DataSet Create(byte[] array, bool init)
         {
-            using (var ms = new MemoryStream(array))
-            {
-                using (var reader = new Reader(ms))
+           
+                using (var reader = new Reader(new MemoryStream(array)))
                 {
                     return Read(reader, init);
                 }
-            }
+            
         }
         
         /// <summary>
@@ -104,13 +103,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// <returns>A <see cref="DataSet"/> filled with data from the array</returns>
         public static DataSet Create(string filePath, bool init)
         {
-            using (var stream = File.OpenRead(filePath))
-            {
-                using (var reader = new Reader(stream))
+       //     using (var stream = File.OpenRead(filePath))
+       //     {
+                using (var reader = new Reader(File.OpenRead(filePath)))
                 {
                     return Read(reader, init);
                 }
-            }
+      //      }
         }
        
         #endregion
@@ -140,14 +139,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
             var strings = new MemoryVariableList<AsciiString>(dataSet, reader, new AsciiStringFactory());
             var components = new MemoryFixedList<Component>(dataSet, reader, new ComponentFactory());
             var maps = new MemoryFixedList<Map>(dataSet, reader, new MapFactory());
-            var properties = new MemoryFixedList<Property>(dataSet, reader, new PropertyFactory());
+            var properties = new PropertiesList(dataSet, reader, new PropertyFactory());
             var values = new MemoryFixedList<Value>(dataSet, reader, new ValueFactory());
-            var profiles = new MemoryVariableList<Profile>(dataSet, reader, new ProfileFactory());
+            var profiles = new MemoryVariableList<Entities.Profile>(dataSet, reader, new ProfileMemoryFactory());
             var signatures = new MemoryFixedList<Signature>(dataSet, reader, new SignatureFactory(dataSet));
             var rankedSignatureIndexes = new MemoryFixedList<RankedSignatureIndex>(
                 dataSet, reader, new RankedSignatureIndexFactory());
-            var nodes = new MemoryVariableList<Node>(dataSet, reader, new NodeFactory());
-            var rootNodes = new MemoryFixedList<Node>(dataSet, reader, new RootNodeFactory());
+            var nodes = new MemoryVariableList<Entities.Node>(dataSet, reader, new NodeMemoryFactory());
+            var rootNodes = new MemoryFixedList<Entities.Node>(dataSet, reader, new RootNodeFactory());
             var profileOffsets = new MemoryFixedList<ProfileOffset>(dataSet, reader, new ProfileOffsetFactory());
 
             dataSet.Strings = strings;

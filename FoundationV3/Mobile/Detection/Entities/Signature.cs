@@ -50,10 +50,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// profile for each component type.
     /// </para>
     /// <para>
-    /// For more information about signature see http://51degrees.com/Support/Documentation/Net.aspx
+    /// For more information about signature see https://51degrees.com/Support/Documentation/Net
     /// </para>
     /// <para>
-    /// For more information see http://51degrees.com/Support/Documentation/Net.aspx
+    /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
     public class Signature : BaseEntity, IComparable<Signature>
     {
@@ -137,7 +137,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                     {
                         if (_profiles == null)
                         {
-                            _profiles = GetProfiles();
+                            _profiles = GetProfiles().ToArray();
                         }
                     }
                 }
@@ -345,7 +345,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             if (_nodes == null)
                 _nodes = GetNodes();
             if (_profiles == null)
-                _profiles = GetProfiles();
+                _profiles = GetProfiles().ToArray();
             if (_values == null)
                 _values = GetValues();
             if (_deviceId == null)
@@ -383,9 +383,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         private Value[] GetValues()
         {
             // Get the number of values in against the signature.
-            var valuesCount = 0;
-            foreach (var profile in Profiles)
-                valuesCount += profile.Values.Length;
+            var valuesCount = Profiles.Sum(i => i.ValueIndexes.Length);
 
             // Add the values to the array for each of the profiles.
             var values = new Value[valuesCount];
@@ -422,15 +420,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
 
         /// <summary>
-        /// Returns an array of profiles associated with the signature.
+        /// Returns an enumeration of profiles associated with the signature.
         /// </summary>
-        /// <returns>Array of profiles associated with the signature</returns>
-        private Profile[] GetProfiles()
+        /// <returns>Enumeration of profiles for the signature</returns>
+        internal IEnumerable<Profile> GetProfiles()
         {
-            var profiles = new Profile[ProfileOffsets.Length];
-            for (int i = 0; i < ProfileOffsets.Length; i++)
-                profiles[i] = DataSet.Profiles[ProfileOffsets[i]];
-            return profiles;
+            return ProfileOffsets.Select(i =>
+                DataSet.Profiles[i]).ToArray();
         }
 
         /// <summary>

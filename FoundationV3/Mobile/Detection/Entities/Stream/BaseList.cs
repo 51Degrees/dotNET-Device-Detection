@@ -50,7 +50,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
     /// Should not be referenced directly.
     /// </remarks>
     /// <typeparam name="T">The type of <see cref="BaseEntity"/> the list will contain</typeparam>
-    public abstract class BaseList<T> : ICacheList, IDisposable where T : BaseEntity
+    public abstract class BaseList<T> : ICacheList where T : BaseEntity
     {
         #region Fields
 
@@ -75,12 +75,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// entities already in use.
         /// </summary>
         internal readonly Cache<T> _cache;
-
-        /// <summary>
-        /// Pools of binary readers connected to the data source.
-        /// </summary>
-        private readonly Pool _pool;
-       
+      
         #endregion
 
         #region Properties
@@ -91,6 +86,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         double ICacheList.PercentageMisses
         {
             get { return _cache != null ? _cache.PercentageMisses : 0; }
+        }
+
+        /// <summary>
+        /// The number of times the cache has been switched.
+        /// </summary>
+        long ICacheList.Switches
+        {
+            get { return _cache != null ? _cache.Switches : 0; }
         }
 
         #endregion
@@ -120,19 +123,18 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// </summary>
         /// <param name="dataSet">Dataset being created</param>
         /// <param name="reader">Reader used to initialise the header only</param>
-        /// <param name="source">Source data file containing the entire data structure</param>
         /// <param name="entityFactory">Used to create new instances of the entity</param>
+        /// <param name="cacheSize">Number of items in list to have capacity to cache</param>
         internal BaseList(
             DataSet dataSet, 
-            Reader reader, 
-            Source source,
-            BaseEntityFactory<T> entityFactory)
+            Reader reader,
+            BaseEntityFactory<T> entityFactory,
+            int cacheSize)
         {
             _dataSet = dataSet;    
-            Header = new Header(reader);    
-            _pool = new Pool(source);
+            Header = new Header(reader);
             EntityFactory = entityFactory;
-            _cache = new Cache<T>(new TimeSpan(0, 0, Constants.CacheServiceInterval));
+            _cache = new Cache<T>(cacheSize);
         }
 
         #endregion
@@ -149,50 +151,21 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
             get
             {
                 T item;
-#if VER4
                 // No need to lock the dictionaries as they support concurrency.
                 if (_cache._itemsActive.TryGetValue(key, out item) == false)
                 {
-                    var reader = _pool.GetReader();
+                    var reader = _dataSet.Pool.GetReader();
                     item = CreateEntity(key, reader);
-                    _pool.Release(reader);
+                    _dataSet.Pool.Release(reader);
                     _cache._itemsActive[key] = item;
                     _cache.Misses++;
                 }
                 _cache.AddRecent(item);
-#else
-                // Lock the dictionaries as they don't support concurrency
-                // below .NET version 4.
-                lock (_cache._itemsActive) 
-                {
-                    if (_cache._itemsActive.TryGetValue(key, out item) == false)
-                    {
-                        var reader = _pool.GetReader();
-                        item = CreateEntity(key, reader);
-                        _pool.Release(reader);
-                        _cache._itemsActive[key] = item;
-                        _cache.Misses++;
-                    }
-                    lock(_cache._itemsInactive) 
-                    {
-                        _cache.AddRecent(item);
-                    }
-                }
-#endif
                 _cache.Requests++;
                 return item;
             }
         }
         
-        /// <summary>
-        /// Disposes of the pool of readers.
-        /// </summary>
-        public void Dispose()
-        {
-            _cache.Dispose();
-            _pool.Dispose();
-        }
-
         #endregion
     }
 }

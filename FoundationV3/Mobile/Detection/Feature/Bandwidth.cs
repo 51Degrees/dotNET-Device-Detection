@@ -19,6 +19,7 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
+using FiftyOne.Foundation.Mobile.Detection.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -297,14 +298,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
         /// <param name="application"></param>
         internal static void Init(HttpApplicationState application)
         {
-            if (Configuration.Manager.BandwidthMonitoringEnabled == false)
+            if (Configuration.Manager.BandwidthMonitoringEnabled == false ||
+                WebProvider.ActiveProvider == null)
             {
                 application["51D_Bandwidth"] = new bool?(false);
             }
             else
             {
-                var property = WebProvider.ActiveProvider.DataSet.Properties.FirstOrDefault(i =>
-                    i.Name == "JavascriptBandwidth");
+                var property = WebProvider.ActiveProvider.DataSet.Properties["JavascriptBandwidth"];
                 application["51D_Bandwidth"] = new bool?(property != null);
             }
             EventLog.Debug(String.Format("Bandwidth monitoring '{0}'", application["51D_Bandwidth"]));
@@ -352,18 +353,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
         /// <returns></returns>
         internal static string GetJavascript(HttpContext context)
         {
-            if (GetIsEnabled(context))
-            {
-                var results = WebProvider.GetResults(context);
-                if (results != null)
-                {
-                    string[] javascript;
-                    if (results.TryGetValue("JavascriptBandwidth", out javascript) &&
-                        javascript.Length == 1)
-                        return javascript[0];
-                }
-            }
-            return null;
+            var javascript = GetJavascriptValues(context.Request);
+            return javascript != null && javascript.Count == 1 ?
+                javascript[0].ToString() : null;
         }
 
         /// <summary>
@@ -468,8 +460,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
             if (enabled.HasValue && enabled.Value)
             {
                 // If the bandwidth javascript is present for this device then it's enabled.
-                var results = WebProvider.GetResults(context);
-                return results != null && results.ContainsKey("JavascriptBandwidth");
+                var javascript = GetJavascriptValues(context.Request);
+                return javascript != null;
             }
             return false;
         }
@@ -477,7 +469,27 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
         #endregion
 
         #region Private Methods
-        
+
+        /// <summary>
+        /// Returns the javascript for the feature.
+        /// </summary>
+        /// <param name="request">Request the javascript is needed for</param>
+        /// <returns>Javascript to support the feature if present</returns>
+        private static Values GetJavascriptValues(HttpRequest request)
+        {
+            Values values = null;
+            var match = WebProvider.GetMatch(request);
+            if (match != null)
+            {
+                var javascript = match["JavascriptBandwidth"];
+                if (javascript != null && javascript.Count > 0)
+                {
+                    values = javascript;
+                }
+            }
+            return values;
+        }
+
         /// <summary>
         /// Retrieves the stats from the session.
         /// </summary>

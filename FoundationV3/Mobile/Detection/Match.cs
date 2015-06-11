@@ -48,7 +48,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// result and the target user agent.
     /// </para>
     /// <para>
-    /// For more information see http://51degrees.com/Support/Documentation/Net.aspx
+    /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
     public class Match : IMatch
     {
@@ -255,6 +255,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         public TimeSpan Elapsed
         {
             get { return new TimeSpan(_elapsed); }
+            internal set { _elapsed = value.Ticks; }
         }
         internal long _elapsed;
 
@@ -271,6 +272,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Returns the results of the match as a sorted list of property
         /// names and values.
         /// </summary>
+        [Obsolete("This method is not memory efficient and should be avoided as the Match " +
+                  "class now exposes an accessor keyed on property name.")]
         public SortedList<string, string[]> Results
         {
             get
@@ -296,7 +299,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
                             // Add the statistics to make available.
                             results.Add(Constants.DetectionTimeProperty, 
-                                new string[] { Elapsed.TotalMilliseconds.ToString("0.000") });
+                                new string[] { Elapsed.TotalMilliseconds.ToString("0.00000") });
                             results.Add(Constants.DifferenceProperty, 
                                 new string[] { Difference.ToString() });
                             results.Add(Constants.Nodes,
@@ -332,14 +335,18 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 {
                     // Get the property value from the profile returned
                     // from the match.
-                    var profile = Profiles.FirstOrDefault(i =>
-                        i.Component.ComponentId == property.Component.ComponentId);
-                    if (profile != null)
+                    Profile profile;
+                    if (ComponentProfiles.TryGetValue(property.Component.ComponentId, out profile) &&
+                        profile != null)
+                    {
                         value = profile[property];
+                    }
 
                     // If the value has not been found use the default profile.
                     if (value == null)
+                    {
                         value = property.Component.DefaultProfile[property];
+                    }
                 }
                 return value;
 
@@ -475,6 +482,26 @@ namespace FiftyOne.Foundation.Mobile.Detection
             }
         }
 
+        internal IDictionary<int, Profile> ComponentProfiles
+        {
+            get
+            {
+                if (_componentProfiles == null)
+                {
+                    lock(this)
+                    {
+                        if (_componentProfiles == null)
+                        {
+                            _componentProfiles = Profiles.ToDictionary(i =>
+                                i.Component.ComponentId);
+                        }
+                    }
+                }
+                return _componentProfiles;
+            }
+        }
+        private IDictionary<int, Profile> _componentProfiles;
+
         /// <summary>
         /// Array of profiles associated with the device that was found.
         /// </summary>
@@ -489,8 +516,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     {
                         if (_profiles == null)
                         {
-                            _profiles = new Profile[_signature.Profiles.Length];
-                            Array.Copy(_signature.Profiles, _profiles, _profiles.Length);
+                            var profiles = new Profile[_signature.Profiles.Length];
+                            Array.Copy(_signature.Profiles, profiles, profiles.Length);
+                            _profiles = profiles;
                         }
                     }
                 }

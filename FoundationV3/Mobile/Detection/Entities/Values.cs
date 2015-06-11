@@ -35,7 +35,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// The class contains helper methods to make consuming the data set easier.
     /// </para>
     /// <para>
-    /// For more information see http://51degrees.com/Support/Documentation/Net.aspx
+    /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
     public class Values : List<Value>
     {
@@ -79,7 +79,51 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
 
         #endregion
 
+        #region Private Methods
+
+        /// <summary>
+        /// Gets the index of the value name.
+        /// </summary>
+        /// <param name="valueName">Value name required</param>
+        /// <returns>The index matching the value name, otherwise a negative number</returns>
+        private int GetValueIndex(string valueName)
+        {
+            int lower = 0;
+            var upper = Count - 1;
+            int middle = 0;
+
+            while (lower <= upper)
+            {
+                middle = lower + (upper - lower) / 2;
+                var comparisonResult = this[middle].Name.CompareTo(valueName);
+                if (comparisonResult == 0)
+                    return middle;
+                else if (comparisonResult > 0)
+                    upper = middle - 1;
+                else
+                    lower = middle + 1;
+            }
+
+            return ~middle;
+        }
+
+        #endregion
+
         #region Public Methods
+
+        /// <summary>
+        /// Returns the value associated with the name provided.
+        /// </summary>
+        /// <param name="valueName"></param>
+        /// <returns></returns>
+        public Value this[string valueName]
+        {
+            get
+            {
+                var index = GetValueIndex(valueName);
+                return index >= 0 ? this[index] : null;
+            }
+        }
 
         /// <summary>
         /// The value represented as a boolean.
@@ -92,7 +136,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         {
             if (_property.IsList)
                 throw new MobileException("ToBool can only be used on non List properties");
-            return this[0].ToBool();
+            return Count > 0 ? this[0].ToBool() : false;
         }
 
         /// <summary>
@@ -106,7 +150,21 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         {
             if (_property.IsList)
                 throw new MobileException("ToDouble can only be used on non List properties");
-            return this[0].ToDouble();
+            return Count > 0 ? this[0].ToDouble() : 0;
+        }
+
+        /// <summary>
+        /// The value represented as a integer.
+        /// </summary>
+        /// <returns>A integer representation of the only item in the list.</returns>
+        /// <exception cref="MobileException">
+        /// Thrown if the method is called for a property with multiple values
+        /// </exception>
+        internal int ToInt()
+        {
+            if (_property.IsList)
+                throw new MobileException("ToInt can only be used on non List properties");
+            return Count > 0 ? this[0].ToInt() : 0;
         }
 
         /// <summary>
@@ -131,5 +189,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
 
         #endregion
+
+
     }
 }

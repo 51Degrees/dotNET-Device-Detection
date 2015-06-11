@@ -23,7 +23,6 @@ namespace FiftyOne.Foundation.Mobile.Redirection
 {
     internal static class Constants
     {
-
         /// <summary>
         /// Full type names of classes representing mobile
         /// page handlers.

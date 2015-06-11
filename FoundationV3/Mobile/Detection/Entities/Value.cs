@@ -41,7 +41,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// provide users with more information about the meaning and intended use of a value.
     /// </para>
     /// <para>
-    /// For more information see http://51degrees.com/Support/Documentation/Net.aspx
+    /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
     public class Value : BaseEntity, IComparable<Value>
     {
@@ -388,9 +388,33 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                     }
                 }
             }
-            return (bool)_asBool;
+            return _asBool.Value;
         }
         private bool? _asBool;
+
+        /// <summary>
+        /// Returns the value as an integer.
+        /// </summary>
+        /// <para>
+        /// If the value can not convert to an integer and the value is not
+        /// equal to the null value then the null value for the property 
+        /// will be used. If no conversion is possible 0 is returned.
+        /// </para>
+        internal int ToInt()
+        {
+            if (_asInt == null)
+            {
+                lock (this)
+                {
+                    if (_asInt == null)
+                    {
+                        _asInt = (int)ToDouble();
+                    }
+                }
+            }
+            return _asInt.Value;
+        }
+        private int? _asInt;
 
         #endregion
     }

@@ -39,7 +39,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// properties and values.
     /// </remarks>
     /// <para>
-    /// For more information see http://51degrees.com/Support/Documentation/Net.aspx
+    /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
     internal class AsciiString : BaseEntity
     {

@@ -35,7 +35,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// As there are a small number of components they are always held in memory.
     /// </remarks>
     /// <para>
-    /// For more information see http://51degrees.com/Support/Documentation/Net.aspx
+    /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
     public class Component : BaseEntity, IComparable<Component>
     {

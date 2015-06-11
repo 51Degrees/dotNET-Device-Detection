@@ -21,136 +21,146 @@
 
 using System.Collections.Generic;
 using System;
-
-#if VER4
 using System.Collections.Concurrent;
-#endif
+using System.Threading;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
     /// <summary>
-    /// Used to speed the retrieval of detection results over duplicate requests.
+    /// Many of the entities used by the detector data set are requested repeatably. 
+    /// The cache improves memory usage and reduces strain on the garbage collector
+    /// by storing previously requested entities for a short period of time to avoid the
+    /// need to refetch them from the underlying storage mechanisim.
     /// </summary>
-    /// <typeparam name="K"></typeparam>
-    /// <typeparam name="V"></typeparam>
+    /// <para>
+    /// The cache works by maintaining two dictionaries of entities keyed on their offset
+    /// or index. The inactive list contains all items requested since the cache was
+    /// created or last serviced. The active list contains all the items currently in 
+    /// the cache. The inactive list is always updated when an item is requested.
+    /// </para>
+    /// <para>
+    /// When the cache is serviced the active list is destroyed and the inactive list
+    /// becomes the active list. i.e. all the items that were requested since the cache
+    /// was last serviced are now in the cache. A new inactive list is created to store
+    /// all items being requested since the cache was last serviced.
+    /// </para>
+    /// <typeparam name="K">Key for the cache items</typeparam>
+    /// <typeparam name="V">Value for the cache items</typeparam>
     internal class Cache<K, V>
     {
-        /// <summary>
-        /// The next time the caches should be switched.
-        /// </summary>
-        private DateTime _nextCacheService = DateTime.MinValue;
+        #region Fields
 
         /// <summary>
-        /// The time between cache services.
+        /// The active list of cached items.
         /// </summary>
-        private readonly TimeSpan _serviceInterval;
+        internal ConcurrentDictionary<K, V> _itemsActive;
 
         /// <summary>
-        /// The active cache.
+        /// The list of inactive cached items.
         /// </summary>
-#if VER4
-        private ConcurrentDictionary<K, V> _active;
-#else
-        private Dictionary<K, V> _active;
-#endif
+        internal ConcurrentDictionary<K, V> _itemsInactive;
 
         /// <summary>
-        /// The background cache.
+        /// When this number of items are in the cache the lists should
+        /// be switched.
         /// </summary>
-#if VER4
-        private ConcurrentDictionary<K, V> _background;
-#else
-        private Dictionary<K, V> _background;
-#endif
+        private readonly int _cacheServiceSize;
 
-        internal Cache(int serviceInterval)
+        /// <summary>
+        /// The number of items the cache lists should have capacity for.
+        /// </summary>
+        private readonly int _cacheSize;
+
+        /// <summary>
+        /// The number of requests made to the cache.
+        /// </summary>
+        internal long Requests;
+
+        /// <summary>
+        /// The number of times an item was not available.
+        /// </summary>
+        internal long Misses;
+
+        /// <summary>
+        /// The number of times the cache was switched.
+        /// </summary>
+        internal long Switches;
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Percentage of cache misses.
+        /// </summary>
+        internal double PercentageMisses
         {
-            _serviceInterval = new TimeSpan(0, 0, serviceInterval);
-            _nextCacheService = DateTime.UtcNow + _serviceInterval;
-#if VER4
-            _active = new ConcurrentDictionary<K, V>();
-            _background = new ConcurrentDictionary<K, V>();
-#else
-            _active = new Dictionary<K, V>();
-            _background = new Dictionary<K, V>();
-#endif
-        }
-
-        internal Cache(IEqualityComparer<K> comparer, int serviceInterval)
-        {
-            _serviceInterval = new TimeSpan(serviceInterval);
-            _nextCacheService = DateTime.UtcNow + _serviceInterval;
-#if VER4
-            _active = new ConcurrentDictionary<K, V>(comparer);
-            _background = new ConcurrentDictionary<K, V>(comparer);
-#else
-            _active = new Dictionary<K, V>(comparer);
-            _background = new Dictionary<K, V>(comparer);
-#endif
-        }
-
-        /// <summary>
-        /// Service the cache by switching the lists if the next service
-        /// time has passed.
-        /// </summary>
-        private void Service()
-        {
-            if (_nextCacheService < DateTime.UtcNow)
+            get
             {
-                lock (this)
-                {
-                    if (_nextCacheService < DateTime.UtcNow)
-                    {
-                        // Switch the cache dictionaries over.
-                        var tempCache = _active;
-                        _active = _background;
-                        _background = tempCache;
-
-                        // Clear the background cache before continuing.
-                        _background.Clear();
-
-                        // Set the next service time.
-                        _nextCacheService = DateTime.UtcNow + _serviceInterval;
-                    }
-                }
+                return (double)Misses / (double)Requests;
             }
         }
 
-        internal bool TryGetValue(K key, out V result)
+        #endregion
+
+        #region Constructor
+
+        /// <summary>
+        /// Constucts a new instance of the cache.
+        /// </summary>
+        /// <param name="cacheSize">The number of items to store in the cache</param>
+        internal Cache(int cacheSize)
         {
-#if VER4
-            return _active.TryGetValue(key, out result);
-#else
-            lock (_active)
-            {
-                return _active.TryGetValue(key, out result);
-            }
-#endif
+            _cacheSize = cacheSize;
+            _cacheServiceSize = cacheSize / 2;
+            _itemsInactive = new ConcurrentDictionary<K, V>(Environment.ProcessorCount, cacheSize);
+            _itemsActive = new ConcurrentDictionary<K, V>(Environment.ProcessorCount, cacheSize);
         }
 
-        internal void SetActive(K key, V result)
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Indicates an item has been retrieved from the data set and should
+        /// be reset in the cache so it's not removed at the next service.
+        /// If the inactive cache is now more than 1/2 the total cache size
+        /// the the lists should be switched.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        internal void AddRecent(K key, V value)
         {
-#if VER4
-            _active[key] = result;
-#else
-            lock (_active)
+            _itemsInactive[key] = value;
+            if (_itemsInactive.Count > _cacheServiceSize)
             {
-                _active[key] = result;
+                ThreadPool.QueueUserWorkItem(ServiceCache, this);
             }
-#endif
         }
 
-        internal void SetBackground(K key, V result)
+        /// <summary>
+        /// Locks the cache before removing old items from the cache.
+        /// Call by the timer thread at the intervals requested by the
+        /// related list or dictionary.
+        /// </summary>
+        /// <param name="state">Reference to the cache</param>
+        private static void ServiceCache(object state)
         {
-#if VER4
-            _background[key] = result;
-#else
-            lock (_background)
-            {
-                _background[key] = result;
-            }
-#endif
-            Service();
+            var cache = (Cache<K,V>)state;
+
+            // Create a temporary copy of the new active list.
+            var temp = cache._itemsInactive;
+
+            // Clear the inactive list.
+            cache._itemsInactive.Clear();
+
+            // Switch over the cached items dictionaries.
+            cache._itemsActive = temp;
+
+            // Increase the switch count for the cache.
+            cache.Switches++;
         }
+
+        #endregion
     }
 }

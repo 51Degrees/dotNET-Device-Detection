@@ -61,6 +61,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// The stream does not contain valid data.
         /// </summary>
-        DataInvalid = 9
+        DataInvalid = 9,
+        /// <summary>
+        /// The automatic update is in progress.
+        /// </summary>
+        InProgress = 10,
+        /// <summary>
+        /// The data file downloaded is no different the current one.
+        /// </summary>
+        UpdateNotNeeded = 11
     }
 }

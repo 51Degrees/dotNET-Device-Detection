@@ -23,7 +23,9 @@ using System.IO;
 using FiftyOne.Foundation.Mobile.Detection.Entities;
 using FiftyOne.Foundation.Mobile.Detection.Entities.Memory;
 using FiftyOne.Foundation.Mobile.Detection.Entities.Stream;
+using DataSet = FiftyOne.Foundation.Mobile.Detection.Entities.Stream.DataSet;
 using FiftyOne.Foundation.Mobile.Detection.Readers;
+using System;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Factories
 {
@@ -43,7 +45,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
     /// stored in memory as there is no benefit retrieving them every time they're needed.
     /// </remarks>
     /// <para>
-    /// For more information see http://51degrees.com/Support/Documentation/Net.aspx
+    /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
     public static class StreamFactory
     {
@@ -58,13 +60,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// </returns>
         public static DataSet Create(byte[] array)
         {
-            using (var ms = new MemoryStream(array))
-            {
-                using (var reader = new Reader(ms))
+            DataSet dataSet = null;
+
+                using (var reader = new Reader(new MemoryStream(array)))
                 {
-                    return Read(reader, new Source(array));
+                    dataSet = new DataSet(reader, array);
+                    Read(reader, dataSet);
                 }
-            }
+
+            return dataSet;
         }
 
         /// <summary>
@@ -72,17 +76,19 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// </summary>
         /// <param name="filePath">Uncompressed file containing the data for the data set</param>
         /// <returns>
-        /// A <see cref="DataSet"/> configured to read entities from the file path when required
+        /// A <see cref="DataSet"/>configured to read entities from the file path when required
         /// </returns>
         public static DataSet Create(string filePath)
         {
-            using (var stream = File.OpenRead(filePath))
-            {
-                using (var reader = new Reader(stream))
+            DataSet dataSet = null;
+
+                using (var reader = new Reader(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
                 {
-                    return Read(reader, new Source(filePath));
+                    dataSet = new DataSet(reader, filePath);
+                    Read(reader, dataSet);
                 }
-            }
+
+            return dataSet;
         }
               
         #endregion
@@ -90,45 +96,35 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         #region Private Methods
 
         /// <summary>
-        /// Creates a new <see cref="DataSet"/> from the binary reader provided.
+        /// Initialises the dataset <see cref="DataSet"/> using the binary reader provided.
         /// </summary>
-        /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
-        /// </param>
-        /// <param name="source">
-        /// The source of the data used by the created detector.
-        /// </param>
         /// <para>
-        /// A <see cref="DataSet"/> is constructed using the reader to retrieve 
-        /// the header information. The data is only loaded when required by the detection
+        /// A <see cref="DataSet"/> is initialised using the reader to retrieve 
+        /// entity information. The data is only loaded when required by the detection
         /// process.
         /// </para>
-        /// <returns>
-        /// A <see cref="DataSet"/> configured to read entities from the array when required
-        /// </returns>
-        internal static DataSet Read(Reader reader, Source source)
+        /// <param name="dataSet">A data set to be initialised ready for detection</param>
+        /// <param name="reader">A binary reader connected to the underlying data source 
+        /// and positioned after the header.</param>
+        internal static void Read(Reader reader, DataSet dataSet)
         {
-            var dataSet = new DataSet(reader);
-
-            dataSet.Strings = new VariableList<AsciiString>(dataSet, reader, source, new AsciiStringFactory());
+            dataSet.Strings = new VariableList<AsciiString>(dataSet, reader, new AsciiStringFactory(), Constants.StringsCacheSize);
             var components = new MemoryFixedList<Component>(dataSet, reader, new ComponentFactory());
             dataSet._components = components;
             var maps = new MemoryFixedList<Map>(dataSet, reader, new MapFactory());
             dataSet._maps = maps;
-            var properties = new MemoryFixedList<Property>(dataSet, reader, new PropertyFactory());
+            var properties = new PropertiesList(dataSet, reader, new PropertyFactory());
             dataSet._properties = properties;
-            dataSet._values = new FixedList<Value>(dataSet, reader, source, new ValueFactory());
-            dataSet.Profiles = new VariableList<Profile>(dataSet, reader, source, new ProfileFactory());
-            dataSet._signatures = new FixedList<Signature>(dataSet, reader, source, new SignatureFactory(dataSet));
-            var rankedSignatureIndexes = new MemoryFixedList<RankedSignatureIndex>(
-                dataSet, reader, new RankedSignatureIndexFactory());
-            dataSet._rankedSignatureIndexes = rankedSignatureIndexes;
-            dataSet.Nodes = new VariableList<Node>(dataSet, reader, source, new NodeFactory());
-            var rootNodes = new MemoryFixedList<Node>(dataSet, reader, new RootNodeFactory());
+            dataSet._values = new FixedList<Value>(dataSet, reader, new ValueFactory(), Constants.ValuesCacheSize);
+            dataSet.Profiles = new VariableList<Entities.Profile>(dataSet, reader, new ProfileStreamFactory(dataSet.Pool), Constants.ProfilesCacheSize);
+            dataSet._signatures = new FixedList<Signature>(dataSet, reader, new SignatureFactory(dataSet), Constants.SignaturesCacheSize);
+            dataSet._rankedSignatureIndexes = new FixedList<RankedSignatureIndex>(dataSet, reader, new RankedSignatureIndexFactory(), Constants.RankedSignaturesCacheSize);
+            dataSet.Nodes = new VariableList<Entities.Node>(dataSet, reader, new NodeStreamFactory(dataSet.Pool), Constants.NodesCacheSize);
+            var rootNodes = new MemoryFixedList<Entities.Node>(dataSet, reader, new RootNodeFactory());
             dataSet.RootNodes = rootNodes;
             var profileOffsets = new MemoryFixedList<ProfileOffset>(dataSet, reader, new ProfileOffsetFactory());
             dataSet._profileOffsets = profileOffsets;
-            
+
             // Read into memory all the small lists which are frequently accessed.
             reader.BaseStream.Position = components.Header.StartPosition;
             components.Read(reader);
@@ -136,14 +132,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
             maps.Read(reader);
             reader.BaseStream.Position = properties.Header.StartPosition;
             properties.Read(reader);
-            reader.BaseStream.Position = rankedSignatureIndexes.Header.StartPosition;
-            rankedSignatureIndexes.Read(reader);
             reader.BaseStream.Position = rootNodes.Header.StartPosition;
             rootNodes.Read(reader);
             reader.BaseStream.Position = profileOffsets.Header.StartPosition;
             profileOffsets.Read(reader);
-
-            return dataSet;
         }
 
         #endregion

@@ -19,6 +19,7 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
+using FiftyOne.Foundation.Mobile.Detection.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,7 +41,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
         /// <param name="application"></param>
         internal static void Init(HttpApplicationState application)
         {
-            if (Configuration.Manager.FeatureDetectionEnabled == false)
+            if (Configuration.Manager.FeatureDetectionEnabled == false  ||
+                WebProvider.ActiveProvider == null)
             {
                 application[Constants.ProfileOverrideCookieName] = new bool?(false);
             }
@@ -54,6 +56,26 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
         }
 
         /// <summary>
+        /// Returns the javascript for the feature.
+        /// </summary>
+        /// <param name="request">Request the javascript is needed for</param>
+        /// <returns>Javascript to support the feature if present</returns>
+        private static Values GetJavascriptValues(HttpRequest request)
+        {
+            Values values = null;
+            var match = WebProvider.GetMatch(request);
+            if (match != null)
+            {
+                var javascript = match["JavascriptHardwareProfile"];
+                if (javascript != null && javascript.Count > 0)
+                {
+                    values = javascript;
+                }
+            }
+            return values;
+        }
+
+        /// <summary>
         /// Returns the javascript for profile override for the
         /// requesting device.
         /// </summary>
@@ -61,24 +83,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
         /// <returns></returns>
         internal static string GetJavascript(HttpContext context)
         {
-            if (GetIsEnabled(context))
-            {
-                var results = WebProvider.GetResults(context);
-                if (results != null)
-                {
-                    string[] javascript;
-                    if (results.TryGetValue("JavascriptHardwareProfile", out javascript))
-                    {
-                        return String.Format(
-                            "function FODPO() {{ var profileIds = new Array(); " +
-                            "{0} " +
-                            "document.cookie = \"{1}=\" + profileIds.join(\"|\"); }}",
-                            String.Join("\r", javascript),
-                            Constants.ProfileOverrideCookieName);
-                    }
-                }
-            }
-            return null;
+            var javascript = GetJavascriptValues(context.Request);
+            return javascript != null ?
+                String.Format(
+                    "function FODPO() {{ var profileIds = new Array(); " +
+                    "{0} " +
+                    "document.cookie = \"{1}=\" + profileIds.join(\"|\"); }}",
+                    String.Join("\r", javascript),
+                    Constants.ProfileOverrideCookieName) : null;
         }
 
         /// <summary>
@@ -93,8 +105,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
             if (enabled.HasValue && enabled.Value)
             {
                 // If the profile javascript is present for this device then it's enabled.
-                var results = WebProvider.GetResults(context);
-                return results != null && results.ContainsKey("JavascriptHardwareProfile");
+                return  GetJavascriptValues(context.Request) != null;
             }
             return false;
         }

@@ -104,23 +104,27 @@ namespace FiftyOne.Foundation.UI.Web
         protected override void OnInit(EventArgs e)
         {
             base.OnInit(e);
-            _instructions = new Literal();
-            _textBoxUserAgent = new TextBox();
-            _buttonTest = new Button();
-            _userAgentLink = new HyperLink();
-            _deviceExplorer = new DeviceExplorer();
-            _textBoxUserAgent.MaxLength = 800;
-            _buttonTest.Click += new EventHandler(ButtonTest_Click);
-            _deviceExplorer.Navigation = false;
-            _deviceExplorer.FooterEnabled = false;
-            _deviceExplorer.LogoEnabled = false;
-            _deviceExplorer.ImagesEnabled = true;
-            _container.Controls.Add(_instructions);
-            _container.Controls.Add(_textBoxUserAgent);
-            _container.Controls.Add(_buttonTest);
-            _container.Controls.Add(_userAgentLink);
-            _container.Controls.Add(_deviceExplorer);
-            _container.DefaultButton = _buttonTest.ID;
+
+            if (DataSet != null)
+            {
+                _instructions = new Literal();
+                _textBoxUserAgent = new TextBox();
+                _buttonTest = new Button();
+                _userAgentLink = new HyperLink();
+                _deviceExplorer = new DeviceExplorer();
+                _textBoxUserAgent.MaxLength = 800;
+                _buttonTest.Click += new EventHandler(ButtonTest_Click);
+                _deviceExplorer.Navigation = false;
+                _deviceExplorer.FooterEnabled = false;
+                _deviceExplorer.LogoEnabled = false;
+                _deviceExplorer.ImagesEnabled = true;
+                _container.Controls.Add(_instructions);
+                _container.Controls.Add(_textBoxUserAgent);
+                _container.Controls.Add(_buttonTest);
+                _container.Controls.Add(_userAgentLink);
+                _container.Controls.Add(_deviceExplorer);
+                _container.DefaultButton = _buttonTest.ID;
+            }
         }
 
         /// <summary>
@@ -130,21 +134,25 @@ namespace FiftyOne.Foundation.UI.Web
         protected override void OnPreRender(EventArgs e)
         {
             base.OnPreRender(e);
-            _deviceExplorer.Visible =
-                _deviceExplorer.DeviceID != null || 
-                String.IsNullOrEmpty(_deviceExplorer.UserAgent) == false;
 
-            _textBoxUserAgent.Text = String.IsNullOrEmpty(_deviceExplorer.UserAgent) ?
-                Request.UserAgent : _deviceExplorer.UserAgent;
+            if (DataSet != null)
+            {
+                _deviceExplorer.Visible =
+                    _deviceExplorer.DeviceID != null ||
+                    String.IsNullOrEmpty(_deviceExplorer.UserAgent) == false;
 
-            _userAgentLink.NavigateUrl = base.GetNewUrl("useragent", _textBoxUserAgent.Text);
+                _textBoxUserAgent.Text = String.IsNullOrEmpty(_deviceExplorer.UserAgent) ?
+                    Request.UserAgent : _deviceExplorer.UserAgent;
 
-            _userAgentLink.CssClass = LinkCssClass;
-            _textBoxUserAgent.CssClass = TextBoxCssClass;
-            _buttonTest.CssClass = ButtonCssClass;
-            _instructions.Text = UserAgentTesterInstructions;
-            _buttonTest.Text = UserAgentTesterButton;
-            _userAgentLink.Text = "Link";
+                _userAgentLink.NavigateUrl = base.GetNewUrl("useragent", _textBoxUserAgent.Text);
+
+                _userAgentLink.CssClass = LinkCssClass;
+                _textBoxUserAgent.CssClass = TextBoxCssClass;
+                _buttonTest.CssClass = ButtonCssClass;
+                _instructions.Text = UserAgentTesterInstructions;
+                _buttonTest.Text = UserAgentTesterButton;
+                _userAgentLink.Text = "Link";
+            }
         }
 
         private void ButtonTest_Click(object sender, EventArgs e)

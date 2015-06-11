@@ -26,11 +26,11 @@ namespace FiftyOne.Foundation
         /// <summary>
         /// The default url to send customers to when they want to find out more and purchase.
         /// </summary>
-        internal const string RetailerUrl = "http://51degrees.mobi/Purchase/PremiumData.aspx";
+        internal const string RetailerUrl = "https://51degrees.com/products/store/rvdsfcatid/on-premise-device-detection-8";
 
         /// <summary>
         /// The default name of the retailer.
         /// </summary>
-        internal const string RetailerName = "Visit the 51Degrees.mobi store";
+        internal const string RetailerName = "Visit the 51Degrees store";
     }
 }

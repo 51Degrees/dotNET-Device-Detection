@@ -414,59 +414,63 @@ namespace FiftyOne.Foundation.UI.Web
         {
             base.OnPreRender(e);
 
-            var xml = new StringBuilder();
-            using (var writer = XmlWriter.Create(xml, new XmlWriterSettings() { 
-                OmitXmlDeclaration = true,
-                Encoding = Response.HeaderEncoding,
-                ConformanceLevel = ConformanceLevel.Fragment
-            }))
+            if (DataSet != null)
             {
-                if (String.IsNullOrEmpty(UserAgent) == false)
+                var xml = new StringBuilder();
+                using (var writer = XmlWriter.Create(xml, new XmlWriterSettings()
                 {
-                    BuildModelsForUserAgent(writer, UserAgent);
-                }
-                else if (String.IsNullOrEmpty(SearchText) == false)
+                    OmitXmlDeclaration = true,
+                    Encoding = Response.HeaderEncoding,
+                    ConformanceLevel = ConformanceLevel.Fragment
+                }))
                 {
-                    if (IsPostBack)
+                    if (String.IsNullOrEmpty(UserAgent) == false)
+                    {
+                        BuildModelsForUserAgent(writer, UserAgent);
+                    }
+                    else if (String.IsNullOrEmpty(SearchText) == false)
+                    {
+                        if (IsPostBack)
+                        {
+                            BuildModelsForSearch(writer, SearchText);
+                        }
+                        else if (String.IsNullOrEmpty(DeviceID) == false)
+                        {
+                            BuildModelForSearch(writer, SearchText, DeviceID);
+                        }
+                        else
+                        {
+                            BuildModelsForSearch(writer, SearchText);
+                        }
+                    }
+                    else if (String.IsNullOrEmpty(SearchText) == false)
                     {
                         BuildModelsForSearch(writer, SearchText);
+                    }
+                    else if (String.IsNullOrEmpty(Vendor) == false)
+                    {
+                        if (String.IsNullOrEmpty(Model) == false)
+                        {
+                            BuildModelForVendor(writer, Vendor, Model);
+                        }
+                        else
+                        {
+                            BuildModelsForVendor(writer, Vendor);
+                        }
                     }
                     else if (String.IsNullOrEmpty(DeviceID) == false)
                     {
-                        BuildModelForSearch(writer, SearchText, DeviceID);
+                        BuildModelForDeviceID(writer, DeviceID);
                     }
                     else
                     {
-                        BuildModelsForSearch(writer, SearchText);
+                        BuildVendors(writer);
                     }
                 }
-                else if (String.IsNullOrEmpty(SearchText) == false)
-                {
-                    BuildModelsForSearch(writer, SearchText);
-                }
-                else if (String.IsNullOrEmpty(Vendor) == false)
-                {
-                    if (String.IsNullOrEmpty(Model) == false)
-                    {
-                        BuildModelForVendor(writer, Vendor, Model);
-                    }
-                    else
-                    {
-                        BuildModelsForVendor(writer, Vendor);
-                    }
-                }
-                else if (String.IsNullOrEmpty(DeviceID) == false)
-                {
-                    BuildModelForDeviceID(writer, DeviceID);
-                }
-                else
-                {
-                    BuildVendors(writer);
-                }
+                var literal = new Literal();
+                literal.Text = xml.ToString();
+                _container.Controls.Add(literal);
             }
-            var literal = new Literal();
-            literal.Text = xml.ToString();
-            _container.Controls.Add(literal);
         }
         
         #endregion
@@ -926,21 +930,18 @@ namespace FiftyOne.Foundation.UI.Web
 
         private void BuildModelsForVendor(XmlWriter writer, string vendorName)
         {
-            var vendors = DataSet.Hardware.Properties.FirstOrDefault(i =>
-                i.Name == "HardwareVendor");
-            var model = DataSet.Hardware.Properties.FirstOrDefault(i =>
-                i.Name == "HardwareModel");
+            var vendors = DataSet.Properties["HardwareVendor"];
+            var model = DataSet.Properties["HardwareModel"];
             if (vendors != null &&
                 model != null)
             {
-                var vendor = vendors.Values.FirstOrDefault(i =>
-                    i.Name == vendorName);
+                var vendor = vendors.Values[vendorName];
                 if (vendor != null)
                 {
                     // Get the profiles that relate to the vendor.
                     var profiles = vendor.Profiles.Where(i =>
                         i.Component.ComponentId == vendors.Component.ComponentId).Distinct().OrderBy(i =>
-                            i["HardwareModel"].ToString()).ToArray();
+                            i[model].ToString()).ToArray();
 
                     BuildInstructions(writer, DeviceExplorerModelsHtml);
                     BuildBackButton(writer, "All Vendors", null, "List all Vendors");
@@ -1091,12 +1092,31 @@ namespace FiftyOne.Foundation.UI.Web
             }));
         }
 
+        private char StartCharacter(string value)
+        {
+            var c = value.ToUpperInvariant()[0];
+            if (c >= 'A' && c <= 'Z')
+            {
+                return c;
+            }
+            return '1';
+        }
+
         private void BuildVendors(XmlWriter writer)
         {
-            var vendors = DataSet.Hardware.Properties.FirstOrDefault(i =>
-                i.Name == "HardwareVendor");
+            var vendors = DataSet.Properties["HardwareVendor"];
             if (vendors != null)
             {
+                // Group the vendors by the first letter.
+                var vendorsGrouped = vendors.Values.GroupBy(k => 
+                    StartCharacter(k.Name)).ToDictionary(g => 
+                        g.Key, g => g.ToList());
+
+                // Get the number of hardware profiles for each vendor.
+                var vendorCounts = DataSet.Hardware.Profiles.GroupBy(k =>
+                    k[vendors].ToString()).ToDictionary(g =>
+                        g.Key, g => g.Count());
+                
                 BuildInstructions(writer, DeviceExplorerVendorsHtml);
 
                 BuildSearch(writer);
@@ -1104,18 +1124,18 @@ namespace FiftyOne.Foundation.UI.Web
                 writer.WriteStartElement("div");
                 writer.WriteAttributeString("class", VendorLettersCssClass);
                 writer.WriteStartElement("ul");
-                for (int c = (byte)'A'; c <= (byte)'Z'; c++)
+                foreach(var g in vendorsGrouped)
                 {
-                    BuildVendorNavigation(writer, vendors.Values.Any(i => i.Name[0] == c), (char)c);
+                    BuildVendorNavigation(writer, true, g.Key);
                 }
                 writer.WriteEndElement();
                 writer.WriteEndElement();
                 writer.WriteStartElement("div");
                 writer.WriteAttributeString("class", VendorsCssClass);
                 writer.WriteStartElement("ul");
-                for (int c = (byte)'A'; c <= (byte)'Z'; c++)
+                foreach (var g in vendorsGrouped)
                 {
-                    BuildVendors(writer, vendors.Values.Where(i => i.Name[0] == c), (char)c);
+                    BuildVendors(writer, g.Value, vendorCounts, g.Key);
                 }
                 writer.WriteEndElement();
                 writer.WriteEndElement();
@@ -1149,7 +1169,7 @@ namespace FiftyOne.Foundation.UI.Web
             writer.WriteRaw(html);
         }
 
-        private void BuildVendors(XmlWriter writer, IEnumerable<Value> vendors, char c)
+        private void BuildVendors(XmlWriter writer, IEnumerable<Value> vendors, Dictionary<string, int> profiles, char c)
         {
             writer.WriteStartElement("li");
             writer.WriteAttributeString("style", "display: none;");
@@ -1162,9 +1182,12 @@ namespace FiftyOne.Foundation.UI.Web
                 writer.WriteAttributeString("href", MakeQueryString("Vendor", vendor.Name));
                 writer.WriteString(vendor.Name);
                 writer.WriteEndElement();
-                writer.WriteStartElement("span");
-                writer.WriteString(String.Format("({0})", vendor.Profiles.Count()));
-                writer.WriteEndElement();
+                if (profiles.ContainsKey(vendor.Name))
+                {
+                    writer.WriteStartElement("span");
+                    writer.WriteString(String.Format("({0})", profiles[vendor.Name]));
+                    writer.WriteEndElement();
+                }
                 writer.WriteEndElement();
             }
             writer.WriteEndElement();

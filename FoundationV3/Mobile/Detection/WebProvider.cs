@@ -20,6 +20,7 @@
  * ********************************************************************* */
 
 using System;
+using System.Linq;
 using System.IO;
 using System.Web;
 using FiftyOne.Foundation.Mobile.Detection.Configuration;
@@ -50,10 +51,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         #region Constructor
 
-        internal WebProvider() : base(Constants.CacheServiceInterval) { }
-
-        internal WebProvider(DataSet dataSet)
-            : base(dataSet, true, Constants.CacheServiceInterval)
+        /// <summary>
+        /// Constructs a new instance of the provider with the data set 
+        /// supplied.
+        /// </summary>
+        /// <param name="dataSet"></param>
+        private WebProvider(DataSet dataSet)
+            : base(dataSet, false, Constants.UserAgentCacheSize)
         {
         }
 
@@ -64,58 +68,56 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// A reference to the active provider.
         /// </summary>
+        internal static WebProvider GetActiveProvider()
+        {
+            if (_activeProviderCreated == false)
+            {
+                lock (_lock)
+                {
+                    if (_activeProviderCreated == false)
+                    {
+                        _activeProvider = Create();
+
+                        // The DetectorModule should set to listen for the 
+                        // application reycling or shutting down. This is belt
+                        // and braces in case thte HttpModule method fails to 
+                        // fire the application end event.
+                        AppDomain.CurrentDomain.ProcessExit += OnApplicationEnd;
+
+                        _activeProviderCreated = true;
+                    }
+                }
+            }
+            return _activeProvider;
+        }
+        private static WebProvider _activeProvider;
+        private static bool _activeProviderCreated = false;
+
+        /// <summary>
+        /// A reference to the active provider.
+        /// </summary>
         public static WebProvider ActiveProvider
         {
             get
             {
-                if (_activeProvider == null)
-                {
-                    lock (_lock)
-                    {
-                        AppDomain.CurrentDomain.ProcessExit += ProcessExit;
-                        _activeProvider = Create();
-                    }
-                }
-                return _activeProvider;
+                return GetActiveProvider();
             }
         }
-
         
-        internal static WebProvider _activeProvider;
-
-        /// <summary>
-        /// A reference to the embedded provider.
-        /// </summary>
-        internal static WebProvider EmbeddedProvider
-        {
-            get
-            {
-                if (_embeddedProvider == null)
-                {
-                    lock (_lock)
-                    {
-                        _embeddedProvider = new WebProvider();
-                    }
-                }
-                return _embeddedProvider;
-            }
-        }
-        internal static WebProvider _embeddedProvider;
-
         /// <summary>
         /// Returns a temporary file name for the data file.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A temporary file in the App_Data folder</returns>
         internal static string GetTempFileName()
         {
+            var directoryInfo = new DirectoryInfo(
+                Mobile.Configuration.Support.GetFilePath(Constants.TemporaryFilePath));
             var fileInfo = new FileInfo(Manager.BinaryFilePath);
-
-            var fileName = String.Format(
-                "{0}.{1}.tmp",
+            return Path.Combine(
+                directoryInfo.FullName,
+                String.Format("{0}.{1}.tmp",
                 fileInfo.Name,
-                Guid.NewGuid());
-
-            return Path.Combine(fileInfo.DirectoryName, fileName);
+                Guid.NewGuid()));
         }
 
         /// <summary>
@@ -123,14 +125,30 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// returns the published data of the file. Throws an 
         /// exception if there's a problem accessing the file.
         /// </summary>
-        /// <param name="fileInfo"></param>
-        /// <returns></returns>
-        private static DateTime GetDataFileDate(FileInfo fileInfo)
+        /// <param name="fileName"></param>
+        /// <returns>The date time from the file, or null if the file is not a valid data file</returns>
+        internal static DateTime? GetDataFileDate(string fileName)
         {
-            using (var dataset = StreamFactory.Create(fileInfo.FullName))
+            try
             {
-                var date = dataset.Published;
-                return date;
+                using (var stream = File.OpenRead(fileName))
+                {
+                    using (var reader = new BinaryReader(stream))
+                    {
+                        using (var dataSet = new DataSet(reader))
+                        {
+                            return dataSet.Published;
+                        }
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                EventLog.Info(String.Format(
+                    "Exception getting data file date from file '{0}'",
+                    fileName));
+                EventLog.Debug(ex);
+                return null;
             }
         }
 
@@ -147,75 +165,54 @@ namespace FiftyOne.Foundation.Mobile.Detection
             if (masterFile.Exists)
             {
                 // Get the publish date of the master data file.
-                var masterDate = GetDataFileDate(masterFile);
+                var masterDate = GetDataFileDate(masterFile.FullName);
 
-                // Check if there are any other tmp files.
-                var fileNames = Directory.GetFiles(
-                    Mobile.Configuration.Support.GetFilePath("~/App_Data"), 
-                    "*.tmp");
-                foreach (var fileName in fileNames)
+                // Make sure the temporary directory exists.
+                var directory = new DirectoryInfo(
+                    Mobile.Configuration.Support.GetFilePath(Constants.TemporaryFilePath));
+                if (directory.Exists == false)
                 {
-                    var file = new FileInfo(fileName);
-                    if( file.Exists &&
-                        file.FullName != masterFile.FullName &&
-                        file.Name.StartsWith(masterFile.Name))
-                    {
-                        // Check if temp file matches date of the master file.
-                        try
-                        {
-                            dataSet = StreamFactory.Create(file.FullName);
-                            if (dataSet.Published == masterDate)
-                            {
-                                EventLog.Info(
-                                    "Using existing temp data file with published data {0} - \"{1}\"",
-                                    dataSet.Published.ToShortDateString(),
-                                    file.FullName);
-                                return dataSet;
-                            }
-                            else
-                            {
-                                // The data set must be disposed of to release
-                                // any file handles.
-                                dataSet.Dispose();
-                            }
-                        }
-                        catch (Exception ex) // Exception may occur if file is not a 51Degrees file, no action is needed.
-                        {
-                            EventLog.Info(
-                                "Error while reading temporary data file \"{0}\": {1}", 
-                                file.FullName, ex.Message);
-                            // Ensure an open data set is disposed of properly
-                            // so that any file handles are released.
-                            if (dataSet != null)
-                            {
-                                dataSet.Dispose();
-                            }
-                        }
-                    }
+                    directory.Create();
                 }
+
+                // Get the first matching temporary file if one exists.
+                var temporaryFile = directory.GetFiles("*.tmp").FirstOrDefault(i =>
+                        i.Exists &&
+                        i.FullName.Equals(masterFile.FullName) == false &&
+                        i.Name.StartsWith(masterFile.Name) &&
+                        masterDate.Equals(GetDataFileDate(i.FullName)));
                 
-                // No suitable temp file was found, create one in the
-                // App_Data folder to enable the source file to be updated
-                // without stopping the web site.
-                var tempFileName = GetTempFileName();
+                if (temporaryFile != null)
+                {
+                    // Use the existing temporary file.
+                    EventLog.Info(
+                        "Using existing temp data file with published data {0} - \"{1}\"",
+                        masterDate.HasValue ? masterDate.Value.ToShortDateString() : "null",
+                        temporaryFile.FullName);
+                }
+                else
+                {
+                    // No suitable temp file was found, create one in the
+                    // temporary file folder to enable the source file to be updated
+                    // without stopping the web site.
+                    temporaryFile = new FileInfo(GetTempFileName());
 
-                // Copy the file to enable other processes to update it.
-                try
-                {
-                    File.Copy(masterFile.FullName, tempFileName);
-                    EventLog.Info("Created temp data file - \"{0}\"", tempFileName);
-                    dataSet = StreamFactory.Create(tempFileName);
-                }
-                catch (IOException ex)
-                {
-                    // Ensure an open data set is disposed of properly
-                    // so that any file handles are released.
-                    if (dataSet != null)
+                    // Copy the file to enable other processes to update it.
+                    try
                     {
-                        dataSet.Dispose();
+                        File.Copy(masterFile.FullName, temporaryFile.FullName);
+                        EventLog.Info("Created temp data file - \"{0}\"", temporaryFile.FullName);
                     }
-                    throw new MobileException(String.Format("Could not create temporary file. Check worker process has write permissions to '{0}'. For medium trust environments ensure data file is located in App_Data.", tempFileName), ex);
+                    catch (IOException ex)
+                    {
+                        throw new MobileException(String.Format(
+                            "Could not create temporary file. Check worker process has " +
+                            "write permissions to '{0}'. For medium trust environments " +
+                            "ensure data file is located in App_Data.", 
+                            temporaryFile.FullName), ex);
+                    }
                 }
+                dataSet = StreamFactory.Create(temporaryFile.FullName);
             }
             return dataSet;
         }
@@ -228,19 +225,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             try
             {
-                if (String.IsNullOrEmpty(Manager.BinaryFilePath))
-                    return;
-
-                var fileInfo = new FileInfo(Manager.BinaryFilePath);
-
-                var files = Directory.GetFiles(
-                    fileInfo.DirectoryName,
-                    String.Format("{0}.*.tmp", fileInfo.Name));
-                foreach (var file in files)
+                var directory = new DirectoryInfo(
+                                    Mobile.Configuration.Support.GetFilePath(Constants.TemporaryFilePath));
+                foreach (var file in directory.GetFiles())
                 {
                     try
                     {
-                        File.Delete(file);
+                        file.Delete();
                     }
                     catch (IOException ex)
                     {
@@ -307,15 +298,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         "Enable debug level logging and try again to help identify cause.",
                         Manager.BinaryFilePath),
                         ex));
-                // Reset the provider to enable it to be created from the embedded data.
-                provider = null;
             }
 
             // Does the provider exist and has data been loaded?
             if (provider == null || provider.DataSet == null)
             {
-                // No so initialise it with the embeddded binary data so at least we can do something.
-                provider = EmbeddedProvider;
+                EventLog.Fatal("No data source available to create provider.");
             }
             
             return provider;
@@ -331,7 +319,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         public static void Refresh()
         {
+            var provider = _activeProvider;
             _activeProvider = null;
+            _activeProviderCreated = false;
+            if (provider != null)
+            {
+                // Dispose of the old provider.
+                provider.Dispose();
+            }
         }
 
         /// <summary>
@@ -358,7 +353,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
         public void Dispose()
         {
             if (DataSet != null)
+            {
                 DataSet.Dispose();
+            }
         }
 
         #endregion
@@ -366,32 +363,26 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Internal Methods
 
         /// <summary>
-        /// Close the data set elegantly.
+        /// The application is being disposed of either due to a recycle event or 
+        /// shutdown. Ensure the active provider is disposed of to release resources.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        static void ProcessExit(object sender, EventArgs e)
+        internal static void OnApplicationEnd(object sender, EventArgs e)
         {
-            var provider = _activeProvider;
-            _activeProvider = null;
-            if (provider != null &&
-                provider != _embeddedProvider)
+            try
             {
-                // Dispose of the data set to ensure any open file connections
-                // are closed before the detector data set is freed for collection.
-                provider.DataSet.Dispose();
+                var provider = _activeProvider;
+                if (provider != null)
+                {
+                    provider.Dispose();
+                }
             }
-        }
-
-        /// <summary>
-        /// Returns the match results for the current context, or creates one if one
-        /// does not already exist.
-        /// </summary>
-        /// <param name="context">Context needing to find the matching device</param>
-        /// <returns></returns>
-        internal static SortedList<string, string[]> GetResults(HttpContext context)
-        {
-            return GetResults(context.Request);
+            finally
+            {
+                _activeProvider = null;
+                _activeProviderCreated = false;
+            }
         }
 
         /// <summary>
@@ -409,28 +400,22 @@ namespace FiftyOne.Foundation.Mobile.Detection
         internal static System.Collections.IDictionary GetContextItems(HttpRequest request)
         {
             System.Collections.IDictionary items = null;
-#if VER4
             if (request.RequestContext != null &&
                 request.RequestContext.HttpContext !=null)
             {
                 items = request.RequestContext.HttpContext.Items;
             }
-#else
-            if (HttpContext.Current != null)
-            {
-                items = HttpContext.Current.Items;
-            }
-#endif
             return items;
         }
 
         /// <summary>
         /// Returns the match results for the request, or creates one if one does not
-        /// already exist.
+        /// already exist. If the match has already been calculated it is fetched
+        /// from the context items collection.
         /// </summary>
         /// <param name="request"></param>
-        /// <returns></returns>
-        internal static SortedList<string, string[]> GetResults(HttpRequest request)
+        /// <returns>The match for the request</returns>
+        internal static Match GetMatch(HttpRequest request)
         {
             var matchKey = Constants.MatchKey + (request.UserAgent != null ? request.UserAgent.GetHashCode().ToString() : "");
             var hasOverrides = Feature.ProfileOverride.HasOverrides(request);
@@ -441,66 +426,41 @@ namespace FiftyOne.Foundation.Mobile.Detection
             var items = GetContextItems(request);
 
             // Get the results from the items collection if if exists already.
-            var results = items != null ? items[matchKey] as SortedList<string, string[]> : null;
+            var match = items != null ? items[matchKey] as Match : null;
 
-            if (results == null || hasOverrides)
+            if (match == null || hasOverrides)
             {
                 // A lock is needed in case 2 simultaneous operations are done on the
                 // request at the sametime. This is a rare use case but ensures robustness.
                 lock (request)
                 {
-                    results = items != null ? items[matchKey] as SortedList<string, string[]> : null;
-                    if (results == null || hasOverrides)
+                    match = items != null ? items[matchKey] as Match : null;
+                    var provider = GetActiveProvider();
+                    if ((match == null || hasOverrides) && provider != null)
                     {
+                        // Create the match object ready to store the results.
+                        match = provider.CreateMatch();
+                        match.Timer.Reset();
+                        match.Timer.Start();
+
                         // Get the match and store the list of properties and values 
                         // in the context and session.
-                        var match = ActiveProvider.Match(GetRequiredHeaders(request));
-                        if (match != null)
-                        {
-                            // Allow other feature detection methods to override profiles.
-                            Feature.ProfileOverride.Override(request, match);
-                            if (items != null)
-                            {
-                                items[matchKey] = match.Results;
-                            }
-
-                            // Add info on match method, rank and difference where 
-                            // the match method is not equal to none.
-                            match.Results.Add("MatchMethod",
-                                new string[] { match.Method.ToString() });
+                        match = provider.Match(GetRequiredHeaders(request), match);
                             
-                            // If the match method is not null then the difference
-                            // will be relevent to the result so include it.
-                            if (match.Method != MatchMethods.None)
-                            {
-                                match.Results.Add("MatchDifference",
-                                    new string[] { match.Difference.ToString() });
-                            }
-                            else
-                            {
-                                match.Results.Add("MatchDifference",
-                                    new string[] { "N/A" });
-                            }
-
-                            // The signature rank is relevent so include it in
-                            // the result.
-                            if (match.Signature != null)
-                            {
-                                match.Results.Add("MatchSignatureRank",
-                                    new string[] { match.Signature.Rank.ToString() });
-                            }
-                            else
-                            {
-                                match.Results.Add("MatchSignatureRank",
-                                    new string[] { "N/A" });
-                            }
-
-                            results = match.Results;
+                        // Allow other feature detection methods to override profiles.
+                        Feature.ProfileOverride.Override(request, match);
+                        if (items != null)
+                        {
+                            items[matchKey] = match;
                         }
+
+                        match.Timer.Stop();
+                        match.Elapsed = new TimeSpan(match.Timer.ElapsedTicks);
                     }
                 }
             }
-            return results;
+            
+            return match;
         }
 
         /// <summary>

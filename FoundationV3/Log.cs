@@ -28,11 +28,7 @@ using System.Threading;
 
 #endregion
 
-#if VER4 
-
 using System.Threading.Tasks;
-
-#endif
 
 #if AZURE
 
@@ -182,7 +178,7 @@ namespace FiftyOne
                             if (writer != null)
                             {
                                 writer.Close();
-                                writer.Dispose();
+
                             }
                         }
                     }
@@ -199,7 +195,7 @@ namespace FiftyOne
                     if (stream != null)
                     {
                         stream.Close();
-                        stream.Dispose();
+
                     }
                 }
                 // Sleep for 50ms incase any new messages come in.
@@ -254,11 +250,7 @@ namespace FiftyOne
                     if (_running == false)
                     {
                         _running = true;
-#if VER4
                         Task.Factory.StartNew(() => Run(null));
-#else
-                        ThreadPool.QueueUserWorkItem(Run);
-#endif
                     }
                 }
             }

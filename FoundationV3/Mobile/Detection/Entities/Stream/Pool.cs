@@ -27,7 +27,7 @@ using FiftyOne.Foundation.Mobile.Detection.Readers;
 namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 {
     /// <summary>
-    /// As multiple threads need to read from the <see cref="Source"/> concurrently
+    /// As multiple threads need to read from the <see cref="SourceBase"/> concurrently
     /// this class provides a mechanisim for readers to be recycled across threads
     /// and requests.
     /// </summary>
@@ -51,19 +51,19 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <summary>
         /// A pool of file readers to use to read data from the file.
         /// </summary>
-        private readonly Source _source;
+        private readonly SourceBase Source;
 
         #endregion
 
         #region Constructor
 
         /// <summary>
-        /// Constructs a new pool of readers for <see cref="Source"/> provided.
+        /// Constructs a new pool of readers for <see cref="SourceBase"/> provided.
         /// </summary>
         /// <param name="source">The data source for the list</param>
-        internal Pool(Source source)
+        internal Pool(SourceBase source)
         {
-            _source = source;
+            Source = source;
         }
 
         #endregion
@@ -83,7 +83,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
                 if (_readers.Count > 0)
                     return _readers.Dequeue();
             }
-            return _source.CreateReader();
+            return Source.CreateReader();
         }
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// </summary>
         public void Dispose()
         {
-            _source.Dispose();
+            Source.Dispose();
         }
 
         #endregion
