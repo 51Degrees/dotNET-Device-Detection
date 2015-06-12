@@ -167,20 +167,19 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             try
             {
-                // Wait until any other threads have finished executing.
-                _autoDownloadUpdateSignal.WaitOne();
-
                 // If licence keys are available auto update.
                 if (LicenceKey.Keys.Length > 0)
                 {
-                    // Check the Next Update date of the data set to determine if we should
-                    // check for an update.
+                    // Check that there is a binary file, and that either the active provider
+                    // is not available indicating no source data file, or if is available
+                    // that the next update is in the past, or that the device data being used
+                    // is the free lite version.
                     if (BinaryFile != null &&
-                        WebProvider.ActiveProvider != null &&
-                        (WebProvider.ActiveProvider.DataSet.NextUpdate < DateTime.UtcNow ||
+                        (WebProvider.ActiveProvider == null ||
+                        WebProvider.ActiveProvider.DataSet.NextUpdate < DateTime.UtcNow ||
                         WebProvider.ActiveProvider.DataSet.Name == "Lite"))
                     {
-                        if (Download() == LicenceKeyResults.Success)
+                        if (Download(LicenceKey.Keys) == LicenceKeyResults.Success)
                         {
                             WebProvider.Refresh();
                         }
@@ -206,19 +205,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     EventLog.Fatal(ex);
                 }
             }
-            finally
-            {
-                // Signal any waiting threads to start.
-                _autoDownloadUpdateSignal.Set();
-            }
-        }
-
-        /// <summary>
-        /// Downloads and updates the premium data file.
-        /// </summary>
-        internal static LicenceKeyResults Download()
-        {
-            return Download(LicenceKey.Keys);
         }
 
         /// <summary>
