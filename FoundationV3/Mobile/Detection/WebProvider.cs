@@ -82,7 +82,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         // application reycling or shutting down. This is belt
                         // and braces in case thte HttpModule method fails to 
                         // fire the application end event.
-                        AppDomain.CurrentDomain.ProcessExit += OnApplicationEnd;
+                        AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
 
                         _activeProviderCreated = true;
                     }
@@ -368,7 +368,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        internal static void OnApplicationEnd(object sender, EventArgs e)
+        private static void OnProcessExit(object sender, EventArgs e)
         {
             try
             {
