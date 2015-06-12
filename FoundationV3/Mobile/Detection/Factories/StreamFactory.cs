@@ -82,11 +82,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         {
             DataSet dataSet = null;
 
-                using (var reader = new Reader(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
-                {
-                    dataSet = new DataSet(reader, filePath);
-                    Read(reader, dataSet);
-                }
+            using (var reader = new Reader(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
+            {
+                dataSet = new DataSet(reader, filePath);
+                Read(reader, dataSet);
+            }
 
             return dataSet;
         }
