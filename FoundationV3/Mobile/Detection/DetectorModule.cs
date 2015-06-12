@@ -139,9 +139,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
             // Used to set the bandwidth monitoring information.
             application.PostRequestHandlerExecute += OnPostRequestHandlerExecute;
             application.PostAcquireRequestState += OnPostAcquireRequestState;
-
-            // Ensure we know when to dispose of the WebProvider.
-            application.Disposed += WebProvider.OnApplicationEnd;
         }
 
         /// <summary>
@@ -346,9 +343,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             var provider = WebProvider.ActiveProvider;
             var hashBuffer = new List<byte>();
-            hashBuffer.AddRange(BitConverter.GetBytes(provider.DataSet.Published.Year));
-            hashBuffer.AddRange(BitConverter.GetBytes(provider.DataSet.Published.Month));
-            hashBuffer.AddRange(BitConverter.GetBytes(provider.DataSet.Published.Day));
+            if (provider != null)
+            {
+                hashBuffer.AddRange(BitConverter.GetBytes(provider.DataSet.Published.Year));
+                hashBuffer.AddRange(BitConverter.GetBytes(provider.DataSet.Published.Month));
+                hashBuffer.AddRange(BitConverter.GetBytes(provider.DataSet.Published.Day));
+            }
             if (String.IsNullOrEmpty(request.UserAgent) == false)
             {
                 hashBuffer.AddRange(Encoding.ASCII.GetBytes(request.UserAgent));
