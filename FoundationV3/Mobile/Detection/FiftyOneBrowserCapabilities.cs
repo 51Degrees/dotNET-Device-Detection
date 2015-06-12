@@ -977,7 +977,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     case "MatchSignatureRank":
                         return _match.Signature != null ? _match.Signature.Rank.ToString() : "N/A";
                     case "detectionTime":
-                    case "DetectionTime":
+                    case Constants.DetectionTimeProperty:
                         return _match.Elapsed.TotalMilliseconds.ToString();
                     default:
                         var value = _match[key];
