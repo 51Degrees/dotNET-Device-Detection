@@ -242,6 +242,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// </summary>
         private readonly MemoryMappedFileSecurity _security;
 
+        /// <summary>
+        /// Stream connected to the underlying file.
+        /// </summary>
+        private readonly FileStream _fileStream;
+
         #endregion
 
         #region Constructors
@@ -260,8 +265,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
                 GetType().Name,
                 new FileInfo(fileName).Name);
 
+            _fileStream = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
             _file = MemoryMappedFile.CreateFromFile(
-                File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read),
+                _fileStream,
                 mapName,
                 _fileInfo.Length,
                 MemoryMappedFileAccess.Read,
@@ -291,6 +297,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         {
             base.Dispose();
             _file.Dispose();
+            _fileStream.Dispose();
             DeleteFile();
         }
         
