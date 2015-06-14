@@ -115,6 +115,15 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="application">HttpApplication object for the web application.</param>
         protected void Initialise(HttpApplication application)
         {
+            // Replace the browser capabilities provider with one that is 51Degrees
+            // enabled if not done so already.
+            if (HttpCapabilitiesBase.BrowserCapabilitiesProvider is
+                FiftyOne.Foundation.Mobile.Detection.MobileCapabilitiesProvider == false)
+            {
+                HttpCapabilitiesBase.BrowserCapabilitiesProvider =
+                    new FiftyOne.Foundation.Mobile.Detection.MobileCapabilitiesProvider();
+            }
+
             // Configure the bandwidth monitoring component.
             Feature.Bandwidth.Init(application.Application);
 

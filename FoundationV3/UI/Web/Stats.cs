@@ -125,7 +125,7 @@ namespace FiftyOne.Foundation.UI.Web
         {
             try
             {
-                if (AutoUpdate.Download() == LicenceKeyResults.Success)
+                if (AutoUpdate.Download(LicenceKey.Keys) == LicenceKeyResults.Success)
                 {
                     WebProvider.Refresh();
                 }
@@ -144,6 +144,7 @@ namespace FiftyOne.Foundation.UI.Web
         {
             base.OnPreRender(e);
             _buttonRefresh.Text = RefreshButtonText;
+            _buttonRefresh.CssClass = ButtonCssClass;
             
             // Only enable the refresh button if premium keys are available.
             _buttonRefresh.Visible = ButtonVisible && LicenceKey.Keys != null && LicenceKey.Keys.Length > 0;

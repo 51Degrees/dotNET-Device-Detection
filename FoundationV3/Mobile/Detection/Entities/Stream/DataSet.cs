@@ -48,7 +48,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// </summary>
         /// <param name="reader">Reader conneceted to the data source and positioned at element zero</param>
         /// <param name="fileName">Valid path to the uncompressed data set file</param>
-        internal DataSet(BinaryReader reader, string fileName) : base(reader)
+        /// <param name="lastModified">Date and time the source data was last modified.</param>
+        internal DataSet(BinaryReader reader, string fileName, DateTime lastModified)
+            : base(reader, lastModified)
         {
             Pool = new Pool(new SourceMemoryMappedFile(fileName));
         }
@@ -59,7 +61,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// </summary>
         /// <param name="reader">Reader conneceted to the data source and positioned at element zero</param>
         /// <param name="data">Byte array containing uncompressed data set</param>
-        internal DataSet(BinaryReader reader, byte[] data) : base(reader)
+        internal DataSet(BinaryReader reader, byte[] data) : base(reader, DateTime.MinValue)
         {
             Pool = new Pool(new SourceMemory(data));
         }
