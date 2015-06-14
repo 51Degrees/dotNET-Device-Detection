@@ -45,8 +45,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         private readonly static object _lock = new object();
 
-        private static DateTime? binaryFileLastModified = null;
-
         #endregion
 
         #region Constructor
@@ -135,7 +133,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 {
                     using (var reader = new BinaryReader(stream))
                     {
-                        using (var dataSet = new DataSet(reader))
+                        using (var dataSet = new DataSet(reader, File.GetLastWriteTimeUtc(fileName)))
                         {
                             return dataSet.Published;
                         }
@@ -175,46 +173,76 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     directory.Create();
                 }
 
-                // Get the first matching temporary file if one exists.
-                var temporaryFile = directory.GetFiles("*.tmp").FirstOrDefault(i =>
+                // Loop through the temporary files to see if we can use any of them.
+                foreach (var temporaryFile in directory.GetFiles("*.tmp").Where(i =>
                         i.Exists &&
                         i.FullName.Equals(masterFile.FullName) == false &&
                         i.Name.StartsWith(masterFile.Name) &&
-                        masterDate.Equals(GetDataFileDate(i.FullName)));
-                
-                if (temporaryFile != null)
+                        masterDate.Equals(GetDataFileDate(i.FullName))))
                 {
                     // Use the existing temporary file.
-                    EventLog.Info(
-                        "Using existing temp data file with published data {0} - \"{1}\"",
-                        masterDate.HasValue ? masterDate.Value.ToShortDateString() : "null",
-                        temporaryFile.FullName);
+                    EventLog.Debug(
+                        "Trying to use existing temporary data file '{0}' with published date '{1}' as data source.",
+                        temporaryFile.FullName,
+                        masterDate.HasValue ? masterDate.Value.ToShortDateString() : "null");
+                    try
+                    {
+                        // Try and create the data set from the existing temporary file.
+                        // If the file can't be used then record the exception in debug
+                        // logging.
+                        dataSet = StreamFactory.Create(temporaryFile.FullName, File.GetLastWriteTimeUtc(masterFile.FullName));
+
+                        // The data set could be created so exit the loop.
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        // This can happen if the data file is being used by another process in
+                        // exclusive mode and as yet hasn't been freed up.
+                        EventLog.Debug(
+                            "Could not use existing temporary data file '{0}' as data source",
+                            temporaryFile.FullName);
+                        EventLog.Debug(ex);
+                        dataSet = null;
+                    }
                 }
-                else
+                
+                if (dataSet == null)
                 {
                     // No suitable temp file was found, create one in the
                     // temporary file folder to enable the source file to be updated
                     // without stopping the web site.
-                    temporaryFile = new FileInfo(GetTempFileName());
-
-                    // Copy the file to enable other processes to update it.
-                    try
-                    {
-                        File.Copy(masterFile.FullName, temporaryFile.FullName);
-                        EventLog.Info("Created temp data file - \"{0}\"", temporaryFile.FullName);
-                    }
-                    catch (IOException ex)
-                    {
-                        throw new MobileException(String.Format(
-                            "Could not create temporary file. Check worker process has " +
-                            "write permissions to '{0}'. For medium trust environments " +
-                            "ensure data file is located in App_Data.", 
-                            temporaryFile.FullName), ex);
-                    }
+                    dataSet = StreamFactory.Create(CreateNewTemporaryFile(masterFile).FullName, File.GetLastWriteTimeUtc(masterFile.FullName));
                 }
-                dataSet = StreamFactory.Create(temporaryFile.FullName);
+                
             }
             return dataSet;
+        }
+
+        /// <summary>
+        /// Create a new temporary file for use the stream factory.
+        /// </summary>
+        /// <param name="masterFile">Name of the master file to use as the source</param>
+        /// <returns>Name of the file created.</returns>
+        private static FileInfo CreateNewTemporaryFile(FileInfo masterFile)
+        {
+            var temporaryFile = new FileInfo(GetTempFileName());
+
+            // Copy the file to enable other processes to update it.
+            try
+            {
+                File.Copy(masterFile.FullName, temporaryFile.FullName);
+                EventLog.Info("Created temp data file - \"{0}\"", temporaryFile.FullName);
+            }
+            catch (IOException ex)
+            {
+                throw new MobileException(String.Format(
+                    "Could not create temporary file. Check worker process has " +
+                    "write permissions to '{0}'. For medium trust environments " +
+                    "ensure data file is located in App_Data.",
+                    temporaryFile.FullName), ex);
+            }
+            return temporaryFile;
         }
 
         /// <summary>
@@ -264,7 +292,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 {
                     if (File.Exists(Manager.BinaryFilePath))
                     {
-                        binaryFileLastModified = new FileInfo(Manager.BinaryFilePath).LastWriteTimeUtc;
                         if (Manager.MemoryMode)
                         {
                             EventLog.Info(String.Format(
@@ -335,15 +362,39 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="state">Required for timer callback. This parameter is not used.</param>
         public static void CheckDataFileRefresh(object state)
         {
-            if (Manager.BinaryFilePath != null &&
-                File.Exists(Manager.BinaryFilePath))
+            try
             {
-                var modifiedDate = new FileInfo(Manager.BinaryFilePath).LastWriteTimeUtc;
-                if (binaryFileLastModified == null || modifiedDate > binaryFileLastModified)
+                if (ActiveProvider == null ||
+                    CheckDataFileHasRefreshed(ActiveProvider.DataSet))
                 {
+                    EventLog.Info("Refreshing active provider due to change in underlying data source.");
                     Refresh();
                 }
             }
+            catch(Exception ex)
+            {
+                EventLog.Info(String.Format("Exception processing data file refresh check."));
+                EventLog.Debug(ex);
+            }
+        }
+
+        /// <summary>
+        /// Returns true if a newer data set is now available.
+        /// </summary>
+        /// <param name="dataSet">The data set to be checked for changes to the master source</param>
+        /// <returns></returns>
+        private static bool CheckDataFileHasRefreshed(DataSet dataSet)
+        {
+            if (Manager.BinaryFilePath != null &&
+                File.Exists(Manager.BinaryFilePath) &&
+                dataSet.Published != null && dataSet.LastModified > DateTime.MinValue)
+            {
+                if (dataSet.LastModified != null && File.GetLastWriteTimeUtc(Manager.BinaryFilePath) > dataSet.LastModified)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
         
         /// <summary>
@@ -435,17 +486,16 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 lock (request)
                 {
                     match = items != null ? items[matchKey] as Match : null;
-                    var provider = GetActiveProvider();
-                    if ((match == null || hasOverrides) && provider != null)
+                    if ((match == null || hasOverrides) && ActiveProvider != null)
                     {
                         // Create the match object ready to store the results.
-                        match = provider.CreateMatch();
+                        match = ActiveProvider.CreateMatch();
                         match.Timer.Reset();
                         match.Timer.Start();
 
                         // Get the match and store the list of properties and values 
                         // in the context and session.
-                        match = provider.Match(GetRequiredHeaders(request), match);
+                        match = ActiveProvider.Match(GetRequiredHeaders(request), match);
                             
                         // Allow other feature detection methods to override profiles.
                         Feature.ProfileOverride.Override(request, match);

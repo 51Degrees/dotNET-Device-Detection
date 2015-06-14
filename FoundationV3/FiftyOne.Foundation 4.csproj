@@ -250,9 +250,6 @@
     <Compile Include="UI\Web\DeviceExplorer.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="UI\Web\DeviceFinder.cs">
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
     <Compile Include="UI\Web\DeviceTemplate.cs" />
     <Compile Include="UI\Web\LiteMessage.cs">
       <SubType>ASPXCodeBehind</SubType>

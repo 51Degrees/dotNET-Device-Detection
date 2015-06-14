@@ -330,7 +330,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             LicenceKeyResults status = LicenceKeyResults.InProgress;
             try
             {
-                using (var dataSet = StreamFactory.Create(uncompressedTempFile))
+                using (var dataSet = StreamFactory.Create(uncompressedTempFile, File.GetLastWriteTimeUtc(uncompressedTempFile)))
                 {
                     var currentProvider = WebProvider.ActiveProvider;
                     status = currentProvider == null ||

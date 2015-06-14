@@ -938,7 +938,7 @@ namespace FiftyOne.Foundation.UI {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;div class=&quot;{0}&quot;&gt;We&apos;re sorry you&apos;ve decided not to share usage data. We hope you&apos;ll reconsider as usage data helps us provide you a better product. Find out more &lt;a href=&quot;http://51Degrees.com/Support/FAQs/UsageData&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.&lt;br/&gt;You may need to restart the web site for the change to become effective.&lt;/div&gt;.
+        ///   Looks up a localized string similar to &lt;div class=&quot;{0}&quot;&gt;We&apos;re sorry you&apos;ve decided not to share usage data. We hope you&apos;ll reconsider as usage data helps us provide you a better product. Find out more &lt;a href=&quot;https://51degrees.com/support/faqs/usage-data&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.&lt;br/&gt;You may need to restart the web site for the change to become effective.&lt;/div&gt;.
         /// </summary>
         internal static string ShareUsageFalseHtml {
             get {
@@ -974,7 +974,7 @@ namespace FiftyOne.Foundation.UI {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to http://51Degrees.com/Support/FAQs/UsageData.
+        ///   Looks up a localized string similar to https://51degrees.com/support/faqs/usage-data.
         /// </summary>
         internal static string ShareUsageUrl {
             get {
@@ -983,7 +983,7 @@ namespace FiftyOne.Foundation.UI {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;div class=&quot;{0}&quot;&gt;&lt;span&gt;Format: &lt;b&gt;{1}&lt;/b&gt;&lt;/span&gt; &lt;span&gt;Published: &lt;b&gt;{2:d}&lt;/b&gt;&lt;/span&gt;&lt;span&gt;Properties: &lt;b&gt;{3}&lt;/b&gt;&lt;/span&gt;&lt;span&gt;Detection: &lt;b&gt;{4}ms&lt;/b&gt;&lt;/span&gt;&lt;span&gt;Avg. Res: &lt;b&gt;{5:ss\.fff}&lt;/b&gt;&lt;/span&gt;&lt;span&gt;Avg. Comp: &lt;b&gt;{6:ss\.fff}&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;.
+        ///   Looks up a localized string similar to &lt;div class=&quot;{0}&quot;&gt;&lt;span&gt;Format:&amp;nbsp;&lt;b&gt;{1}&lt;/b&gt;&lt;/span&gt;&amp;nbsp;&lt;span&gt;Published:&amp;nbsp;&lt;b&gt;{2:d}&lt;/b&gt;&lt;/span&gt;&amp;nbsp;&lt;span&gt;Properties:&amp;nbsp;&lt;b&gt;{3}&lt;/b&gt;&lt;/span&gt;&amp;nbsp;&lt;span&gt;Detection:&amp;nbsp;&lt;b&gt;{4}ms&lt;/b&gt;&lt;/span&gt;&amp;nbsp;&lt;span&gt;Avg.&amp;nbsp;Res:&amp;nbsp;&lt;b&gt;{5:ss\.fff}&lt;/b&gt;&lt;/span&gt;&amp;nbsp;&lt;span&gt;Avg.&amp;nbsp;Comp:&amp;nbsp;&lt;b&gt;{6:ss\.fff}&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;.
         /// </summary>
         internal static string StatsHtml {
             get {

@@ -265,15 +265,34 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
                 GetType().Name,
                 new FileInfo(fileName).Name);
 
-            _fileStream = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
-            _file = MemoryMappedFile.CreateFromFile(
-                _fileStream,
-                mapName,
-                _fileInfo.Length,
-                MemoryMappedFileAccess.Read,
-                _security,
-                HandleInheritability.Inheritable,
-                true);
+            try
+            {
+                // Try opening an existing memory mapped file incase one is
+                // already available. This will reduce the number of open
+                // memory mapped files.
+                _file = MemoryMappedFile.OpenExisting(mapName, MemoryMappedFileRights.Read, HandleInheritability.Inheritable);
+                _fileStream = null;
+                EventLog.Info(String.Format(
+                    "Created memory mapped data source from existing map name '{0}'.",
+                    mapName));
+            }
+            catch(Exception)
+            {
+                // An existing memory mapped file could not be used. Use a new 
+                // one connected to the same underlying file.
+                _fileStream = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+                _file = MemoryMappedFile.CreateFromFile(
+                    _fileStream,
+                    mapName,
+                    _fileInfo.Length,
+                    MemoryMappedFileAccess.Read,
+                    _security,
+                    HandleInheritability.Inheritable,
+                    true);
+                EventLog.Info(String.Format(
+                    "Created memory mapped data source from data file '{0}'.",
+                    fileName));
+            }
         }
 
         #endregion
@@ -297,7 +316,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         {
             base.Dispose();
             _file.Dispose();
-            _fileStream.Dispose();
+            if (_fileStream != null)
+            {
+                _fileStream.Dispose();
+            }
             DeleteFile();
         }
         

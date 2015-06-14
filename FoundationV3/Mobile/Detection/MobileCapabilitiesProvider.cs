@@ -37,17 +37,15 @@ namespace FiftyOne.Foundation.Mobile.Detection
     {
         /// <summary>
         /// Constructs an instance of <cref see="MobileCapabilitiesProvider"/>.
-        /// Sets the cache key length to a value of 256 to allow for mobile
-        /// useragents that can often be longer than the default 64 characters.
+        /// All default values remain the same and are unaltered.
         /// </summary>
         public MobileCapabilitiesProvider()
             : base()
         {
-            EventLog.Debug("Constructing MobileCapabilitiesProvider - Default");
+            EventLog.Debug("Constructing MobileCapabilitiesProvider");
 #if DEBUG
             LogStackTrace();
 #endif
-            base.UserAgentCacheKeyLength = 256;
         }
 
 #if DEBUG

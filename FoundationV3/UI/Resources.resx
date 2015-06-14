@@ -252,7 +252,7 @@ The web servers firewall or another firewall is blocking access to the host or t
     <value>&lt;div class="{0}"&gt;&lt;p&gt;The data source provided could not be read from.&lt;/p&gt;&lt;/div&gt;</value>
   </data>
   <data name="StatsHtml" xml:space="preserve">
-    <value>&lt;div class="{0}"&gt;&lt;span&gt;Format: &lt;b&gt;{1}&lt;/b&gt;&lt;/span&gt; &lt;span&gt;Published: &lt;b&gt;{2:d}&lt;/b&gt;&lt;/span&gt;&lt;span&gt;Properties: &lt;b&gt;{3}&lt;/b&gt;&lt;/span&gt;&lt;span&gt;Detection: &lt;b&gt;{4}ms&lt;/b&gt;&lt;/span&gt;&lt;span&gt;Avg. Res: &lt;b&gt;{5:ss\.fff}&lt;/b&gt;&lt;/span&gt;&lt;span&gt;Avg. Comp: &lt;b&gt;{6:ss\.fff}&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;</value>
+    <value>&lt;div class="{0}"&gt;&lt;span&gt;Format:&amp;nbsp;&lt;b&gt;{1}&lt;/b&gt;&lt;/span&gt;&amp;nbsp;&lt;span&gt;Published:&amp;nbsp;&lt;b&gt;{2:d}&lt;/b&gt;&lt;/span&gt;&amp;nbsp;&lt;span&gt;Properties:&amp;nbsp;&lt;b&gt;{3}&lt;/b&gt;&lt;/span&gt;&amp;nbsp;&lt;span&gt;Detection:&amp;nbsp;&lt;b&gt;{4}ms&lt;/b&gt;&lt;/span&gt;&amp;nbsp;&lt;span&gt;Avg.&amp;nbsp;Res:&amp;nbsp;&lt;b&gt;{5:ss\.fff}&lt;/b&gt;&lt;/span&gt;&amp;nbsp;&lt;span&gt;Avg.&amp;nbsp;Comp:&amp;nbsp;&lt;b&gt;{6:ss\.fff}&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;</value>
   </data>
   <data name="UploadButtonText" xml:space="preserve">
     <value>Upload</value>
@@ -430,7 +430,7 @@ The web servers firewall or another firewall is blocking access to the host or t
     <value>&lt;div class="{0}"&gt;There was a problem recording your share usage data preference. If the web site is operating in a medium trust environment or modify permission to the configuration file(s) is not granted to the application pool identity you will have to change this value in the configuration file manually. Find the fiftyOne/detection element in the config file and set the shareUsage attribute.&lt;/div&gt;</value>
   </data>
   <data name="ShareUsageFalseHtml" xml:space="preserve">
-    <value>&lt;div class="{0}"&gt;We're sorry you've decided not to share usage data. We hope you'll reconsider as usage data helps us provide you a better product. Find out more &lt;a href="http://51Degrees.com/Support/FAQs/UsageData" target="_blank"&gt;here&lt;/a&gt;.&lt;br/&gt;You may need to restart the web site for the change to become effective.&lt;/div&gt;</value>
+    <value>&lt;div class="{0}"&gt;We're sorry you've decided not to share usage data. We hope you'll reconsider as usage data helps us provide you a better product. Find out more &lt;a href="https://51degrees.com/support/faqs/usage-data" target="_blank"&gt;here&lt;/a&gt;.&lt;br/&gt;You may need to restart the web site for the change to become effective.&lt;/div&gt;</value>
   </data>
   <data name="ShareUsageLinkText" xml:space="preserve">
     <value>Learn More</value>
@@ -439,7 +439,7 @@ The web servers firewall or another firewall is blocking access to the host or t
     <value>&lt;div class="{0}"&gt;Thank you for sharing usage data and helping improve this product.&lt;br/&gt;You may need to restart the web site for the change to become effective.&lt;/div&gt;</value>
   </data>
   <data name="ShareUsageUrl" xml:space="preserve">
-    <value>http://51Degrees.com/Support/FAQs/UsageData</value>
+    <value>https://51degrees.com/support/faqs/usage-data</value>
   </data>
   <data name="ImageRotationScript" xml:space="preserve">
     <value> // constants to control animations

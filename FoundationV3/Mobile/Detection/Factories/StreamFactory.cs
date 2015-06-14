@@ -75,16 +75,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// Creates a new <see cref="DataSet"/> from the file provided.
         /// </summary>
         /// <param name="filePath">Uncompressed file containing the data for the data set</param>
+        /// <param name="lastModified">Date and time the source data was last modified.</param>
         /// <returns>
         /// A <see cref="DataSet"/>configured to read entities from the file path when required
         /// </returns>
-        public static DataSet Create(string filePath)
+        public static DataSet Create(string filePath, DateTime lastModified)
         {
             DataSet dataSet = null;
 
             using (var reader = new Reader(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
             {
-                dataSet = new DataSet(reader, filePath);
+                dataSet = new DataSet(reader, filePath, lastModified);
                 Read(reader, dataSet);
             }
 

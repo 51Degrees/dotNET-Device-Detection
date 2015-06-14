@@ -74,7 +74,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
            
                 using (var reader = new Reader(new MemoryStream(array)))
                 {
-                    return Read(reader, init);
+                    return Read(reader, init, DateTime.MinValue);
                 }
             
         }
@@ -88,7 +88,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// <returns>A <see cref="DataSet"/> filled with data from the array</returns>
         public static DataSet Create(string filePath)
         {
-            return Create(filePath, false);
+            return Create(filePath, false, File.GetLastWriteTimeUtc(filePath));
         }
 
         /// <summary>
@@ -100,16 +100,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// <param name="init">
         /// True to indicate that the data set should be fulling initialised
         /// </param>
+        /// <param name="lastModified">Date and time the source data was last modified.</param>
         /// <returns>A <see cref="DataSet"/> filled with data from the array</returns>
-        public static DataSet Create(string filePath, bool init)
+        public static DataSet Create(string filePath, bool init, DateTime lastModified)
         {
-       //     using (var stream = File.OpenRead(filePath))
-       //     {
-                using (var reader = new Reader(File.OpenRead(filePath)))
-                {
-                    return Read(reader, init);
-                }
-      //      }
+            using (var reader = new Reader(File.OpenRead(filePath)))
+            {
+                return Read(reader, init, lastModified);
+            }
         }
        
         #endregion
@@ -131,10 +129,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// lists before reading the data into memory. Finally it initialise is required
         /// references between entities are worked out and stored.
         /// </para>
+        /// <param name="lastModified">Date and time the source data was last modified.</param>
         /// <returns>A <see cref="DataSet"/> filled with data from the reader</returns>
-        internal static DataSet Read(Reader reader, bool init)
+        internal static DataSet Read(Reader reader, bool init, DateTime lastModified)
         {
-            var dataSet = new DataSet(reader);
+            var dataSet = new DataSet(reader, lastModified);
 
             var strings = new MemoryVariableList<AsciiString>(dataSet, reader, new AsciiStringFactory());
             var components = new MemoryFixedList<Component>(dataSet, reader, new ComponentFactory());

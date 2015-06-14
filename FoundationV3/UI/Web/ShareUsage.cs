@@ -44,10 +44,10 @@ namespace FiftyOne.Foundation.UI.Web
 
         private Literal _literalResult = null;
         private CheckBox _checkBoxShareUsage = null;
-        private HyperLink _hyperLinkShareUsage = null;
         private CheckBox _checkBoxDeviceDetection = null;
         private CheckBox _checkBoxAutoUpdate = null;
         private CheckBox _checkBoxImageOptimiser = null;
+        private HyperLink _hyperLinkShareUsage = null;
 
         #endregion
 
@@ -359,6 +359,10 @@ namespace FiftyOne.Foundation.UI.Web
             _checkBoxShareUsage.Checked = FiftyOne.Foundation.Mobile.Detection.Configuration.Manager.ShareUsage;
             _checkBoxDeviceDetection.Checked = FiftyOne.Foundation.Mobile.Detection.Configuration.Manager.Enabled;
             _checkBoxAutoUpdate.Checked = FiftyOne.Foundation.Mobile.Detection.Configuration.Manager.AutoUpdate;
+            _checkBoxShareUsage.ViewStateMode = System.Web.UI.ViewStateMode.Enabled;
+            _checkBoxAutoUpdate.ViewStateMode = System.Web.UI.ViewStateMode.Enabled;
+            _checkBoxDeviceDetection.ViewStateMode = System.Web.UI.ViewStateMode.Enabled;
+            _checkBoxImageOptimiser.ViewStateMode = System.Web.UI.ViewStateMode.Enabled;
             _checkBoxShareUsage.CheckedChanged += new EventHandler(_checkBoxShareUsage_CheckedChanged);
             _checkBoxAutoUpdate.CheckedChanged += new EventHandler(_checkBoxAutoUpdate_CheckedChanged);
             _checkBoxDeviceDetection.CheckedChanged += new EventHandler(_checkBoxDeviceDetection_CheckedChanged);
@@ -415,6 +419,8 @@ namespace FiftyOne.Foundation.UI.Web
             try
             {
                 FiftyOne.Foundation.Mobile.Configuration.Manager.ImageOptimisation.Enabled = _checkBoxImageOptimiser.Checked;
+
+                
 
                 Context.Application["51D_ImageOptimiser"] = _checkBoxImageOptimiser.Checked;
 

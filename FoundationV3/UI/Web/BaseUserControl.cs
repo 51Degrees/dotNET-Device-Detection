@@ -493,9 +493,7 @@ namespace FiftyOne.Foundation.UI.Web
             // Write the model of the device.
             writer.WriteStartElement("h2");
             writer.WriteAttributeString("class", ModelCssClass);
-            WriteLinkStart(writer, profile, deviceUrl, String.Format("{0} - {1}",
-                profile["HardwareVendor"],
-                profile["HardwareModel"]));
+            WriteLinkStart(writer, profile, deviceUrl, profile["HardwareVendor"].ToString());
             writer.WriteEndElement();
             writer.WriteEndElement();
 
@@ -512,7 +510,7 @@ namespace FiftyOne.Foundation.UI.Web
             // Write the name of the device.
             writer.WriteStartElement("h3");
             writer.WriteAttributeString("class", NameCssClass);
-            WriteLinkStart(writer, profile, deviceUrl, profile["HardwareName"].ToString());
+            WriteLinkStart(writer, profile, deviceUrl, profile["HardwareModel"].ToString(), profile["HardwareName"].ToString());
             writer.WriteEndElement();
             writer.WriteEndElement();
 
@@ -625,11 +623,11 @@ namespace FiftyOne.Foundation.UI.Web
         #region Static Methods
 
 
-        private static void WriteLinkStart(XmlWriter writer, Profile profile, string deviceUrl, string text)
+        private static void WriteLinkStart(XmlWriter writer, Profile profile, string deviceUrl, string text, string title = null)
         {
             writer.WriteStartElement("a");
             writer.WriteAttributeString("href", deviceUrl);
-            writer.WriteAttributeString("title", profile.ToString());
+            writer.WriteAttributeString("title", title != null ? title : profile.ToString());
             writer.WriteValue(text);
         }
 

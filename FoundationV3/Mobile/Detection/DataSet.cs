@@ -236,9 +236,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         public readonly Guid Tag;
 
         /// <summary>
-        /// The date the data file was last modified.
+        /// The date the data source last modified if application.
         /// </summary>
-        public readonly DateTime LastModified = DateTime.MinValue;
+        public readonly DateTime LastModified;
 
         /// <summary>
         /// The date the data set was published.
@@ -625,7 +625,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <param name="reader">
         /// Reader connected to the source data structure and positioned to start reading
         /// </param>
-        internal DataSet(BinaryReader reader)
+        /// <param name="lastModified">
+        /// The date and time the source of the data was last modified.
+        /// </param>
+        internal DataSet(BinaryReader reader, DateTime lastModified)
         {
             // Check for an exception which would indicate the file is the 
             // wrong type for the API.
@@ -654,6 +657,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                     Version,
                     BinaryConstants.FormatVersion));
 
+            LastModified = lastModified;
             Tag = new Guid(reader.ReadBytes(16));
             _copyrightOffset = reader.ReadInt32();
             _age = new TimeSpan(reader.ReadInt16() * TimeSpan.TicksPerDay * 30);
