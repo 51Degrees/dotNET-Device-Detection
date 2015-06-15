@@ -35,7 +35,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
     /// <summary>
     /// Returns all the settings from the Web.Config for this component.
     /// </summary>
-    internal static class Manager
+    public static class Manager
     {
         #region Fields
 
@@ -60,7 +60,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
         /// Determines if device data should automatically be updated when a
         /// licence key is provided.
         /// </summary>
-        internal static bool AutoUpdate
+        public static bool AutoUpdate
         {
             get
             {
@@ -75,7 +75,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
         /// <summary>
         /// Determines if device detection should be enabled.
         /// </summary>
-        internal static bool Enabled
+        public static bool Enabled
         {
             get
             {
@@ -91,7 +91,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
         /// When set to true enables bandwidth monitoring. Also requires the data set specified in 
         /// the binaryFilePath attribute to support bandwidth monitoring. 
         /// </summary>
-        internal static bool BandwidthMonitoringEnabled
+        public static bool BandwidthMonitoringEnabled
         {
             get
             {
@@ -103,7 +103,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
         /// When set to true enables feature detection. Also requires the data set specified in the
         /// binaryFilePath attribute to support feature detection. 
         /// </summary>
-        internal static bool FeatureDetectionEnabled
+        public static bool FeatureDetectionEnabled
         {
             get
             {
@@ -115,7 +115,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
         /// Returns true or false depending on whether usage information
         /// should be shared with 51Degrees.mobi.
         /// </summary>
-        internal static bool ShareUsage
+        public static bool ShareUsage
         {
             get
             {
