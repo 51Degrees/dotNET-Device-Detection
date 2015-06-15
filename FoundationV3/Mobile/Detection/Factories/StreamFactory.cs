@@ -72,6 +72,19 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         }
 
         /// <summary>
+        /// Creates a new <see cref="DataSet"/> from the file provided. The last modified
+        /// date of the data set is the last write time of the data file provided.
+        /// </summary>
+        /// <param name="filePath">Uncompressed file containing the data for the data set</param>
+        /// <returns>
+        /// A <see cref="DataSet"/>configured to read entities from the file path when required
+        /// </returns>
+        public static DataSet Create(string filePath)
+        {
+            return Create(filePath, File.GetLastWriteTimeUtc(filePath));
+        }
+
+        /// <summary>
         /// Creates a new <see cref="DataSet"/> from the file provided.
         /// </summary>
         /// <param name="filePath">Uncompressed file containing the data for the data set</param>
