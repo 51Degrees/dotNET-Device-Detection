@@ -150,7 +150,7 @@
     <value>&lt;div class="{0}"&gt;&lt;p&gt;The licence file '{1}' could not be written to this web sites bin folder '{2}'. Create a text file with the extension .lic and paste the licence key  into the file. Save the text file in the bin folder.&lt;/p&gt;&lt;/div&gt;</value>
   </data>
   <data name="ActivationFailureGenericHtml" xml:space="preserve">
-    <value>&lt;div class="{0}"&gt;&lt;p&gt;Whoops. There was a problem activating the licence key or uploading premium data. We're unsure why this happened. Please &lt;a href="http://51Degrees.com/AboutUs/ContactUs.aspx"&gt;Contact Us&lt;/a&gt; providing details of your web site implementation, relevent entries from your log file, and we'll try and help you.&lt;/p&gt;&lt;/div&gt;</value>
+    <value>&lt;div class="{0}"&gt;&lt;p&gt;Whoops. There was a problem activating the licence key or uploading premium data. We're unsure why this happened. Please &lt;a href="https://51degrees.com/contact-us"&gt;Contact Us&lt;/a&gt; providing details of your web site implementation, relevent entries from your log file, and we'll try and help you.&lt;/p&gt;&lt;/div&gt;</value>
   </data>
   <data name="ActivationFailureHttpHtml" xml:space="preserve">
     <value>&lt;div class="{0}"&gt;&lt;p&gt;We were unable to reach the 51Degrees licence validation web site at the host '{1}'. This could be for one of the following reasons.&lt;/p&gt;

@@ -404,7 +404,8 @@ namespace FiftyOne.Foundation.UI.Web
 
             _hyperLinkShareUsage.Visible = _checkBoxShareUsage.Visible = 
                 _literalResult.Visible = _checkBoxShareUsage.Visible =
-                _checkBoxDeviceDetection.Visible = _checkBoxImageOptimiser.Visible = ShowShareUsage;
+                _checkBoxDeviceDetection.Visible = _checkBoxImageOptimiser.Visible = 
+                _checkBoxAutoUpdate.Visible = ShowShareUsage;
         }
 
         /// <summary>

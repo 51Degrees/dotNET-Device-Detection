@@ -505,6 +505,15 @@ namespace FiftyOne.Foundation.UI.Web
         #region Other
 
         /// <summary>
+        /// Controls whether the upload option is displayed.
+        /// </summary>
+        public bool ShowUpload
+        {
+            get { return _upload.Visible; }
+            set { _upload.Visible = value; }
+        }
+
+        /// <summary>
         /// Controls whether the share usage information is displayed.
         /// Defaults to true.
         /// </summary>
@@ -614,7 +623,7 @@ namespace FiftyOne.Foundation.UI.Web
         {
             base.OnPreRender(e);
             _literalInstructions.Visible = _literalInstructions.Visible & InstructionsEnabled;
-            _literalUpload.Visible = _literalUpload.Visible & InstructionsEnabled;
+            _literalUpload.Visible = _upload.Visible & _literalUpload.Visible & InstructionsEnabled;
             if (String.IsNullOrEmpty(_literalInstructions.Text))
                 _literalInstructions.Text = IsPaidFor ?
                     String.Format(ActivatedMessageHtml, SuccessCssClass, DataSet.Name) :
