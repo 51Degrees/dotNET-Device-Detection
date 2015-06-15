@@ -25,7 +25,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
 {
     /// <summary>
     /// Used internally to support match results from other platforms
-    /// list Java, C and PHP.
+    /// like Java, C and PHP.
     /// </summary>
     public interface IMatch
     {
