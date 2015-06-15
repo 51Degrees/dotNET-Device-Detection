@@ -80,7 +80,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         }
         
         /// <summary>
-        /// Creates a new <see cref="DataSet"/> from the file provided.
+        /// Creates a new <see cref="DataSet"/> from the file provided. The last modified
+        /// date of the data set is the last write time of the data file provided.
         /// </summary>
         /// <param name="filePath">
         /// Uncompressed file containing the data for the data set
