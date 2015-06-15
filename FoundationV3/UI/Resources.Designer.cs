@@ -133,7 +133,7 @@ namespace FiftyOne.Foundation.UI {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;div class=&quot;{0}&quot;&gt;&lt;p&gt;Whoops. There was a problem activating the licence key or uploading premium data. We&apos;re unsure why this happened. Please &lt;a href=&quot;http://51Degrees.com/AboutUs/ContactUs.aspx&quot;&gt;Contact Us&lt;/a&gt; providing details of your web site implementation, relevent entries from your log file, and we&apos;ll try and help you.&lt;/p&gt;&lt;/div&gt;.
+        ///   Looks up a localized string similar to &lt;div class=&quot;{0}&quot;&gt;&lt;p&gt;Whoops. There was a problem activating the licence key or uploading premium data. We&apos;re unsure why this happened. Please &lt;a href=&quot;https://51degrees.com/contact-us&quot;&gt;Contact Us&lt;/a&gt; providing details of your web site implementation, relevent entries from your log file, and we&apos;ll try and help you.&lt;/p&gt;&lt;/div&gt;.
         /// </summary>
         internal static string ActivationFailureGenericHtml {
             get {
