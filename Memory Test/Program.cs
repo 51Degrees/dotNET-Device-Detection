@@ -44,9 +44,9 @@ namespace FiftyOne.Foundation.MemoryTest
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            Test(args.Length > 0 ? args[0] : "../../data/51Degrees-Lite.dat", 
+            Test(args.Length > 0 ? args[0] : "../../data/51Degrees-Lite.dat",
                 args.Length > 1 ? args[1] : "../../data/20000 User Agents.csv",
-                StreamFactory.Create, 
+                StreamFactory.Create,
                 "Stream");
             Test(args.Length > 0 ? args[0] : "../../data/51Degrees-Lite.dat",
                 args.Length > 1 ? args[1] : "../../data/20000 User Agents.csv",

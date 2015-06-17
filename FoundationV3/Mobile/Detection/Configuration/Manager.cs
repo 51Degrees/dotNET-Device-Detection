@@ -88,6 +88,21 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
         }
 
         /// <summary>
+        /// Determines if image optimiser should be enabled or disabled.
+        /// </summary>
+        public static bool ImageOptimiserEnabled
+        {
+            get
+            {
+                return Mobile.Configuration.Manager.ImageOptimisation.Enabled;
+            }
+            set
+            {
+                SetImageOptimiserEnabled(value);
+            }
+        }
+
+        /// <summary>
         /// When set to true enables bandwidth monitoring. Also requires the data set specified in 
         /// the binaryFilePath attribute to support bandwidth monitoring. 
         /// </summary>
@@ -136,6 +151,18 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
         private static void SetDeviceDetection(bool value)
         {
             DetectionSection element = GetDetectionElement();
+            element.Enabled = value;
+            Support.SetWebApplicationSection(element);
+            Refresh();
+        }
+
+        /// <summary>
+        /// Sets the image optimiser value.
+        /// </summary>
+        /// <param name="value"></param>
+        private static void SetImageOptimiserEnabled(bool value)
+        {
+            var element = Mobile.Configuration.Manager.ImageOptimisation;
             element.Enabled = value;
             Support.SetWebApplicationSection(element);
             Refresh();

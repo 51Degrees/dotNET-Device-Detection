@@ -228,115 +228,111 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         
         #endregion
 
-        #region Data Set Fields
+        #region Data Set Properties
 
         /// <summary>
         /// A unique Tag for the data set.
         /// </summary>
-        public readonly Guid Tag;
+        public Guid Tag { get; internal set; }
 
         /// <summary>
         /// The date the data source last modified if application.
         /// </summary>
-        public readonly DateTime LastModified;
+        public DateTime LastModified { get; internal set; }
 
         /// <summary>
         /// The date the data set was published.
         /// </summary>
-        public readonly DateTime Published;
+        public DateTime Published { get; internal set; }
 
         /// <summary>
         /// The date the data set is next expected to be updated by 51Degrees.
         /// </summary>
-        public readonly DateTime NextUpdate;
+        public DateTime NextUpdate { get; internal set; }
 
         /// <summary>
         /// The minimum number times a user agent should have been seen before
         /// it was included in the dataset.
         /// </summary>
-        public readonly int MinUserAgentCount;
+        public int MinUserAgentCount { get; internal set; }
 
         /// <summary>
         /// The version of the data set.
         /// </summary>
-        public readonly Version Version;
+        public Version Version { get; internal set; }
 
         /// <summary>
         /// The maximum length of a user agent string.
         /// </summary>
-        public readonly short MaxUserAgentLength;
+        public short MaxUserAgentLength { get; internal set; }
 
         /// <summary>
         /// The minimum length of a user agent string.
         /// </summary>
-        public readonly short MinUserAgentLength;
+        public short MinUserAgentLength { get; internal set; }
         
         /// <summary>
         /// The lowest character the character trees can contain.
         /// </summary>
-        public readonly byte LowestCharacter;
+        public byte LowestCharacter { get; internal set; }
 
         /// <summary>
         /// The highest character the character trees can contain.
         /// </summary>
-        public readonly byte HighestCharacter;
+        public byte HighestCharacter { get; internal set; }
                
         /// <summary>
         /// The number of unique device combinations available in the data set.
         /// </summary>
-        public readonly int DeviceCombinations;
+        public int DeviceCombinations { get; internal set; }
 
         /// <summary>
         /// The maximum number of signatures that can be checked. Needed to avoid
         /// bogus user agents which deliberately require so many signatures to be 
         /// checked that performance is degraded.
         /// </summary>
-        public readonly int MaxSignatures;
+        public int MaxSignatures { get; internal set; }
 
         /// <summary>
         /// The number of profiles each signature can contain.
         /// </summary>
-        internal readonly int SignatureProfilesCount;
+        internal int SignatureProfilesCount { get; set; }
 
         /// <summary>
         /// The number of nodes each signature can contain.
         /// </summary>
-        internal readonly int SignatureNodesCount;
+        internal int SignatureNodesCount { get; set; }
 
         /// <summary>
         /// The maximum number of values that can be returned by a profile
         /// and a property supporting a list of values.
         /// </summary>
-        internal readonly short MaxValues;
+        internal short MaxValues { get; set; }
 
         /// <summary>
         /// The number of bytes to allocate to a buffer returning
         /// CSV format data for a match.
         /// </summary>
-        internal readonly int CsvBufferLength;
+        public int CsvBufferLength { get; internal set; }
 
         /// <summary>
         /// The number of bytes to allocate to a buffer returning
         /// JSON format data for a match.
         /// </summary>
-        internal readonly int JsonBufferLength;
+        public int JsonBufferLength { get; internal set; }
 
         /// <summary>
         /// The number of bytes to allocate to a buffer returning
         /// XML format data for a match.
         /// </summary>
-        internal readonly int XmlBufferLength;
+        public int XmlBufferLength { get; internal set; }
 
         /// <summary>
         /// The maximum number of signatures that could possibly 
         /// be returned during a closest match.
         /// </summary>
-        internal readonly int MaxSignaturesClosest;
+        internal int MaxSignaturesClosest { get; set; }
         
-        #endregion
-
-        #region Data Set Properties
-
         /// <summary>
         /// Set when the disposed method is called indicating the data
         /// set is no longer valid and can't be used.
@@ -445,10 +441,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         {
             get
             {
-                return (DateTime.UtcNow - Published) - _age;
+                return (DateTime.UtcNow - Published) - AgeAtPublication;
             }
         }
-        private readonly TimeSpan _age;
+        internal TimeSpan AgeAtPublication;
 
         /// <summary>
         /// The copyright notice associated with the data set.
@@ -463,7 +459,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                     {
                         if (_copyright == null)
                         {
-                            _copyright = Strings[_copyrightOffset].ToString();
+                            _copyright = Strings[CopyrightOffset].ToString();
                         }
                     }
                 }
@@ -471,7 +467,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             }
         }
         private string _copyright;
-        private readonly int _copyrightOffset;
+        internal int CopyrightOffset { private get; set; }
 
         /// <summary>
         /// The common name of the data set.
@@ -486,14 +482,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                     {
                         if (_name == null)
                         {
-                            _name = Strings[_nameOffset].ToString();
+                            _name = Strings[NameOffset].ToString();
                         }
                     }
                 }
                 return _name; 
             }
         }
-        private readonly int _nameOffset;
+        internal int NameOffset;
         private string _name;
 
         /// <summary>
@@ -509,14 +505,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                     {
                         if (_format == null)
                         {
-                            _format = Strings[_formatOffset].ToString();
+                            _format = Strings[FormatOffset].ToString();
                         }
                     }
                 }
                 return _format; 
             }
         }
-        private readonly int _formatOffset;
+        internal int FormatOffset;
         private string _format;
                 
         #endregion
@@ -622,63 +618,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// Constructs a new data set ready to have lists of data assigned
         /// to it.
         /// </summary>
-        /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
-        /// </param>
         /// <param name="lastModified">
         /// The date and time the source of the data was last modified.
         /// </param>
-        internal DataSet(BinaryReader reader, DateTime lastModified)
+        internal DataSet(DateTime lastModified)
         {
-            // Check for an exception which would indicate the file is the 
-            // wrong type for the API.
-            try
-            {
-                Version = new Version(
-                    reader.ReadInt32(),
-                    reader.ReadInt32(),
-                    reader.ReadInt32(),
-                    reader.ReadInt32());
-            }
-            catch (ArgumentOutOfRangeException ex)
-            {
-                throw new MobileException(String.Format(
-                    "Data file is invalid. Check that the data file is " +
-                    "decompressed and is the latest version '{0}' format.",
-                    BinaryConstants.FormatVersion), ex);
-            }
-
-            // Throw exception if the data file does not have the correct
-            // version in formation.
-            if (Version.Major != BinaryConstants.FormatVersion.Major ||
-                Version.Minor != BinaryConstants.FormatVersion.Minor)
-                throw new MobileException(String.Format(
-                    "Version mismatch. Data is version '{0}' for '{1}' reader",
-                    Version,
-                    BinaryConstants.FormatVersion));
-
             LastModified = lastModified;
-            Tag = new Guid(reader.ReadBytes(16));
-            _copyrightOffset = reader.ReadInt32();
-            _age = new TimeSpan(reader.ReadInt16() * TimeSpan.TicksPerDay * 30);
-            MinUserAgentCount = reader.ReadInt32();
-            _nameOffset = reader.ReadInt32();
-            _formatOffset = reader.ReadInt32();
-            Published = ReadDate(reader);
-            NextUpdate = ReadDate(reader);
-            DeviceCombinations = reader.ReadInt32();
-            MaxUserAgentLength = reader.ReadInt16();
-            MinUserAgentLength = reader.ReadInt16();
-            LowestCharacter = reader.ReadByte();
-            HighestCharacter = reader.ReadByte();
-            MaxSignatures = reader.ReadInt32();
-            SignatureProfilesCount = reader.ReadInt32();
-            SignatureNodesCount = reader.ReadInt32();
-            MaxValues = reader.ReadInt16();
-            CsvBufferLength = reader.ReadInt32();
-            JsonBufferLength = reader.ReadInt32();
-            XmlBufferLength = reader.ReadInt32();
-            MaxSignaturesClosest = reader.ReadInt32();
         }
 
         /// <summary>
@@ -689,9 +634,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         internal void Init()
         {
             // Set the string values of the data set.
-            _name = Strings[_nameOffset].ToString();
-            _format = Strings[_formatOffset].ToString();
-            _copyright = Strings[_copyrightOffset].ToString();
+            _name = Strings[NameOffset].ToString();
+            _format = Strings[FormatOffset].ToString();
+            _copyright = Strings[CopyrightOffset].ToString();
 
             // Initialise any objects that can be pre referenced to speed up
             // initial matching.
@@ -713,16 +658,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             // We no longer need the strings data structure as all dependent
             // data has been taken from it.
             Strings = null;
-        }
-
-        /// <summary>
-        /// Reads a date in year, month and day order from the reader.
-        /// </summary>
-        /// <param name="reader">Reader positioned at the start of the date</param>
-        /// <returns>A date time with the year, month and day set from the reader</returns>
-        private static DateTime ReadDate(BinaryReader reader)
-        {
-            return new DateTime(reader.ReadInt16(), reader.ReadByte(), reader.ReadByte());
         }
 
         /// <summary>

@@ -71,12 +71,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// <returns>A <see cref="DataSet"/> filled with data from the array</returns>
         public static DataSet Create(byte[] array, bool init)
         {
-           
-                using (var reader = new Reader(new MemoryStream(array)))
-                {
-                    return Read(reader, init, DateTime.MinValue);
-                }
-            
+            DataSet dataSet = new DataSet(DateTime.MinValue);
+            using (var reader = new Reader(new MemoryStream(array)))
+            {
+                 Load(dataSet, reader, init);
+            }
+            return dataSet;
         }
         
         /// <summary>
@@ -105,10 +105,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// <returns>A <see cref="DataSet"/> filled with data from the array</returns>
         public static DataSet Create(string filePath, bool init, DateTime lastModified)
         {
-            using (var reader = new Reader(File.OpenRead(filePath)))
+            DataSet dataSet = new DataSet(lastModified);
+            using (var reader = new Reader(
+                File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
             {
-                return Read(reader, init, lastModified);
+                Load(dataSet, reader, init);
             }
+            return dataSet;
         }
        
         #endregion
@@ -118,6 +121,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// <summary>
         /// Creates a new <see cref="DataSet"/> from the binary reader provided.
         /// </summary>
+        /// <param name="dataSet">The data set to be loaded with data from the reader</param>
         /// <param name="reader">
         /// Reader connected to the source data structure and positioned to start reading
         /// </param>
@@ -130,12 +134,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// lists before reading the data into memory. Finally it initialise is required
         /// references between entities are worked out and stored.
         /// </para>
-        /// <param name="lastModified">Date and time the source data was last modified.</param>
-        /// <returns>A <see cref="DataSet"/> filled with data from the reader</returns>
-        internal static DataSet Read(Reader reader, bool init, DateTime lastModified)
+        internal static void Load(DataSet dataSet, Reader reader, bool init)
         {
-            var dataSet = new DataSet(reader, lastModified);
-
+            CommonFactory.LoadHeader(dataSet, reader);
             var strings = new MemoryVariableList<AsciiString>(dataSet, reader, new AsciiStringFactory());
             var components = new MemoryFixedList<Component>(dataSet, reader, new ComponentFactory());
             var maps = new MemoryFixedList<Map>(dataSet, reader, new MapFactory());
@@ -181,7 +182,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
                 // Force garbage collection as a lot of memory has been freed.
                 GC.Collect();  
             }
-            return dataSet;
         }
         
         #endregion
