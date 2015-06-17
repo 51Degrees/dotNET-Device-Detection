@@ -133,8 +133,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 {
                     using (var reader = new BinaryReader(stream))
                     {
-                        using (var dataSet = new DataSet(reader, File.GetLastWriteTimeUtc(fileName)))
+                        using (var dataSet = new DataSet(File.GetLastWriteTimeUtc(fileName)))
                         {
+                            CommonFactory.LoadHeader(dataSet, reader);
                             return dataSet.Published;
                         }
                     }
@@ -339,6 +340,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #endregion
 
         #region Public Methods
+
+        /// <summary>
+        /// Checks for a new version of the data file if licence keys are available.
+        /// </summary>
+        public static void Download()
+        {
+            AutoUpdate.Download(LicenceKey.Keys);
+        }
 
         /// <summary>
         /// Forces the application to reload the active provider on the next

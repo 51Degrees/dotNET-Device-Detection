@@ -160,7 +160,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <exception cref="MobileException">
         /// Thrown if the method is called for a property with multiple values
         /// </exception>
-        internal int ToInt()
+        public int ToInt()
         {
             if (_property.IsList)
                 throw new MobileException("ToInt can only be used on non List properties");
@@ -189,6 +189,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
 
         #endregion
+
+
 
 
     }

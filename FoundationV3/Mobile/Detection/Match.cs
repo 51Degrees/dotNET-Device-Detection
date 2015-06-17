@@ -220,7 +220,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// The data set used for the detection.
         /// </summary>
-        internal readonly DataSet DataSet;
+        public readonly DataSet DataSet;
 
         /// <summary>
         /// The next character position to be checked.

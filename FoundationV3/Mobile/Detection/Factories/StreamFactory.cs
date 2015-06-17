@@ -60,14 +60,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// </returns>
         public static DataSet Create(byte[] array)
         {
-            DataSet dataSet = null;
-
-                using (var reader = new Reader(new MemoryStream(array)))
-                {
-                    dataSet = new DataSet(reader, array);
-                    Read(reader, dataSet);
-                }
-
+            var dataSet = new DataSet(array);
+            Load(dataSet);
             return dataSet;
         }
 
@@ -94,14 +88,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// </returns>
         public static DataSet Create(string filePath, DateTime lastModified)
         {
-            DataSet dataSet = null;
-
-            using (var reader = new Reader(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
-            {
-                dataSet = new DataSet(reader, filePath, lastModified);
-                Read(reader, dataSet);
-            }
-
+            var dataSet = new DataSet(filePath, lastModified);
+            Load(dataSet);
             return dataSet;
         }
               
@@ -110,7 +98,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         #region Private Methods
 
         /// <summary>
-        /// Initialises the dataset <see cref="DataSet"/> using the binary reader provided.
+        /// Initialises the dataset <see cref="DataSet"/> using the source of the data set.
         /// </summary>
         /// <para>
         /// A <see cref="DataSet"/> is initialised using the reader to retrieve 
@@ -118,38 +106,46 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// process.
         /// </para>
         /// <param name="dataSet">A data set to be initialised ready for detection</param>
-        /// <param name="reader">A binary reader connected to the underlying data source 
-        /// and positioned after the header.</param>
-        internal static void Read(Reader reader, DataSet dataSet)
+        private static void Load(DataSet dataSet)
         {
-            dataSet.Strings = new VariableList<AsciiString>(dataSet, reader, new AsciiStringFactory(), Constants.StringsCacheSize);
-            var components = new MemoryFixedList<Component>(dataSet, reader, new ComponentFactory());
-            dataSet._components = components;
-            var maps = new MemoryFixedList<Map>(dataSet, reader, new MapFactory());
-            dataSet._maps = maps;
-            var properties = new PropertiesList(dataSet, reader, new PropertyFactory());
-            dataSet._properties = properties;
-            dataSet._values = new FixedList<Value>(dataSet, reader, new ValueFactory(), Constants.ValuesCacheSize);
-            dataSet.Profiles = new VariableList<Entities.Profile>(dataSet, reader, new ProfileStreamFactory(dataSet.Pool), Constants.ProfilesCacheSize);
-            dataSet._signatures = new FixedList<Signature>(dataSet, reader, new SignatureFactory(dataSet), Constants.SignaturesCacheSize);
-            dataSet._rankedSignatureIndexes = new FixedList<RankedSignatureIndex>(dataSet, reader, new RankedSignatureIndexFactory(), Constants.RankedSignaturesCacheSize);
-            dataSet.Nodes = new VariableList<Entities.Node>(dataSet, reader, new NodeStreamFactory(dataSet.Pool), Constants.NodesCacheSize);
-            var rootNodes = new MemoryFixedList<Entities.Node>(dataSet, reader, new RootNodeFactory());
-            dataSet.RootNodes = rootNodes;
-            var profileOffsets = new MemoryFixedList<ProfileOffset>(dataSet, reader, new ProfileOffsetFactory());
-            dataSet._profileOffsets = profileOffsets;
+            var reader = dataSet.Pool.GetReader();
+            try
+            {
+                reader.BaseStream.Position = 0;
+                CommonFactory.LoadHeader(dataSet, reader);
+                dataSet.Strings = new VariableList<AsciiString>(dataSet, reader, new AsciiStringFactory(), Constants.StringsCacheSize);
+                var components = new MemoryFixedList<Component>(dataSet, reader, new ComponentFactory());
+                dataSet._components = components;
+                var maps = new MemoryFixedList<Map>(dataSet, reader, new MapFactory());
+                dataSet._maps = maps;
+                var properties = new PropertiesList(dataSet, reader, new PropertyFactory());
+                dataSet._properties = properties;
+                dataSet._values = new FixedList<Value>(dataSet, reader, new ValueFactory(), Constants.ValuesCacheSize);
+                dataSet.Profiles = new VariableList<Entities.Profile>(dataSet, reader, new ProfileStreamFactory(dataSet.Pool), Constants.ProfilesCacheSize);
+                dataSet._signatures = new FixedList<Signature>(dataSet, reader, new SignatureFactory(dataSet), Constants.SignaturesCacheSize);
+                dataSet._rankedSignatureIndexes = new FixedList<RankedSignatureIndex>(dataSet, reader, new RankedSignatureIndexFactory(), Constants.RankedSignaturesCacheSize);
+                dataSet.Nodes = new VariableList<Entities.Node>(dataSet, reader, new NodeStreamFactory(dataSet.Pool), Constants.NodesCacheSize);
+                var rootNodes = new MemoryFixedList<Entities.Node>(dataSet, reader, new RootNodeFactory());
+                dataSet.RootNodes = rootNodes;
+                var profileOffsets = new MemoryFixedList<ProfileOffset>(dataSet, reader, new ProfileOffsetFactory());
+                dataSet._profileOffsets = profileOffsets;
 
-            // Read into memory all the small lists which are frequently accessed.
-            reader.BaseStream.Position = components.Header.StartPosition;
-            components.Read(reader);
-            reader.BaseStream.Position = maps.Header.StartPosition;
-            maps.Read(reader);
-            reader.BaseStream.Position = properties.Header.StartPosition;
-            properties.Read(reader);
-            reader.BaseStream.Position = rootNodes.Header.StartPosition;
-            rootNodes.Read(reader);
-            reader.BaseStream.Position = profileOffsets.Header.StartPosition;
-            profileOffsets.Read(reader);
+                // Read into memory all the small lists which are frequently accessed.
+                reader.BaseStream.Position = components.Header.StartPosition;
+                components.Read(reader);
+                reader.BaseStream.Position = maps.Header.StartPosition;
+                maps.Read(reader);
+                reader.BaseStream.Position = properties.Header.StartPosition;
+                properties.Read(reader);
+                reader.BaseStream.Position = rootNodes.Header.StartPosition;
+                rootNodes.Read(reader);
+                reader.BaseStream.Position = profileOffsets.Header.StartPosition;
+                profileOffsets.Read(reader);
+            }
+            finally
+            {
+                dataSet.Pool.Release(reader);
+            }
         }
 
         #endregion
