@@ -22,6 +22,7 @@
 using System;
 using System.Text;
 using System.IO;
+using FiftyOne.Foundation.Mobile.Detection.Entities.Stream;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Factories
 {
@@ -41,22 +42,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
             FileInfo fileInfo = new FileInfo(file);
             if (fileInfo.Exists)
             {
-                using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
-                {
-                    return Create(stream);
-                }
+                return Create(new Pool(new SourceMemoryMappedFile(file)));
             }
             return null;
         }
 
-        /// <summary>
-        /// Creates a new provider from the binary stream supplied.
-        /// </summary>
-        /// <param name="stream">Binary stream to use to create the provider.</param>
-        /// <returns>A new provider initialised with data from the stream provided.</returns>
-        public static TrieProvider Create(FileStream stream)
+        private static TrieProvider Create(Pool pool)
         {
-            using (BinaryReader reader = new BinaryReader(stream))
+            var reader = pool.GetReader();
+            try
             {
                 // Check the version number is correct for this API.
                 var version = reader.ReadUInt16();
@@ -77,7 +71,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
                     ReadLookupList(reader),
                     reader.ReadInt64(),
                     reader.BaseStream.Position,
-                    stream.Name);
+                    pool);
+            }
+            finally
+            {
+                // Return the reader back to the pool.
+                pool.Release(reader);
             }
         }
 

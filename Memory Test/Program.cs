@@ -62,12 +62,6 @@ namespace FiftyOne.Foundation.MemoryTest
         {
             DateTime startTime;
             int counter = 0;
-            var methods = new SortedList<MatchMethods, int>();
-            methods.Add(MatchMethods.Closest, 0);
-            methods.Add(MatchMethods.Exact, 0);
-            methods.Add(MatchMethods.Nearest, 0);
-            methods.Add(MatchMethods.None, 0);
-            methods.Add(MatchMethods.Numeric, 0);
             long startMemory = GC.GetTotalMemory(true);
 
             Console.WriteLine(new String('*', 80));
@@ -85,14 +79,44 @@ namespace FiftyOne.Foundation.MemoryTest
                         test);
 
                     long hashCode = 0;
+                    long memory = 0;
+                    var memorySamples = 0;
 
                     // Detect each line in the file.
                     var line = reader.ReadLine();
                     while (line != null)
                     {
-                        provider.GetDeviceIndex(line.Trim());
+                        // Get the device and one property value.
+                        var deviceIndex = provider.GetDeviceIndex(line.Trim());
+                        var value = provider.GetPropertyValue(deviceIndex, "IsMobile");
+                        hashCode += value.GetHashCode();
+
+                        // Update the counters.
+                        counter++;
+
+                        // Record memory usage every 1000 detections.
+                        if (counter % 1000 == 0)
+                        {
+                            memorySamples++;
+                            memory += GC.GetTotalMemory(false);
+                        }
+
                         line = reader.ReadLine();
                     }
+
+                    // Output headline results.
+                    Console.WriteLine();
+                    var completeTime = (DateTime.UtcNow - startTime);
+                    Console.WriteLine("Total of '{0}' detections in '{1:0.00} seconds",
+                        counter,
+                        completeTime.TotalSeconds);
+                    Console.WriteLine("Average detection time '{0:0.00}' ms",
+                        completeTime.TotalMilliseconds / counter);
+
+                    // Average memory used.
+                    Console.WriteLine();
+                    Console.WriteLine("Average memory used '{0}' MBs",
+                        ((memory / memorySamples) - startMemory) / (1024 * 1024));
                 }
             }
         }
