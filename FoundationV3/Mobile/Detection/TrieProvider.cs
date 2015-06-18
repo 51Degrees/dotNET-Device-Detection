@@ -138,9 +138,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="lookupList">Lookups data array.</param>
         /// <param name="nodesLength">The length of the node data.</param>
         /// <param name="nodesOffset">The position of the start of the nodes in the file provided.</param>
-        /// <param name="fileName">Name of the source data file used to create the provider.</param>
+        /// <param name="pool">Pool connected to the data source.</param>
         internal TrieProvider(string copyright, byte[] strings, byte[] properties, byte[] devices,
-            byte[] lookupList, long nodesLength, long nodesOffset, string fileName)
+            byte[] lookupList, long nodesLength, long nodesOffset, Pool pool)
         {
             Copyright = copyright;
             _strings = strings;
@@ -148,9 +148,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             _devices = devices;
             _lookupList = lookupList;
             _nodesOffset = nodesOffset;
-
-            // Creates a pool to use to access the source data file.
-            _pool = new Pool(new SourceFile(fileName));
+            _pool = pool;
 
             // Store the maximum number of properties.
             _propertyCount = _properties.Length / sizeof(int);
