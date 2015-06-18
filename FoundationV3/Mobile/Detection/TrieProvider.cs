@@ -150,7 +150,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             _nodesOffset = nodesOffset;
 
             // Creates a pool to use to access the source data file.
-            _pool = new Pool(new SourceMemoryMappedFile(fileName));
+            _pool = new Pool(new SourceFile(fileName));
 
             // Store the maximum number of properties.
             _propertyCount = _properties.Length / sizeof(int);
