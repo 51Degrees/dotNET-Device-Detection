@@ -44,14 +44,14 @@ namespace FiftyOne.Foundation.MemoryTest
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            //Test(args.Length > 0 ? args[0] : "../../data/51Degrees-Lite.dat",
-            //    args.Length > 1 ? args[1] : "../../data/20000 User Agents.csv",
-            //    StreamFactory.Create,
-            //    "Stream");
-            //Test(args.Length > 0 ? args[0] : "../../data/51Degrees-Lite.dat",
-            //    args.Length > 1 ? args[1] : "../../data/20000 User Agents.csv",
-            //    MemoryFactory.Create,
-            //    "Memory");
+            Test(args.Length > 0 ? args[0] : "../../data/51Degrees-Lite.dat",
+                args.Length > 1 ? args[1] : "../../data/20000 User Agents.csv",
+                StreamFactory.Create,
+                "Stream");
+            Test(args.Length > 0 ? args[0] : "../../data/51Degrees-Lite.dat",
+                args.Length > 1 ? args[1] : "../../data/20000 User Agents.csv",
+                MemoryFactory.Create,
+                "Memory");
             TestTrie(args.Length > 2 ? args[2] : "../../data/51Degrees-Lite.trie",
                 args.Length > 1 ? args[1] : "../../data/20000 User Agents.csv",
                 "Trie");
