@@ -44,15 +44,57 @@ namespace FiftyOne.Foundation.MemoryTest
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            Test(args.Length > 0 ? args[0] : "../../data/51Degrees-Lite.dat",
+            //Test(args.Length > 0 ? args[0] : "../../data/51Degrees-Lite.dat",
+            //    args.Length > 1 ? args[1] : "../../data/20000 User Agents.csv",
+            //    StreamFactory.Create,
+            //    "Stream");
+            //Test(args.Length > 0 ? args[0] : "../../data/51Degrees-Lite.dat",
+            //    args.Length > 1 ? args[1] : "../../data/20000 User Agents.csv",
+            //    MemoryFactory.Create,
+            //    "Memory");
+            TestTrie(args.Length > 2 ? args[2] : "../../data/51Degrees-Lite.trie",
                 args.Length > 1 ? args[1] : "../../data/20000 User Agents.csv",
-                StreamFactory.Create,
-                "Stream");
-            Test(args.Length > 0 ? args[0] : "../../data/51Degrees-Lite.dat",
-                args.Length > 1 ? args[1] : "../../data/20000 User Agents.csv",
-                MemoryFactory.Create,
-                "Memory");
+                "Trie");
             Console.ReadKey();
+        }
+
+        private static void TestTrie(string dataFile, string userAgentsFile, string test)
+        {
+            DateTime startTime;
+            int counter = 0;
+            var methods = new SortedList<MatchMethods, int>();
+            methods.Add(MatchMethods.Closest, 0);
+            methods.Add(MatchMethods.Exact, 0);
+            methods.Add(MatchMethods.Nearest, 0);
+            methods.Add(MatchMethods.None, 0);
+            methods.Add(MatchMethods.Numeric, 0);
+            long startMemory = GC.GetTotalMemory(true);
+
+            Console.WriteLine(new String('*', 80));
+
+            using (var reader = new FileInfo(userAgentsFile).OpenText())
+            {
+                startTime = DateTime.UtcNow;
+
+                // Create the dataset and output the creation time and method.
+                using (var provider = TrieFactory.Create(dataFile))
+                {
+                    Console.WriteLine(
+                        "Took {0:0} ms to create data set with method '{1}'",
+                        (DateTime.UtcNow - startTime).TotalMilliseconds,
+                        test);
+
+                    long hashCode = 0;
+
+                    // Detect each line in the file.
+                    var line = reader.ReadLine();
+                    while (line != null)
+                    {
+                        provider.GetDeviceIndex(line.Trim());
+                        line = reader.ReadLine();
+                    }
+                }
+            }
         }
 
         private delegate DataSet CreateDataSet(string fileName);
