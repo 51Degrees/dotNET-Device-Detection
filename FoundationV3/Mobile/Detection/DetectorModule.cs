@@ -196,28 +196,41 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         private void OnLoad(object page, EventArgs e)
         {
-            // Indicates if any script calls were added to the page.
-            var addedScript = false;
-
-            // Register the image optimising script to initiate optimisation.
-            addedScript |= Feature.ImageOptimiser.AddScript((System.Web.UI.Page)page);
-
             // Determine if the bandwidth script will be called.
-            addedScript |= Feature.Bandwidth.GetIsEnabled(HttpContext.Current);
+            var bandwidthEnabled = Feature.Bandwidth.GetIsEnabled(HttpContext.Current);
+            
+            // Register the image optimising script to initiate optimisation.
+            var imageOptimiserEnabeld = Feature.ImageOptimiser.AddScript((System.Web.UI.Page)page);
 
             // Register the profile override script.
-            addedScript |= Feature.ProfileOverride.AddScript((System.Web.UI.Page)page);
+            var profileOverrideEnabled = Feature.ProfileOverride.AddScript((System.Web.UI.Page)page);
+
+            // Indicates if any script calls were added to the page.
+            var addedScript = bandwidthEnabled | imageOptimiserEnabeld | profileOverrideEnabled;
 
             // Register the core javascript for 51Degrees if any scripts 
             // were added to the page.
-            if (addedScript)
+            if (bandwidthEnabled || imageOptimiserEnabeld || profileOverrideEnabled)
             {
+                string tag;
+
+                // If bandwidth detection and image optimiser option is disabled then the include can occur
+                // with the async option enabled.
+                if (bandwidthEnabled || imageOptimiserEnabeld)
+                {
+                    tag = "<script src=\"{0}\" type=\"text/javascript\"></script>";
+                }
+                else
+                {
+                    tag = "<script src=\"{0}\" type=\"text/javascript\" async></script>";
+                }
+
+                // Add the client script to the back.
                 ((System.Web.UI.Page)page).ClientScript.RegisterClientScriptBlock(
                     GetType(),
                     ((Page)page).ResolveUrl("~/51Degrees.core.js"),
-                    String.Format(
-                        "<script src=\"{0}\" type=\"text/javascript\"></script>", 
-                         ((Page)page).ResolveUrl("~/51Degrees.core.js")));
+                    String.Format(tag,
+                        ((Page)page).ResolveUrl("~/51Degrees.core.js")));
 
                 // Has to occur after the core javascript has been loaded.
                 Feature.Bandwidth.AddScript((System.Web.UI.Page)page);
@@ -260,12 +273,26 @@ namespace FiftyOne.Foundation.Mobile.Detection
                             {
                                 case "51Degrees.features.js":
                                     content.Append(GetFeatureJavaScript(context));
-                                    expires = DateTime.UtcNow.AddMinutes(
-                                        context.Session != null ? context.Session.Timeout : _redirectTimeout);
+
+                                    // The list of features will be refreshed when the session expires just in case
+                                    // something changed about the configuration. If profile overrides are available
+                                    // then the features list will expire instantly as client side changes will impact
+                                    // the results.
+                                    if (String.IsNullOrEmpty(Feature.ProfileOverride.GetJavascript(context)))
+                                    {
+                                        expires = DateTime.UtcNow.AddMinutes(
+                                            context.Session != null ? context.Session.Timeout : _redirectTimeout);
+                                    }
+
                                     break;
                                 case "51Degrees.core.js":
                                     AppendCoreJavaScript(context, content);
-                                    expires = WebProvider.ActiveProvider.DataSet.NextUpdate;
+
+                                    // Changed to a shorter expiring time in case the configuration of the site
+                                    // is changed before the next update date of the dataset.
+                                    expires = DateTime.UtcNow.AddMinutes(
+                                        context.Session != null ? context.Session.Timeout : _redirectTimeout);
+
                                     break;
                             }
                             SendJavaScript(context, hash, content.ToString(), expires, WebProvider.ActiveProvider.DataSet.Published);
@@ -284,9 +311,24 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns></returns>
         private static void AppendCoreJavaScript(HttpContext context, StringBuilder sb)
         {
-            AppendJavascript(sb, Feature.ImageOptimiser.GetJavascript(context));
-            AppendJavascript(sb, Feature.Bandwidth.GetJavascript(context));
-            AppendJavascript(sb, Feature.ProfileOverride.GetJavascript(context));
+            // If the image optimiser is enabled then add this javascript.
+            if (Feature.ImageOptimiser.GetIsEnabled(context))
+            {
+                AppendJavascript(sb, Feature.ImageOptimiser.GetJavascript(context));
+            }
+
+            // If the bandwidth monitor feature is enabled then add this javascript.
+            if (Feature.Bandwidth.GetIsEnabled(context))
+            {
+                AppendJavascript(sb, Feature.Bandwidth.GetJavascript(context));
+            }
+
+            // Add the profile override javascript if available for this device.
+            var profileOverrideJavascript = Feature.ProfileOverride.GetJavascript(context);
+            if (String.IsNullOrEmpty(profileOverrideJavascript) == false)
+            {
+                AppendJavascript(sb, Feature.ProfileOverride.GetJavascript(context));
+            }
         }
 
         /// <summary>
