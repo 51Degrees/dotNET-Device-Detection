@@ -33,7 +33,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
     {
         /// <summary>
         /// Returns an enumerable starting at the index provided until
-        /// count number if iterations have been performed.
+        /// count number of iterations have been performed.
         /// </summary>
         /// <param name="index">Start index in the fixed list.</param>
         /// <param name="count">Number of iterations to perform.</param>
