@@ -54,7 +54,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         internal DataSet(string fileName, DateTime lastModified)
             : base(lastModified)
         {
-            Pool = new Pool(new SourceMemoryMappedFile(fileName));
+            Pool = new Pool(new SourceFile(fileName));
         }
 
         /// <summary>

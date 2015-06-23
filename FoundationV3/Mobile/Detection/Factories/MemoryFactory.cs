@@ -137,16 +137,39 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         internal static void Load(DataSet dataSet, Reader reader, bool init)
         {
             CommonFactory.LoadHeader(dataSet, reader);
+
             var strings = new MemoryVariableList<AsciiString>(dataSet, reader, new AsciiStringFactory());
             var components = new MemoryFixedList<Component>(dataSet, reader, new ComponentFactory());
             var maps = new MemoryFixedList<Map>(dataSet, reader, new MapFactory());
             var properties = new PropertiesList(dataSet, reader, new PropertyFactory());
             var values = new MemoryFixedList<Value>(dataSet, reader, new ValueFactory());
             var profiles = new MemoryVariableList<Entities.Profile>(dataSet, reader, new ProfileMemoryFactory());
-            var signatures = new MemoryFixedList<Signature>(dataSet, reader, new SignatureFactory(dataSet));
-            var rankedSignatureIndexes = new MemoryFixedList<RankedSignatureIndex>(
-                dataSet, reader, new RankedSignatureIndexFactory());
-            var nodes = new MemoryVariableList<Entities.Node>(dataSet, reader, new NodeMemoryFactory());
+            MemoryFixedList<Signature> signatures = null;
+            MemoryFixedList<Integer> signatureNodeOffsets = null;
+            MemoryFixedList<Integer> nodeRankedSignatureIndexes = null;
+            switch(dataSet.VersionEnum)
+            {
+                case BinaryConstants.FormatVersions.PatternV31:
+                    signatures = new MemoryFixedList<Signature>(dataSet, reader, new SignatureFactoryV31(dataSet));
+                    break;
+                case BinaryConstants.FormatVersions.PatternV32:
+                    signatures = new MemoryFixedList<Signature>(dataSet, reader, new SignatureFactoryV32(dataSet));
+                    signatureNodeOffsets = new MemoryFixedList<Integer>(dataSet, reader, new IntegerFactory());
+                    nodeRankedSignatureIndexes = new MemoryFixedList<Integer>(dataSet, reader, new IntegerFactory());
+                    break;
+            }
+            var rankedSignatureIndexes = new MemoryFixedList<Integer>(
+                dataSet, reader, new IntegerFactory());
+            MemoryVariableList<Entities.Node> nodes = null;
+            switch (dataSet.VersionEnum)
+            {
+                case BinaryConstants.FormatVersions.PatternV31:
+                    nodes = new MemoryVariableList<Entities.Node>(dataSet, reader, new NodeMemoryFactoryV31());
+                    break;
+                case BinaryConstants.FormatVersions.PatternV32:
+                    nodes = new MemoryVariableList<Entities.Node>(dataSet, reader, new NodeMemoryFactoryV32());
+                    break;
+            }
             var rootNodes = new MemoryFixedList<Entities.Node>(dataSet, reader, new RootNodeFactory());
             var profileOffsets = new MemoryFixedList<ProfileOffset>(dataSet, reader, new ProfileOffsetFactory());
 
@@ -158,6 +181,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
             dataSet.Profiles = profiles;
             dataSet._signatures = signatures;
             dataSet._rankedSignatureIndexes = rankedSignatureIndexes;
+            switch (dataSet.VersionEnum)
+            {
+                case BinaryConstants.FormatVersions.PatternV32:
+                    dataSet._signatureNodeOffsets = signatureNodeOffsets;
+                    dataSet._nodeRankedSignatureIndexes = nodeRankedSignatureIndexes;
+                    break;
+            }
             dataSet.Nodes = nodes;
             dataSet.RootNodes = rootNodes;
             dataSet._profileOffsets = profileOffsets;
@@ -169,6 +199,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
             values.Read(reader);
             profiles.Read(reader);
             signatures.Read(reader);
+            switch (dataSet.VersionEnum)
+            {
+                case BinaryConstants.FormatVersions.PatternV32:
+                    signatureNodeOffsets.Read(reader);
+                    nodeRankedSignatureIndexes.Read(reader);
+                    break;
+            }
             rankedSignatureIndexes.Read(reader);
             nodes.Read(reader);
             rootNodes.Read(reader);

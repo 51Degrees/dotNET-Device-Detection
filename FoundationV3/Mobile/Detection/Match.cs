@@ -788,8 +788,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
             {
                 // There is only 1 list so return an enumeration for that
                 // single list.
-                _closestSignatures = Nodes[0].RankedSignatureIndexes.Length;
-                return Nodes[0].RankedSignatureIndexes.Select(i => i);
+                _closestSignatures = Nodes[0].RankedSignatureCount;
+                return Nodes[0].RankedSignatureIndexes;
             }
             else
             {
@@ -799,7 +799,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 var maxCount = 1;
 
                 // Get the nodes in ascending order of signature index length.
-                var iterator = Nodes.OrderBy(i => i.RankedSignatureIndexes.Length).GetEnumerator();
+                var iterator = Nodes.OrderBy(i => i.RankedSignatureCount).GetEnumerator();
 
                 // Get the first node and add all the signature indexes.
                 iterator.MoveNext();
@@ -833,8 +833,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
             }
         }
 
-        private int GetClosestSignaturesForNode(int[] signatureIndexList, 
-            PossibleSignatures linkedList, 
+        private int GetClosestSignaturesForNode(
+            int[] signatureIndexList,
+            PossibleSignatures linkedList,
             int maxCount, int iteration)
         {
             // If there is point adding any new signature indexes set the
@@ -902,11 +903,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="list"></param>
         /// <returns></returns>
-        private static PossibleSignatures BuildInitialList(int[] list)
+        private static PossibleSignatures BuildInitialList(IEnumerable<int> list)
         {
             var linkedList = new PossibleSignatures();
             foreach (var index in list)
+            {
                 linkedList.Add(new PossibleSignature(index, 1));
+            }
             return linkedList;
         }
 

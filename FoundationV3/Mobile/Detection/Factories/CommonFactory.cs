@@ -22,6 +22,7 @@
 using FiftyOne.Foundation.Mobile.Detection.Entities;
 using System;
 using System.IO;
+using System.Linq;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Factories
 {
@@ -51,19 +52,27 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
             {
                 throw new MobileException(String.Format(
                     "Data file is invalid. Check that the data file is " +
-                    "decompressed and is the latest version '{0}' format.",
-                    BinaryConstants.FormatVersion), ex);
+                    "decompressed and is version '{0}' format.",
+                    String.Join(",", BinaryConstants.SupportedPatternFormatVersions.Select(i => 
+                        i.Value.ToString())), ex));
             }
 
             // Throw exception if the data file does not have the correct
             // version in formation.
-            if (dataSet.Version.Major != BinaryConstants.FormatVersion.Major ||
-                dataSet.Version.Minor != BinaryConstants.FormatVersion.Minor)
+            if (BinaryConstants.SupportedPatternFormatVersions.Any(i => i.Value.Equals(dataSet.Version)) == false)
+            {
                 throw new MobileException(String.Format(
                     "Version mismatch. Data is version '{0}' for '{1}' reader",
                     dataSet.Version,
-                    BinaryConstants.FormatVersion));
+                    String.Join(",", BinaryConstants.SupportedPatternFormatVersions.Select(i => 
+                        i.Value.ToString()))));
+            }
 
+            // Set the enum format version value for easier if logic.
+            dataSet.VersionEnum = BinaryConstants.SupportedPatternFormatVersions.FirstOrDefault(i => 
+                i.Value.Equals(dataSet.Version)).Key;
+
+            // Read the common header fields.
             dataSet.Tag = new Guid(reader.ReadBytes(16));
             dataSet.CopyrightOffset = reader.ReadInt32();
             dataSet.AgeAtPublication = new TimeSpan(reader.ReadInt16() * TimeSpan.TicksPerDay * 30);
@@ -85,6 +94,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
             dataSet.JsonBufferLength = reader.ReadInt32();
             dataSet.XmlBufferLength = reader.ReadInt32();
             dataSet.MaxSignaturesClosest = reader.ReadInt32();
+
+            // Read the V32 headers specifically.
+            if (dataSet.VersionEnum == BinaryConstants.FormatVersions.PatternV32)
+            {
+                dataSet._maximumRank = reader.ReadInt32();
+            }
         }
 
         /// <summary>

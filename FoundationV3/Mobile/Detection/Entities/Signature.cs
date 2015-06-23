@@ -55,15 +55,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// <para>
     /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
-    public class Signature : BaseEntity, IComparable<Signature>
+    public abstract class Signature : BaseEntity, IComparable<Signature>
     {
         #region Fields
-
-        /// <summary>
-        /// List of the node offsets the signature relates to ordered
-        /// by offset of the node.
-        /// </summary>
-        internal readonly int[] NodeOffsets;
 
         /// <summary>
         /// Offsets to profiles associated with the signature.
@@ -78,29 +72,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// Gets the rank, where a lower number means the signature is more popular, of
         /// the signature compared to other signatures.
         /// </summary>
-        /// <remarks>
-        /// As the property uses the ranked signature indexes list to obtain the rank
-        /// it will be comparatively slow compared to other methods the firs time
-        /// the property is accessed.
-        /// </remarks>
-        public int Rank
-        {
-            get
-            {
-                if (_rank == null)
-                {
-                    lock(this)
-                    {
-                        if (_rank == null)
-                        {
-                            _rank = GetSignatureRank();
-                        }
-                    }
-                }
-                return _rank.Value;
-            }
-        }
-        internal int? _rank;
+        public abstract int Rank { get; }
 
         /// <summary>
         /// The length in bytes of the signature.
@@ -185,21 +157,22 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                 // Do the values already exist for the property?
                 lock (_nameToValues)
                 {
-                    Values values;
+                    Values values = null;
                     if (_nameToValues.TryGetValue(propertyName, out values))
                         return values;
 
                     // Does not exist already so get the property.
-                    var property = DataSet.Properties.FirstOrDefault(i =>
-                        i.Name == propertyName);
+                    var property = DataSet.Properties[propertyName];
+                    if (property != null) 
+                    {
+                        // Create the list of values.
+                        values = new Values(
+                            property,
+                            Values.Where(i => i.Property.Index == property.Index));
 
-                    // Create the list of values.
-                    values = new Values(
-                        property,
-                        Values.Where(i => i.Property == property));
-
-                    if (values.Count == 0)
-                        values = null;
+                        if (values.Count == 0)
+                            values = null;
+                    }
 
                     // Store for future reference.
                     _nameToValues.Add(propertyName, values);
@@ -241,6 +214,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
 
         #region Internal Properties
         
+        /// <summary>
+        /// Array of node offsets associated with the signature.
+        /// </summary>
+        internal abstract int[] NodeOffsets { get; }
+
         /// <summary>
         /// An array of nodes associated with the signature.
         /// </summary>
@@ -309,7 +287,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             : base(dataSet, index)
         {
             ProfileOffsets = ReadOffsets(dataSet, reader, dataSet.SignatureProfilesCount);
-            NodeOffsets = ReadOffsets(dataSet, reader, dataSet.SignatureNodesCount);
         }
 
         /// <summary>
@@ -320,7 +297,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <param name="reader">Reader connected to the source data structure and positioned to start reading</param>
         /// <param name="length">The number of offsets to read in</param>
         /// <returns>An array of the offsets as integers read from the reader</returns>
-	    private static int[] ReadOffsets(DataSet dataSet, Reader reader, int length) {
+	    internal static int[] ReadOffsets(DataSet dataSet, Reader reader, int length) 
+        {
             reader.List.Clear();
 		    for (int i = 0; i < length; i++) {
 			    int profileIndex = reader.ReadInt32();
@@ -334,7 +312,27 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #endregion
 
         #region Methods
-        
+
+        /// <summary>
+        /// The number of characters in the signature.
+        /// </summary>
+        /// <returns>The number of characters in the signature</returns>
+        internal abstract int GetSignatureLength();
+
+        /// <summary>
+        /// Returns an array of nodes associated with the signature.
+        /// </summary>
+        /// <returns></returns>
+        internal Node[] GetNodes()
+        {
+            var nodes = new Node[NodeOffsets.Length];
+            for (int i = 0; i < NodeOffsets.Length; i++)
+            {
+                nodes[i] = DataSet.Nodes[NodeOffsets[i]];
+            }
+            return nodes;
+        }
+
         /// <summary>
         /// Called after the entire data set has been loaded to ensure 
         /// any further initialisation steps that require other items in
@@ -354,15 +352,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                 _length = GetSignatureLength();
         }
         
-        /// <summary>
-        /// Returns an array of nodes associated with the signature.
-        /// </summary>
-        /// <returns></returns>
-        private Node[] GetNodes()
-        {
-            return NodeOffsets.Select(i => DataSet.Nodes[i]).ToArray();
-        }
-
         /// <summary>
         /// Returns the unique device Id for the signature based on the
         /// profile Ids it contains.
@@ -404,22 +393,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
 
         /// <summary>
-        /// Gets the signature rank by iterating through the list of signature ranks.
-        /// </summary>
-        /// <returns>Rank compared to other signatures starting at 0.</returns>
-        private int GetSignatureRank()
-        {
-            for (var rank = 0; rank < DataSet.RankedSignatureIndexes.Count; rank++)
-            {
-                if (DataSet.RankedSignatureIndexes[rank].SignatureIndex == this.Index)
-                {
-                    return rank;
-                }
-            }
-            return int.MaxValue;
-        }
-
-        /// <summary>
         /// Returns an enumeration of profiles associated with the signature.
         /// </summary>
         /// <returns>Enumeration of profiles for the signature</returns>
@@ -427,16 +400,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         {
             return ProfileOffsets.Select(i =>
                 DataSet.Profiles[i]).ToArray();
-        }
-
-        /// <summary>
-        /// The number of characters in the signature.
-        /// </summary>
-        /// <returns>the number of characters in the signature</returns>
-        private int GetSignatureLength()
-        {
-            var lastNode = DataSet.Nodes[NodeOffsets[NodeOffsets.Length - 1]];
-            return lastNode.Position + lastNode.Length + 1;
         }
 
         #endregion
@@ -527,7 +490,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                     if (_stringValue == null)
                     {
                         var buffer = new byte[Length];
-                        foreach (var node in NodeOffsets.Select(i => DataSet.Nodes[i]))
+                        foreach (var node in Nodes)
                             node.AddCharacters(buffer);
                         for (int i = 0; i < buffer.Length; i++)
                             if (buffer[i] == 0)

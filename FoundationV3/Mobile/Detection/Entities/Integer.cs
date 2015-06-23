@@ -24,51 +24,41 @@ using System.IO;
 namespace FiftyOne.Foundation.Mobile.Detection.Entities
 {
     /// <summary>
-    /// Maps a profile id to its position in the data file.
+    /// A integer item in a list of integers.
     /// </summary>
-    public class ProfileOffset : BaseEntity
+    public class Integer : BaseEntity
     {        
         #region Properties
 
         /// <summary>
-        /// The unique id for the profile.
+        /// The index of the signature in the list of signatures.
         /// </summary>
-        public int ProfileId
+        public int Value
         {
-            get { return _profileId; }
+            get { return _value; }
         }
-        internal int _profileId;
-
-        /// <summary>
-        /// The position within the data file that the profile can be read from.
-        /// </summary>
-        public int Offset
-        {
-            get { return _offset; }
-        }
-        internal int _offset;
+        internal int _value;
 
         #endregion
 
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of <see cref="ProfileOffset"/>
+        /// Constructs a new instance of <see cref="Integer"/>
         /// </summary>
         /// <param name="dataSet">
         /// The data set whose strings list the string is contained within
         /// </param>
-        /// <param name="offset">
-        /// The offset to the start of the profile within the profiles data structure
+        /// <param name="index">
+        /// The index in the data structure to the integer.
         /// </param>
         /// <param name="reader">
-        /// Binary reader positioned at the start of the ProfileOffset.
+        /// Binary reader positioned at the start of the Integer.
         /// </param>
-        internal ProfileOffset(DataSet dataSet, int offset, BinaryReader reader)
-            : base(dataSet, offset)
+        internal Integer(DataSet dataSet, int index, BinaryReader reader)
+            : base(dataSet, index)
         {
-            _profileId = reader.ReadInt32();
-            _offset = reader.ReadInt32();
+            _value = reader.ReadInt32();
         }
         
         #endregion

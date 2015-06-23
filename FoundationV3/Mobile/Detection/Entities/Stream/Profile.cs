@@ -104,10 +104,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
                                 reader.BaseStream.Position = _position;
                                 _valueIndexes = BaseEntity.ReadIntegerArray(reader, _valueIndexesCount);
                             }
-                            catch(Exception ex)
-                            {
-                                throw new MobileException("Cannot to obtain _valueIndexes", ex);
-                            }
                             finally
                             {
                                 _pool.Release(reader);
@@ -138,10 +134,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
                             {
                                 reader.BaseStream.Position = _position + (_valueIndexesCount * sizeof(int));
                                 _signatureIndexes = BaseEntity.ReadIntegerArray(reader, _signatureIndexesCount);
-                            }
-                            catch (Exception ex)
-                            {
-                                throw new MobileException("Cannot to obtain _signatureIndexes", ex);
                             }
                             finally
                             {

@@ -20,9 +20,7 @@
  * ********************************************************************* */
 
 using System;
-using System.Linq;
 using System.Text;
-using System.Diagnostics;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Entities
 {

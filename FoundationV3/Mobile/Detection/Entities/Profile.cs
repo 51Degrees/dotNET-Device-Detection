@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Diagnostics;
+using System.Collections.Concurrent;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Entities
 {
@@ -128,7 +129,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                             values = new Entities.Values(
                                 property,
                                 GetPropertyValuesEnumerable(property));
-                            _propertyIndexToValues.Add(property.Index, values);
+                            PropertyIndexToValues.Add(property.Index, values);
                         }
                     }
                 }
@@ -136,6 +137,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             }
         }
 
+        /// <summary>
+        /// A dictionary relating the index of a property to the
+        /// values returned by the profile. Used to speed up
+        /// subsequent data processing.
+        /// </summary>
         private IDictionary<int, Values> PropertyIndexToValues
         {
             get
@@ -146,7 +152,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                     {
                         if (_propertyIndexToValues == null)
                         {
-                            _propertyIndexToValues = new SortedList<int, Values>();
+                            _propertyIndexToValues = new Dictionary<int, Values>();
                         }
                     }
                 }

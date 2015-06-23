@@ -20,6 +20,7 @@
  * ********************************************************************* */
 
 using System;
+using System.Linq;
 using System.Text;
 using System.IO;
 using FiftyOne.Foundation.Mobile.Detection.Entities.Stream;
@@ -54,12 +55,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
             {
                 // Check the version number is correct for this API.
                 var version = reader.ReadUInt16();
-                if (version != BinaryConstants.FormatVersion.Major)
+                if (BinaryConstants.SupportedTrieFormatVersions.Any(i => i.Value.Major == version) == false)
                 {
                     throw new MobileException(String.Format(
                         "Version mismatch. Data is version '{0}' for '{1}' reader",
                         version,
-                        BinaryConstants.FormatVersion.Major));
+                        String.Join(",", BinaryConstants.SupportedTrieFormatVersions.Select(i => i.Value.ToString()))));
                 }
 
                 // Create the new provider.

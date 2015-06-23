@@ -22,6 +22,7 @@
 using System.IO;
 using FiftyOne.Foundation.Mobile.Detection.Factories;
 using FiftyOne.Foundation.Mobile.Detection.Readers;
+using System.Collections.Generic;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
 {
@@ -49,7 +50,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
     /// Should not be referenced directly.
     /// </remarks>
     /// <typeparam name="T">The type of <see cref="BaseEntity"/> the list will contain</typeparam>
-    public class MemoryFixedList<T> : MemoryBaseList<T>, IReadonlyList<T> where T : BaseEntity
+    public class MemoryFixedList<T> : MemoryBaseList<T>, IFixedList<T> where T : BaseEntity
     {
         #region Constructor
 
@@ -77,7 +78,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         internal override void Read(Reader reader)
         {
             for (int index = 0; index < Header.Count; index++)
+            {
                 _array[index] = (T)EntityFactory.Create(_dataSet, index, reader);
+            }
         }
 
         #endregion
@@ -94,6 +97,30 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
             get { return _array[index]; }
         }
 
+        /// <summary>
+        /// An enumerable that can return a range of T between index
+        /// and the count provided.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public IEnumerable<T> GetRange(int index, int count)
+        {
+            for (int key = index; key < index + count; key++)
+            {
+                yield return _array[key];
+            }
+        }
+
+        /// <summary>
+        /// An enumeration for the underlying array.
+        /// </summary>
+        /// <returns></returns>
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return _array.GetEnumerator();
+        }
+        
         #endregion
     }
 }

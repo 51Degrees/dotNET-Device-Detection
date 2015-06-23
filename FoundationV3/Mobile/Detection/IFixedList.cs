@@ -25,23 +25,19 @@ using FiftyOne.Foundation.Mobile.Detection.Entities;
 namespace FiftyOne.Foundation.Mobile.Detection
 {
     /// <summary>
-    /// A list which only provides those features needed to read items from
-    /// the list.
+    /// Provides the ability to efficiently retrieve the items from the list
+    /// using a ranged enumerable.
     /// </summary>
-    /// <typeparam name="T">The type of <see cref="BaseEntity"/> the list will contain</typeparam>
-    public interface IReadonlyList<T> : IEnumerable<T> where T : BaseEntity
+    /// <typeparam name="T">Type of entity the list contains.</typeparam>
+    public interface IFixedList<T> : IReadonlyList<T> where T : BaseEntity
     {
         /// <summary>
-        /// Accessor for the list.
+        /// Returns an enumerable starting at the index provided until
+        /// count number if iterations have been performed.
         /// </summary>
-        /// <param name="key">Index or offset of the entity required</param>
-        /// <returns></returns>
-        T this[int key] { get; }
-
-        /// <summary>
-        /// Number of items in the list.
-        /// </summary>
-        int Count { get; }
-
+        /// <param name="index">Start index in the fixed list.</param>
+        /// <param name="count">Number of iterations to perform.</param>
+        /// <returns>An enumerable to iterate over the range specified.</returns>
+        IEnumerable<T> GetRange(int index, int count);
     }
 }

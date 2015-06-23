@@ -19,54 +19,59 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 
-namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
+namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 {
     /// <summary>
-    /// All data is loaded into memory when the entity is constructed.
+    /// Base class for file sources.
     /// </summary>
-    internal abstract class Node : Entities.Node
+    internal abstract class SourceFileBase : SourceBase
     {
-        #region Constructors
+        #region Fields
 
         /// <summary>
-        /// Constructs a new instance of <see cref="Node"/>
+        /// The file containing the source data.
         /// </summary>
-        /// <param name="dataSet">
-        /// The data set the node is contained within
-        /// </param>
-        /// <param name="offset">
-        /// The offset in the data structure to the node
-        /// </param>
-        /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
-        /// </param>
-        internal Node(
-            DataSet dataSet,
-            int offset,
-            BinaryReader reader)
-            : base(dataSet, offset, reader)
-        {
-            _numericChildren = ReadNodeNumericIndexes(dataSet, reader, _numericChildrenCount);
-        }
+        protected readonly FileInfo _fileInfo;
 
-        #endregion  
-        
-        #region Overrides
+        #endregion
+
+        #region Constructor
 
         /// <summary>
-        /// An array of all the numeric children.
+        /// 
         /// </summary>
-        protected internal override NodeNumericIndex[] NumericChildren
+        /// <param name="fileName">File source of the data</param>
+        internal SourceFileBase(string fileName)
         {
-            get { return _numericChildren; }
+            _fileInfo = new FileInfo(fileName);
         }
-        private NodeNumericIndex[] _numericChildren;
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Delete the file if it's a temporary file and it 
+        /// still exists.
+        /// </summary>
+        protected void DeleteFile()
+        {
+            if (".tmp".Equals(_fileInfo.Extension) &&
+                _fileInfo.Exists)
+            {
+                try
+                {
+                    _fileInfo.Delete();
+                }
+                catch (IOException)
+                {
+                    // Do nothing as the cause is likely to be because the
+                    // file is in use by another process.
+                }
+            }
+        }
 
         #endregion
     }

@@ -22,6 +22,7 @@
 using System.IO;
 using FiftyOne.Foundation.Mobile.Detection.Factories;
 using FiftyOne.Foundation.Mobile.Detection.Readers;
+using System.Collections.Generic;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
 {
@@ -143,7 +144,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
                 return null;
             }
         }
-
+        
         #endregion
     }
 }

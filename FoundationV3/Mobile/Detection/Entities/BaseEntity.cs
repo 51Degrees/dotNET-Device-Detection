@@ -121,6 +121,20 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Static Methods
 
         /// <summary>
+        /// An enumerable that can be used to read through the entries.
+        /// </summary>
+        /// <param name="reader">Reader set to the position at the start of the list</param>
+        /// <param name="count">The number of integers to read to form the array</param>
+        /// <returns>Iterator to read each integer entry.</returns>
+        protected static IEnumerable<int> GetIntegerEnumerator(BinaryReader reader, int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                yield return reader.ReadInt32();
+            }
+        }
+
+        /// <summary>
         /// Reads an integer array where the first integer is the number of 
         /// following integers.
         /// </summary>

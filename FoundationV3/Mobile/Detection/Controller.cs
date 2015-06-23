@@ -454,8 +454,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
 #if DEBUG
                         // Validate the list is in ascending order of ranked signature index.
-                        var lastIndex = -1;
                         var enumerator = closestSignatures.GetEnumerator();
+                        var lastIndex = -1;
                         while (enumerator.MoveNext())
                         {
                             Debug.Assert(lastIndex < enumerator.Current);
@@ -466,7 +466,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         // Try finding a signature with identical nodes just not in exactly the 
                         // same place.
                         _nearest.EvaluateSignatures(match, closestSignatures.Select(i =>
-                            match.DataSet.Signatures[match.DataSet.RankedSignatureIndexes[i].SignatureIndex]));
+                            match.DataSet.Signatures[match.DataSet.RankedSignatureIndexes[i].Value]));
 
                         if (match._signature != null)
                         {
@@ -479,7 +479,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                             // to the target looking at the smallest character
                             // difference.
                             _closest.EvaluateSignatures(match, closestSignatures.Select(i =>
-                                match.DataSet.Signatures[match.DataSet.RankedSignatureIndexes[i].SignatureIndex]));
+                                match.DataSet.Signatures[match.DataSet.RankedSignatureIndexes[i].Value]));
                             match._method = MatchMethods.Closest;
                         }
                     }
