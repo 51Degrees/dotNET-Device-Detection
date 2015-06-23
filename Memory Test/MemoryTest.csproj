@@ -54,8 +54,9 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="data\20000 User Agents.csv" />
-    <None Include="data\51Degrees-Lite.dat" />
     <None Include="data\51Degrees-Lite.trie" />
+    <None Include="data\51Degrees-LiteV3.1.dat" />
+    <None Include="data\51Degrees-LiteV3.2.dat" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\51Degrees\FoundationV3\FiftyOne.Foundation 4.csproj">
