@@ -54,7 +54,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
     /// Should not be referenced directly.
     /// </remarks>
     /// <typeparam name="T">The type of <see cref="BaseEntity"/> the list will contain</typeparam>
-    public class FixedList<T> : BaseList<T>, IReadonlyList<T> where T : BaseEntity
+    public class FixedList<T> : BaseList<T>, IFixedList<T> where T : BaseEntity
     {
         #region Properties
 
@@ -103,26 +103,52 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
             reader.BaseStream.Position = Header.StartPosition + (EntityFactory.GetLength() * index);
             return (T)EntityFactory.Create(_dataSet, index, reader);
         }
-        
+
         /// <summary>
-        /// An enumerator for the list.
+        /// An enumerator for the list between the range provided.
         /// </summary>
         /// <returns>An enumerator for the list</returns>
+        public IEnumerable<T> GetRange(int index, int count)
+        {
+            var reader = _dataSet.Pool.GetReader();
+            try
+            {
+                reader.BaseStream.Position = Header.StartPosition + (EntityFactory.GetLength() * index);
+                for (int i = 0; i < count; i++)
+                {
+                    yield return (T)EntityFactory.Create(_dataSet, index, reader);
+                }
+            }
+            finally
+            {
+                _dataSet.Pool.Release(reader);
+            }
+        }
+
+        /// <summary>
+        /// An enumeration for the underlying list.
+        /// </summary>
+        /// <returns></returns>
         public IEnumerator<T> GetEnumerator()
         {
-            for (int i = 0; i < Count; i++)
-                yield return this[i];
+            foreach (var item in GetRange(0, Count))
+            {
+                yield return item;
+            }
         }
 
         /// <summary>
-        /// An enumerator for the list.
+        /// An enumeration for the underlying list.
         /// </summary>
-        /// <returns>An enumerator for the list</returns>
+        /// <returns></returns>
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            return GetEnumerator();
+            foreach (var item in GetRange(0, Count))
+            {
+                yield return item;
+            }
         }
-
+        
         #endregion
     }
 }

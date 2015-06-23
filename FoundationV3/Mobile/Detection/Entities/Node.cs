@@ -124,7 +124,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Number of ranked signatures associated with the node.
         /// </summary>
-        protected int _rankedSignatureCount;
+        internal int RankedSignatureCount { get; private set; }
 
         /// <summary>
         /// The next character position to the left of this node
@@ -250,7 +250,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         
         #endregion
 
-        #region Abstract Properties
+        #region Abstract Properties and Methods
 
         /// <summary>
         /// An array of all the numeric children.
@@ -258,10 +258,43 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         internal protected abstract NodeNumericIndex[] NumericChildren { get; }
 
         /// <summary>
-        /// A list of all the signature indexes that relate to this node.
+        /// An array of the ranked signature indexes for the node.
         /// </summary>
         internal abstract int[] RankedSignatureIndexes { get; }
 
+        /// <summary>
+        /// Reads the ranked signature count as an integer.
+        /// </summary>
+        /// <remarks>
+        /// V31 uses a 4 byte integer for the count. V32 uses a 2 byte ushort
+        /// for the count. In both data formats no more than <see cref="ushort.MaxValue"/>
+        /// signatures can be associated with a node.
+        /// </remarks>
+        /// <param name="reader">
+        /// Reader connected to the source data structure and positioned to start reading
+        /// </param>
+        /// <returns>The count of ranked signatures associated with the node.</returns>
+        protected abstract int ReaderRankedSignatureCount(BinaryReader reader);
+
+        /// <summary>
+        /// Used by the constructor to read the variable length list of child
+        /// node indexes associated with the node.
+        /// </summary>
+        /// <param name="dataSet">
+        /// The data set the node is contained within
+        /// </param>
+        /// <param name="reader">
+        /// Reader connected to the source data structure and positioned to start reading
+        /// </param>
+        /// <param name="offset">
+        /// The offset in the data structure to the node
+        /// </param>
+        /// <param name="count">
+        /// The number of node indexes that need to be read.
+        /// </param>
+        /// <returns>An array of child node indexes for the node</returns>
+        protected abstract NodeIndex[] ReadNodeIndexes(DataSet dataSet, BinaryReader reader, int offset, int count);
+        
         #endregion
 
         #region Constructors
@@ -283,14 +316,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             int offset,
             BinaryReader reader) : base (dataSet, offset)
         {
+            var position = reader.BaseStream.Position;
             Position = reader.ReadInt16();
             NextCharacterPosition = reader.ReadInt16();
             _parentOffset = reader.ReadInt32();
             CharacterStringOffset = reader.ReadInt32();
             var childrenCount = reader.ReadInt16();
             _numericChildrenCount = reader.ReadInt16();
-            _rankedSignatureCount = reader.ReadInt32();
-            Children = ReadNodeIndexes(dataSet, reader, offset + NodeFactory.MinLength, childrenCount);
+            RankedSignatureCount = ReaderRankedSignatureCount(reader);
+            Children = ReadNodeIndexes(dataSet, reader, (int)(offset + reader.BaseStream.Position - position), childrenCount);
         }
 
         /// <summary>
@@ -314,60 +348,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                 array[i] = new NodeNumericIndex(dataSet, reader.ReadInt16(), reader.ReadInt32());
             return array;
         }
+     
 
-        /// <summary>
-        /// Used by the constructor to read the variable length list of child
-        /// node indexes associated with the node.
-        /// </summary>
-        /// <param name="dataSet">
-        /// The data set the node is contained within
-        /// </param>
-        /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
-        /// </param>
-        /// <param name="offset">
-        /// The offset in the data structure to the node
-        /// </param>
-        /// <param name="count">
-        /// The number of node indexes that need to be read.
-        /// </param>
-        /// <returns>An array of child node indexes for the node</returns>
-        private static NodeIndex[] ReadNodeIndexes(DataSet dataSet, BinaryReader reader, int offset, int count)
-        {
-            var array = new NodeIndex[count];
-            offset += sizeof(short);
-            for (int i = 0; i < array.Length; i++)
-            {
-                var isString = reader.ReadBoolean();
-                array[i] = new NodeIndex(
-                    dataSet,
-                    offset,
-                    isString,
-                    ReadValue(reader, isString),
-                    reader.ReadInt32());
-                offset += NodeFactory.NodeIndexLength;
-            }
-            return array;
-        }
-
-        /// <summary>
-        /// Reads the value and removes any zero characters if it's a string.
-        /// </summary>
-        /// <param name="reader"></param>
-        /// <param name="isString">True if the value is a string in the strings list</param>
-        /// <returns></returns>
-        private static byte[] ReadValue(BinaryReader reader, bool isString)
-        {
-            var value = reader.ReadBytes(sizeof(int));
-            if (isString == false)
-            {
-                int i;
-                for (i = 0; i < value.Length; i++)
-                    if (value[i] == 0) break;
-                Array.Resize<byte>(ref value, i);
-            }
-            return value;
-        }
 
         #endregion
         
@@ -378,7 +360,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// any further initialisation steps that require other items in
         /// the data set can be completed.
         /// </summary>
-        internal void Init()
+        internal virtual void Init()
         {
             if (IsComplete && _characters == null)
                 _characters = GetCharacters();

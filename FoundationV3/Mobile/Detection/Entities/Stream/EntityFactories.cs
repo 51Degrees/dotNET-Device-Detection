@@ -21,22 +21,18 @@
 
 using FiftyOne.Foundation.Mobile.Detection.Factories;
 using FiftyOne.Foundation.Mobile.Detection.Readers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 {
     /// <summary>
     /// Factory used to create stream <see cref="Entities.Node"/> entities.
     /// </summary>
-    internal class NodeStreamFactory : NodeFactory
+    internal abstract class NodeStreamFactory : NodeFactory
     {
         /// <summary>
         /// Pool for the corresponding data set used to get readers.
         /// </summary>
-        private readonly Pool _pool;
+        protected readonly Pool _pool;
 
         /// <summary>
         /// Constructs a new instance of <see cref="NodeStreamFactory"/>.
@@ -46,9 +42,23 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         {
             _pool = pool;
         }
-        
+    }
+
+    /// <summary>
+    /// Factory used to create stream <see cref="Entities.Node"/> entities.
+    /// </summary>
+    internal class NodeStreamFactoryV31 : NodeStreamFactory
+    {
         /// <summary>
-        /// Constructs a new <see cref="Entities.Node"/> entity from the offset provided.
+        /// Constructs a new instance of <see cref="NodeStreamFactoryV31"/>.
+        /// </summary>
+        /// <param name="pool">Pool from the data set to be used when creating new <see cref="Entities.Node"/> entities</param>
+        internal NodeStreamFactoryV31(Pool pool) : base(pool)
+        {
+        }
+
+        /// <summary>
+        /// Constructs a new <see cref="Entities.Stream.NodeV31"/> entity from the offset provided.
         /// </summary>
         /// <param name="dataSet">
         /// The data set the node is contained within
@@ -62,7 +72,40 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <returns>A new <see cref="Entities.Node"/> entity from the data set</returns>
         protected override Entities.Node Construct(Entities.DataSet dataSet, int offset, Reader reader)
         {
-            return new Entities.Stream.Node((DataSet)dataSet, offset, reader);
+            return new Entities.Stream.NodeV31((DataSet)dataSet, offset, reader);
+        }
+    }
+
+    /// <summary>
+    /// Factory used to create stream <see cref="Entities.Node"/> entities.
+    /// </summary>
+    internal class NodeStreamFactoryV32 : NodeStreamFactory
+    {
+        /// <summary>
+        /// Constructs a new instance of <see cref="NodeStreamFactoryV32"/>.
+        /// </summary>
+        /// <param name="pool">Pool from the data set to be used when creating new <see cref="Entities.Node"/> entities</param>
+        internal NodeStreamFactoryV32(Pool pool)
+            : base(pool)
+        {
+        }
+
+        /// <summary>
+        /// Constructs a new <see cref="Entities.Stream.NodeV32"/> entity from the offset provided.
+        /// </summary>
+        /// <param name="dataSet">
+        /// The data set the node is contained within
+        /// </param>
+        /// <param name="offset">
+        /// The offset in the data structure to the node
+        /// </param>
+        /// <param name="reader">
+        /// Reader connected to the source data structure and positioned to start reading
+        /// </param>
+        /// <returns>A new <see cref="Entities.Node"/> entity from the data set</returns>
+        protected override Entities.Node Construct(Entities.DataSet dataSet, int offset, Reader reader)
+        {
+            return new Entities.Stream.NodeV32((DataSet)dataSet, offset, reader);
         }
     }
 

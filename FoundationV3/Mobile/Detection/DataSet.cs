@@ -262,6 +262,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         public Version Version { get; internal set; }
 
         /// <summary>
+        /// The version of the data set as an enum.
+        /// </summary>
+        public BinaryConstants.FormatVersions VersionEnum { get; internal set; }
+
+        /// <summary>
         /// The maximum length of a user agent string.
         /// </summary>
         public short MaxUserAgentLength { get; internal set; }
@@ -332,7 +337,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// be returned during a closest match.
         /// </summary>
         internal int MaxSignaturesClosest { get; set; }
-        
+
         /// <summary>
         /// Set when the disposed method is called indicating the data
         /// set is no longer valid and can't be used.
@@ -345,6 +350,30 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             }
         }
         private bool _disposed = false;
+
+        /// <summary>
+        /// The largest rank value that can be returned.
+        /// </summary>
+        public int MaximumRank
+        {
+            get
+            {
+                if (_maximumRank == 0 &&
+                    RankedSignatureIndexes != null)
+                {
+                    lock(this)
+                    {
+                        if (_maximumRank == 0 &&
+                            RankedSignatureIndexes != null)
+                        {
+                            _maximumRank = RankedSignatureIndexes.Count;
+                        }
+                    }
+                }
+                return _maximumRank;
+            }
+        }
+        internal int _maximumRank = 0;
 
         /// <summary>
         /// The hardware component.
@@ -571,11 +600,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// Used by the node ranked signature indexes lists to identify
         /// the corresponding signature.
         /// </summary>
-        public IReadonlyList<RankedSignatureIndex> RankedSignatureIndexes
+        internal IFixedList<Integer> RankedSignatureIndexes
         {
             get { return _rankedSignatureIndexes; }
         }
-        internal IReadonlyList<RankedSignatureIndex> _rankedSignatureIndexes;
+        internal IFixedList<Integer> _rankedSignatureIndexes;
 
         /// <summary>
         /// List of profile offsets the data set contains.
@@ -585,6 +614,24 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             get { return _profileOffsets; }
         }
         internal IReadonlyList<ProfileOffset> _profileOffsets;
+
+        /// <summary>
+        /// List of integers that represent ranked signature indexes.
+        /// </summary>
+        internal IFixedList<Integer> NodeRankedSignatureIndexes
+        {
+            get { return _nodeRankedSignatureIndexes; }
+        }
+        internal IFixedList<Integer> _nodeRankedSignatureIndexes;
+
+        /// <summary>
+        /// List of integers that represent signature node offsets.
+        /// </summary>
+        internal IFixedList<Integer> SignatureNodeOffsets
+        {
+            get { return _signatureNodeOffsets; }
+        }
+        internal IFixedList<Integer> _signatureNodeOffsets;
 
         #endregion
 
@@ -651,8 +698,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             foreach (var entity in Nodes)
                 entity.Init();
             foreach (var entity in Signatures)
-                entity.Init();
-            foreach (var entity in RankedSignatureIndexes)
                 entity.Init();
             
             // We no longer need the strings data structure as all dependent
@@ -754,5 +799,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
         
         #endregion
+
+        
     }
 }

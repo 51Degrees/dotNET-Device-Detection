@@ -24,9 +24,11 @@ using FiftyOne.Foundation.Mobile.Detection.Entities;
 using FiftyOne.Foundation.Mobile.Detection.Factories;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FiftyOne.Foundation.MemoryTest
@@ -44,6 +46,38 @@ namespace FiftyOne.Foundation.MemoryTest
         /// <param name="args"></param>
         static void Main(string[] args)
         {
+            Test(args.Length > 0 ? args[0] : "../../data/51Degrees-LiteV3.2.dat",
+                args.Length > 1 ? args[1] : "../../data/20000 User Agents.csv",
+                MemoryFactory.Create,
+                "Memory");
+            Test(args.Length > 0 ? args[0] : "../../data/51Degrees-LiteV3.2.dat",
+                args.Length > 1 ? args[1] : "../../data/20000 User Agents.csv",
+                StreamFactory.Create,
+                "Stream");
+            Test(args.Length > 0 ? args[0] : "../../data/51Degrees-LiteV3.1.dat",
+                args.Length > 1 ? args[1] : "../../data/20000 User Agents.csv",
+                MemoryFactory.Create,
+                "Memory");
+            Test(args.Length > 0 ? args[0] : "../../data/51Degrees-LiteV3.1.dat",
+                args.Length > 1 ? args[1] : "../../data/20000 User Agents.csv",
+                StreamFactory.Create,
+                "Stream"); 
+            //Test(args.Length > 0 ? args[0] : "../../data/51Degrees-EnterpriseV3.2.dat",
+            //    args.Length > 1 ? args[1] : "../../data/20000 User Agents.csv",
+            //    MemoryFactory.Create,
+            //    "Memory");
+            //Test(args.Length > 0 ? args[0] : "../../data/51Degrees-EnterpriseV3.2.dat",
+            //    args.Length > 1 ? args[1] : "../../data/20000 User Agents.csv",
+            //    StreamFactory.Create,
+            //    "Stream");
+            //Test(args.Length > 0 ? args[0] : "../../data/51Degrees-EnterpriseV3.1.dat",
+            //    args.Length > 1 ? args[1] : "../../data/20000 User Agents.csv",
+            //    MemoryFactory.Create,
+            //    "Memory");
+            //Test(args.Length > 0 ? args[0] : "../../data/51Degrees-EnterpriseV3.1.dat",
+            //    args.Length > 1 ? args[1] : "../../data/20000 User Agents.csv",
+            //    StreamFactory.Create,
+            //    "Stream");
             Test(args.Length > 0 ? args[0] : "../../data/51Degrees-Lite.dat",
                 args.Length > 1 ? args[1] : "../../data/20000 User Agents.csv",
                 StreamFactory.Create,
@@ -66,58 +100,55 @@ namespace FiftyOne.Foundation.MemoryTest
 
             Console.WriteLine(new String('*', 80));
 
-            using (var reader = new FileInfo(userAgentsFile).OpenText())
+            startTime = DateTime.UtcNow;
+
+            // Create the dataset and output the creation time and method.
+            using (var provider = TrieFactory.Create(dataFile))
             {
-                startTime = DateTime.UtcNow;
+                Console.WriteLine(
+                    "Took {0:0} ms to create data set with method '{1}'",
+                    (DateTime.UtcNow - startTime).TotalMilliseconds,
+                    test);
 
-                // Create the dataset and output the creation time and method.
-                using (var provider = TrieFactory.Create(dataFile))
-                {
-                    Console.WriteLine(
-                        "Took {0:0} ms to create data set with method '{1}'",
-                        (DateTime.UtcNow - startTime).TotalMilliseconds,
-                        test);
+                long hashCode = 0;
+                long memory = 0;
+                var memorySamples = 0;
 
-                    long hashCode = 0;
-                    long memory = 0;
-                    var memorySamples = 0;
+                // Detect each line in the file.
+                Parallel.ForEach(File.ReadLines(userAgentsFile),
+#if DEBUG
+                    new ParallelOptions() { MaxDegreeOfParallelism = 1 }, 
+#endif
+                    line => {
+                    // Get the device and one property value.
+                    var deviceIndex = provider.GetDeviceIndex(line.Trim());
+                    var value = provider.GetPropertyValue(deviceIndex, "IsMobile");
+                    Interlocked.Add(ref hashCode, value.GetHashCode());
 
-                    // Detect each line in the file.
-                    var line = reader.ReadLine();
-                    while (line != null)
+                    // Update the counters.
+                    Interlocked.Increment(ref counter);
+
+                    // Record memory usage every 1000 detections.
+                    if (counter % 1000 == 0)
                     {
-                        // Get the device and one property value.
-                        var deviceIndex = provider.GetDeviceIndex(line.Trim());
-                        var value = provider.GetPropertyValue(deviceIndex, "IsMobile");
-                        hashCode += value.GetHashCode();
-
-                        // Update the counters.
-                        counter++;
-
-                        // Record memory usage every 1000 detections.
-                        if (counter % 1000 == 0)
-                        {
-                            memorySamples++;
-                            memory += GC.GetTotalMemory(false);
-                        }
-
-                        line = reader.ReadLine();
+                        Interlocked.Increment(ref memorySamples);
+                        Interlocked.Add(ref memory, GC.GetTotalMemory(false));
                     }
+                });
 
-                    // Output headline results.
-                    Console.WriteLine();
-                    var completeTime = (DateTime.UtcNow - startTime);
-                    Console.WriteLine("Total of '{0}' detections in '{1:0.00} seconds",
-                        counter,
-                        completeTime.TotalSeconds);
-                    Console.WriteLine("Average detection time '{0:0.00}' ms",
-                        completeTime.TotalMilliseconds / counter);
+                // Output headline results.
+                Console.WriteLine();
+                var completeTime = (DateTime.UtcNow - startTime);
+                Console.WriteLine("Total of '{0}' detections in '{1:0.00} seconds",
+                    counter,
+                    completeTime.TotalSeconds);
+                Console.WriteLine("Average detection time '{0:0.00}' ms",
+                    completeTime.TotalMilliseconds / counter);
 
-                    // Average memory used.
-                    Console.WriteLine();
-                    Console.WriteLine("Average memory used '{0}' MBs",
-                        ((memory / memorySamples) - startMemory) / (1024 * 1024));
-                }
+                // Average memory used.
+                Console.WriteLine();
+                Console.WriteLine("Average memory used '{0}' MBs",
+                    ((memory / memorySamples) - startMemory) / (1024 * 1024));
             }
         }
 
@@ -144,100 +175,107 @@ namespace FiftyOne.Foundation.MemoryTest
 
             Console.WriteLine(new String('*', 80));
 
-            using (var reader = new FileInfo(userAgentsFile).OpenText())
+            startTime = DateTime.UtcNow;
+
+            // Create the dataset and output the creation time and method.
+            using (var dataSet = factory(dataFile))
             {
-                startTime = DateTime.UtcNow;
+                Console.WriteLine(
+                    "Took {0:0} ms to create data set with method '{1}'",
+                    (DateTime.UtcNow - startTime).TotalMilliseconds,
+                    test);
 
-                // Create the dataset and output the creation time and method.
-                using (var dataSet = factory(dataFile))
+                // Get ready to perform detections on the user agents file.
+                var provider = new Provider(dataSet, 1000);
+                long profiles = 0;
+                long memory = 0;
+                var memorySamples = 0;
+                long hashCode = 0;
+                long time = 0;
+
+                // Detect each line in the file.
+                Parallel.ForEach(File.ReadLines(userAgentsFile),
+#if DEBUG
+                    new ParallelOptions() { MaxDegreeOfParallelism = 1 }, 
+#endif
+                    line =>
                 {
-                    Console.WriteLine(
-                        "Took {0:0} ms to create data set with method '{1}'",
-                        (DateTime.UtcNow - startTime).TotalMilliseconds,
-                        test);
+                    var loopHashCode = 0;
+                    var timer = new Stopwatch();
+                    timer.Start();
+                    var match = provider.Match(line.Trim());
 
-                    // Get ready to perform detections on the user agents file.
-                    var provider = new Provider(dataSet, 1000);
-                    startTime = DateTime.UtcNow;
-                    var line = reader.ReadLine();
-                    long profiles = 0;
-                    long memory = 0;
-                    var memorySamples = 0;
-                    var match = provider.CreateMatch();
-                    long hashCode = 0;
-
-                    // Detect each line in the file.
-                    while (line != null)
+                    // Get all the values using their hashcodes to change the
+                    // running total of all hashcodes.
+                    var profileCount = match.Profiles.SelectMany(i => i.Values).Count();
+                    foreach (var property in dataSet.Properties)
                     {
-                        provider.Match(line.Trim(), match);
-
-                        // Get all the values using their hashcodes to change the
-                        // running total of all hashcodes.
-                        profiles += match.Profiles.SelectMany(i => i.Values).Count();
-                        foreach (var property in dataSet.Properties)
+                        var value = match[property.Name];
+                        if (value != null)
                         {
-                            var value = match[property.Name];
-                            if (value != null)
-                            {
-                                hashCode += value.ToString().GetHashCode();
-                            }
+                            loopHashCode += value.ToString().GetHashCode();
                         }
+                    }
+                    timer.Stop();
 
-                        // Update the counters.
-                        counter++;
+                    Interlocked.Add(ref time, timer.ElapsedTicks);
+                    Interlocked.Add(ref profiles, profileCount);
+                    Interlocked.Add(ref hashCode, loopHashCode);
+
+                    // Update the counters.
+                    Interlocked.Increment(ref counter);
+                    lock (methods)
+                    {
                         methods[match.Method]++;
-
-                        // Record memory usage every 1000 detections.
-                        if (counter % 1000 == 0)
-                        {
-                            memorySamples++;
-                            memory += GC.GetTotalMemory(false);
-                        }
-
-                        // Read the next user-agent if present.
-                        line = reader.ReadLine();
                     }
 
-                    // Output headline results.
-                    Console.WriteLine();
-                    var completeTime = (DateTime.UtcNow - startTime);
-                    Console.WriteLine("Total of '{0}' detections in '{1:0.00} seconds", 
-                        counter, 
-                        completeTime.TotalSeconds);
-                    Console.WriteLine("Average detection time '{0:0.00}' ms", 
-                        completeTime.TotalMilliseconds / counter);
-
-                    // Average memory used.
-                    Console.WriteLine();
-                    Console.WriteLine("Average memory used '{0}' MBs",
-                        ((memory / memorySamples) - startMemory) / (1024 * 1024));
-
-                    // Output the different methods and how often each
-                    // was used for the results.
-                    Console.WriteLine();
-                    foreach(var method in methods) 
+                    // Record memory usage every 1000 detections.
+                    if (counter % 5000 == 0)
                     {
-                        Console.WriteLine("Method '{0}' used '{1:P2}' of detections", 
-                            method.Key,
-                            (double)method.Value / (double)counter);
+                        Interlocked.Increment(ref memorySamples);
+                        Interlocked.Add(ref memory, GC.GetTotalMemory(false));
                     }
+                });
 
-                    // Output the totals for profiles and hashcodes. Used to reconcile
-                    // results between the different factories.
-                    Console.WriteLine();
-                    Console.WriteLine("Total '{0}' profiles", profiles);
-                    Console.WriteLine("Hashcode '{0}' for all detections", hashCode); 
+                // Output headline results.
+                Console.WriteLine();
+                var completeTime = new TimeSpan(time);
+                Console.WriteLine("Total of '{0}' detections in '{1:0.00} seconds", 
+                    counter, 
+                    completeTime.TotalSeconds);
+                Console.WriteLine("Average detection time '{0:0.00}' ms",
+                    completeTime.TotalMilliseconds / counter);
 
-                    // Output the cache stats.
-                    Console.WriteLine();
-                    Console.WriteLine("Signature switches '{0}', misses '{1:P2}'", dataSet.SignatureCacheSwitches, dataSet.PercentageSignatureCacheMisses);
-                    Console.WriteLine("Nodes switches '{0}', misses '{1:P2}'", dataSet.NodeCacheSwitches, dataSet.PercentageNodeCacheMisses);
-                    Console.WriteLine("Values switches '{0}', misses '{1:P2}'", dataSet.ValuesCacheSwitches, dataSet.PercentageValuesCacheMisses);
-                    Console.WriteLine("Ranked signatures switches '{0}', misses '{1:P2}'", dataSet.RankedSignatureCacheSwitches, dataSet.PercentageRankedSignatureCacheMisses);
-                    Console.WriteLine("Profiles switches '{0}', misses '{1:P2}'", dataSet.ProfilesCacheSwitches, dataSet.PercentageProfilesCacheMisses);
-                    Console.WriteLine("Strings switches '{0}', misses '{1:P2}'", dataSet.StringsCacheSwitches, dataSet.PercentageStringsCacheMisses);
-                    Console.WriteLine("UserAgent switches '{0}', misses '{1:P2}'", provider.CacheSwitches, provider.PercentageCacheMisses);
+                // Average memory used.
+                Console.WriteLine();
+                Console.WriteLine("Average memory used '{0}' MBs",
+                    ((memory / memorySamples) - startMemory) / (1024 * 1024));
+
+                // Output the different methods and how often each
+                // was used for the results.
+                Console.WriteLine();
+                foreach(var method in methods) 
+                {
+                    Console.WriteLine("Method '{0}' used '{1:P2}' of detections", 
+                        method.Key,
+                        (double)method.Value / (double)counter);
                 }
+
+                // Output the totals for profiles and hashcodes. Used to reconcile
+                // results between the different factories.
+                Console.WriteLine();
+                Console.WriteLine("Total '{0}' profiles", profiles);
+                Console.WriteLine("Hashcode '{0}' for all detections", hashCode); 
+
+                // Output the cache stats.
+                Console.WriteLine();
+                Console.WriteLine("Signature switches '{0}', misses '{1:P2}'", dataSet.SignatureCacheSwitches, dataSet.PercentageSignatureCacheMisses);
+                Console.WriteLine("Nodes switches '{0}', misses '{1:P2}'", dataSet.NodeCacheSwitches, dataSet.PercentageNodeCacheMisses);
+                Console.WriteLine("Values switches '{0}', misses '{1:P2}'", dataSet.ValuesCacheSwitches, dataSet.PercentageValuesCacheMisses);
+                Console.WriteLine("Ranked signatures switches '{0}', misses '{1:P2}'", dataSet.RankedSignatureCacheSwitches, dataSet.PercentageRankedSignatureCacheMisses);
+                Console.WriteLine("Profiles switches '{0}', misses '{1:P2}'", dataSet.ProfilesCacheSwitches, dataSet.PercentageProfilesCacheMisses);
+                Console.WriteLine("Strings switches '{0}', misses '{1:P2}'", dataSet.StringsCacheSwitches, dataSet.PercentageStringsCacheMisses);
+                Console.WriteLine("UserAgent switches '{0}', misses '{1:P2}'", provider.CacheSwitches, provider.PercentageCacheMisses);
             }
 
             // Try and reclaim memory no longer used.

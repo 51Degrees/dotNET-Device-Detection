@@ -139,6 +139,59 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 
         #endregion
 
+        #region Internal Methods
+
+        /// <summary>
+        /// Accessor which also takes an open reader to avoid having to
+        /// move the file pointer too much from the previous element.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        private T this[int key, Reader reader]
+        {
+            get
+            {
+                T item;
+                // No need to lock the dictionaries as they support concurrency.
+                if (_cache._itemsActive.TryGetValue(key, out item) == false)
+                {
+                    item = CreateEntity(key, reader);
+                    _cache._itemsActive[key] = item;
+                    _cache.Misses++;
+                }
+                _cache.AddRecent(item);
+                _cache.Requests++;
+                return item;
+            }
+        }
+
+        /// <summary>
+        /// Returns each of the elements between the first key and last key
+        /// using the same reader. This improves performance as the reader
+        /// does not have to be created and released for each element.
+        /// </summary>
+        /// <param name="firstKey"></param>
+        /// <param name="lastKey"></param>
+        /// <returns></returns>
+        internal IEnumerator<T> GetEnumerator(int firstKey, int lastKey)
+        {
+            var reader = _dataSet.Pool.GetReader();
+            try
+            {
+                for (int key = firstKey; key <= lastKey; key++)
+                {
+                    yield return this[key, reader];
+                }
+            }
+            finally
+            {
+                _dataSet.Pool.Release(reader);
+            }
+        }
+
+        #endregion
+
         #region Public Methods
 
         /// <summary>
@@ -165,7 +218,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
                 return item;
             }
         }
-        
+       
         #endregion
     }
 }

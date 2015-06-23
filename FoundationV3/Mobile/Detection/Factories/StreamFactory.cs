@@ -122,9 +122,28 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
                 dataSet._properties = properties;
                 dataSet._values = new FixedList<Value>(dataSet, reader, new ValueFactory(), Constants.ValuesCacheSize);
                 dataSet.Profiles = new VariableList<Entities.Profile>(dataSet, reader, new ProfileStreamFactory(dataSet.Pool), Constants.ProfilesCacheSize);
-                dataSet._signatures = new FixedList<Signature>(dataSet, reader, new SignatureFactory(dataSet), Constants.SignaturesCacheSize);
-                dataSet._rankedSignatureIndexes = new FixedList<RankedSignatureIndex>(dataSet, reader, new RankedSignatureIndexFactory(), Constants.RankedSignaturesCacheSize);
-                dataSet.Nodes = new VariableList<Entities.Node>(dataSet, reader, new NodeStreamFactory(dataSet.Pool), Constants.NodesCacheSize);
+                switch (dataSet.VersionEnum)
+                {
+                    case BinaryConstants.FormatVersions.PatternV31:
+                        dataSet._signatures = new FixedList<Signature>(dataSet, reader, new SignatureFactoryV31(dataSet), Constants.SignaturesCacheSize);
+                        break;
+                    case BinaryConstants.FormatVersions.PatternV32:
+                        dataSet._signatures = new FixedList<Signature>(dataSet, reader, new SignatureFactoryV32(dataSet), Constants.SignaturesCacheSize);
+                        dataSet._signatureNodeOffsets = new FixedList<Integer>(dataSet, reader, new IntegerFactory(), Constants.SignatureNodeOffsetsCacheSize);
+                        dataSet._nodeRankedSignatureIndexes = new FixedList<Integer>(dataSet, reader, new IntegerFactory(), Constants.NodeRankedSignatureIndexCacheSize);
+                        break;
+                }
+                dataSet._rankedSignatureIndexes = new FixedList<Integer>(
+                    dataSet, reader, new IntegerFactory(), Constants.RankedSignaturesCacheSize);
+                switch (dataSet.VersionEnum)
+                {
+                    case BinaryConstants.FormatVersions.PatternV31:
+                        dataSet.Nodes = new VariableList<Entities.Node>(dataSet, reader, new NodeStreamFactoryV31(dataSet.Pool), Constants.NodesCacheSize);
+                        break;
+                    case BinaryConstants.FormatVersions.PatternV32:
+                        dataSet.Nodes = new VariableList<Entities.Node>(dataSet, reader, new NodeStreamFactoryV32(dataSet.Pool), Constants.NodesCacheSize);
+                        break;
+                }
                 var rootNodes = new MemoryFixedList<Entities.Node>(dataSet, reader, new RootNodeFactory());
                 dataSet.RootNodes = rootNodes;
                 var profileOffsets = new MemoryFixedList<ProfileOffset>(dataSet, reader, new ProfileOffsetFactory());

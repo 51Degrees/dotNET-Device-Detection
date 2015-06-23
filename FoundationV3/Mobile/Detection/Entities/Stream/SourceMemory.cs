@@ -19,54 +19,48 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 
-namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
+namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 {
     /// <summary>
-    /// All data is loaded into memory when the entity is constructed.
+    /// Encapsulates a byte array containing the uncompressed
+    /// data structures used by the data set.
     /// </summary>
-    internal abstract class Node : Entities.Node
+    internal class SourceMemory : SourceBase
     {
+        #region Fields
+
+        /// <summary>
+        /// The buffer containing the source data.
+        /// </summary>
+        private readonly byte[] _buffer;
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
-        /// Constructs a new instance of <see cref="Node"/>
+        /// Creates the source from the byte array provided.
         /// </summary>
-        /// <param name="dataSet">
-        /// The data set the node is contained within
-        /// </param>
-        /// <param name="offset">
-        /// The offset in the data structure to the node
-        /// </param>
-        /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
-        /// </param>
-        internal Node(
-            DataSet dataSet,
-            int offset,
-            BinaryReader reader)
-            : base(dataSet, offset, reader)
+        /// <param name="buffer">Byte array source of the data</param>
+        internal SourceMemory(byte[] buffer)
         {
-            _numericChildren = ReadNodeNumericIndexes(dataSet, reader, _numericChildrenCount);
+            _buffer = buffer;
         }
 
-        #endregion  
-        
-        #region Overrides
+        #endregion
+
+        #region Methods
 
         /// <summary>
-        /// An array of all the numeric children.
+        /// Creates a new stream from the data source.
         /// </summary>
-        protected internal override NodeNumericIndex[] NumericChildren
+        /// <returns>A freshly opened stream to the data source</returns>
+        internal override System.IO.Stream CreateStream()
         {
-            get { return _numericChildren; }
+            return new MemoryStream(_buffer);
         }
-        private NodeNumericIndex[] _numericChildren;
 
         #endregion
     }

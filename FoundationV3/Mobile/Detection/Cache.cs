@@ -140,25 +140,27 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         /// <summary>
         /// Locks the cache before removing old items from the cache.
-        /// Call by the timer thread at the intervals requested by the
-        /// related list or dictionary.
+        /// Call when the cache becomes full and needs to be switched.
         /// </summary>
-        /// <param name="state">Reference to the cache</param>
+        /// <param name="state">Reference to the cache being serviced.</param>
         private static void ServiceCache(object state)
         {
-            var cache = (Cache<K,V>)state;
+            lock (state)
+            {
+                var cache = (Cache<K, V>)state;
 
-            // Create a temporary copy of the new active list.
-            var temp = cache._itemsInactive;
+                // Create a temporary copy of the new active list.
+                var temp = cache._itemsInactive;
 
-            // Clear the inactive list.
-            cache._itemsInactive.Clear();
+                // Clear the inactive list.
+                cache._itemsInactive.Clear();
 
-            // Switch over the cached items dictionaries.
-            cache._itemsActive = temp;
+                // Switch over the cached items dictionaries.
+                cache._itemsActive = temp;
 
-            // Increase the switch count for the cache.
-            cache.Switches++;
+                // Increase the switch count for the cache.
+                cache.Switches++;
+            }
         }
 
         #endregion

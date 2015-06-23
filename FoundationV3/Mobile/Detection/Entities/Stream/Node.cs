@@ -33,19 +33,19 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
     /// into memory when the entity is constructed, they're only loaded from the
     /// data source when requested.
     /// </summary>
-    internal class Node : Entities.Node
+    internal abstract class Node : Entities.Node
     {
         #region Fields
 
         /// <summary>
         /// The position in the data set where the NumericChildren start.
         /// </summary>
-        private readonly long _position;
+        protected readonly long _position;
 
         /// <summary>
         /// Pool used to load NumericChildren and RankedSignatureIndexes.
         /// </summary>
-        private readonly Pool _pool;
+        protected readonly Pool _pool;
 
         #endregion
 
@@ -96,10 +96,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
                                 reader.BaseStream.Position = _position;
                                 _numericChildren = ReadNodeNumericIndexes(DataSet, reader, _numericChildrenCount);
                             }
-                            catch (Exception ex)
-                            {
-                                throw new MobileException("Cannot obtain numeric Children",ex);
-                            }
                             finally
                             {
                                 _pool.Release(reader);
@@ -111,42 +107,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
             }
         }
         private NodeNumericIndex[] _numericChildren;
-
-        /// <summary>
-        /// A list of all the signature indexes that relate to this node.
-        /// </summary>
-        internal override int[] RankedSignatureIndexes
-        {
-            get
-            {
-                if (_rankedSignatureIndexes == null)
-                {
-                    lock(this)
-                    {
-                        if (_rankedSignatureIndexes == null)
-                        {
-                            var reader = _pool.GetReader();
-                            try
-                            {
-                                reader.BaseStream.Position = _position + ((sizeof(short) + sizeof(int)) * _numericChildrenCount);
-                                _rankedSignatureIndexes = BaseEntity.ReadIntegerArray(reader, _rankedSignatureCount);
-                            }
-                            catch (Exception ex)
-                            {
-                                throw new MobileException("Cannot to obtain _rankedSignatureIndexes", ex);
-                            }
-                            finally
-                            {
-                                _pool.Release(reader);
-                            }
-                        }
-                    }
-                }
-                return _rankedSignatureIndexes;
-            }
-        }
-        private int[] _rankedSignatureIndexes;
-
+        
         #endregion
     }
 }

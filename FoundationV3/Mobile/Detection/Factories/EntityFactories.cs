@@ -71,28 +71,28 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         }
     }
 
-    internal class RankedSignatureIndexFactory : BaseEntityFactory<RankedSignatureIndex>
+    internal class IntegerFactory : BaseEntityFactory<Integer>
     {
         /// <summary>
-        /// Creates a new instance of <see cref="RankedSignatureIndex"/>
+        /// Creates a new instance of <see cref="Integer"/>
         /// </summary>
         /// <param name="dataSet">
-        /// The data set whose ranked signature index list the offset is contained within
+        /// The data set whose data structure includes integer values
         /// </param>
         /// <param name="index">
-        /// The index to the start of the signature index within the data structure
+        /// The index to the start of the Integer within the data structure
         /// </param>
         /// <param name="reader">
-        /// Binary reader positioned at the start of the profile offset
+        /// Binary reader positioned at the start of the Integer
         /// </param>
-        /// <returns>A new instance of an profile offset</returns>
-        internal override RankedSignatureIndex Create(DataSet dataSet, int index, Reader reader)
+        /// <returns>A new instance of a Integer</returns>
+        internal override Integer Create(DataSet dataSet, int index, Reader reader)
         {
-            return new RankedSignatureIndex(dataSet, index, reader);
+            return new Integer(dataSet, index, reader);
         }
 
         /// <summary>
-        /// Returns the length of the <see cref="RankedSignatureIndex"/> entity
+        /// Returns the length of the <see cref="Integer"/> entity
         /// </summary>
         /// <returns>Length in bytes of the RankedSignatureIndex</returns>
         internal override int GetLength()
@@ -100,7 +100,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
             return sizeof(Int32);
         }
     }
-
+    
     internal class ProfileOffsetFactory : BaseEntityFactory<ProfileOffset>
     {
         /// <summary>
@@ -219,14 +219,116 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         }
     }
     
-    internal abstract class NodeFactory : BaseEntityFactory<Node>
+    internal static class NodeFactoryShared
     {
         #region Constants
 
         /// <summary>
-        /// The length of a node index.
+        /// The length of a node index in V3.1 format data.
         /// </summary>
-        internal const int NodeIndexLength = sizeof(bool) + sizeof(int) + sizeof(int);
+        internal const int NodeIndexLengthV31 = sizeof(bool) + sizeof(int) + sizeof(int);
+
+        /// <summary>
+        /// The length of a node index in V3.2 format data.
+        /// </summary>
+        internal const int NodeIndexLengthV32 = sizeof(int) + sizeof(int);
+
+        /// <summary>
+        /// Used by the constructor to read the variable length list of child
+        /// node indexes associated with the node in V3.1 format.
+        /// </summary>
+        /// <param name="dataSet">
+        /// The data set the node is contained within
+        /// </param>
+        /// <param name="reader">
+        /// Reader connected to the source data structure and positioned to start reading
+        /// </param>
+        /// <param name="offset">
+        /// The offset in the data structure to the node
+        /// </param>
+        /// <param name="count">
+        /// The number of node indexes that need to be read.
+        /// </param>
+        /// <returns>An array of child node indexes for the node</returns>
+        internal static NodeIndex[] ReadNodeIndexesV31(DataSet dataSet, BinaryReader reader, int offset, int count)
+        {
+            var array = new NodeIndex[count];
+            offset += sizeof(short);
+            for (int i = 0; i < array.Length; i++)
+            {
+                var isString = reader.ReadBoolean();
+                array[i] = new NodeIndex(
+                    dataSet,
+                    offset,
+                    isString,
+                    ReadValue(reader, isString),
+                    reader.ReadInt32());
+                offset += NodeFactoryShared.NodeIndexLengthV31;
+            }
+            return array;
+        }
+
+        /// <summary>
+        /// Used by the constructor to read the variable length list of child
+        /// node indexes associated with the node in V3.1 format.
+        /// </summary>
+        /// <param name="dataSet">
+        /// The data set the node is contained within
+        /// </param>
+        /// <param name="reader">
+        /// Reader connected to the source data structure and positioned to start reading
+        /// </param>
+        /// <param name="offset">
+        /// The offset in the data structure to the node
+        /// </param>
+        /// <param name="count">
+        /// The number of node indexes that need to be read.
+        /// </param>
+        /// <returns>An array of child node indexes for the node</returns>
+        internal static NodeIndex[] ReadNodeIndexesV32(DataSet dataSet, BinaryReader reader, int offset, int count)
+        {
+            var array = new NodeIndex[count];
+            offset += sizeof(short);
+            for (int i = 0; i < array.Length; i++)
+            {
+                var index = reader.ReadInt32();
+                var isString = index < 0;
+                array[i] = new NodeIndex(
+                    dataSet,
+                    offset,
+                    isString,
+                    ReadValue(reader, isString),
+                    Math.Abs(index));
+                offset += NodeFactoryShared.NodeIndexLengthV31;
+            }
+            return array;
+        }
+
+        /// <summary>
+        /// Reads the value and removes any zero characters if it's a string.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="isString">True if the value is a string in the strings list</param>
+        /// <returns></returns>
+        private static byte[] ReadValue(BinaryReader reader, bool isString)
+        {
+            var value = reader.ReadBytes(sizeof(int));
+            if (isString == false)
+            {
+                int i;
+                for (i = 0; i < value.Length; i++)
+                    if (value[i] == 0) break;
+                Array.Resize<byte>(ref value, i);
+            }
+            return value;
+        }
+
+        #endregion
+    }
+
+    internal abstract class NodeFactory : BaseEntityFactory<Node>
+    {
+        #region Constants
 
         /// <summary>
         /// The length of a numeric node index.
@@ -234,10 +336,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         internal const int NodeNumericIndexLength = sizeof(short) + sizeof(int);
 
         /// <summary>
-        /// The minimum length of a node assuming no node indexes or signatures.
+        /// The basic length of a node for all supported versions.
         /// </summary>
-        internal const int MinLength = sizeof(short) + sizeof(short) + sizeof(int) + sizeof(int) +
-                                       sizeof(short) + sizeof(short) + sizeof(int);
+        internal const int BaseLength = sizeof(short) + sizeof(short) + sizeof(int) + sizeof(int) +
+                                       sizeof(short) + sizeof(short);
 
         #endregion
 
@@ -259,19 +361,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         internal override Node Create(DataSet dataSet, int offset, Reader reader)
         {
             return Construct(dataSet, offset, reader);
-        }
-
-        /// <summary>
-        /// Returns the length of the <see cref="Node"/> entity provided.
-        /// </summary>
-        /// <param name="entity">An entity of type Node who length is required</param>
-        /// <returns>The number of bytes used to store the node</returns>
-        internal override int GetLength(Node entity)
-        {
-            return MinLength +
-                (entity.Children.Length * NodeIndexLength) +
-                (entity.NumericChildren.Length * NodeNumericIndexLength) +
-                (entity.RankedSignatureIndexes.Length * sizeof(int));
         }
     }
 
@@ -419,6 +508,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
 
         #endregion
 
+        #region Overridden Methods
+
         /// <summary>
         /// Creates a new instance of <see cref="Value"/>
         /// </summary>
@@ -441,9 +532,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         {
             return RecordLength;
         }
+
+        #endregion
     }
 
-    internal class SignatureFactory : BaseEntityFactory<Signature>
+    internal class SignatureFactoryV31 : BaseEntityFactory<Signature>
     {
         #region Fields
 
@@ -454,13 +547,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of <see cref="SignatureFactory"/>
+        /// Constructs a new instance of <see cref="SignatureFactoryV31"/>
         /// </summary>
         /// <param name="dataSet">The data set the factory will create signatures for</param>
-        internal SignatureFactory(DataSet dataSet)
+        internal SignatureFactoryV31(DataSet dataSet)
         {
             _recordLength =
-                (dataSet.SignatureProfilesCount * sizeof(int)) + 
+                (dataSet.SignatureProfilesCount * sizeof(int)) +
                 (dataSet.SignatureNodesCount * sizeof(int));
         }
 
@@ -469,7 +562,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         #region Overridden Methods
 
         /// <summary>
-        /// Creates a new instance of <see cref="Signature"/>
+        /// Creates a new instance of <see cref="SignatureV31"/>
         /// </summary>
         /// <param name="dataSet">
         /// The data set whose signature list the value is contained within
@@ -483,7 +576,73 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// <returns>A new instance of a <see cref="Signature"/></returns>
         internal override Signature Create(DataSet dataSet, int index, Reader reader)
         {
-            return new Signature(dataSet, index, reader);
+            return new SignatureV31(dataSet, index, reader);
+        }
+
+        /// <summary>
+        /// The length of the signature.
+        /// </summary>
+        /// <returns>Length of the signature in bytes</returns>
+        internal override int GetLength()
+        {
+            return _recordLength;
+        }
+
+        #endregion
+    }
+
+    internal class SignatureFactoryV32 : BaseEntityFactory<Signature>
+    {
+        #region Constants
+
+        /// <summary>
+        /// The length of each signature record in the dataset.
+        /// byte = count of nodes associated with the signature
+        /// int = first index of the node offset in signaturesnodes
+        /// int = rank of the signature
+        /// </summary>
+        private const int NODES_LENGTH = sizeof(byte) + sizeof(int) + sizeof(int);
+
+        #endregion
+
+        #region Fields
+
+        private readonly int _recordLength;
+
+        #endregion
+
+        #region Constructor
+
+        /// <summary>
+        /// Constructs a new instance of <see cref="SignatureFactoryV32"/>
+        /// </summary>
+        internal SignatureFactoryV32(DataSet dataSet)
+        {
+            _recordLength =
+                (dataSet.SignatureProfilesCount * sizeof(int)) +
+                NODES_LENGTH;
+        }
+
+        #endregion
+
+        #region Overridden Methods
+
+        /// <summary>
+        /// Creates a new instance of <see cref="SignatureV32"/>
+        /// </summary>
+        /// <param name="dataSet">
+        /// The data set whose signature list the value is contained within
+        /// </param>
+        /// <param name="index">
+        /// The index of the signature within the values data structure
+        /// </param>
+        /// <param name="reader">
+        /// Binary reader positioned at the start of the signature
+        /// </param>
+        /// <returns>A new instance of a <see cref="Signature"/></returns>
+        internal override Signature Create(DataSet dataSet, int index, Reader reader)
+        {
+            return new SignatureV32(dataSet, index, reader);
         }
 
         /// <summary>
