@@ -28,6 +28,7 @@ using FiftyOne.Foundation.Mobile.Detection.Entities;
 using System.Collections.Generic;
 using FiftyOne.Foundation.Mobile.Detection.Factories;
 using System.Collections.Specialized;
+using System.Reflection;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
@@ -291,6 +292,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 // Does a binary file exist?
                 if (Manager.BinaryFilePath != null)
                 {
+                    // Log API version for diagnosis.
+                    var assembly = Assembly.GetExecutingAssembly().GetName();
+                    EventLog.Info(String.Format(
+                        "Creating data set from '{0}' version '{1}'",
+                        assembly.Name,
+                        assembly.Version));
+                    
                     if (File.Exists(Manager.BinaryFilePath))
                     {
                         if (Manager.MemoryMode)
@@ -305,7 +313,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
                             provider = new WebProvider(GetTempFileDataSet());
                         }
                         EventLog.Info(String.Format(
-                            "Created provider from binary data file '{0}'.",
+                            "Created provider from version '{0}' format '{1}' data published on '{2:u}' in master file '{3}'.",
+                            provider.DataSet.Version,
+                            provider.DataSet.Name,
+                            provider.DataSet.Published,
                             Manager.BinaryFilePath));
                     }
                     else
