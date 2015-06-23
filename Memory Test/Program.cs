@@ -91,26 +91,23 @@ namespace FiftyOne.Foundation.MemoryTest
                 var memorySamples = 0;
 
                 // Detect each line in the file.
-                Parallel.ForEach(File.ReadLines(userAgentsFile),
-#if DEBUG
-                    new ParallelOptions() { MaxDegreeOfParallelism = 1 }, 
-#endif
-                    line => {
+                foreach(var line in File.ReadLines(userAgentsFile))
+                {
                     // Get the device and one property value.
                     var deviceIndex = provider.GetDeviceIndex(line.Trim());
                     var value = provider.GetPropertyValue(deviceIndex, "IsMobile");
-                    Interlocked.Add(ref hashCode, value.GetHashCode());
+                    hashCode += value.GetHashCode();
 
                     // Update the counters.
-                    Interlocked.Increment(ref counter);
+                    counter++;
 
                     // Record memory usage every 1000 detections.
                     if (counter % 1000 == 0)
                     {
-                        Interlocked.Increment(ref memorySamples);
-                        Interlocked.Add(ref memory, GC.GetTotalMemory(false));
+                        memorySamples++;
+                        memory += GC.GetTotalMemory(false);
                     }
-                });
+                }
 
                 // Output headline results.
                 Console.WriteLine();
@@ -170,52 +167,38 @@ namespace FiftyOne.Foundation.MemoryTest
                 long time = 0;
 
                 // Detect each line in the file.
-                Parallel.ForEach(File.ReadLines(userAgentsFile),
-#if DEBUG
-                    new ParallelOptions() { MaxDegreeOfParallelism = 1 }, 
-#endif
-                    line =>
+                startTime = DateTime.UtcNow;
+                foreach(var line in File.ReadLines(userAgentsFile))
                 {
-                    var loopHashCode = 0;
-                    var timer = new Stopwatch();
-                    timer.Start();
                     var match = provider.Match(line.Trim());
 
                     // Get all the values using their hashcodes to change the
                     // running total of all hashcodes.
-                    var profileCount = match.Profiles.SelectMany(i => i.Values).Count();
+                    profiles += match.Profiles.SelectMany(i => i.Values).Count();
                     foreach (var property in dataSet.Properties)
                     {
                         var value = match[property.Name];
                         if (value != null)
                         {
-                            loopHashCode += value.ToString().GetHashCode();
+                            hashCode += value.ToString().GetHashCode();
                         }
                     }
-                    timer.Stop();
-
-                    Interlocked.Add(ref time, timer.ElapsedTicks);
-                    Interlocked.Add(ref profiles, profileCount);
-                    Interlocked.Add(ref hashCode, loopHashCode);
 
                     // Update the counters.
-                    Interlocked.Increment(ref counter);
-                    lock (methods)
-                    {
-                        methods[match.Method]++;
-                    }
+                    counter++;
+                    methods[match.Method]++;
 
                     // Record memory usage every 1000 detections.
                     if (counter % 5000 == 0)
                     {
-                        Interlocked.Increment(ref memorySamples);
-                        Interlocked.Add(ref memory, GC.GetTotalMemory(false));
+                        memorySamples++;
+                        memory += GC.GetTotalMemory(false);
                     }
-                });
+                }
 
                 // Output headline results.
                 Console.WriteLine();
-                var completeTime = new TimeSpan(time);
+                var completeTime = DateTime.UtcNow - startTime;
                 Console.WriteLine("Total of '{0}' detections in '{1:0.00} seconds", 
                     counter, 
                     completeTime.TotalSeconds);
