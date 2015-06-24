@@ -227,95 +227,93 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 
         #endregion
 
-        /// <summary>
-        /// Encapsulates a file containing an uncompressed data structure.
-        /// </summary>
-        internal class SourceMemoryMappedFile : SourceFileBase
-        {
-            #region Fields
-
-            /// <summary>
-            /// The memory mapped file to use as the source.
-            /// </summary>
-            private readonly MemoryMappedFile _mapped;
-
-            /// <summary>
-            /// Used to ensure that only one memory mapped source can be 
-            /// created at a time.
-            /// </summary>
-            private static readonly object _createLock = new object();
-
-            #endregion
-
-            #region Constructors
-
-            /// <summary>
-            /// Creates the source from the file provided.
-            /// </summary>
-            /// <param name="fileName">File source of the data</param>
-            internal SourceMemoryMappedFile(string fileName)
-                : base(fileName)
-            {
-                // The mapname must not be the same as the file name.
-                var mapName = String.Format(
-                    "{0}-{1}",
-                    GetType().Name,
-                    _fileInfo.Name);
-
-                // Ensure only one memory mapped file source is created at a time
-                // to ensure that any checks for an existing file can not occur at
-                // the same time.
-                lock (_createLock)
-                {
-                    try
-                    {
-                        // Try opening an existing memory mapped file incase one is
-                        // already available. This will reduce the number of open
-                        // memory mapped files.
-                        _mapped = MemoryMappedFile.OpenExisting(mapName, MemoryMappedFileRights.Read, HandleInheritability.Inheritable);
-                    }
-                    catch (Exception)
-                    {
-                        // An existing memory mapped file could not be used. Use a new 
-                        // one connected to the same underlying file.
-                        _mapped = MemoryMappedFile.CreateFromFile(
-                            _fileInfo.FullName,
-                            FileMode.Open,
-                            mapName,
-                            _fileInfo.Length,
-                            MemoryMappedFileAccess.Read);
-                    }
-                }
-            }
-
-            #endregion
-
-            #region Methods
-
-            /// <summary>
-            /// Creates a new stream from the data source.
-            /// </summary>
-            /// <returns>A freshly opened stream to the data source</returns>
-            internal override System.IO.Stream CreateStream()
-            {
-                return _mapped.CreateViewStream(0, _fileInfo.Length, MemoryMappedFileAccess.Read);
-            }
-
-            /// <summary>
-            /// Closes any file references and then checks
-            /// to delete the file.
-            /// </summary>
-            public override void Dispose()
-            {
-                base.Dispose();
-                _mapped.Dispose();
-                DeleteFile();
-            }
-
-            #endregion
-        }
-
     }
 
+    /// <summary>
+    /// Encapsulates a file containing an uncompressed data structure.
+    /// </summary>
+    internal class SourceMemoryMappedFile : SourceFileBase
+    {
+        #region Fields
 
+        /// <summary>
+        /// The memory mapped file to use as the source.
+        /// </summary>
+        private readonly MemoryMappedFile _mapped;
+
+        /// <summary>
+        /// Used to ensure that only one memory mapped source can be 
+        /// created at a time.
+        /// </summary>
+        private static readonly object _createLock = new object();
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Creates the source from the file provided.
+        /// </summary>
+        /// <param name="fileName">File source of the data</param>
+        internal SourceMemoryMappedFile(string fileName)
+            : base(fileName)
+        {
+            // The mapname must not be the same as the file name.
+            var mapName = String.Format(
+                "{0}-{1}",
+                GetType().Name,
+                _fileInfo.Name);
+
+            // Ensure only one memory mapped file source is created at a time
+            // to ensure that any checks for an existing file can not occur at
+            // the same time.
+            lock (_createLock)
+            {
+                try
+                {
+                    // Try opening an existing memory mapped file incase one is
+                    // already available. This will reduce the number of open
+                    // memory mapped files.
+                    _mapped = MemoryMappedFile.OpenExisting(mapName, MemoryMappedFileRights.Read, HandleInheritability.Inheritable);
+                }
+                catch (Exception)
+                {
+                    // An existing memory mapped file could not be used. Use a new 
+                    // one connected to the same underlying file.
+                    _mapped = MemoryMappedFile.CreateFromFile(
+                        _fileInfo.FullName,
+                        FileMode.Open,
+                        mapName,
+                        _fileInfo.Length,
+                        MemoryMappedFileAccess.Read);
+                }
+            }
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Creates a new stream from the data source.
+        /// </summary>
+        /// <returns>A freshly opened stream to the data source</returns>
+        internal override System.IO.Stream CreateStream()
+        {
+            return _mapped.CreateViewStream(0, _fileInfo.Length, MemoryMappedFileAccess.Read);
+        }
+
+        /// <summary>
+        /// Closes any file references and then checks
+        /// to delete the file.
+        /// </summary>
+        public override void Dispose()
+        {
+            base.Dispose();
+            _mapped.Dispose();
+            DeleteFile();
+        }
+
+        #endregion
+    }
 }
