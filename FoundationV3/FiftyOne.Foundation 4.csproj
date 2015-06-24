@@ -12,10 +12,14 @@
     <AssemblyName>FiftyOne.Foundation</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
     <ApplicationIcon>PDA.ico</ApplicationIcon>
     <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>
@@ -145,10 +149,7 @@
     <Compile Include="Mobile\Detection\Entities\Stream\NodeV32.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\NodeV31.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\Profile.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\SourceFile.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\SourceFileBase.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\SourceMemory.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\SourceBase.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\Source.cs" />
     <Compile Include="Mobile\Detection\Factories\EntityFactories.cs" />
     <Compile Include="Mobile\Detection\Factories\CommonFactory.cs" />
     <Compile Include="Mobile\Detection\IFixedList.cs" />
@@ -166,7 +167,6 @@
     <Compile Include="Mobile\Detection\Entities\Stream\BaseList.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\Cache.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\Pool.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\SourceMemoryMappedFile.cs" />
     <Compile Include="Mobile\Detection\Controller.cs" />
     <Compile Include="Mobile\Detection\Feature\Bandwidth.cs" />
     <Compile Include="Mobile\Detection\Feature\ImageOptimiser.cs" />
