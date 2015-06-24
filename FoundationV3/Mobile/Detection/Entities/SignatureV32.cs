@@ -123,7 +123,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <returns>The number of characters in the signature</returns>
         internal override int GetSignatureLength()
         {
-            var lastNode = DataSet.Nodes[DataSet.SignatureNodeOffsets[NodeCount + FirstNodeOffsetIndex].Value];
+            var lastNode = DataSet.Nodes[DataSet.SignatureNodeOffsets[NodeCount + FirstNodeOffsetIndex - 1].Value];
             return lastNode.Position + lastNode.Length + 1;
         }
 
