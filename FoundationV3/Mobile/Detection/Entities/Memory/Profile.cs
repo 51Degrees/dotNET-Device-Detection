@@ -68,7 +68,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         {
             get { return _valueIndexes; }
         }
-        private int[] _valueIndexes;
+        private readonly int[] _valueIndexes;
 
         /// <summary>
         /// Array of signature indexes associated with the profile.
@@ -77,21 +77,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         {
             get { return _signatureIndexes; }
         }
-        private int[] _signatureIndexes;
-
-        #endregion
-
-        #region Methods
-
-        /// <summary>
-        /// Initialises the data and releases any memory for collection.
-        /// </summary>
-        internal override void Init()
-        {
-            base.Init();
-            _signatureIndexes = null;
-            _valueIndexes = null;
-        }
+        private readonly int[] _signatureIndexes;
 
         #endregion
     }
