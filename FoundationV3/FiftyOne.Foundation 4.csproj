@@ -12,14 +12,10 @@
     <AssemblyName>FiftyOne.Foundation</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SccProjectName>
-    </SccProjectName>
-    <SccLocalPath>
-    </SccLocalPath>
-    <SccAuxPath>
-    </SccAuxPath>
-    <SccProvider>
-    </SccProvider>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
     <ApplicationIcon>PDA.ico</ApplicationIcon>
     <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>
@@ -130,7 +126,10 @@
     <Compile Include="Mobile\Detection\Cache.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Mobile\Detection\Entities\Integer.cs">
+    <Compile Include="Mobile\Detection\Entities\ComponentV31.cs" />
+    <Compile Include="Mobile\Detection\Entities\ComponentV32.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\FixedList.cs" />
+    <Compile Include="Mobile\Detection\Entities\IntegerEntity.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Mobile\Detection\Entities\Memory\EntityFactories.cs" />
@@ -143,6 +142,7 @@
     <Compile Include="Mobile\Detection\Entities\SignatureV31.cs" />
     <Compile Include="Mobile\Detection\Entities\Map.cs" />
     <Compile Include="Mobile\Detection\Entities\NodeNumericIndex.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\CacheList.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\DataSet.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\EntityFactories.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\Node.cs" />
@@ -161,7 +161,7 @@
     <Compile Include="Mobile\Detection\Entities\Stream\ICacheList.cs" />
     <Compile Include="Mobile\Detection\Factories\StreamFactory.cs" />
     <Compile Include="Mobile\Detection\Entities\Memory\MemoryFixedList.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\FixedList.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\FixedCacheList.cs" />
     <Compile Include="Mobile\Detection\Entities\Headers\Header.cs" />
     <Compile Include="Mobile\Detection\Entities\Memory\MemoryBaseList.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\BaseList.cs" />

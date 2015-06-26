@@ -31,6 +31,7 @@ using System.IO.Compression;
 using FiftyOne.Foundation.Mobile.Detection.Factories;
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
@@ -164,42 +165,103 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </returns>
         public Match Match(NameValueCollection headers, Match match)
         {
-            // Get the match for the main user agent.
-            Match(headers["User-Agent"], match);
-
-            // Get the user agent for the device if a secondary header is present.
-            var deviceUserAgent = GetDeviceUserAgent(headers);
-            if (deviceUserAgent != null)
+            // Find the headers that we need a match object for.
+            var headersToMatch = new Dictionary<string, Match>();
+            var headersIterator = headers.AllKeys.Intersect(match.DataSet.HttpHeaders).GetEnumerator();
+            var currentMatch = match;
+            while (headersIterator.MoveNext())
             {
-                var deviceMatch = Match(deviceUserAgent);
-                if (deviceMatch != null)
-                {
-                    // Update the statistics about the matching process.
-                    match._signaturesCompared += deviceMatch._signaturesCompared;
-                    match._signaturesRead += deviceMatch._signaturesRead;
-                    match._stringsRead += deviceMatch._stringsRead;
-                    match._rootNodesEvaluated += deviceMatch._rootNodesEvaluated;
-                    match._nodesEvaluated += deviceMatch._nodesEvaluated;
-                    match._elapsed += deviceMatch._elapsed;
-
-                    // Replace the Hardware and Software profiles with the ones from
-                    // the device match.
-                    for (int i = 0; i < match.Profiles.Length && i < deviceMatch.Profiles.Length; i++)
-                    {
-                        if (match.Profiles[i].Component.ComponentId <= 2 &&
-                            match.Profiles[i].Component.ComponentId == deviceMatch.Profiles[i].Component.ComponentId)
-                        {
-                            // Swap over the profiles if they're the same component.
-                            match.Profiles[i] = deviceMatch.Profiles[i];
-                        }
-                    }
-
-                    // Remove the signature as a single one is not being returned.
-                    match._signature = null;
-                }
+                headersToMatch.Add(headersIterator.Current, currentMatch != null ? currentMatch : CreateMatch());
+                currentMatch = null;
             }
 
+            if (headersToMatch.Count == 0)
+            {
+                // Just in case the list is empty check to add the User-Agent header.
+                headersToMatch.Add("User-Agent", match);
+            }
+
+            // Now process the matches for the headers provided.
+            Parallel.ForEach(headersToMatch, i =>
+            {
+                Match(i.Key, i.Value);
+            });
+
+            // Merge the different matches if more than one present.
+            if (headersToMatch.Count > 1)
+            {
+                foreach(var i in headersToMatch)
+                {
+                    if (i.Value != match)
+                    {
+                        // Update the statistics about the matching process.
+                        match._signaturesCompared += i.Value._signaturesCompared;
+                        match._signaturesRead += i.Value._signaturesRead;
+                        match._stringsRead += i.Value._stringsRead;
+                        match._rootNodesEvaluated += i.Value._rootNodesEvaluated;
+                        match._nodesEvaluated += i.Value._nodesEvaluated;
+                        match._elapsed += i.Value._elapsed;
+
+                        // Find any components that should use this header.
+                        if (SwitchProfiles(match, i))
+                        {
+                            // Remove the signature as a single one is not being returned
+                            // for this match.
+                            match._signature = null;
+                        }
+                    }
+                }
+            }
+            
             return match;
+        }
+
+        /// <summary>
+        /// Switches over profiles if a better header can be used to provide a match result
+        /// for the component. For example; Opera-Mini uses other headers to provide the
+        /// details about the hardware.
+        /// </summary>
+        /// <param name="match"></param>
+        /// <param name="headerMatch"></param>
+        /// <returns>True if one or more switches occured, otherwise false</returns>
+        private bool SwitchProfiles(Match match, KeyValuePair<string, Detection.Match> headerMatch)
+        {
+            var result = false;
+            foreach (var component in DataSet.Components)
+            {
+                result = result | SwitchProfiles(match, headerMatch, component);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Checks the headerMatch to see if it can be used to provide a profile
+        /// for this component. If it can then switch the profile for the component
+        /// in the match instance to the one provided in the headerMatch.
+        /// </summary>
+        /// <param name="match"></param>
+        /// <param name="headerMatch"></param>
+        /// <param name="component"></param>
+        /// <returns></returns>
+        private bool SwitchProfiles(Match match, KeyValuePair<string, Detection.Match> headerMatch, Component component)
+        {
+            foreach (var header in component.HttpHeaders)
+            {
+                if (header.Equals(headerMatch.Key))
+                {
+                    // Switch the profile in the match being returned for the 
+                    // component provided.
+                    for (int p = 0; p < match.Profiles.Length; p++)
+                    {
+                        if (match.Profiles[p].Component.Equals(component))
+                        {
+                            match.Profiles[p] = headerMatch.Value.ComponentProfiles[component.ComponentId];
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
         }
 
         /// <summary>
@@ -330,20 +392,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
 
         #region Private Methods
-
-        /// <summary>
-        /// Used to check other header fields in case a device user agent is being used
-        /// and returns the devices useragent string.
-        /// </summary>
-        /// <param name="headers">Collection of Http headers associated with the request.</param>
-        /// <returns>The useragent string of the device.</returns>
-        private static string GetDeviceUserAgent(NameValueCollection headers)
-        {
-            foreach (string current in Detection.Constants.DeviceUserAgentHeaders)
-                if (headers[current] != null)
-                    return headers[current];
-            return null;
-        }
 
         #endregion
 

@@ -194,3 +194,10 @@ FakesAssemblies/
 
 # Visual Studio 6 workspace options file
 *.opt
+
+# 51Degrees
+*Premium*
+*Enterprise*
+App_Data/Log.txt
+*.lic
+App_Data/Cache*

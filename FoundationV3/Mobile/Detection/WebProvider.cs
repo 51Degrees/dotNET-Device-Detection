@@ -134,7 +134,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 {
                     using (var reader = new BinaryReader(stream))
                     {
-                        using (var dataSet = new DataSet(File.GetLastWriteTimeUtc(fileName)))
+                        using (var dataSet = new DataSet(File.GetLastWriteTimeUtc(fileName), DataSet.Modes.File))
                         {
                             CommonFactory.LoadHeader(dataSet, reader);
                             return dataSet.Published;
@@ -562,9 +562,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 // it is url encoded with pluses instead of spaces. This code transforms the useragent back,
                 // but a new NameValueCollection is needed as the original collection cannot be modified.
                 headers = new NameValueCollection(request.Headers.Count, request.Headers);
-                if (headers[Constants.UserAgentHeader] != null)
+                foreach (var componentHeader in ActiveProvider.DataSet.Components.SelectMany(i => i.HttpHeaders).Distinct())
                 {
-                    headers[Constants.UserAgentHeader] = escapedUA;
+                    if (headers[componentHeader] != null)
+                    {
+                        headers[componentHeader] = escapedUA;
+                        break;
+                    }
                 }
             }
             else

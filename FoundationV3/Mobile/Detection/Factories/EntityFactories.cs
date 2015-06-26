@@ -163,10 +163,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         }
     }
 
-    internal class ComponentFactory : BaseEntityFactory<Component>
+    internal class ComponentFactoryV31 : ComponentFactory
     {
         /// <summary>
-        /// Creates a new instance of <see cref="Component"/>
+        /// Creates a new instance of <see cref="ComponentV31"/>
         /// </summary>
         /// <param name="dataSet">
         /// The data set whose components list the component is contained within
@@ -175,12 +175,34 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// <param name="reader">
         /// Reader connected to the source data structure and positioned to start reading
         /// </param>
-        /// <returns>A new instance of an <see cref="Component"/></returns>
+        /// <returns>A new instance of an <see cref="ComponentV31"/></returns>
         internal override Component Create(DataSet dataSet, int index, Reader reader)
         {
-            return new Component(dataSet, index, reader);
+            return new ComponentV31(dataSet, index, reader);
         }
+    }
 
+    internal class ComponentFactoryV32 : ComponentFactory
+    {
+        /// <summary>
+        /// Creates a new instance of <see cref="ComponentFactoryV32"/>
+        /// </summary>
+        /// <param name="dataSet">
+        /// The data set whose components list the component is contained within
+        /// </param>
+        /// <param name="index">Index of the entity within the list</param>
+        /// <param name="reader">
+        /// Reader connected to the source data structure and positioned to start reading
+        /// </param>
+        /// <returns>A new instance of an <see cref="ComponentFactoryV32"/></returns>
+        internal override Component Create(DataSet dataSet, int index, Reader reader)
+        {
+            return new ComponentV32(dataSet, index, reader);
+        }
+    }
+
+    internal abstract class ComponentFactory : BaseEntityFactory<Component>
+    {
         /// <summary>
         /// Returns the length of the <see cref="Component"/> entity
         /// </summary>
@@ -299,7 +321,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
                     isString,
                     ReadValue(reader, isString),
                     Math.Abs(index));
-                offset += NodeFactoryShared.NodeIndexLengthV31;
+                offset += NodeFactoryShared.NodeIndexLengthV32;
             }
             return array;
         }
@@ -600,8 +622,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// byte = count of nodes associated with the signature
         /// int = first index of the node offset in signaturesnodes
         /// int = rank of the signature
+        /// byte = flags to indicate information about the signature
         /// </summary>
-        private const int NODES_LENGTH = sizeof(byte) + sizeof(int) + sizeof(int);
+        private const int NODES_LENGTH = sizeof(byte) + sizeof(int) + sizeof(int) + sizeof(byte);
 
         #endregion
 

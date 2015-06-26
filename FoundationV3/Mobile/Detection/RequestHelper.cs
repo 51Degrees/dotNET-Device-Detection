@@ -139,6 +139,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     // Record details about the assembly for diagnosis purposes.
                     WriteAssembly(writer);
 
+                    // Record information about the active provider.
+                    WriteProvider(writer, WebProvider.ActiveProvider);
+
                     // Record either the IP address of the client if not local or the IP
                     // address of the machine.
                     if (request.IsLocal == false ||
@@ -252,6 +255,25 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     if (attribute is AssemblyTitleAttribute)
                         writer.WriteElementString("Product", ((AssemblyTitleAttribute) attribute).Title);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Writes information about the data set being used by the provider.
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="provider"></param>
+        private static void WriteProvider(XmlWriter writer, WebProvider provider)
+        {
+            if (provider != null)
+            {
+                writer.WriteStartElement("DataSet");
+                if (provider.DataSet.Export != null)
+                {
+                    writer.WriteElementString("Export", provider.DataSet.Export.ToString());
+                }
+                writer.WriteElementString("Tag", provider.DataSet.Tag.ToString());
+                writer.WriteEndElement();
             }
         }
 
