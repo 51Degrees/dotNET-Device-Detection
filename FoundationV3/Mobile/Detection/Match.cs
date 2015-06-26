@@ -693,12 +693,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
             _signaturesCompared = 0;
             _signaturesRead = 0;
             _stringsRead = 0;
-
+            
             _signature = null;
             _signatures.Clear();
             Nodes.Clear();
             _profiles = null;
             _profileIds = null;
+            _componentProfiles = null;
 
             Init(targetUserAgent);
         }

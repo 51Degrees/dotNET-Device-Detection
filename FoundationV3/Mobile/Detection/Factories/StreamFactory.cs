@@ -60,7 +60,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// </returns>
         public static DataSet Create(byte[] array)
         {
-            var dataSet = new DataSet(array);
+            var dataSet = new DataSet(array, DataSet.Modes.MemoryMapped);
             Load(dataSet);
             return dataSet;
         }
@@ -88,7 +88,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// </returns>
         public static DataSet Create(string filePath, DateTime lastModified)
         {
-            var dataSet = new DataSet(filePath, lastModified);
+            var dataSet = new DataSet(filePath, lastModified, DataSet.Modes.File);
             Load(dataSet);
             return dataSet;
         }
@@ -114,26 +114,35 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
                 reader.BaseStream.Position = 0;
                 CommonFactory.LoadHeader(dataSet, reader);
                 dataSet.Strings = new VariableList<AsciiString>(dataSet, reader, new AsciiStringFactory(), Constants.StringsCacheSize);
-                var components = new MemoryFixedList<Component>(dataSet, reader, new ComponentFactory());
+                MemoryFixedList<Component> components = null;
+                switch (dataSet.VersionEnum)
+                {
+                    case BinaryConstants.FormatVersions.PatternV31:
+                        components = new MemoryFixedList<Component>(dataSet, reader, new ComponentFactoryV31());
+                        break;
+                    case BinaryConstants.FormatVersions.PatternV32:
+                        components = new MemoryFixedList<Component>(dataSet, reader, new ComponentFactoryV32());
+                        break;
+                }
                 dataSet._components = components;
                 var maps = new MemoryFixedList<Map>(dataSet, reader, new MapFactory());
                 dataSet._maps = maps;
                 var properties = new PropertiesList(dataSet, reader, new PropertyFactory());
                 dataSet._properties = properties;
-                dataSet._values = new FixedList<Value>(dataSet, reader, new ValueFactory(), Constants.ValuesCacheSize);
+                dataSet._values = new FixedCacheList<Value>(dataSet, reader, new ValueFactory(), Constants.ValuesCacheSize);
                 dataSet.Profiles = new VariableList<Entities.Profile>(dataSet, reader, new ProfileStreamFactory(dataSet.Pool), Constants.ProfilesCacheSize);
                 switch (dataSet.VersionEnum)
                 {
                     case BinaryConstants.FormatVersions.PatternV31:
-                        dataSet._signatures = new FixedList<Signature>(dataSet, reader, new SignatureFactoryV31(dataSet), Constants.SignaturesCacheSize);
+                        dataSet._signatures = new FixedCacheList<Signature>(dataSet, reader, new SignatureFactoryV31(dataSet), Constants.SignaturesCacheSize);
                         break;
                     case BinaryConstants.FormatVersions.PatternV32:
-                        dataSet._signatures = new FixedList<Signature>(dataSet, reader, new SignatureFactoryV32(dataSet), Constants.SignaturesCacheSize);
-                        dataSet._signatureNodeOffsets = new FixedList<Integer>(dataSet, reader, new IntegerFactory(), Constants.SignatureNodeOffsetsCacheSize);
-                        dataSet._nodeRankedSignatureIndexes = new FixedList<Integer>(dataSet, reader, new IntegerFactory(), Constants.NodeRankedSignatureIndexCacheSize);
+                        dataSet._signatures = new FixedCacheList<Signature>(dataSet, reader, new SignatureFactoryV32(dataSet), Constants.SignaturesCacheSize);
+                        dataSet._signatureNodeOffsets = new FixedCacheList<Integer>(dataSet, reader, new IntegerFactory(), Constants.SignatureNodeOffsetsCacheSize);
+                        dataSet._nodeRankedSignatureIndexes = new FixedList<Integer>(dataSet, reader, new IntegerFactory());
                         break;
                 }
-                dataSet._rankedSignatureIndexes = new FixedList<Integer>(
+                dataSet._rankedSignatureIndexes = new FixedCacheList<Integer>(
                     dataSet, reader, new IntegerFactory(), Constants.RankedSignaturesCacheSize);
                 switch (dataSet.VersionEnum)
                 {

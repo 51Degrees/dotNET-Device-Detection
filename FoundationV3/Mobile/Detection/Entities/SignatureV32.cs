@@ -42,6 +42,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// </summary>
         private readonly int FirstNodeOffsetIndex;
 
+        /// <summary>
+        /// Flags used to provide extra details about the signature.
+        /// </summary>
+        private readonly byte Flags;
+
         #endregion
 
         #region Public Properties
@@ -111,6 +116,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             NodeCount = reader.ReadByte();
             FirstNodeOffsetIndex = reader.ReadInt32();
             _rank = reader.ReadInt32();
+            Flags = reader.ReadByte();
         }
 
         #endregion

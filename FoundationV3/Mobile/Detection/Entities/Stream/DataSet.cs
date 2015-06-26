@@ -51,8 +51,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// </summary>
         /// <param name="fileName">Valid path to the uncompressed data set file</param>
         /// <param name="lastModified">Date and time the source data was last modified.</param>
-        internal DataSet(string fileName, DateTime lastModified)
-            : base(lastModified)
+        /// <param name="mode">
+        /// The mode of operation the data set will be using.
+        /// </param>
+        internal DataSet(string fileName, DateTime lastModified, Modes mode)
+            : base(lastModified, mode)
         {
             Pool = new Pool(new SourceFile(fileName));
         }
@@ -62,8 +65,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// data source provided.
         /// </summary>
         /// <param name="data">Byte array containing uncompressed data set</param>
-        internal DataSet(byte[] data)
-            : base(DateTime.MinValue)
+        /// <param name="mode">
+        /// The mode of operation the data set will be using.
+        /// </param>
+        internal DataSet(byte[] data, Modes mode)
+            : base(DateTime.MinValue, mode)
         {
             Pool = new Pool(new SourceMemory(data));
         }

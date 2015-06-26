@@ -74,6 +74,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
 
             // Read the common header fields.
             dataSet.Tag = new Guid(reader.ReadBytes(16));
+            switch(dataSet.VersionEnum)
+            {
+                case BinaryConstants.FormatVersions.PatternV32:
+                    dataSet.Export = new Guid(reader.ReadBytes(16));
+                    break;
+            }
             dataSet.CopyrightOffset = reader.ReadInt32();
             dataSet.AgeAtPublication = new TimeSpan(reader.ReadInt16() * TimeSpan.TicksPerDay * 30);
             dataSet.MinUserAgentCount = reader.ReadInt32();

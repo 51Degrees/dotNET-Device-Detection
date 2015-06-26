@@ -128,19 +128,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
         internal const int SignaturesCacheSize = 16000;
 
         /// <summary>
-        /// The number of ranked signatures that it should be possible to cache.
-        /// </summary>
-        internal const int RankedSignaturesCacheSize = 16000;
-
-        /// <summary>
         /// The number of signature node offsets that it should be possible to cache.
         /// </summary>
         internal const int SignatureNodeOffsetsCacheSize = 16000;
 
         /// <summary>
-        /// The number of ranked signature indexes that it should be possible to cache. 
+        /// The number of ranked signatures that it should be possible to cache.
         /// </summary>
-        internal const int NodeRankedSignatureIndexCacheSize = 16000;
+        internal const int RankedSignaturesCacheSize = 16000;
 
         /// <summary>
         /// The number of node that it should be possible to cache.
@@ -155,12 +150,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// The number of profiles that it should be possible to cache.
         /// </summary>
-        internal const int ProfilesCacheSize = 300;
+        internal const int ProfilesCacheSize = 600;
 
         /// <summary>
         /// The number of strings that it should be possible to cache.
         /// </summary>
-        internal const int StringsCacheSize = 3000;
+        internal const int StringsCacheSize = 6000;
 
         /// <summary>
         /// If premium data is being used with Foundation the licence key
@@ -229,17 +224,20 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Array of HTTP headers that represent the useragent string of the
         /// device rather than the browser.
         /// </summary>
+        [Obsolete("Replaced with embedded Http Headers in V3.2 data file.")]
         internal static readonly string[] DeviceUserAgentHeaders = new string[]
             {
                 "Device-Stock-UA",
                 "x-Device-User-Agent",
                 "X-Device-User-Agent",
-                "X-OperaMini-Phone-UA"
+                "X-OperaMini-Phone-UA",
+                "User-Agent"
             };
 
         /// <summary>
         /// The Http header field that contains the user agent.
         /// </summary>
+        [Obsolete("Replaced with embedded Http Headers in V3.2 data file.")]
         internal const string UserAgentHeader = "User-Agent";
 
         /// <summary>

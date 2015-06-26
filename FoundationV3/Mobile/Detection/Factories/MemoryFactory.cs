@@ -24,6 +24,7 @@ using FiftyOne.Foundation.Mobile.Detection.Entities;
 using FiftyOne.Foundation.Mobile.Detection.Readers;
 using FiftyOne.Foundation.Mobile.Detection.Entities.Memory;
 using System.IO;
+using System.Reflection;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Factories
 {
@@ -71,7 +72,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// <returns>A <see cref="DataSet"/> filled with data from the array</returns>
         public static DataSet Create(byte[] array, bool init)
         {
-            DataSet dataSet = new DataSet(DateTime.MinValue);
+            DataSet dataSet = new DataSet(DateTime.MinValue, DataSet.Modes.Memory);
             using (var reader = new Reader(new MemoryStream(array)))
             {
                  Load(dataSet, reader, init);
@@ -105,7 +106,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// <returns>A <see cref="DataSet"/> filled with data from the array</returns>
         public static DataSet Create(string filePath, bool init, DateTime lastModified)
         {
-            DataSet dataSet = new DataSet(lastModified);
+            DataSet dataSet = new DataSet(lastModified, DataSet.Modes.Memory);
             using (var reader = new Reader(
                 File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
             {
@@ -139,7 +140,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
             CommonFactory.LoadHeader(dataSet, reader);
 
             var strings = new MemoryVariableList<AsciiString>(dataSet, reader, new AsciiStringFactory());
-            var components = new MemoryFixedList<Component>(dataSet, reader, new ComponentFactory());
+            MemoryFixedList<Component> components = null;
+            switch(dataSet.VersionEnum)
+            {
+                case BinaryConstants.FormatVersions.PatternV31:
+                    components = new MemoryFixedList<Component>(dataSet, reader, new ComponentFactoryV31());
+                    break;
+                case BinaryConstants.FormatVersions.PatternV32:
+                    components = new MemoryFixedList<Component>(dataSet, reader, new ComponentFactoryV32());
+                    break;
+            }
             var maps = new MemoryFixedList<Map>(dataSet, reader, new MapFactory());
             var properties = new PropertiesList(dataSet, reader, new PropertyFactory());
             var values = new MemoryFixedList<Value>(dataSet, reader, new ValueFactory());

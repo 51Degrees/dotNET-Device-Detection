@@ -55,20 +55,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
     /// Should not be referenced directly.
     /// </remarks>
     /// <typeparam name="T">The type of <see cref="BaseEntity"/> the list will contain</typeparam>
-    public class VariableList<T> : BaseList<T>, IReadonlyList<T> where T : BaseEntity
+    public class VariableList<T> : CacheList<T>, IReadonlyList<T> where T : BaseEntity
     {
-        #region Properties
-
-        /// <summary>
-        /// The number of items in the list.
-        /// </summary>
-        public int Count
-        {
-            get { return Header.Count; }
-        }
-
-        #endregion
-
         #region Constructor
 
         /// <summary>

@@ -19,7 +19,6 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
-
 namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 {
     /// <summary>

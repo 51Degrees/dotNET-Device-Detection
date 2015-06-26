@@ -37,7 +37,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// <para>
     /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
-    public class Component : BaseEntity, IComparable<Component>
+    public abstract class Component : BaseEntity, IComparable<Component>
     {
         #region Fields
 
@@ -49,8 +49,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
 
         #endregion
 
+        /// <summary>
+        /// List of http headers that should be checked in order to perform
+        /// a detection where more headers than User-Agent are available. This
+        /// data is used by methods that can Http Header collections.
+        /// </summary>
+        public abstract string[] HttpHeaders { get; }
+
         #region Properties
-                
+        
         /// <summary>
         /// The unique name of the component.
         /// </summary>

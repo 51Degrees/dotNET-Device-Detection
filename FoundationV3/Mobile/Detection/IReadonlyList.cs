@@ -42,6 +42,5 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Number of items in the list.
         /// </summary>
         int Count { get; }
-
     }
 }

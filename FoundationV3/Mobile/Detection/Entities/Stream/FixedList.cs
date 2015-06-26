@@ -20,35 +20,26 @@
  * ********************************************************************* */
 
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Collections.Generic;
+using System.Threading;
+using FiftyOne.Foundation.Mobile.Detection.Entities.Headers;
 using FiftyOne.Foundation.Mobile.Detection.Factories;
 using FiftyOne.Foundation.Mobile.Detection.Readers;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 {
     /// <summary>
-    /// A readonly list of fixed length entity types held on persistent storage rather
-    /// than in memory.
+    /// <para>
+    /// Lists can be stored as a set of related objects entirely within memory, or 
+    /// the relevent objects loaded as required from a file or other permanent store
+    /// as required.
+    /// </para>
     /// </summary>
-    /// <para>
-    /// Entities in the underlying data structure are either fixed length where the 
-    /// data that represents them always contains the same number of bytes, or variable
-    /// length where the number of bytes to represent the entity varies.
-    /// </para>
-    /// <para>
-    /// This class uses the index of the entity in the accessor. The list is typically
-    /// used by entities that need to be found quickly using a divide and conquer 
-    /// algorithm.
-    /// </para>
     /// <remarks>
-    /// The constructor will read the header information about the underlying data structure.
-    /// The data for each entity is only loaded when requested via the accessor. A cache is used
-    /// to avoid creating duplicate objects when requested multiple times.
-    /// </remarks>
-    /// <remarks>
-    /// Data sources which don't support seeking can not be used. Specifically compressed data 
-    /// structures can not be used with these lists.
+    /// Delegate methods are used to create new instances of items to add to the list
+    /// in order to avoid creating many inherited list classes for each 
+    /// <see cref="BaseEntity"/> type.
     /// </remarks>
     /// <remarks>
     /// Should not be referenced directly.
@@ -56,33 +47,20 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
     /// <typeparam name="T">The type of <see cref="BaseEntity"/> the list will contain</typeparam>
     public class FixedList<T> : BaseList<T>, IFixedList<T> where T : BaseEntity
     {
-        #region Properties
-
-        /// <summary>
-        /// The number of items in the list.
-        /// </summary>
-        public int Count
-        {
-            get { return Header.Count; }
-        }
-
-        #endregion
-
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of <see cref="FixedList{T}"/>
+        /// Constructs a new instance of <see cref="BaseList{T}"/> ready to read entities from 
+        /// the source.
         /// </summary>
-        /// <param name="dataSet">The <see cref="DataSet"/> being created</param>
-        /// <param name="reader">Reader connected to the source data structure and positioned to start reading</param>
+        /// <param name="dataSet">Dataset being created</param>
+        /// <param name="reader">Reader used to initialise the header only</param>
         /// <param name="entityFactory">Used to create new instances of the entity</param>
-        /// <param name="cacheSize">Number of items in list to have capacity to cache</param>
         internal FixedList(
-            DataSet dataSet, 
-            Reader reader, 
-            BaseEntityFactory<T> entityFactory,
-            int cacheSize)
-            : base(dataSet, reader, entityFactory, cacheSize)
+            DataSet dataSet,
+            Reader reader,
+            BaseEntityFactory<T> entityFactory)
+            : base(dataSet, reader, entityFactory)
         {
         }
 
@@ -148,7 +126,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
                 yield return item;
             }
         }
-        
+
         #endregion
     }
 }

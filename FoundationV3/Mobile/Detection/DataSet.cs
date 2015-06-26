@@ -48,8 +48,37 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// </para>
     public class DataSet : IDisposable
     {
+        #region Enumerations
+
+        /// <summary>
+        /// The modes of operation the data set can be built in.
+        /// </summary>
+        public enum Modes
+        {
+            /// <summary>
+            /// The device data is held on disk and loaded into memory
+            /// when needed. Caching is used to clear out stale items.
+            /// Lowest memory use and slowest device deteciton.
+            /// </summary>
+            File,
+            /// <summary>
+            /// The device data is loaded into memory as .NET class instances
+            /// and then is no longer referenced. Offers the fastest device 
+            /// detection in .NET managed code, but a slower startup time.
+            /// </summary>
+            Memory,
+            /// <summary>
+            /// The device data is loaded into memory as a byte array. .NET
+            /// class instances are created when needed and then cleared from
+            /// the cache.
+            /// </summary>
+            MemoryMapped
+        }
+
+        #endregion
+
         #region Public Properties
-              
+
         #region Cache Stats
 
         /// <summary>
@@ -229,6 +258,40 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #endregion
 
         #region Data Set Properties
+
+        /// <summary>
+        /// The mode of operation the data set is using.
+        /// </summary>
+        public readonly Modes Mode;
+
+        /// <summary>
+        /// List of unique Http Headers that the data set needs to consider
+        /// to perform the most accurate matches.
+        /// </summary>
+        public string[] HttpHeaders
+        {
+            get
+            {
+                if (_httpHeaders == null)
+                {
+                    lock (this)
+                    {
+                        if (_httpHeaders == null)
+                        {
+                            _httpHeaders = Components.SelectMany(i =>
+                                i.HttpHeaders).Distinct().ToArray();
+                        }
+                    }
+                }
+                return _httpHeaders;
+            }
+        }
+        private string[] _httpHeaders;
+
+        /// <summary>
+        /// A unique Tag for the exported data.
+        /// </summary>
+        public Guid Export { get; internal set; }
 
         /// <summary>
         /// A unique Tag for the data set.
@@ -668,9 +731,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <param name="lastModified">
         /// The date and time the source of the data was last modified.
         /// </param>
-        internal DataSet(DateTime lastModified)
+        /// <param name="mode">
+        /// The mode of operation the data set will be using.
+        /// </param>
+        internal DataSet(DateTime lastModified, Modes mode)
         {
             LastModified = lastModified;
+            Mode = mode;
         }
 
         /// <summary>
