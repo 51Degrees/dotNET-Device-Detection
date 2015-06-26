@@ -184,21 +184,11 @@ UpgradeLog*.htm
 *.bim_*.settings
 
 # Microsoft Fakes
-FakesAssemblies/
-
-# Node.js Tools for Visual Studio
-.ntvs_analysis.dat
-
-# Visual Studio 6 build log
-*.plg
-
-# Visual Studio 6 workspace options file
-*.opt
-
-# 51Degrees
-*Premium*
-*Enterprise*
-App_Data/Log.txt
+Log.txt
 *.lic
-App_Data/Cache*
+*Enterprise*.dat
+*Premium*.dat
+*Enterprise*.trie
+*Premium*.trie
+App_Data/Cache/
 million.csv
