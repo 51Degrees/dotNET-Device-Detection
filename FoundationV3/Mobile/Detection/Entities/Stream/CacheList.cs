@@ -107,6 +107,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         #region Public Methods
 
         /// <summary>
+        /// Resets the cache.
+        /// </summary>
+        public void ResetCache()
+        {
+            _cache.ResetCache();
+        }
+
+        /// <summary>
         /// Retrieves the entity at the offset or index requested.
         /// </summary>
         /// <param name="key">Index or offset of the entity required</param>

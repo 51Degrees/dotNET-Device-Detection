@@ -86,6 +86,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         internal long Switches;
 
+        /// <summary>
+        /// Indicates a switch operation is in progress.
+        /// </summary>
+        private bool _swtiching = false;
+
         #endregion
 
         #region Properties
@@ -132,9 +137,18 @@ namespace FiftyOne.Foundation.Mobile.Detection
         internal void AddRecent(K key, V value)
         {
             _itemsInactive[key] = value;
-            if (_itemsInactive.Count > _cacheServiceSize)
+            if (_itemsInactive.Count > _cacheServiceSize &&
+                _swtiching == false)
             {
-                ThreadPool.QueueUserWorkItem(ServiceCache, this);
+                lock (this)
+                {
+                    if (_itemsInactive.Count > _cacheServiceSize &&
+                        _swtiching == false)
+                    {
+                        ThreadPool.QueueUserWorkItem(ServiceCache, this);
+                        _swtiching = true;
+                    }
+                }
             }
         }
 
@@ -160,6 +174,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
                 // Increase the switch count for the cache.
                 cache.Switches++;
+
+                // Allow other switch operations to proceed.
+                cache._swtiching = false;
             }
         }
 

@@ -79,6 +79,20 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         #region Methods
 
         /// <summary>
+        /// Resets the cache for the data set.
+        /// </summary>
+        public override void ResetCache()
+        {
+            base.ResetCache();
+            ((ICacheList)Signatures).ResetCache();
+            ((ICacheList)Nodes).ResetCache();
+            ((ICacheList)Strings).ResetCache();
+            ((ICacheList)Profiles).ResetCache();
+            ((ICacheList)Values).ResetCache();
+            ((ICacheList)RankedSignatureIndexes).ResetCache();
+        }
+
+        /// <summary>
         /// Disposes of the data set closing all readers and streams in
         /// the pool. If a temporary data file is used then the file
         /// is also deleted if it's not being used by other processes.
