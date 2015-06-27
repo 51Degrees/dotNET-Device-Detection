@@ -37,5 +37,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// The number of times the lists have been switched.
         /// </summary>
         long Switches { get; }
+
+        /// <summary>
+        /// Resets the cache used by the list.
+        /// </summary>
+        void ResetCache();
     }
 }

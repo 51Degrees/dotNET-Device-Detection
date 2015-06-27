@@ -864,9 +864,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         {
             return _properties[propertyName];
         }
+
+        /// <summary>
+        /// If there are cached lists being used the stats are reset for them.
+        /// </summary>
+        public virtual void ResetCache()
+        {
+            // Do nothing in this implementation.
+        }
         
         #endregion
-
-        
     }
 }

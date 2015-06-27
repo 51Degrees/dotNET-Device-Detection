@@ -33,13 +33,34 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
     /// <typeparam name="T">The type of <see cref="BaseEntity"/> the cache will contain</typeparam>
     internal class Cache<T> : Cache<int, T> where T : BaseEntity 
     {
+        /// <summary>
+        /// Constructs a new instance of <see cref="Cache<T>"/> for
+        /// use with entities.
+        /// </summary>
+        /// <param name="cacheSize"></param>
         internal Cache(int cacheSize) : base(cacheSize)
         {
         }
 
+        /// <summary>
+        /// Adds the item to the using it's index as the key.
+        /// </summary>
+        /// <param name="item"></param>
         internal void AddRecent(T item)
         {
             base.AddRecent(item.Index, item);
+        }
+
+        /// <summary>
+        /// Resets the stats for the cache.
+        /// </summary>
+        internal void ResetCache()
+        {
+            base._itemsActive.Clear();
+            base._itemsInactive.Clear();
+            base.Misses = 0;
+            base.Requests = 0;
+            base.Switches = 0;
         }
     }
 }
