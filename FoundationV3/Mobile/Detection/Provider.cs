@@ -165,73 +165,82 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </returns>
         public Match Match(NameValueCollection headers, Match match)
         {
-            // Find the headers that we need a match object for.
-            var headersToMatch = new Dictionary<string, Match>();
-            var headersIterator = headers.AllKeys.Intersect(match.DataSet.HttpHeaders).GetEnumerator();
-            var currentMatch = match;
-            while (headersIterator.MoveNext())
+            if (headers == null || headers.Count == 0)
             {
-                headersToMatch.Add(headersIterator.Current, currentMatch != null ? currentMatch : CreateMatch());
-                currentMatch = null;
+                // Empty headers all default match result.
+                Controller.MatchDefault(match);
             }
-
-            if (headersToMatch.Count == 0)
+            else
             {
-                // Just in case the list is empty check to add the User-Agent header.
-                headersToMatch.Add("User-Agent", match);
-            }
+                // Get the overlapping headers?
+                var importantHeaders = headers.AllKeys.Intersect(DataSet.HttpHeaders);
 
-            // Now process the matches for the headers provided.
-            Parallel.ForEach(headersToMatch, i =>
-            {
-                Match(i.Key, i.Value);
-            });
-
-            // Merge the different matches if more than one present.
-            if (headersToMatch.Count > 1)
-            {
-                foreach(var i in headersToMatch)
+                if (importantHeaders.Count() == 1)
                 {
-                    if (i.Value != match)
+                    // If only 1 header is important then return a simple single match.
+                    Match(headers[importantHeaders.First()], match);
+                }
+                else
+                {
+                    // Create matches for each of the headers.
+                    var matches = MatchForHeaders(match, headers, importantHeaders);
+                    
+                    foreach(var component in DataSet.Components)
                     {
-                        // Update the statistics about the matching process.
-                        match._signaturesCompared += i.Value._signaturesCompared;
-                        match._signaturesRead += i.Value._signaturesRead;
-                        match._stringsRead += i.Value._stringsRead;
-                        match._rootNodesEvaluated += i.Value._rootNodesEvaluated;
-                        match._nodesEvaluated += i.Value._nodesEvaluated;
-                        match._elapsed += i.Value._elapsed;
-
-                        // Find any components that should use this header.
-                        if (SwitchProfiles(match, i))
+                        foreach(var header in component.HttpHeaders)
                         {
-                            // Remove the signature as a single one is not being returned
-                            // for this match.
-                            match._signature = null;
+                            Match headerMatch;
+                            if (matches.TryGetValue(header, out headerMatch))
+                            {
+                                if (headerMatch != match)
+                                {
+                                    // Update the statistics about the matching process.
+                                    match._signaturesCompared += headerMatch._signaturesCompared;
+                                    match._signaturesRead += headerMatch._signaturesRead;
+                                    match._stringsRead += headerMatch._stringsRead;
+                                    match._rootNodesEvaluated += headerMatch._rootNodesEvaluated;
+                                    match._nodesEvaluated += headerMatch._nodesEvaluated;
+                                    match._elapsed += headerMatch._elapsed;
+
+                                    // Switch the match component profile for the other header match.
+                                    if (SwitchProfiles(match, headerMatch, component))
+                                    {
+                                        // Remove the signature as a single one is not being returned
+                                        // for this match.
+                                        match._signature = null;
+                                    }
+                                }
+                                break;
+                            }
                         }
                     }
                 }
             }
-            
             return match;
         }
 
         /// <summary>
-        /// Switches over profiles if a better header can be used to provide a match result
-        /// for the component. For example; Opera-Mini uses other headers to provide the
-        /// details about the hardware.
+        /// Matches each of the required headers.
         /// </summary>
         /// <param name="match"></param>
-        /// <param name="headerMatch"></param>
-        /// <returns>True if one or more switches occured, otherwise false</returns>
-        private bool SwitchProfiles(Match match, KeyValuePair<string, Detection.Match> headerMatch)
+        /// <param name="headers"></param>
+        /// <param name="importantHeaders"></param>
+        /// <returns></returns>
+        private Dictionary<string, Match> MatchForHeaders(Match match, NameValueCollection headers, IEnumerable<string> importantHeaders)
         {
-            var result = false;
-            foreach (var component in DataSet.Components)
+            var matches = new Dictionary<string, Match>();
+            var iterator = importantHeaders.GetEnumerator();
+            var currentMatch = match;
+            while(iterator.MoveNext())
             {
-                result = result | SwitchProfiles(match, headerMatch, component);
+                matches.Add(iterator.Current, currentMatch != null ? currentMatch : CreateMatch());
+                currentMatch = null;
             }
-            return result;
+            Parallel.ForEach(matches, m =>
+            {
+                Match(headers[m.Key], m.Value);
+            });
+            return matches;
         }
 
         /// <summary>
@@ -243,11 +252,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="headerMatch"></param>
         /// <param name="component"></param>
         /// <returns></returns>
-        private bool SwitchProfiles(Match match, KeyValuePair<string, Detection.Match> headerMatch, Component component)
+        private bool SwitchProfiles(Match match, Match headerMatch, Component component)
         {
             foreach (var header in component.HttpHeaders)
             {
-                if (header.Equals(headerMatch.Key))
+                if (header.Equals(headerMatch.HttpHeader))
                 {
                     // Switch the profile in the match being returned for the 
                     // component provided.
@@ -255,7 +264,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     {
                         if (match.Profiles[p].Component.Equals(component))
                         {
-                            match.Profiles[p] = headerMatch.Value.ComponentProfiles[component.ComponentId];
+                            match.Profiles[p] = headerMatch.ComponentProfiles[component.ComponentId];
                             return true;
                         }
                     }
