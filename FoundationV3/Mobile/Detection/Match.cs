@@ -245,6 +245,15 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
         private string _targetUserAgent;
         
+        /// <summary>
+        /// The Http header that provided the user agent.
+        /// </summary>
+        public string HttpHeader
+        {
+            get { return _httpHeader; }
+        }
+        private string _httpHeader = "User-Agent";
+
         #endregion
 
         #region Public Properties
@@ -659,9 +668,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
         private void Init(string targetUserAgent)
         {
             if (String.IsNullOrEmpty(targetUserAgent) == false)
+            {
                 TargetUserAgentArray = ASCIIEncoder.GetBytes(targetUserAgent);
+            }
             else
+            {
                 TargetUserAgentArray = new byte[0];
+            }
             _targetUserAgent = targetUserAgent;
 
             ResetNextCharacterPositionIndex();

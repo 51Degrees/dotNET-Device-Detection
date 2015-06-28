@@ -582,7 +582,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// The detection failed and a default match needs to be returned.
         /// </summary>
         /// <param name="match">Information about the detection</param>
-        private static void MatchDefault(Match match)
+        internal static void MatchDefault(Match match)
         {
             match._method = MatchMethods.None;
             match._profiles = match.DataSet.Components.Select(i => i.DefaultProfile).ToArray();
