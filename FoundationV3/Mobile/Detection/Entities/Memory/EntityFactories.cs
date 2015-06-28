@@ -64,6 +64,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
                 sizeof(ushort) + // Length of the ranked signatures count number
                 (entity.Children.Length * NodeFactoryShared.NodeIndexLengthV32) +
                 (entity.NumericChildren.Length * NodeNumericIndexLength) +
+                // If the ranked signature count is zero then nothing follows. If it's
+                // great than 0 then the next 4 bytes are the index of the first signature.
                 (entity.RankedSignatureCount == 0 ? 0 : sizeof(int));
         }
     }
