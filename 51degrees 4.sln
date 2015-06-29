@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Detector Web Site 4", "Detector Web Site\Detector Web Site 4.csproj", "{A0A7C5CE-1B06-4BB3-AB9D-DB055C6EDF69}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FiftyOne.Foundation 4", "FoundationV3\FiftyOne.Foundation 4.csproj", "{9D658044-FB65-4939-8449-A3A1DEBBB31A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{EF15770F-53EA-4E9F-AB5D-8C54A0B7A8ED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{1211A461-73CA-4D7E-86A7-983540F12539}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -67,6 +69,20 @@ Global
 		{EF15770F-53EA-4E9F-AB5D-8C54A0B7A8ED}.Release|Win32.ActiveCfg = Release|Any CPU
 		{EF15770F-53EA-4E9F-AB5D-8C54A0B7A8ED}.Release|x64.ActiveCfg = Release|Any CPU
 		{EF15770F-53EA-4E9F-AB5D-8C54A0B7A8ED}.Release|x86.ActiveCfg = Release|Any CPU
+		{1211A461-73CA-4D7E-86A7-983540F12539}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1211A461-73CA-4D7E-86A7-983540F12539}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1211A461-73CA-4D7E-86A7-983540F12539}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{1211A461-73CA-4D7E-86A7-983540F12539}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{1211A461-73CA-4D7E-86A7-983540F12539}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{1211A461-73CA-4D7E-86A7-983540F12539}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1211A461-73CA-4D7E-86A7-983540F12539}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1211A461-73CA-4D7E-86A7-983540F12539}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1211A461-73CA-4D7E-86A7-983540F12539}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1211A461-73CA-4D7E-86A7-983540F12539}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{1211A461-73CA-4D7E-86A7-983540F12539}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{1211A461-73CA-4D7E-86A7-983540F12539}.Release|Win32.ActiveCfg = Release|Any CPU
+		{1211A461-73CA-4D7E-86A7-983540F12539}.Release|x64.ActiveCfg = Release|Any CPU
+		{1211A461-73CA-4D7E-86A7-983540F12539}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
