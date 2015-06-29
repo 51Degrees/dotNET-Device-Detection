@@ -43,5 +43,10 @@ namespace FiftyOne.UnitTests.MetaData.Enterprise
         [TestMethod]
         public void EnterpriseV32File_RetrieveValues() { base.RetrieveValues(); }
 
+        [TestMethod]
+        public void EnterpriseV32File_CheckPropertyCount() { base.CheckPropertyCount(160); }
+
+        [TestMethod]
+        public void EnterpriseV32File_ValidatePropertiesHaveDescription() { base.ValidatePropertiesHaveDescription(); }
     }
 }
