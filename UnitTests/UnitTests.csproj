@@ -55,8 +55,6 @@
     <Compile Include="HttpHeaders\Combinations.cs" />
     <Compile Include="HttpHeaders\Enterprise\V31Array.cs" />
     <Compile Include="HttpHeaders\Enterprise\V32Array.cs" />
-    <Compile Include="HttpHeaders\Lite\V31Array.cs" />
-    <Compile Include="HttpHeaders\Lite\V32Array.cs" />
     <Compile Include="HttpHeaders\Premium\V31Array.cs" />
     <Compile Include="HttpHeaders\Premium\V32Array.cs" />
     <Compile Include="MetaData\Enterprise\V31File.cs" />
