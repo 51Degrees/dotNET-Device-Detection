@@ -102,6 +102,21 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// <param name="init">
         /// True to indicate that the data set should be fulling initialised
         /// </param>
+        /// <returns>A <see cref="DataSet"/> filled with data from the array</returns>
+        public static DataSet Create(string filePath, bool init)
+        {
+            return Create(filePath, init, File.GetLastWriteTimeUtc(filePath));
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="DataSet"/> from the file provided.
+        /// </summary>
+        /// <param name="filePath">
+        /// Uncompressed file containing the data for the data set
+        /// </param>
+        /// <param name="init">
+        /// True to indicate that the data set should be fulling initialised
+        /// </param>
         /// <param name="lastModified">Date and time the source data was last modified.</param>
         /// <returns>A <see cref="DataSet"/> filled with data from the array</returns>
         public static DataSet Create(string filePath, bool init, DateTime lastModified)
