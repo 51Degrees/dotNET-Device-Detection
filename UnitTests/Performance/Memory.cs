@@ -32,7 +32,7 @@ namespace FiftyOne.UnitTests.Performance
         protected abstract int MaxInitializeTime { get; }
 
         [TestInitialize()]
-        protected void CreateDataSet()
+        public void CreateDataSet()
         {
             var start = DateTime.UtcNow;
             _dataSet = MemoryFactory.Create(Path.Combine(DataFile));
