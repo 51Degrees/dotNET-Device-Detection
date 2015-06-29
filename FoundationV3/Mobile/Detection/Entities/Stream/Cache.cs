@@ -34,7 +34,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
     internal class Cache<T> : Cache<int, T> where T : BaseEntity 
     {
         /// <summary>
-        /// Constructs a new instance of <see cref="Cache<T>"/> for
+        /// Constructs a new instance of <see cref="Cache{T}"/> for
         /// use with entities.
         /// </summary>
         /// <param name="cacheSize"></param>

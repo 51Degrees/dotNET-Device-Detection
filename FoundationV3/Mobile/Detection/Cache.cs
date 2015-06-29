@@ -159,25 +159,22 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="state">Reference to the cache being serviced.</param>
         private static void ServiceCache(object state)
         {
-            lock (state)
-            {
-                var cache = (Cache<K, V>)state;
+            var cache = (Cache<K, V>)state;
 
-                // Create a temporary copy of the new active list.
-                var temp = cache._itemsInactive;
+            // Create a temporary copy of the new active list.
+            var temp = cache._itemsInactive;
 
-                // Clear the inactive list.
-                cache._itemsInactive.Clear();
+            // Clear the inactive list.
+            cache._itemsInactive.Clear();
 
-                // Switch over the cached items dictionaries.
-                cache._itemsActive = temp;
+            // Switch over the cached items dictionaries.
+            cache._itemsActive = temp;
 
-                // Increase the switch count for the cache.
-                cache.Switches++;
+            // Increase the switch count for the cache.
+            cache.Switches++;
 
-                // Allow other switch operations to proceed.
-                cache._swtiching = false;
-            }
+            // Allow other switch operations to proceed.
+            cache._swtiching = false;
         }
 
         #endregion
