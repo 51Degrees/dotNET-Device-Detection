@@ -49,6 +49,14 @@ namespace FiftyOne.UnitTests.MetaData
             }
         }
 
+        protected void ValidatePropertiesHaveDescription()
+        {
+            foreach (Property prop in _dataSet.Properties)
+            {
+                Assert.IsNotNull(prop.Description);
+            }
+        }
+
         protected void RetrieveProperties()
         {
             foreach(var property in _dataSet.Properties)
@@ -76,6 +84,12 @@ namespace FiftyOne.UnitTests.MetaData
             }
         }
 
+        protected void CheckPropertyCount(int expectedCount)
+        {
+            Assert.IsTrue(_dataSet.Properties.Count >= expectedCount, String.Format(
+                "Property count lower than '{0}'.", expectedCount));
+        }
+
         protected void RetrieveValues()
         {
             foreach(var value in _dataSet.Values)
@@ -93,6 +107,7 @@ namespace FiftyOne.UnitTests.MetaData
             {
                 _dataSet.Dispose();
             }
+            GC.SuppressFinalize(this);
         }
     }
 }
