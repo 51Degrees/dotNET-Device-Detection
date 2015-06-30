@@ -241,6 +241,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
                 // Set references between objects.
                 dataSet.Init();
 
+                // The following lists will not be needed anymore
+                // so they can be freed.
+                dataSet._signatureNodeOffsets = null;
+                dataSet._nodeRankedSignatureIndexes = null;
+
                 // Force garbage collection as a lot of memory has been freed.
                 GC.Collect();  
             }
