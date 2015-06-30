@@ -18,6 +18,7 @@
  * This Source Code Form is “Incompatible With Secondary Licenses”, as
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
+
 using FiftyOne.Foundation.Mobile.Detection;
 using FiftyOne.Foundation.Mobile.Detection.Entities;
 using System;
@@ -32,6 +33,31 @@ namespace FiftyOne.UnitTests
 {
     public static class Utils
     {
+        public class Memory
+        {
+            private readonly long StartMemory;
+
+            public long TotalMemory = 0;
+
+            public int MemorySamples = 0;
+
+            internal Memory()
+            {
+                StartMemory = GC.GetTotalMemory(true);
+            }
+
+            public double AverageMemoryUsed
+            {
+                get { return ((TotalMemory / MemorySamples) - StartMemory) / (double)(1024 * 1024); }
+            }
+
+            internal void Reset()
+            {
+                TotalMemory = 0;
+                MemorySamples = 0;
+            }
+        }
+
         public class Results
         {
             private static readonly Dictionary<MatchMethods, int> _matchMethods;
@@ -50,10 +76,9 @@ namespace FiftyOne.UnitTests
 
             public readonly DateTime StartTime;
 
-            public int Count
-            {
-                get { return Methods.Sum(i => i.Value); }
-            }
+            public int Count = 0;
+
+            public long CheckSum = 0;
 
             public TimeSpan ElapsedTime
             {
@@ -77,8 +102,6 @@ namespace FiftyOne.UnitTests
             }
         }
 
-        
-
         /// <summary>
         /// Creates a data set that is connected to the file provided.
         /// </summary>
@@ -98,30 +121,33 @@ namespace FiftyOne.UnitTests
         /// Passed a match to perform what ever tests are required.
         /// </summary>
         /// <param name="match">Match of a detection.</param>
-        public delegate void ProcessMatch(Match match, object state);
+        /// <param name="results">The results data for the loop.</param>
+        /// <param name="state">State used by the method.</param>
+        public delegate void ProcessMatch(Results results, Match match, object state);
 
         /// <summary>
         /// In a single thread loops through the useragents in the file
         /// provided perform a match with the data set provided passing
         /// control back to the method provided for further processing.
         /// </summary>
-        /// <param name="dataSet"></param>
+        /// <param name="provider"></param>
         /// <param name="userAgents"></param>
         /// <param name="method"></param>
         /// <returns>Counts for each of the methods used</returns>
-        internal static Results DetectLoopSingleThreaded(DataSet dataSet, IEnumerable<string> userAgents, ProcessMatch method, object state)
+        internal static Results DetectLoopSingleThreaded(Provider provider, IEnumerable<string> userAgents, ProcessMatch method, object state)
         {
-            dataSet.ResetCache();
-            var provider = new Provider(dataSet);
+            provider.DataSet.ResetCache();
             var match = provider.CreateMatch();
             var results = new Results();
             foreach (var line in userAgents)
             {
                 provider.Match(line.Trim(), match);
-                method(match, state);
+                method(results, match, state);
+                results.Count++;
                 results.Methods[match.Method]++;
             }
             ReportMethods(results.Methods);
+            ReportProvider(provider);
             ReportTime(results);
             return results;
         }
@@ -131,25 +157,26 @@ namespace FiftyOne.UnitTests
         /// provided perform a match with the data set provided passing
         /// control back to the method provided for further processing.
         /// </summary>
-        /// <param name="dataSet"></param>
+        /// <param name="provider"></param>
         /// <param name="userAgents"></param>
         /// <param name="method"></param>
         /// <returns>Counts for each of the methods used</returns>
-        internal static Results DetectLoopMultiThreaded(DataSet dataSet, IEnumerable<string> userAgents, ProcessMatch method, object state)
+        internal static Results DetectLoopMultiThreaded(Provider provider, IEnumerable<string> userAgents, ProcessMatch method, object state)
         {
-            dataSet.ResetCache();
-            var provider = new Provider(dataSet);
+            provider.DataSet.ResetCache();
             var results = new Results();
             Parallel.ForEach(userAgents, line =>
             {
                 var match = provider.Match(line.Trim());
-                method(match, state);
+                method(results, match, state);
+                Interlocked.Increment(ref results.Count);
                 lock (results.Methods)
                 {
                     results.Methods[match.Method] = results.Methods[match.Method] + 1;
                 }
             });
             ReportMethods(results.Methods);
+            ReportProvider(provider);
             ReportTime(results);
             return results;
         }
@@ -196,9 +223,41 @@ namespace FiftyOne.UnitTests
                 results.ElapsedTime.TotalMilliseconds / results.Count);
         }
 
-        public static void DoNothing(Match match, object state)
+        internal static void ReportProvider(Provider provider)
         {
-            // Do nothing.
+            Console.WriteLine("User-Agent cache switches '{0}' with '{1:P2} misses",
+                provider.CacheSwitches,
+                provider.PercentageCacheMisses);
+            ReportCache(provider.DataSet);
+        }
+
+        /// <summary>
+        /// Gets all the property values for the match and adds their
+        /// summed hashcodes to the overall check sum for the test.
+        /// </summary>
+        /// <param name="results"></param>
+        /// <param name="match"></param>
+        /// <param name="state"></param>
+        public static void RetrievePropertyValues(Results results, Match match, object state)
+        {
+            if (state != null)
+            {
+                var checkSum = 0;
+                foreach (var property in (IEnumerable<Property>)state)
+                {
+                    checkSum += match[property].ToString().GetHashCode();
+                }
+                Interlocked.Add(ref results.CheckSum, checkSum);
+            }
+        }
+
+        public static void MonitorMemory(Results results, Match match, object state)
+        {
+            if (results.Count % 1000 == 0)
+            {
+                Interlocked.Increment(ref ((Memory)state).MemorySamples);
+                Interlocked.Add(ref ((Memory)state).TotalMemory, GC.GetTotalMemory(true));
+            }
         }
     }
 }

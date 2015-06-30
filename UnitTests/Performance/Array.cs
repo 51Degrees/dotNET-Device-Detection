@@ -23,14 +23,14 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using FiftyOne.Foundation.Mobile.Detection.Factories;
 using System.IO;
 using FiftyOne.Foundation.Mobile.Detection;
+using System.Collections.Generic;
+using FiftyOne.Foundation.Mobile.Detection.Entities;
 
 namespace FiftyOne.UnitTests.Performance
 {
     [TestClass]
     public abstract class Array : Base
     {
-        protected abstract int MaxInitializeTime { get; }
-
         [TestInitialize()]
         public void CreateDataSet()
         {
@@ -39,78 +39,57 @@ namespace FiftyOne.UnitTests.Performance
             _testInitializeTime = DateTime.UtcNow - start;
         }
 
-        protected void InitializeTime() 
-        {
-            Assert.IsTrue(_testInitializeTime.TotalMilliseconds < MaxInitializeTime,
-                String.Format("Initialisation time greater than '{0}' ms", MaxInitializeTime));
-            Console.WriteLine("{0:0.00}ms", _testInitializeTime.TotalMilliseconds);  
-        }
-
-        protected override Utils.Results BadUserAgentsMulti() 
+        protected Utils.Results BadUserAgentsMulti(IEnumerable<Property> properties, int maxDetectionTime) 
         { 
-            var results = base.BadUserAgentsMulti(); 
-            Assert.IsTrue(results.AverageTime.Milliseconds < 3, "Average Time");
+            var results = base.UserAgentsMulti(
+                base.GetBadUserAgents(), properties, maxDetectionTime); 
             Assert.IsTrue(results.GetMethodPercentage(MatchMethods.Exact) < 0.2, "Exact Method");
             Asserts.AssertCacheMissesBad(_dataSet);
             return results;
         }
 
-        protected override Utils.Results BadUserAgentsSingle() 
+        protected Utils.Results BadUserAgentsSingle(IEnumerable<Property> properties, int maxDetectionTime) 
         {
-            var results = base.BadUserAgentsSingle();
-            Assert.IsTrue(results.AverageTime.Milliseconds < 7, "Average Time");
+            var results = base.UserAgentsSingle(
+                base.GetBadUserAgents(), null, maxDetectionTime);
             Assert.IsTrue(results.GetMethodPercentage(MatchMethods.Exact) < 0.2, "Exact Method");
             Asserts.AssertCacheMissesBad(_dataSet);
             return results;
         }
 
-        protected override Utils.Results DuplicatedUserAgentsMulti() 
+        protected Utils.Results RandomUserAgentsMulti(IEnumerable<Property> properties, int maxDetectionTime) 
         {
-            var results = base.DuplicatedUserAgentsMulti();
-            Assert.IsTrue(results.AverageTime.Milliseconds < 1, "Average Time");
+            var results = base.UserAgentsMulti(
+                base.GetRandomUserAgents(), null, maxDetectionTime);
             Assert.IsTrue(results.GetMethodPercentage(MatchMethods.Exact) > 0.95, "Exact Method");
             Asserts.AssertCacheMissesGood(_dataSet);
             return results;
         }
 
-        protected override Utils.Results DuplicatedUserAgentsSingle() 
+        protected Utils.Results RandomUserAgentsSingle(IEnumerable<Property> properties, int maxDetectionTime) 
         {
-            var results = base.DuplicatedUserAgentsSingle();
-            Assert.IsTrue(results.AverageTime.Milliseconds < 1, "Average Time");
+            var results = base.UserAgentsSingle(
+                base.GetRandomUserAgents(), null, maxDetectionTime);
             Assert.IsTrue(results.GetMethodPercentage(MatchMethods.Exact) > 0.95, "Exact Method");
             Asserts.AssertCacheMissesGood(_dataSet);
             return results;
         }
 
-        protected override Utils.Results UniqueUserAgentsMulti() 
+        protected Utils.Results UniqueUserAgentsMulti(IEnumerable<Property> properties, int maxDetectionTime) 
         {
-            var results = base.UniqueUserAgentsMulti(); 
-            Assert.IsTrue(results.AverageTime.Milliseconds < 1, "Average Time");
+            var results = base.UserAgentsMulti(
+                base.GetUniqueUserAgents(), null, maxDetectionTime); 
             Assert.IsTrue(results.GetMethodPercentage(MatchMethods.Exact) > 0.95, "Exact Method");
             Asserts.AssertCacheMissesGood(_dataSet);
             return results;
         }
 
-        protected override Utils.Results UniqueUserAgentsSingle() 
+        protected Utils.Results UniqueUserAgentsSingle(IEnumerable<Property> properties, int maxDetectionTime) 
         {
-            var results = base.UniqueUserAgentsSingle(); 
-            Assert.IsTrue(results.AverageTime.Milliseconds < 1, "Average Time");
+            var results = base.UserAgentsSingle(
+                base.GetUniqueUserAgents(), properties, maxDetectionTime); 
             Assert.IsTrue(results.GetMethodPercentage(MatchMethods.Exact) > 0.95, "Exact Method");
             Asserts.AssertCacheMissesGood(_dataSet);
-            return results;
-        }
-
-        protected override Utils.Results RandomUserAgentsMulti()
-        {
-            var results = base.RandomUserAgentsMulti();
-            Assert.IsTrue(results.AverageTime.Milliseconds < 3, "Average Time");
-            return results;
-        }
-
-        protected override Utils.Results RandomUserAgentsSingle()
-        {
-            var results = base.RandomUserAgentsSingle();
-            Assert.IsTrue(results.AverageTime.Milliseconds < 5, "Average Time");
             return results;
         }
     }

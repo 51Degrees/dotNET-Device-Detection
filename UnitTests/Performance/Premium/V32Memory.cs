@@ -40,57 +40,82 @@ namespace FiftyOne.UnitTests.Performance.Premium
         }
 
         [TestMethod]
-        public void PremiumV32Memory_InitializeTime() 
+        public void PremiumV32Memory_Performance_InitializeTime() 
         {
             base.InitializeTime();
         }
 
+
         [TestMethod]
-        public void PremiumV32Memory_BadUserAgentsMulti() 
+        public void PremiumV32Memory_Performance_BadUserAgentsMulti()
         {
-            base.BadUserAgentsMulti();
+            base.BadUserAgentsMulti(null, 1);
         }
 
         [TestMethod]
-        public void PremiumV32Memory_BadUserAgentsSingle() 
+        public void PremiumV32Memory_Performance_BadUserAgentsSingle()
         {
-            base.BadUserAgentsSingle();
+            base.BadUserAgentsSingle(null, 2);
         }
 
         [TestMethod]
-        public void PremiumV32Memory_DuplicatedUserAgentsMulti() 
+        public void PremiumV32Memory_Performance_UniqueUserAgentsMulti()
         {
-            base.DuplicatedUserAgentsMulti();
+            base.UniqueUserAgentsMulti(null, 1);
         }
 
         [TestMethod]
-        public void PremiumV32Memory_DuplicatedUserAgentsSingle() 
+        public void PremiumV32Memory_Performance_UniqueUserAgentsSingle()
         {
-            base.DuplicatedUserAgentsSingle();
+            base.UniqueUserAgentsSingle(null, 1);
         }
 
         [TestMethod]
-        public void PremiumV32Memory_UniqueUserAgentsMulti()
+        public void PremiumV32Memory_Performance_RandomUserAgentsMulti()
         {
-            base.UniqueUserAgentsMulti();
+            base.RandomUserAgentsMulti(null, 1);
         }
 
         [TestMethod]
-        public void PremiumV32Memory_UniqueUserAgentsSingle() 
+        public void PremiumV32Memory_Performance_RandomUserAgentsSingle()
         {
-            base.UniqueUserAgentsSingle();
+            base.RandomUserAgentsSingle(null, 1);
         }
 
         [TestMethod]
-        public void PremiumV32Memory_RandomUserAgentsMulti()
+        public void PremiumV32Memory_Performance_BadUserAgentsMultiAll()
         {
-            base.RandomUserAgentsMulti();
+            base.BadUserAgentsMulti(_dataSet.Properties, 1);
         }
 
         [TestMethod]
-        public void PremiumV32Memory_RandomUserAgentsSingle()
+        public void PremiumV32Memory_Performance_BadUserAgentsSingleAll()
         {
-            base.RandomUserAgentsSingle();
+            base.BadUserAgentsSingle(_dataSet.Properties, 3);
+        }
+
+        [TestMethod]
+        public void PremiumV32Memory_Performance_UniqueUserAgentsMultiAll()
+        {
+            base.UniqueUserAgentsMulti(_dataSet.Properties, 1);
+        }
+
+        [TestMethod]
+        public void PremiumV32Memory_Performance_UniqueUserAgentsSingleAll()
+        {
+            base.UniqueUserAgentsSingle(_dataSet.Properties, 1);
+        }
+
+        [TestMethod]
+        public void PremiumV32Memory_Performance_RandomUserAgentsMultiAll()
+        {
+            base.RandomUserAgentsMulti(_dataSet.Properties, 1);
+        }
+
+        [TestMethod]
+        public void PremiumV32Memory_Performance_RandomUserAgentsSingleAll()
+        {
+            base.RandomUserAgentsSingle(_dataSet.Properties, 1);
         }
     }
 }

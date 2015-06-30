@@ -24,6 +24,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 using FiftyOne.Foundation.Mobile.Detection.Entities;
 using FiftyOne.Foundation.Mobile.Detection.Factories;
+using FiftyOne.Foundation.Mobile.Detection;
+using System.Collections.Generic;
 
 namespace FiftyOne.UnitTests.Performance
 {
@@ -35,81 +37,81 @@ namespace FiftyOne.UnitTests.Performance
         /// </summary>
         protected DataSet _dataSet;
 
+        /// <summary>
+        /// Name of the data file to use for the tests.
+        /// </summary>
         protected abstract string DataFile { get; }
 
+        /// <summary>
+        /// Time taken to initialise the data set for the tests.
+        /// </summary>
         protected TimeSpan _testInitializeTime;
 
-        protected virtual Utils.Results UniqueUserAgentsSingle()
+        protected abstract int MaxInitializeTime { get; }
+
+        protected IEnumerable<string> GetRandomUserAgents()
         {
+            return UserAgentGenerator.GetEnumerable(20000, 0);
+        }
+
+        protected IEnumerable<string> GetUniqueUserAgents()
+        {
+            return File.ReadAllLines(Constants.GOOD_USERAGENTS_FILE);
+        }
+
+        protected IEnumerable<string> GetBadUserAgents()
+        {
+            return UserAgentGenerator.GetEnumerable(20000, 10);
+        }
+
+        protected virtual void InitializeTime()
+        {
+            Assert.IsTrue(_testInitializeTime.TotalMilliseconds < MaxInitializeTime,
+                String.Format("Initialisation time greater than '{0}' ms", MaxInitializeTime));
+            Console.WriteLine("{0:0.00}ms", _testInitializeTime.TotalMilliseconds);
+        }
+
+        protected virtual Utils.Results UserAgentsSingle(IEnumerable<string> userAgents, Utils.ProcessMatch method, object state)
+        {
+            Console.WriteLine("Method: {0}", method.Method.Name);
             return Utils.DetectLoopSingleThreaded(
-                _dataSet,
-                File.ReadAllLines(Constants.GOOD_USERAGENTS_FILE),
-                Utils.DoNothing,
-                null);
+                new Provider(_dataSet),
+                userAgents,
+                method,
+                state);
         }
 
-        protected virtual Utils.Results DuplicatedUserAgentsSingle()
+        protected virtual Utils.Results UserAgentsMulti(IEnumerable<string> userAgents, Utils.ProcessMatch method, object state)
         {
-            return Utils.DetectLoopSingleThreaded(
-                _dataSet,
-                UserAgentGenerator.GetEnumerable(Constants.USERAGENT_COUNT, 0),
-                Utils.DoNothing,
-                null);
-        }
-
-        protected virtual Utils.Results BadUserAgentsSingle()
-        {
-            return Utils.DetectLoopSingleThreaded(
-                _dataSet,
-                UserAgentGenerator.GetEnumerable(Constants.USERAGENT_COUNT, 10),
-                Utils.DoNothing,
-                null);
-        }
-
-        protected virtual Utils.Results UniqueUserAgentsMulti()
-        {
+            Console.WriteLine(String.Empty); 
+            Console.WriteLine("Method: {0}", method.Method.Name);
             return Utils.DetectLoopMultiThreaded(
-                _dataSet,
-                File.ReadAllLines(Constants.GOOD_USERAGENTS_FILE),
-                Utils.DoNothing,
-                null);
+                new Provider(_dataSet),
+                userAgents,
+                method,
+                state);
         }
 
-        protected virtual Utils.Results DuplicatedUserAgentsMulti()
+        protected virtual Utils.Results UserAgentsMulti(IEnumerable<string> userAgents, IEnumerable<Property> properties, int guidanceTime)
         {
-            return Utils.DetectLoopMultiThreaded(
-                _dataSet,
-                UserAgentGenerator.GetEnumerable(Constants.USERAGENT_COUNT, 0),
-                Utils.DoNothing,
-                null);
+            var results = UserAgentsMulti(userAgents, Utils.RetrievePropertyValues, properties);
+            Console.WriteLine("Values check sum: '{0}'", results.CheckSum);
+            Assert.IsTrue(results.AverageTime.TotalMilliseconds < guidanceTime,
+                String.Format("Average time of '{0:0.000}' ms exceeded guidance time of '{1}' ms",
+                    results.AverageTime.TotalMilliseconds,
+                    guidanceTime));
+            return results;
         }
 
-        protected virtual Utils.Results BadUserAgentsMulti()
+        protected virtual Utils.Results UserAgentsSingle(IEnumerable<string> userAgents, IEnumerable<Property> properties, int guidanceTime)
         {
-            return Utils.DetectLoopMultiThreaded(
-                _dataSet,
-                UserAgentGenerator.GetEnumerable(Constants.USERAGENT_COUNT, 10),
-                Utils.DoNothing,
-                null);
-        }
-
-
-        protected virtual Utils.Results RandomUserAgentsMulti()
-        {
-            return Utils.DetectLoopMultiThreaded(
-                _dataSet,
-                UserAgentGenerator.GetEnumerable(20000, 0),
-                Utils.DoNothing,
-                null);
-        }
-
-        protected virtual Utils.Results RandomUserAgentsSingle()
-        {
-            return Utils.DetectLoopSingleThreaded(
-                _dataSet,
-                UserAgentGenerator.GetEnumerable(20000, 0),
-                Utils.DoNothing,
-                null);
+            var results = UserAgentsSingle(userAgents, Utils.RetrievePropertyValues, properties);
+            Console.WriteLine("Values check sum: '{0}'", results.CheckSum);
+            Assert.IsTrue(results.AverageTime.TotalMilliseconds < guidanceTime,
+                String.Format("Average time of '{0:0.000}' ms exceeded guidance time of '{1}' ms",
+                    results.AverageTime.TotalMilliseconds,
+                    guidanceTime));
+            return results;
         }
 
         [TestCleanup]

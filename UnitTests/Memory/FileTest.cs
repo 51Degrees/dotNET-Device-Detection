@@ -22,34 +22,18 @@ using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using FiftyOne.Foundation.Mobile.Detection.Factories;
 using System.IO;
+using FiftyOne.Foundation.Mobile.Detection;
 
-namespace FiftyOne.UnitTests.HttpHeaders.Lite
+namespace FiftyOne.UnitTests.Memory
 {
     [TestClass]
-    public class V32Array : Combinations
+    public abstract class FileTest : Base
     {
         [TestInitialize()]
         public void CreateDataSet()
         {
-            _dataSet = StreamFactory.Create(File.ReadAllBytes(Path.Combine(Constants.LITE_PATTERN_V32)));
-        }
-
-        [TestMethod]
-        public void LiteV32Array_OperaMiniSamsung() 
-        {
-            base.OperaMini_Samsung();
-        }
-
-        [TestMethod]
-        public void LiteV32Array_OperaMini_HTC()
-        {
-            base.OperaMini_HTC();
-        }
-
-        [TestMethod]
-        public void LiteV32Array_OperaMini_iPhone()
-        {
-            base.OperaMini_iPhone();
+            _memory = new Utils.Memory();
+            _dataSet = StreamFactory.Create(Path.Combine(DataFile));
         }
     }
 }

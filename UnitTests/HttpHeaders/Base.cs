@@ -73,14 +73,14 @@ namespace FiftyOne.UnitTests.HttpHeaders
                 headers.Add("User-Agent", userAgentIterator.Current);
                 provider.Match(headers, match);
                 Assert.IsTrue(match.Signature == null, "Signature not equal null");
-                method(match, state);
+                method(results, match, state);
                 results.Methods[match.Method]++;
             }
 
             return results;
         }
 
-        public static void GenericValidate(FiftyOne.Foundation.Mobile.Detection.Match match, object state)
+        public static void GenericValidate(Utils.Results results, FiftyOne.Foundation.Mobile.Detection.Match match, object state)
         {
             var validation = (Validation)state;
             foreach(var test in validation)

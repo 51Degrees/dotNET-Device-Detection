@@ -35,57 +35,82 @@ namespace FiftyOne.UnitTests.Performance.Lite
         }
 
         [TestMethod]
-        public void LiteV32File_InitializeTime()
+        public void LiteV32File_Performance_InitializeTime()
         {
             base.InitializeTime();
         }
 
+
         [TestMethod]
-        public void LiteV32File_BadUserAgentsMulti()
+        public void LiteV32File_Performance_BadUserAgentsMulti()
         {
-            base.BadUserAgentsMulti();
+            base.BadUserAgentsMulti(null, 1);
         }
 
         [TestMethod]
-        public void LiteV32File_BadUserAgentsSingle()
+        public void LiteV32File_Performance_BadUserAgentsSingle()
         {
-            base.BadUserAgentsSingle();
+            base.BadUserAgentsSingle(null, 4);
         }
 
         [TestMethod]
-        public void LiteV32File_DuplicatedUserAgentsMulti()
+        public void LiteV32File_Performance_UniqueUserAgentsMulti()
         {
-            base.DuplicatedUserAgentsMulti();
+            base.UniqueUserAgentsMulti(null, 1);
         }
 
         [TestMethod]
-        public void LiteV32File_DuplicatedUserAgentsSingle()
+        public void LiteV32File_Performance_UniqueUserAgentsSingle()
         {
-            base.DuplicatedUserAgentsSingle();
+            base.UniqueUserAgentsSingle(null, 1);
         }
 
         [TestMethod]
-        public void LiteV32File_UniqueUserAgentsMulti()
+        public void LiteV32File_Performance_RandomUserAgentsMulti()
         {
-            base.UniqueUserAgentsMulti();
+            base.RandomUserAgentsMulti(null, 1);
         }
 
         [TestMethod]
-        public void LiteV32File_UniqueUserAgentsSingle()
+        public void LiteV32File_Performance_RandomUserAgentsSingle()
         {
-            base.UniqueUserAgentsSingle();
+            base.RandomUserAgentsSingle(null, 1);
         }
 
         [TestMethod]
-        public void LiteV32File_RandomUserAgentsMulti()
+        public void LiteV32File_Performance_BadUserAgentsMultiAll()
         {
-            base.RandomUserAgentsMulti();
+            base.BadUserAgentsMulti(_dataSet.Properties, 5);
         }
 
         [TestMethod]
-        public void LiteV32File_RandomUserAgentsSingle()
+        public void LiteV32File_Performance_BadUserAgentsSingleAll()
         {
-            base.RandomUserAgentsSingle();
+            base.BadUserAgentsSingle(_dataSet.Properties, 6);
+        }
+
+        [TestMethod]
+        public void LiteV32File_Performance_UniqueUserAgentsMultiAll()
+        {
+            base.UniqueUserAgentsMulti(_dataSet.Properties, 1);
+        }
+
+        [TestMethod]
+        public void LiteV32File_Performance_UniqueUserAgentsSingleAll()
+        {
+            base.UniqueUserAgentsSingle(_dataSet.Properties, 1);
+        }
+
+        [TestMethod]
+        public void LiteV32File_Performance_RandomUserAgentsMultiAll()
+        {
+            base.RandomUserAgentsMulti(_dataSet.Properties, 1);
+        }
+
+        [TestMethod]
+        public void LiteV32File_Performance_RandomUserAgentsSingleAll()
+        {
+            base.RandomUserAgentsSingle(_dataSet.Properties, 1);
         }
     }
 }
