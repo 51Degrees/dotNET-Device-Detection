@@ -304,9 +304,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         if (Manager.MemoryMode)
                         {
                             EventLog.Info(String.Format(
-                                "Creating memory provider from binary data file '{0}'.",
+                                "Creating memory byte array dataset and provider from binary data file '{0}'.",
                                 Manager.BinaryFilePath));
-                            provider = new WebProvider(MemoryFactory.Create(Manager.BinaryFilePath));
+                            provider = new WebProvider(StreamFactory.Create(File.ReadAllBytes(Manager.BinaryFilePath)));
                         }
                         else
                         {
