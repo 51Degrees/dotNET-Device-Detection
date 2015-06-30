@@ -127,6 +127,13 @@
       <Name>FiftyOne.Foundation 4</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Enterprise.playlist" />
+    <None Include="Lite.playlist" />
+    <None Include="Memory.playlist" />
+    <None Include="Performance.playlist" />
+    <None Include="Premium.playlist" />
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
