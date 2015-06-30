@@ -86,7 +86,7 @@ namespace FiftyOne.UnitTests.Performance.Lite
         [TestMethod]
         public void LiteV32Array_Performance_BadUserAgentsMultiAll()
         {
-            base.BadUserAgentsMulti(_dataSet.Properties, 1);
+            base.BadUserAgentsMulti(_dataSet.Properties, 3);
         }
 
         [TestMethod]
