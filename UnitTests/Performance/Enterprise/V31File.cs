@@ -35,57 +35,82 @@ namespace FiftyOne.UnitTests.Performance.Enterprise
         }
 
         [TestMethod]
-        public void EnterpriseV31File_InitializeTime()
+        public void EnterpriseV31File_Performance_InitializeTime()
         {
             base.InitializeTime();
         }
 
+
         [TestMethod]
-        public void EnterpriseV31File_BadUserAgentsMulti()
+        public void EnterpriseV31File_Performance_BadUserAgentsMulti()
         {
-            base.BadUserAgentsMulti();
+            base.BadUserAgentsMulti(null, 3);
         }
 
         [TestMethod]
-        public void EnterpriseV31File_BadUserAgentsSingle()
+        public void EnterpriseV31File_Performance_BadUserAgentsSingle()
         {
-            base.BadUserAgentsSingle();
+            base.BadUserAgentsSingle(null, 5);
         }
 
         [TestMethod]
-        public void EnterpriseV31File_DuplicatedUserAgentsMulti()
+        public void EnterpriseV31File_Performance_UniqueUserAgentsMulti()
         {
-            base.DuplicatedUserAgentsMulti();
+            base.UniqueUserAgentsMulti(null, 1);
         }
 
         [TestMethod]
-        public void EnterpriseV31File_DuplicatedUserAgentsSingle()
+        public void EnterpriseV31File_Performance_UniqueUserAgentsSingle()
         {
-            base.DuplicatedUserAgentsSingle();
+            base.UniqueUserAgentsSingle(null, 1);
         }
 
         [TestMethod]
-        public void EnterpriseV31File_UniqueUserAgentsMulti()
+        public void EnterpriseV31File_Performance_RandomUserAgentsMulti()
         {
-            base.UniqueUserAgentsMulti();
+            base.RandomUserAgentsMulti(null, 1);
         }
 
         [TestMethod]
-        public void EnterpriseV31File_UniqueUserAgentsSingle()
+        public void EnterpriseV31File_Performance_RandomUserAgentsSingle()
         {
-            base.UniqueUserAgentsSingle();
+            base.RandomUserAgentsSingle(null, 1);
         }
 
         [TestMethod]
-        public void EnterpriseV31File_RandomUserAgentsMulti()
+        public void EnterpriseV31File_Performance_BadUserAgentsMultiAll()
         {
-            base.RandomUserAgentsMulti();
+            base.BadUserAgentsMulti(_dataSet.Properties, 1);
         }
 
         [TestMethod]
-        public void EnterpriseV31File_RandomUserAgentsSingle()
+        public void EnterpriseV31File_Performance_BadUserAgentsSingleAll()
         {
-            base.RandomUserAgentsSingle();
+            base.BadUserAgentsSingle(_dataSet.Properties, 7);
+        }
+
+        [TestMethod]
+        public void EnterpriseV31File_Performance_UniqueUserAgentsMultiAll()
+        {
+            base.UniqueUserAgentsMulti(_dataSet.Properties, 1);
+        }
+
+        [TestMethod]
+        public void EnterpriseV31File_Performance_UniqueUserAgentsSingleAll()
+        {
+            base.UniqueUserAgentsSingle(_dataSet.Properties, 3);
+        }
+
+        [TestMethod]
+        public void EnterpriseV31File_Performance_RandomUserAgentsMultiAll()
+        {
+            base.RandomUserAgentsMulti(_dataSet.Properties, 1);
+        }
+
+        [TestMethod]
+        public void EnterpriseV31File_Performance_RandomUserAgentsSingleAll()
+        {
+            base.RandomUserAgentsSingle(_dataSet.Properties, 1);
         }
     }
 }

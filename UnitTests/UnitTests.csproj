@@ -33,6 +33,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -55,10 +56,30 @@
     <Compile Include="HttpHeaders\Combinations.cs" />
     <Compile Include="HttpHeaders\Enterprise\V31Array.cs" />
     <Compile Include="HttpHeaders\Enterprise\V32Array.cs" />
-    <Compile Include="HttpHeaders\Lite\V31Array.cs" />
-    <Compile Include="HttpHeaders\Lite\V32Array.cs" />
     <Compile Include="HttpHeaders\Premium\V31Array.cs" />
     <Compile Include="HttpHeaders\Premium\V32Array.cs" />
+    <Compile Include="Memory\Enterprise\V31Array.cs" />
+    <Compile Include="Memory\Enterprise\V31File.cs" />
+    <Compile Include="Memory\Enterprise\V31Memory.cs" />
+    <Compile Include="Memory\Enterprise\V32Array.cs" />
+    <Compile Include="Memory\Enterprise\V32File.cs" />
+    <Compile Include="Memory\Enterprise\V32Memory.cs" />
+    <Compile Include="Memory\Lite\V31File.cs" />
+    <Compile Include="Memory\Lite\V31Memory.cs" />
+    <Compile Include="Memory\Lite\V32File.cs" />
+    <Compile Include="Memory\Lite\V32Memory.cs" />
+    <Compile Include="Memory\Memory.cs" />
+    <Compile Include="Memory\FileTest.cs" />
+    <Compile Include="Memory\Array.cs" />
+    <Compile Include="Memory\Base.cs" />
+    <Compile Include="Memory\Lite\V31Array.cs" />
+    <Compile Include="Memory\Lite\V32Array.cs" />
+    <Compile Include="Memory\Premium\V31Array.cs" />
+    <Compile Include="Memory\Premium\V31File.cs" />
+    <Compile Include="Memory\Premium\V31Memory.cs" />
+    <Compile Include="Memory\Premium\V32Array.cs" />
+    <Compile Include="Memory\Premium\V32File.cs" />
+    <Compile Include="Memory\Premium\V32Memory.cs" />
     <Compile Include="MetaData\Enterprise\V31File.cs" />
     <Compile Include="MetaData\Enterprise\V31Memory.cs" />
     <Compile Include="MetaData\Enterprise\V32File.cs" />
@@ -106,7 +127,6 @@
       <Name>FiftyOne.Foundation 4</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

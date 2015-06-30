@@ -18,6 +18,7 @@
  * This Source Code Form is “Incompatible With Secondary Licenses”, as
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
+
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using FiftyOne.Foundation.Mobile.Detection.Factories;
@@ -40,57 +41,82 @@ namespace FiftyOne.UnitTests.Performance.Premium
         }
 
         [TestMethod]
-        public void PremiumV32Array_InitializeTime() 
+        public void PremiumV32Array_Performance_InitializeTime() 
         {
             base.InitializeTime(); 
         }
 
+
         [TestMethod]
-        public void PremiumV32Array_BadUserAgentsMulti() 
+        public void PremiumV32Array_Performance_BadUserAgentsMulti()
         {
-            base.BadUserAgentsMulti();
-        }
-        
-        [TestMethod]
-        public void PremiumV32Array_BadUserAgentsSingle() 
-        {
-            base.BadUserAgentsSingle();
+            base.BadUserAgentsMulti(null, 3);
         }
 
         [TestMethod]
-        public void PremiumV32Array_DuplicatedUserAgentsMulti() 
+        public void PremiumV32Array_Performance_BadUserAgentsSingle()
         {
-            base.DuplicatedUserAgentsMulti();
+            base.BadUserAgentsSingle(null, 4);
         }
 
         [TestMethod]
-        public void PremiumV32Array_DuplicatedUserAgentsSingle() 
+        public void PremiumV32Array_Performance_UniqueUserAgentsMulti()
         {
-            base.DuplicatedUserAgentsSingle();
+            base.UniqueUserAgentsMulti(null, 1);
         }
 
         [TestMethod]
-        public void PremiumV32Array_UniqueUserAgentsMulti() 
+        public void PremiumV32Array_Performance_UniqueUserAgentsSingle()
         {
-            base.UniqueUserAgentsMulti();
+            base.UniqueUserAgentsSingle(null, 1);
         }
 
         [TestMethod]
-        public void PremiumV32Array_UniqueUserAgentsSingle() 
+        public void PremiumV32Array_Performance_RandomUserAgentsMulti()
         {
-            base.UniqueUserAgentsSingle();
+            base.RandomUserAgentsMulti(null, 1);
         }
 
         [TestMethod]
-        public void PremiumV32Array_RandomUserAgentsMulti()
+        public void PremiumV32Array_Performance_RandomUserAgentsSingle()
         {
-            base.RandomUserAgentsMulti();
+            base.RandomUserAgentsSingle(null, 1);
         }
 
         [TestMethod]
-        public void PremiumV32Array_RandomUserAgentsSingle()
+        public void PremiumV32Array_Performance_BadUserAgentsMultiAll()
         {
-            base.RandomUserAgentsSingle();
+            base.BadUserAgentsMulti(_dataSet.Properties, 3);
+        }
+
+        [TestMethod]
+        public void PremiumV32Array_Performance_BadUserAgentsSingleAll()
+        {
+            base.BadUserAgentsSingle(_dataSet.Properties, 4);
+        }
+
+        [TestMethod]
+        public void PremiumV32Array_Performance_UniqueUserAgentsMultiAll()
+        {
+            base.UniqueUserAgentsMulti(_dataSet.Properties, 1);
+        }
+
+        [TestMethod]
+        public void PremiumV32Array_Performance_UniqueUserAgentsSingleAll()
+        {
+            base.UniqueUserAgentsSingle(_dataSet.Properties, 1);
+        }
+
+        [TestMethod]
+        public void PremiumV32Array_Performance_RandomUserAgentsMultiAll()
+        {
+            base.RandomUserAgentsMulti(_dataSet.Properties, 1);
+        }
+
+        [TestMethod]
+        public void PremiumV32Array_Performance_RandomUserAgentsSingleAll()
+        {
+            base.RandomUserAgentsSingle(_dataSet.Properties, 1);
         }
     }
 }

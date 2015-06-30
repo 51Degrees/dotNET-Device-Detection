@@ -40,57 +40,82 @@ namespace FiftyOne.UnitTests.Performance.Premium
         }
 
         [TestMethod]
-        public void PremiumV31Array_InitializeTime() 
+        public void PremiumV31Array_Performance_InitializeTime() 
         {
             base.InitializeTime(); 
         }
 
+
         [TestMethod]
-        public void PremiumV31Array_BadUserAgentsMulti() 
+        public void PremiumV31Array_Performance_BadUserAgentsMulti()
         {
-            base.BadUserAgentsMulti();
-        }
-        
-        [TestMethod]
-        public void PremiumV31Array_BadUserAgentsSingle() 
-        {
-            base.BadUserAgentsSingle();
+            base.BadUserAgentsMulti(null, 3);
         }
 
         [TestMethod]
-        public void PremiumV31Array_DuplicatedUserAgentsMulti() 
+        public void PremiumV31Array_Performance_BadUserAgentsSingle()
         {
-            base.DuplicatedUserAgentsMulti();
+            base.BadUserAgentsSingle(null, 5);
         }
 
         [TestMethod]
-        public void PremiumV31Array_DuplicatedUserAgentsSingle() 
+        public void PremiumV31Array_Performance_UniqueUserAgentsMulti()
         {
-            base.DuplicatedUserAgentsSingle();
+            base.UniqueUserAgentsMulti(null, 1);
         }
 
         [TestMethod]
-        public void PremiumV31Array_UniqueUserAgentsMulti() 
+        public void PremiumV31Array_Performance_UniqueUserAgentsSingle()
         {
-            base.UniqueUserAgentsMulti();
+            base.UniqueUserAgentsSingle(null, 1);
         }
 
         [TestMethod]
-        public void PremiumV31Array_UniqueUserAgentsSingle() 
+        public void PremiumV31Array_Performance_RandomUserAgentsMulti()
         {
-            base.UniqueUserAgentsSingle();
+            base.RandomUserAgentsMulti(null, 1);
         }
 
         [TestMethod]
-        public void PremiumV31Array_RandomUserAgentsMulti()
+        public void PremiumV31Array_Performance_RandomUserAgentsSingle()
         {
-            base.RandomUserAgentsMulti();
+            base.RandomUserAgentsSingle(null, 1);
         }
 
         [TestMethod]
-        public void PremiumV31Array_RandomUserAgentsSingle()
+        public void PremiumV31Array_Performance_BadUserAgentsMultiAll()
         {
-            base.RandomUserAgentsSingle();
+            base.BadUserAgentsMulti(_dataSet.Properties, 3);
+        }
+
+        [TestMethod]
+        public void PremiumV31Array_Performance_BadUserAgentsSingleAll()
+        {
+            base.BadUserAgentsSingle(_dataSet.Properties, 4);
+        }
+
+        [TestMethod]
+        public void PremiumV31Array_Performance_UniqueUserAgentsMultiAll()
+        {
+            base.UniqueUserAgentsMulti(_dataSet.Properties, 1);
+        }
+
+        [TestMethod]
+        public void PremiumV31Array_Performance_UniqueUserAgentsSingleAll()
+        {
+            base.UniqueUserAgentsSingle(_dataSet.Properties, 1);
+        }
+
+        [TestMethod]
+        public void PremiumV31Array_Performance_RandomUserAgentsMultiAll()
+        {
+            base.RandomUserAgentsMulti(_dataSet.Properties, 1);
+        }
+
+        [TestMethod]
+        public void PremiumV31Array_Performance_RandomUserAgentsSingleAll()
+        {
+            base.RandomUserAgentsSingle(_dataSet.Properties, 1);
         }
     }
 }
