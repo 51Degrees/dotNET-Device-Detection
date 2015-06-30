@@ -103,6 +103,24 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
         }
 
         /// <summary>
+        /// Access to the memory mode setting. Returns true if the data should be
+        /// loaded into memory increasing startup time but improving overall performance.
+        /// </summary>
+        public static bool MemoryMode
+        {
+            get
+            {
+                if (_configurationSection == null)
+                    return false;
+                return _configurationSection.MemoryMode;
+            }
+            set
+            {
+                SetMemoryMode(value);
+            }
+        }
+
+        /// <summary>
         /// When set to true enables bandwidth monitoring. Also requires the data set specified in 
         /// the binaryFilePath attribute to support bandwidth monitoring. 
         /// </summary>
@@ -169,6 +187,18 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
         }
 
         /// <summary>
+        /// Sets the memory mode value.
+        /// </summary>
+        /// <param name="value"></param>
+        private static void SetMemoryMode(bool value)
+        {
+            DetectionSection element = GetDetectionElement();
+            element.MemoryMode = value;
+            Support.SetWebApplicationSection(element);
+            Refresh();
+        }
+
+        /// <summary>
         /// Sets the shared usage value.
         /// </summary>
         /// <param name="value"></param>
@@ -204,20 +234,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
                 return null;
 
             return configuration.GetSection("fiftyOne/detection") as DetectionSection;
-        }
-
-        /// <summary>
-        /// Returns true if the data should be loaded into memory increasing
-        /// startup time but improving overall performance.
-        /// </summary>
-        internal static bool MemoryMode
-        {
-            get
-            {
-                if (_configurationSection == null)
-                    return false;
-                return _configurationSection.MemoryMode;
-            }
         }
 
         /// <summary>
