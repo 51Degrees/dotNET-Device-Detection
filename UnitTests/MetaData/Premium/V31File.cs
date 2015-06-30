@@ -43,5 +43,10 @@ namespace FiftyOne.UnitTests.MetaData.Premium
         [TestMethod]
         public void PremiumV31File_RetrieveValues() { base.RetrieveValues(); }
 
+        [TestMethod]
+        public void PremiumV31File_CheckPropertyCount() { base.CheckPropertyCount(130); }
+
+        [TestMethod]
+        public void PremiumV31File_ValidatePropertiesHaveDescription() { base.ValidatePropertiesHaveDescription(); }
     }
 }

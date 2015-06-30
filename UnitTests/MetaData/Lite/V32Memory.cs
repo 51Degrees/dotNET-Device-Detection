@@ -43,5 +43,10 @@ namespace FiftyOne.UnitTests.MetaData.Lite
         [TestMethod]
         public void LiteV32Memory_RetrieveValues() { base.RetrieveValues(); }
 
+        [TestMethod]
+        public void LiteV32Memory_CheckPropertyCount() { base.CheckPropertyCount(57); }
+
+        [TestMethod]
+        public void LiteV32Memory_ValidatePropertiesHaveDescription() { base.ValidatePropertiesHaveDescription(); }
     }
 }
