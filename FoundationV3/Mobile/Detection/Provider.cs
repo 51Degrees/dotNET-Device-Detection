@@ -190,11 +190,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     var componentIndex = 0;
                     foreach(var component in DataSet.Components)
                     {
-                        /// See if any of the headers can be used for this
-                        /// components profile. As soon as one matches then
-                        /// stop and don't look at any more. They are ordered
-                        /// in preferred sequence such that the first item is 
-                        /// the most preferred.
+                        // See if any of the headers can be used for this
+                        // components profile. As soon as one matches then
+                        // stop and don't look at any more. They are ordered
+                        // in preferred sequence such that the first item is 
+                        // the most preferred.
                         foreach(var header in component.HttpHeaders)
                         {
                             Match headerMatch;
