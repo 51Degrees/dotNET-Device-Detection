@@ -6,13 +6,13 @@
 
 Use code like...
 
-```
+```cs
 Request.Browser["IsMobile"]
 ```
 
 or 
 
-```
+```cs
 Request.Browser["IsTablet"]
 ```
 
@@ -28,7 +28,7 @@ https://[YOUR DOMAIN]/51Degrees.features.js?DeviceType&ScreenInchesDiagonal
 
 Use...
 
-```
+```cs
 var detectionProvider = new Provider(StreamFactory.Create("[DATA FILE LOCATION]"));
 var deviceType = detectionProvider.Match("[YOUR USERAGENT]")["DeviceType"];
 ```
