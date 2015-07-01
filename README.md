@@ -2,7 +2,7 @@
 
 # Device Detection for Microsoft .NET
 
-[Recent Changes](#RecentChanges "Review recent major changes") | [.NET Developer Documation](https://51degrees.com/support/documentation/net "Full getting started guide and advanced developer documentation") | [Device Databases](https://51degrees.com/compare-data-options "Different device databases which can be used with 51Degrees device detection")
+[Recent Changes](#recent-changes "Review recent major changes") | [.NET Developer Documation](https://51degrees.com/support/documentation/net "Full getting started guide and advanced developer documentation") | [Device Databases](https://51degrees.com/compare-data-options "Different device databases which can be used with 51Degrees device detection")
 
 ## What is Device Detection?
 
