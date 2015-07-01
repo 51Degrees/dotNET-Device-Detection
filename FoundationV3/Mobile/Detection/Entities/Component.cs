@@ -37,7 +37,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// <para>
     /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
-    public abstract class Component : BaseEntity, IComparable<Component>
+    public abstract class Component : BaseEntity, IComparable<Component>, IEquatable<Component>
     {
         #region Fields
 
@@ -232,6 +232,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         public override string ToString()
         {
             return Name;
+        }
+
+        /// <summary>
+        /// Compares this instance to another using the component Id.
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public bool Equals(Component other)
+        {
+            return ComponentId.Equals(other.ComponentId);
         }
 
         #endregion
