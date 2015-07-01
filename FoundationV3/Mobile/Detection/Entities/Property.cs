@@ -54,7 +54,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// <para>
     /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
-    public class Property : BaseEntity,  IComparable<Property>
+    public class Property : BaseEntity,  IComparable<Property>, IEquatable<Property>
     {
         #region Fields
 
@@ -460,6 +460,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         public override string ToString()
         {
             return Name;
+        }
+
+        /// <summary>
+        /// Compares the properties using name value.
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public bool Equals(Property other)
+        {
+            return this.Name.Equals(other.Name);
         }
 
         #endregion
