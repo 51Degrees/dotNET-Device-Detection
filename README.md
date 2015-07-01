@@ -52,8 +52,7 @@ Data files which are updated weekly and daily, automatically, and with more prop
 
 This release focuses on reducing memory consumption and improving performance when the device data file is used directly from the disk.
 
-<div style="background-color: yellow; padding: 1em">
-<b>Important Change:</b> The embedded device data has been removed from the assembly and by default placed in the App_Data folder for both web and non-web projects. The solution will not work without the associated data file being provided and the WebProvider.ActiveProvider property can now return null.
+**Important Change: The embedded device data has been removed from the assembly and by default placed in the App_Data folder for both web and non-web projects. The solution will not work without the associated data file being provided and the WebProvider.ActiveProvider property can now return null.
 </div>
 
 ### Major Changes
