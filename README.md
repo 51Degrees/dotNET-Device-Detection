@@ -1,6 +1,6 @@
 ![51Degrees](https://51degrees.com/Portals/0/Logo.png "THE Fasstest and Most Accurate Device Detection")**Device Detection for Microsoft .NET**
 
-[Recent Changes](#recent-changes "Review recent major changes") | [.NET Developer Documention](https://51degrees.com/support/documentation/net "Full getting started guide and advanced developer documentation") | [Device Databases](https://51degrees.com/compare-data-options "Different device databases which can be used with 51Degrees device detection")
+[Recent Changes](#recent-changes "Review recent major changes") | [Supported Databases](https://51degrees.com/compare-data-options "Different device databases which can be used with 51Degrees device detection") | [.NET Developer Documention](https://51degrees.com/support/documentation/net "Full getting started guide and advanced developer documentation") | [Available Properties](https://51degrees.com/resources/property-dictionary "View all available properties and values") | [Test User-Agents](https://51degrees.com/resources/user-agent-tester "Enter User-Agents and determine the type of device, operating system and browser")
 
 **Server Side:** Use code like...
 
@@ -14,7 +14,7 @@ or
 Request.Browser["IsTablet"]
 ```
 
-... from within a web application server side to determine the type of device accessing the web page.
+... from within a web application server side to determine the requesting device type.
 
 **Client Side:** Include...
 
@@ -31,7 +31,7 @@ var detectionProvider = new Provider(StreamFactory.Create("[DATA FILE LOCATION]"
 var deviceType = detectionProvider.Match("[YOUR USERAGENT]")["DeviceType"];
 ```
 
-... to use device detection offline to analyse web log files by User-Agent headers.
+... to perform offline analyse of web log files with User-Agent headers.
 
 ## What's needed?
 
