@@ -33,6 +33,8 @@ var deviceType = detectionProvider.Match("[YOUR USERAGENT]")["DeviceType"];
 
 ... to perform offline analyse of web log files with User-Agent headers.
 
+**[List All Properties](https://51degrees.com/resources/property-dictionary "View all available properties and values")**
+
 ## What's needed?
 
 The simplest method of deploying 51Degrees device detection to a .NET project is with NuGet. Just search for [51Degrees on NuGet](https://www.nuget.org/packages?q=51degrees "51Degrees Packages on NuGet").
