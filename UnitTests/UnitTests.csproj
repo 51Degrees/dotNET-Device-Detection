@@ -118,8 +118,8 @@
     <Compile Include="Performance\Asserts.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Performance\Base.cs" />
-    <Compile Include="UserAgentGenerator.cs" />
-    <Compile Include="Utils.cs" />
+    <Compile Include="Common\UserAgentGenerator.cs" />
+    <Compile Include="Common\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FoundationV3\FiftyOne.Foundation 4.csproj">
@@ -128,11 +128,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Enterprise.playlist" />
-    <None Include="Lite.playlist" />
-    <None Include="Memory.playlist" />
-    <None Include="Performance.playlist" />
-    <None Include="Premium.playlist" />
+    <None Include="Playlists\Enterprise.playlist" />
+    <None Include="Playlists\Lite.playlist" />
+    <None Include="Playlists\Memory.playlist" />
+    <None Include="Playlists\Performance.playlist" />
+    <None Include="Playlists\Premium.playlist" />
     <None Include="README.md" />
   </ItemGroup>
   <Choose>
