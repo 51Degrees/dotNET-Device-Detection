@@ -184,7 +184,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 {
                     // Create matches for each of the headers.
                     var matches = MatchForHeaders(match, headers, importantHeaders);
-                    
+
+                    // A list of new profiles to use with the match.
+                    var newProfiles = new Profile[DataSet.Components.Count];
+                    var newProfileIndex = 0;
                     foreach(var component in DataSet.Components)
                     {
                         foreach(var header in component.HttpHeaders)
@@ -192,28 +195,33 @@ namespace FiftyOne.Foundation.Mobile.Detection
                             Match headerMatch;
                             if (matches.TryGetValue(header, out headerMatch))
                             {
-                                if (headerMatch != match)
-                                {
-                                    // Update the statistics about the matching process.
-                                    match._signaturesCompared += headerMatch._signaturesCompared;
-                                    match._signaturesRead += headerMatch._signaturesRead;
-                                    match._stringsRead += headerMatch._stringsRead;
-                                    match._rootNodesEvaluated += headerMatch._rootNodesEvaluated;
-                                    match._nodesEvaluated += headerMatch._nodesEvaluated;
-                                    match._elapsed += headerMatch._elapsed;
+                                // Update the statistics about the matching process.
+                                match._signaturesCompared += headerMatch._signaturesCompared;
+                                match._signaturesRead += headerMatch._signaturesRead;
+                                match._stringsRead += headerMatch._stringsRead;
+                                match._rootNodesEvaluated += headerMatch._rootNodesEvaluated;
+                                match._nodesEvaluated += headerMatch._nodesEvaluated;
+                                match._elapsed += headerMatch._elapsed;
 
-                                    // Switch the match component profile for the other header match.
-                                    if (SwitchProfiles(match, headerMatch, component))
-                                    {
-                                        // Remove the signature as a single one is not being returned
-                                        // for this match.
-                                        match._signature = null;
-                                    }
-                                }
+                                // Set the profile for this component.
+                                newProfiles[newProfileIndex] = headerMatch.ComponentProfiles[component.ComponentId];
+
+                                // Move to the next index.
+                                newProfileIndex++;
+
                                 break;
                             }
                         }
                     }
+
+                    // Reset any fields that relate to the profiles assigned
+                    // to the match result.
+                    match._signature = null;
+                    match._componentProfiles = null;
+                    match._results = null;
+
+                    // Replace the match profiles with the new ones.
+                    match._profiles = newProfiles;
                 }
             }
             return match;
@@ -242,37 +250,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             });
             return matches;
         }
-
-        /// <summary>
-        /// Checks the headerMatch to see if it can be used to provide a profile
-        /// for this component. If it can then switch the profile for the component
-        /// in the match instance to the one provided in the headerMatch.
-        /// </summary>
-        /// <param name="match"></param>
-        /// <param name="headerMatch"></param>
-        /// <param name="component"></param>
-        /// <returns></returns>
-        private bool SwitchProfiles(Match match, Match headerMatch, Component component)
-        {
-            foreach (var header in component.HttpHeaders)
-            {
-                if (header.Equals(headerMatch.HttpHeader))
-                {
-                    // Switch the profile in the match being returned for the 
-                    // component provided.
-                    for (int p = 0; p < match.Profiles.Length; p++)
-                    {
-                        if (match.Profiles[p].Component.Equals(component))
-                        {
-                            match.Profiles[p] = headerMatch.ComponentProfiles[component.ComponentId];
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
-        }
-
+        
         /// <summary>
         /// For a given collection of HTTP headers returns a match containing 
         /// information about the capabilities of the device and 

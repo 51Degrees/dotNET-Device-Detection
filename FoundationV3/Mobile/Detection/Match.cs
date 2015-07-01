@@ -325,7 +325,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 return _results;
             }
         }
-        private SortedList<string, string[]> _results;
+        internal SortedList<string, string[]> _results;
 
         /// <summary>
         /// Gets the values associated with the property name using the profiles
@@ -491,6 +491,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
             }
         }
 
+        /// <summary>
+        /// Dictionary keyed on the component id returning related
+        /// profiles.
+        /// </summary>
         internal IDictionary<int, Profile> ComponentProfiles
         {
             get
@@ -501,6 +505,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     {
                         if (_componentProfiles == null)
                         {
+                            if (Profiles == null)
+                            {
+                                int t = 1; ;
+                            }
                             _componentProfiles = Profiles.ToDictionary(i =>
                                 i.Component.ComponentId);
                         }
@@ -509,7 +517,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 return _componentProfiles;
             }
         }
-        private IDictionary<int, Profile> _componentProfiles;
+        internal IDictionary<int, Profile> _componentProfiles;
 
         /// <summary>
         /// Array of profiles associated with the device that was found.
