@@ -226,7 +226,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 "x-Device-User-Agent",
                 "X-Device-User-Agent",
                 "X-OperaMini-Phone-UA",
-                "User-Agent"
+#pragma warning disable 618
+                UserAgentHeader
+#pragma warning restore 618
             };
 
         /// <summary>
