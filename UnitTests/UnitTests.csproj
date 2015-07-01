@@ -133,6 +133,7 @@
     <None Include="Memory.playlist" />
     <None Include="Performance.playlist" />
     <None Include="Premium.playlist" />
+    <None Include="README.md" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
