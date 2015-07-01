@@ -8,22 +8,25 @@
 
 Use code like...
 
-```Request.Browser["IsMobile"]``` or 
+```Request.Browser["IsMobile"]```
+
+or 
+
 ```Request.Browser["IsTablet"]``` 
 
-...from within a web application to determine the type of device requesting the web page server side.
+... from within a web application to determine the type of device requesting the web page server side.
 
 Include...
 
-```https://[YOUR DOMAIN]/51Degrees.features.js?DeviceType&ScreenInchesDiagonal``` 
+```C# https://[YOUR DOMAIN]/51Degrees.features.js?DeviceType&ScreenInchesDiagonal``` 
 
-...from Javascript to retrieve device type and physcial screen size information. Use Google Analytics custom dimensions to add this data for more granular analysis.
+... from Javascript to retrieve device type and physcial screen size information. Use Google Analytics custom dimensions to add this data for more granular analysis.
 
 Use...
 
  ```var detectionProvider = new Provider(StreamFactory.Create("[DATA FILE LOCATION]"));``` 
 
-...to use device detection offline to analyse web log files by User-Agent headers.
+... to use device detection offline to analyse web log files by User-Agent headers.
 
 ## What do I need?
 
@@ -64,7 +67,7 @@ This release focuses on reducing memory consumption and improving performance wh
 * The entity RankedSignatureIndex has been renamed to IntegerEntity along with the associated factories. This is so that the entity can be reused in the new lists for Nodes related to Signatures and Signatures related to Nodes where each list also contains 4 byte integer data types.
 * A potential threading problem has been resolved in Profile entity by only referencing the property PropertyIndexToValues rather than its backed private field.
 * Cache service method thread start is now synchronised.
-* Memory/Profile.cs Init() method has been removed as the ValueIndexes and SignatureIndexes arrays are needed to support other methods and don’t need to be freed.
+* Memory/Profile.cs Init() method has been removed as the ValueIndexes and SignatureIndexes arrays are needed to support other methods and donâ€™t need to be freed.
 * Changed the Cache classes AddRecent and ServiceCache methods to prevent multiple service operations in multiple threads.
 * Added a ResetCache method to the dataset.
 * WebProvider in memory mode now uses a byte array in memory rather than constructing all instances of every entity. This reduces start up time.
