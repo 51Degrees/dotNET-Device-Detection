@@ -30,6 +30,7 @@ Use...
 
 ```
 var detectionProvider = new Provider(StreamFactory.Create("[DATA FILE LOCATION]"));
+var deviceType = detectionProvider.Match("[YOUR USERAGENT]")["DeviceType"];
 ```
 
 ... to use device detection offline to analyse web log files by User-Agent headers.
