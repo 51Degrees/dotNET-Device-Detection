@@ -345,7 +345,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     // Get the property value from the profile returned
                     // from the match.
                     Profile profile = Profiles.FirstOrDefault(i =>
-                        property.Component.Equals(property.Component));
+                        property.Component.Equals(i.Component));
                     if (profile != null)
                     {
                         value = profile[property];
