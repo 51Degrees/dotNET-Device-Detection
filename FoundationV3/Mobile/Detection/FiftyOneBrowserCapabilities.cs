@@ -358,24 +358,46 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             get
             {
-                if (_browserVersionSet == false)
+                if (_browserVersion == null)
                 {
                     lock (this)
                     {
-                        if (_browserVersionSet == false)
+                        if (_browserVersion == null)
                         {
                             var version = _match["BrowserVersion"];
+
+                            // Use the version from 51Degrees if it's present and contains
+                            // numeric segments.
+                            int majorVersion = 0, minorVersion = 0, buildVersion = 0, revisionVersion = 0;
                             if (version != null)
                             {
                                 MatchCollection segments = Regex.Matches(version[0].Name, @"\d+");
-                                int majorVersion = 0, minorVersion = 0, buildVersion = 0, revisionVersion = 0;
-                                if (segments.Count > 0) int.TryParse(segments[0].Value, out majorVersion);
-                                if (segments.Count > 1) int.TryParse(segments[1].Value, out minorVersion);
-                                if (segments.Count > 2) int.TryParse(segments[2].Value, out buildVersion);
-                                if (segments.Count > 3) int.TryParse(segments[3].Value, out revisionVersion);
-                                _browserVersion = new Version(majorVersion, minorVersion, buildVersion, revisionVersion);
-                                _browserVersionSet = true;
+                                if (segments.Count > 0)
+                                {
+                                    if (segments.Count > 0) int.TryParse(segments[0].Value, out majorVersion);
+                                    if (segments.Count > 1) int.TryParse(segments[1].Value, out minorVersion);
+                                    if (segments.Count > 2) int.TryParse(segments[2].Value, out buildVersion);
+                                    if (segments.Count > 3) int.TryParse(segments[3].Value, out revisionVersion);
+                                }
                             }
+
+                            // If no browser version is available then try the default 
+                            // properties, or set to an empty instance.
+                            if (majorVersion == 0 &&
+                                minorVersion == 0 &&
+                                buildVersion == 0 &&
+                                revisionVersion == 0)
+                            {
+                                majorVersion = _defaultBrowserCapabilities.MajorVersion;
+                                MatchCollection segments = Regex.Matches(_defaultBrowserCapabilities.MinorVersionString, @"\d+");
+                                if (segments.Count > 0)
+                                {
+                                    if (segments.Count > 0) int.TryParse(segments[0].Value, out minorVersion);
+                                    if (segments.Count > 1) int.TryParse(segments[1].Value, out buildVersion);
+                                }
+                            }
+
+                            _browserVersion = new Version(majorVersion, minorVersion, buildVersion, revisionVersion);
                         }
                     }
                 }
@@ -383,7 +405,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
             }
         }
         private Version _browserVersion;
-        private bool _browserVersionSet = false;
         private static readonly Regex BrowserVersionRegex = new Regex(@"\d+", RegexOptions.Compiled);
 
         /// <summary>
