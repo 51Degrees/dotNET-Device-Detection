@@ -2,9 +2,7 @@
 
 [Recent Changes](#recent-changes "Review recent major changes") | [.NET Developer Documention](https://51degrees.com/support/documentation/net "Full getting started guide and advanced developer documentation") | [Device Databases](https://51degrees.com/compare-data-options "Different device databases which can be used with 51Degrees device detection")
 
-## What is Device Detection?
-
-Use code like...
+**Server Side:** Use code like...
 
 ```cs
 Request.Browser["IsMobile"]
@@ -16,9 +14,9 @@ or
 Request.Browser["IsTablet"]
 ```
 
-... from within a web application to determine the type of device requesting the web page server side.
+... from within a web application server side to determine the type of device accessing the web page.
 
-Include...
+**Client Side:** Include...
 
 ```
 https://[YOUR DOMAIN]/51Degrees.features.js?DeviceType&ScreenInchesDiagonal
@@ -26,7 +24,7 @@ https://[YOUR DOMAIN]/51Degrees.features.js?DeviceType&ScreenInchesDiagonal
 
 ... from Javascript to retrieve device type and physcial screen size information. Use Google Analytics custom dimensions to add this data for more granular analysis.
 
-Use...
+**Offline:** Use...
 
 ```cs
 var detectionProvider = new Provider(StreamFactory.Create("[DATA FILE LOCATION]"));
@@ -35,7 +33,7 @@ var deviceType = detectionProvider.Match("[YOUR USERAGENT]")["DeviceType"];
 
 ... to use device detection offline to analyse web log files by User-Agent headers.
 
-## What do I need?
+## What's needed?
 
 The simplest method of deploying 51Degrees device detection to a .NET project is with NuGet. Just search for [51Degrees on NuGet](https://www.nuget.org/packages?q=51degrees "51Degrees Packages on NuGet").
 
