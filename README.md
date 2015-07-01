@@ -8,26 +8,30 @@
 
 Use code like...
 
-```Request.Browser["IsMobile"]
+```
+Request.Browser["IsMobile"]
 ```
 
 or 
 
-```Request.Browser["IsTablet"]
+```
+Request.Browser["IsTablet"]
 ```
 
 ... from within a web application to determine the type of device requesting the web page server side.
 
 Include...
 
-```C# https://[YOUR DOMAIN]/51Degrees.features.js?DeviceType&ScreenInchesDiagonal
+```
+C# https://[YOUR DOMAIN]/51Degrees.features.js?DeviceType&ScreenInchesDiagonal
 ```
 
 ... from Javascript to retrieve device type and physcial screen size information. Use Google Analytics custom dimensions to add this data for more granular analysis.
 
 Use...
 
-```var detectionProvider = new Provider(StreamFactory.Create("[DATA FILE LOCATION]"));
+```
+var detectionProvider = new Provider(StreamFactory.Create("[DATA FILE LOCATION]"));
 ```
 
 ... to use device detection offline to analyse web log files by User-Agent headers.
