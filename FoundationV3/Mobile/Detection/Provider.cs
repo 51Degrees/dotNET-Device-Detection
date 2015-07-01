@@ -187,9 +187,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
                     // A list of new profiles to use with the match.
                     var newProfiles = new Profile[DataSet.Components.Count];
-                    var newProfileIndex = 0;
+                    var componentIndex = 0;
                     foreach(var component in DataSet.Components)
                     {
+                        /// See if any of the headers can be used for this
+                        /// components profile. As soon as one matches then
+                        /// stop and don't look at any more. They are ordered
+                        /// in preferred sequence such that the first item is 
+                        /// the most preferred.
                         foreach(var header in component.HttpHeaders)
                         {
                             Match headerMatch;
@@ -204,20 +209,25 @@ namespace FiftyOne.Foundation.Mobile.Detection
                                 match._elapsed += headerMatch._elapsed;
 
                                 // Set the profile for this component.
-                                newProfiles[newProfileIndex] = headerMatch.ComponentProfiles[component.ComponentId];
-
-                                // Move to the next index.
-                                newProfileIndex++;
+                                newProfiles[componentIndex] = headerMatch.Profiles.FirstOrDefault(i =>
+                                    component.Equals(i.Component));
 
                                 break;
                             }
+                        }
+
+                        // If no profile could be found for the component
+                        // then use the default profile.
+                        if (newProfiles[componentIndex] == null)
+                        {
+                            newProfiles[componentIndex] = component.DefaultProfile;
+                            componentIndex++;
                         }
                     }
 
                     // Reset any fields that relate to the profiles assigned
                     // to the match result.
                     match._signature = null;
-                    match._componentProfiles = null;
                     match._results = null;
 
                     // Replace the match profiles with the new ones.

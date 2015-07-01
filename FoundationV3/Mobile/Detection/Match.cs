@@ -344,9 +344,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 {
                     // Get the property value from the profile returned
                     // from the match.
-                    Profile profile;
-                    if (ComponentProfiles.TryGetValue(property.Component.ComponentId, out profile) &&
-                        profile != null)
+                    Profile profile = Profiles.FirstOrDefault(i =>
+                        property.Component.Equals(property.Component));
+                    if (profile != null)
                     {
                         value = profile[property];
                     }
@@ -490,34 +490,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
                             i.ProfileId.ToString()).ToArray());
             }
         }
-
-        /// <summary>
-        /// Dictionary keyed on the component id returning related
-        /// profiles.
-        /// </summary>
-        internal IDictionary<int, Profile> ComponentProfiles
-        {
-            get
-            {
-                if (_componentProfiles == null)
-                {
-                    lock(this)
-                    {
-                        if (_componentProfiles == null)
-                        {
-                            if (Profiles == null)
-                            {
-                                int t = 1; ;
-                            }
-                            _componentProfiles = Profiles.ToDictionary(i =>
-                                i.Component.ComponentId);
-                        }
-                    }
-                }
-                return _componentProfiles;
-            }
-        }
-        internal IDictionary<int, Profile> _componentProfiles;
 
         /// <summary>
         /// Array of profiles associated with the device that was found.
@@ -720,7 +692,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
             Nodes.Clear();
             _profiles = null;
             _profileIds = null;
-            _componentProfiles = null;
 
             Init(targetUserAgent);
         }
