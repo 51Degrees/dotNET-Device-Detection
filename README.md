@@ -55,7 +55,7 @@ This release focuses on reducing memory consumption and improving performance wh
 **Important Change:** The embedded device data has been removed from the assembly and by default placed in the App_Data folder for both web and non-web projects. The solution will not work without the associated data file being provided and the WebProvider.ActiveProvider property can now return null.
 </div>
 
-### Major Changes
+### Major Changes in Version 3.2
 
 * Embedded data has been removed from the assembly and now must be provided from the App_Data folder.
 * .NET 3.5 is not supported in this release in order to use memory mapped files and simplify overriding default browser capabilities.
