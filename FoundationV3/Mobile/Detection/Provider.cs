@@ -221,8 +221,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         if (newProfiles[componentIndex] == null)
                         {
                             newProfiles[componentIndex] = component.DefaultProfile;
-                            componentIndex++;
                         }
+
+                        // Move to the next array element.
+                        componentIndex++;
                     }
 
                     // Reset any fields that relate to the profiles assigned
