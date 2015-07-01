@@ -31,7 +31,7 @@ var detectionProvider = new Provider(StreamFactory.Create("[DATA FILE LOCATION]"
 var deviceType = detectionProvider.Match("[YOUR USERAGENT]")["DeviceType"];
 ```
 
-... to perform offline analysis of web log files with User-Agent headers.
+... to perform offline analysis of web logs with User-Agent headers.
 
 **[List All Properties](https://51degrees.com/resources/property-dictionary "View all available properties and values")**
 
