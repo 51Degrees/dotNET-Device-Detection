@@ -23,7 +23,7 @@ Request.Browser["IsTablet"]
 Include...
 
 ```
-C# https://[YOUR DOMAIN]/51Degrees.features.js?DeviceType&ScreenInchesDiagonal
+https://[YOUR DOMAIN]/51Degrees.features.js?DeviceType&ScreenInchesDiagonal
 ```
 
 ... from Javascript to retrieve device type and physcial screen size information. Use Google Analytics custom dimensions to add this data for more granular analysis.
