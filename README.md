@@ -1,6 +1,4 @@
-![51Degrees](https://51degrees.com/Portals/0/Logo.png "THE Fasstest and Most Accurate Device Detection")
-
-# Device Detection for Microsoft .NET
+![51Degrees](https://51degrees.com/Portals/0/Logo.png "THE Fasstest and Most Accurate Device Detection")**Device Detection for Microsoft .NET**
 
 [Recent Changes](#recent-changes "Review recent major changes") | [.NET Developer Documention](https://51degrees.com/support/documentation/net "Full getting started guide and advanced developer documentation") | [Device Databases](https://51degrees.com/compare-data-options "Different device databases which can be used with 51Degrees device detection")
 
