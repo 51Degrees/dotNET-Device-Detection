@@ -49,33 +49,33 @@ namespace FiftyOne.UnitTests.API
         [TestMethod]
         public void API_NullUserAgent()
         {
-            _provider.Match((string)null);
+            FetchAllProperties(_provider.Match((string)null));
         }
 
         [TestMethod]
         public void API_EmptyUserAgent()
         {
-            _provider.Match(String.Empty);
+            FetchAllProperties(_provider.Match(String.Empty));
         }
 
         [TestMethod]
         public void API_LongUserAgent()
         {
             var userAgent = String.Join(" ", UserAgentGenerator.GetEnumerable(10, 10));
-            _provider.Match(userAgent);
+            FetchAllProperties(_provider.Match(userAgent));
         }
 
         [TestMethod]
         public void API_NullHeaders()
         {
-            _provider.Match((NameValueCollection)null);
+            FetchAllProperties(_provider.Match((NameValueCollection)null));
         }
 
         [TestMethod]
         public void API_EmptyHeaders()
         {
             var headers = new NameValueCollection();
-            _provider.Match(headers);
+            FetchAllProperties(_provider.Match(headers));
         }
 
         [TestMethod]
@@ -101,6 +101,19 @@ namespace FiftyOne.UnitTests.API
                 }
             }
             _provider.Match(headers);
+        }
+
+        private void FetchAllProperties(Match match)
+        {
+            var checkSum = 0;
+            foreach(var property in match.DataSet.Properties)
+            {
+                Console.WriteLine("Property: {0} with value {1}",
+                    property.Name,
+                    match[property.Name]);
+                checkSum += match[property.Name].ToString().GetHashCode();
+            }
+            Console.WriteLine("Check sum: {0}", checkSum);
         }
     }
 }
