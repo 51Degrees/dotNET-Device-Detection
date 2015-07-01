@@ -42,7 +42,7 @@ namespace FiftyOne.UnitTests.API
         [TestInitialize()]
         public void CreateDataSet()
         {
-            _dataSet = StreamFactory.Create(Path.Combine(Constants.LITE_PATTERN_V31));
+            _dataSet = StreamFactory.Create(Path.Combine(Constants.ENTERPRISE_PATTERN_V31));
             _provider = new Provider(_dataSet);
         }
 
@@ -86,7 +86,18 @@ namespace FiftyOne.UnitTests.API
             {
                 headers.Add(header, UserAgentGenerator.GetRandomUserAgent(0));
             }
-            _provider.Match(headers);
+            FetchAllProperties(_provider.Match(headers));
+        }
+
+        [TestMethod]
+        public void API_AllHeadersNull()
+        {
+            var headers = new NameValueCollection();
+            foreach (var header in _dataSet.HttpHeaders)
+            {
+                headers.Add(header, null);
+            }
+            FetchAllProperties(_provider.Match(headers));
         }
 
         [TestMethod]
@@ -100,7 +111,21 @@ namespace FiftyOne.UnitTests.API
                     headers.Add(header, UserAgentGenerator.GetRandomUserAgent(0));
                 }
             }
-            _provider.Match(headers);
+            FetchAllProperties(_provider.Match(headers));
+        }
+
+        [TestMethod]
+        public void API_DuplicateHeadersNull()
+        {
+            var headers = new NameValueCollection();
+            for (var i = 0; i < 5; i++)
+            {
+                foreach (var header in _dataSet.HttpHeaders)
+                {
+                    headers.Add(header, null);
+                }
+            }
+            FetchAllProperties(_provider.Match(headers));
         }
 
         private void FetchAllProperties(Match match)
