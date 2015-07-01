@@ -41,7 +41,7 @@ This GitHub repository and NuGet include 51Degrees free Lite device database. Th
 
 Data files which are updated weekly and daily, automatically, and with more properties and device combinationsare also available.
 
-[Compare Device Databases](https://51degrees.com/compare-data-options "Compare different data file options for 51Degrees device detection")
+**[Compare Device Databases](https://51degrees.com/compare-data-options "Compare different data file options for 51Degrees device detection")**
 
 ## Recent Changes
 
