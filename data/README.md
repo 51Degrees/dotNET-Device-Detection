@@ -1,0 +1,5 @@
+![51Degrees](https://51degrees.com/Portals/0/Logo.png "THE Fastest and Most Accurate Device Detection")**Device Databases**
+
+[Supported Databases](https://51degrees.com/compare-data-options "Different device databases which can be used with 51Degrees device detection")
+
+The data files contained in this folder are licenced under the Mozilla Public License 2 and updated monthly.
