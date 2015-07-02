@@ -1,6 +1,6 @@
 ![51Degrees](https://51degrees.com/Portals/0/Logo.png "THE Fasstest and Most Accurate Device Detection")**Device Detection for Microsoft .NET**
 
-[Recent Changes](#recent-changes "Review recent major changes") | [Supported Databases](https://51degrees.com/compare-data-options "Different device databases which can be used with 51Degrees device detection") | [.NET Developer Documention](https://51degrees.com/support/documentation/net "Full getting started guide and advanced developer documentation") | [Available Properties](https://51degrees.com/resources/property-dictionary "View all available properties and values")
+[Recent Changes](#recent-changes "Review recent major changes") | [Supported Databases](https://51degrees.com/compare-data-options?utm_source=github&utm_medium=repository&utm_content=home-menu&utm_campaign=net-open-source "Different device databases which can be used with 51Degrees device detection") | [.NET Developer Documention](https://51degrees.com/support/documentation/net?utm_source=github&utm_medium=repository&utm_content=home-menu&utm_campaign=net-open-source "Full getting started guide and advanced developer documentation") | [Available Properties](https://51degrees.com/resources/property-dictionary?utm_source=github&utm_medium=repository&utm_content=home-menu&utm_campaign=net-open-source "View all available properties and values")
 
 **Server Side:** Use code like...
 
@@ -33,7 +33,7 @@ var deviceType = detectionProvider.Match("[YOUR USERAGENT]")["DeviceType"];
 
 ... to perform offline analysis of web logs with User-Agent headers.
 
-**[Review All Properties](https://51degrees.com/resources/property-dictionary "View all available properties and values")**
+**[Review All Properties](https://51degrees.com/resources/property-dictionary?utm_source=github&utm_medium=repository&utm_content=home-cta&utm_campaign=net-open-source "View all available properties and values")**
 
 ## What's needed?
 
@@ -43,7 +43,7 @@ This GitHub repository and NuGet include 51Degrees free Lite device database. Th
 
 Data files which are updated weekly and daily, automatically, and with more properties and device combinationsare also available.
 
-**[Compare Device Databases](https://51degrees.com/compare-data-options "Compare different data file options for 51Degrees device detection")**
+**[Compare Device Databases](https://51degrees.com/compare-data-options?utm_source=github&utm_medium=repository&utm_content=home-cta&utm_campaign=net-open-source "Compare different data file options for 51Degrees device detection")**
 
 ## Recent Changes
 

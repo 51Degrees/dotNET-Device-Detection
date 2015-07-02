@@ -6,4 +6,4 @@ The data files contained in this folder are licenced under the Mozilla Public Li
 
 Data files that are automatically updated weekly and daily containing properties such as full device type, physical screen size, supported inputs and device price information are also available.
 
-**[Compare Device Databases](https://51degrees.com/compare-data-options "Different device databases which can be used with 51Degrees device detection")**
+**[Compare Device Databases](https://51degrees.com/compare-data-options?utm_source=github&utm_medium=repository&utm_content=data&utm_campaign=net-open-source "Different device databases which can be used with 51Degrees device detection")**
