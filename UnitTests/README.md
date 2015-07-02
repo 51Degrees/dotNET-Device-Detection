@@ -2,7 +2,7 @@
 
 **Important:** Unit tests are provided for both code and data files. Enterprise and Premium data files needed to be placed in the Data folder of this repository in order for all tests to be executed. These files can be obtained from 51Degrees.
 
-**[Get Premium and Enterprise Data](https://51degrees.com/compare-data-options "Different device databases which can be used with 51Degrees device detection")**
+**[Get Premium and Enterprise Data](https://51degrees.com/compare-data-options?utm_source=github&utm_medium=repository&utm_content=unit-tests&utm_campaign=net-open-source "Different device databases which can be used with 51Degrees device detection")**
 
 ## Unit Test Categories
 
