@@ -34,7 +34,7 @@ namespace FiftyOne.UnitTests.API
     /// Summary description for UnitTest1
     /// </summary>
     [TestClass]
-    public class API
+    public class API : IDisposable
     {
         private DataSet _dataSet;
         private Provider _provider;
@@ -126,6 +126,21 @@ namespace FiftyOne.UnitTests.API
                 }
             }
             FetchAllProperties(_provider.Match(headers));
+        }
+
+        [TestCleanup]
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_dataSet != null)
+            {
+                _dataSet.Dispose();
+            }
         }
 
         private void FetchAllProperties(Match match)

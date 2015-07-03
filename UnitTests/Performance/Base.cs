@@ -30,7 +30,7 @@ using System.Collections.Generic;
 namespace FiftyOne.UnitTests.Performance
 {
     [TestClass]
-    public abstract class Base
+    public abstract class Base : IDisposable
     {
         /// <summary>
         /// The data set to be used for the tests.
@@ -116,6 +116,12 @@ namespace FiftyOne.UnitTests.Performance
 
         [TestCleanup]
         public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
         {
             if (_dataSet != null)
             {
