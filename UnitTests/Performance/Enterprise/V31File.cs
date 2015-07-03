@@ -80,7 +80,7 @@ namespace FiftyOne.UnitTests.Performance.Enterprise
         [TestMethod]
         public void EnterpriseV31File_Performance_BadUserAgentsMultiAll()
         {
-            base.BadUserAgentsMulti(_dataSet.Properties, 1);
+            base.BadUserAgentsMulti(_dataSet.Properties, 3);
         }
 
         [TestMethod]

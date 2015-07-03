@@ -31,7 +31,7 @@ using System.Threading.Tasks;
 
 namespace FiftyOne.UnitTests.HttpHeaders
 {
-    public class Base
+    public class Base : IDisposable
     {
         public class Validation : Dictionary<Property, Regex>
         {
@@ -94,6 +94,21 @@ namespace FiftyOne.UnitTests.HttpHeaders
                         test.Value,
                         value));
                 }
+            }
+        }
+
+        [TestCleanup]
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_dataSet != null)
+            {
+                _dataSet.Dispose();
             }
         }
     }

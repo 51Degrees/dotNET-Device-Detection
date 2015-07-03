@@ -103,11 +103,16 @@ namespace FiftyOne.UnitTests.MetaData
         [TestCleanup]
         public void Dispose()
         {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
             if (_dataSet != null)
             {
                 _dataSet.Dispose();
             }
-            GC.SuppressFinalize(this);
         }
     }
 }
