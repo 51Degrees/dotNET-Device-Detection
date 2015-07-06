@@ -75,7 +75,21 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// </returns>
         public static DataSet Create(string filePath)
         {
-            return Create(filePath, File.GetLastWriteTimeUtc(filePath));
+            return Create(filePath, File.GetLastWriteTimeUtc(filePath), false);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="DataSet"/> from the file provided. The last modified
+        /// date of the data set is the last write time of the data file provided.
+        /// </summary>
+        /// <param name="filePath">Uncompressed file containing the data for the data set</param>
+        /// <param name="isTempFile">True if the file should be deleted when the source is disposed</param>
+        /// <returns>
+        /// A <see cref="DataSet"/>configured to read entities from the file path when required
+        /// </returns>
+        public static DataSet Create(string filePath, bool isTempFile)
+        {
+            return Create(filePath, File.GetLastWriteTimeUtc(filePath), isTempFile);
         }
 
         /// <summary>
@@ -88,7 +102,21 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// </returns>
         public static DataSet Create(string filePath, DateTime lastModified)
         {
-            var dataSet = new DataSet(filePath, lastModified, DataSet.Modes.File);
+            return Create(filePath, File.GetLastWriteTimeUtc(filePath), false);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="DataSet"/> from the file provided.
+        /// </summary>
+        /// <param name="filePath">Uncompressed file containing the data for the data set</param>
+        /// <param name="lastModified">Date and time the source data was last modified.</param>
+        /// <param name="isTempFile">True if the file should be deleted when the source is disposed</param>
+        /// <returns>
+        /// A <see cref="DataSet"/>configured to read entities from the file path when required
+        /// </returns>
+        public static DataSet Create(string filePath, DateTime lastModified, bool isTempFile)
+        {
+            var dataSet = new DataSet(filePath, lastModified, DataSet.Modes.File, isTempFile);
             Load(dataSet);
             return dataSet;
         }
