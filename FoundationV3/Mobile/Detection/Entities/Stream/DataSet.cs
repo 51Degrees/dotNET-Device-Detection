@@ -43,6 +43,27 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 
         #endregion 
 
+        #region Properties
+
+        /// <summary>
+        /// The number of readers that have been created in the pool
+        /// that connects the data set to the data source.
+        /// </summary>
+        public int ReadersCreated
+        {
+            get { return Pool.ReadersCreated; }
+        }
+
+        /// <summary>
+        /// The number of readers in the queue ready to be used.
+        /// </summary>
+        public int ReadersQueued
+        {
+            get { return Pool.ReadersQueued; }
+        }
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
@@ -54,10 +75,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <param name="mode">
         /// The mode of operation the data set will be using.
         /// </param>
-        internal DataSet(string fileName, DateTime lastModified, Modes mode)
+        /// <param name="isTempFile">True if the file should be deleted when the source is disposed</param>
+        internal DataSet(string fileName, DateTime lastModified, Modes mode, bool isTempFile)
             : base(lastModified, mode)
         {
-            Pool = new Pool(new SourceFile(fileName));
+            Pool = new Pool(new SourceFile(fileName, isTempFile));
         }
 
         /// <summary>
