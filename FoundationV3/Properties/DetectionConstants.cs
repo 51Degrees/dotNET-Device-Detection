@@ -150,7 +150,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// The number of strings that it should be possible to cache.
         /// </summary>
-        internal const int StringsCacheSize = 6000;
+        internal const int StringsCacheSize = 8000;
 
         /// <summary>
         /// If premium data is being used with Foundation the licence key
