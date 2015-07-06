@@ -47,7 +47,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
             /// The binary data file format used with Trie version 3 device 
             /// detection.
             /// </summary>
-            TrieV30
+            TrieV30,
+            /// <summary>
+            /// The binary data file format used with Trie version 3.2 device 
+            /// detection.
+            /// </summary>
+            TrieV32
         }
 
         /// <summary>
@@ -62,7 +67,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// An array of trie format versions that this API will support.
         /// </summary>
         public static readonly KeyValuePair<FormatVersions, Version>[] SupportedTrieFormatVersions = new KeyValuePair<FormatVersions, Version>[] {
-            new KeyValuePair<FormatVersions, Version>(FormatVersions.TrieV30, new Version(3, 0, 0, 0))
+            new KeyValuePair<FormatVersions, Version>(FormatVersions.TrieV30, new Version(3, 0, 0, 0)),
+            new KeyValuePair<FormatVersions, Version>(FormatVersions.TrieV32, new Version(3, 2, 0, 0))
         };
 
         /// <summary>
