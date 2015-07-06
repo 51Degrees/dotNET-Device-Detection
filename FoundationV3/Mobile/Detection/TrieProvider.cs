@@ -26,13 +26,14 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using FiftyOne.Foundation.Mobile.Detection.Entities.Stream;
+using System.Collections.Specialized;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
     /// <summary>
     /// Decision trie data structure provider.
     /// </summary>
-    public class TrieProvider : IDisposable
+    public abstract class TrieProvider : IDisposable
     {
         #region Enumerations
 
@@ -72,7 +73,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Byte array of the available properties.
         /// </summary>
-        private readonly byte[] _properties;
+        protected readonly byte[] _properties;
 
         /// <summary>
         /// Byte array of the devices list.
@@ -97,26 +98,50 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Dictionary of property names to indexes.
         /// </summary>
-        private readonly Dictionary<string, int> _propertyIndex = new Dictionary<string, int>();
+        protected readonly Dictionary<string, int> _propertyIndex = new Dictionary<string, int>();
 
         /// <summary>
         /// List of the available property names.
         /// </summary>
-        private readonly List<string> _propertyNames = new List<string>();
+        protected readonly List<string> _propertyNames = new List<string>();
 
         /// <summary>
-        /// The number of properties available in total.
+        /// List of Http headers for each property index.
         /// </summary>
-        private int _propertyCount = 0;
+        protected readonly List<string[]> _propertyHttpHeaders = new List<string[]>();
 
         #endregion
 
         #region Public Properties
 
         /// <summary>
+        /// A list of Http headers that the provider can use
+        /// for device detection.
+        /// </summary>
+        public List<string> HttpHeaders
+        {
+            get
+            {
+                if (_httpHeaders == null)
+                {
+                    lock(this)
+                    {
+                        if (_httpHeaders == null)
+                        {
+                            _httpHeaders = _propertyHttpHeaders.SelectMany(i =>
+                                i).Distinct().OrderBy(i => i).ToList();
+                        }
+                    }
+                }
+                return _httpHeaders;
+            }
+        }
+        private List<string> _httpHeaders;
+
+        /// <summary>
         /// List of all property names for the provider.
         /// </summary>
-        public List<string> PropertyNames
+        public IList<string> PropertyNames
         {
             get 
             {
@@ -149,12 +174,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
             _lookupList = lookupList;
             _nodesOffset = nodesOffset;
             _pool = pool;
-
-            // Store the maximum number of properties.
-            _propertyCount = _properties.Length / sizeof(int);
-
-            // Get the names of all the properties.
-            InitPropertyNames();
         }
         
         #endregion
@@ -190,15 +209,53 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns></returns>
         public int GetDeviceIndex(string userAgent)
         {
+            int index;
             var reader = _pool.GetReader();
-            reader.BaseStream.Position = _nodesOffset;
-            var index = GetDeviceIndex(
-                reader,
-                GetUserAgentByteArray(userAgent),
-                0,
-                0);
-            _pool.Release(reader);
+            try
+            {
+                reader.BaseStream.Position = _nodesOffset;
+                index = GetDeviceIndex(
+                    reader,
+                    GetUserAgentByteArray(userAgent),
+                    0,
+                    0);
+            }
+            finally
+            {
+                _pool.Release(reader);
+            }
             return index;
+        }
+
+        /// <summary>
+        /// Returns a collection of device indexes for each of the relevent
+        /// HTTP headers provided. Those headers which are unrelated to device
+        /// detection are ignored.
+        /// </summary>
+        /// <param name="headers">Collection of HTTP headers and values</param>
+        /// <returns>Collection of headers and device indexes for each one</returns>
+        public IDictionary<string, int> GetDeviceIndexes(NameValueCollection headers)
+        {
+            IDictionary<string, int> indexes = new SortedDictionary<string, int>();
+            if (headers != null)
+            {
+                var reader = _pool.GetReader();
+                try
+                {
+                    foreach (string header in headers.Keys)
+                    {
+                        if (HttpHeaders.BinarySearch(header) >= 0)
+                        {
+                            indexes.Add(header, GetDeviceIndex(headers[header]));
+                        }
+                    }
+                }
+                finally
+                {
+                    _pool.Release(reader);
+                }
+            }
+            return indexes;
         }
 
         /// <summary>
@@ -212,14 +269,45 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
 
         /// <summary>
-        /// Returns the property value based on the useragent provided.
+        /// Returns the property value based on the device indexes provided.
+        /// </summary>
+        /// <param name="deviceIndexes">Http headers and their device index.</param>
+        /// <param name="property">The name of the property required.</param>
+        /// <returns>The value of the property for the given device index</returns>
+        public string GetPropertyValue(IDictionary<string, int> deviceIndexes, string property)
+        {
+            return GetPropertyValue(deviceIndexes, _propertyIndex[property]);
+        }
+
+        /// <summary>
+        /// Returns the property value based on the device index provided.
         /// </summary>
         /// <param name="deviceIndex">The index of the device whose property should be returned.</param>
         /// <param name="property">The name of the property required.</param>
         /// <returns>The value of the property for the given device index</returns>
         public string GetPropertyValue(int deviceIndex, string property)
         {
-            return GetPropertyValue(deviceIndex, GetPropertyIndex(property));
+            return GetPropertyValue(deviceIndex, _propertyIndex[property]);
+        }
+
+        /// <summary>
+        /// Returns the value of the property index provided from the device indexes provided.
+        /// Matches the Http header to the property index.
+        /// </summary>
+        /// <param name="deviceIndexes">Indexes for the device.</param>
+        /// <param name="propertyIndex">Index of the property required.</param>
+        /// <returns>The value of the property for the given device indexes</returns>
+        public string GetPropertyValue(IDictionary<string, int> deviceIndexes, int propertyIndex)
+        {
+            int deviceIndex;
+            foreach(var header in _propertyHttpHeaders[propertyIndex])
+            {
+                if (deviceIndexes.TryGetValue(header, out deviceIndex))
+                {
+                    return GetPropertyValue(deviceIndex, propertyIndex);
+                }
+            }
+            return null;
         }
 
         /// <summary>
@@ -227,50 +315,38 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="deviceIndex">Index for the device.</param>
         /// <param name="propertyIndex">Index of the property required.</param>
-        /// <returns></returns>
+        /// <returns>The value of the property index for the given device index</returns>
         public string GetPropertyValue(int deviceIndex, int propertyIndex)
         {
-            var devicePosition = deviceIndex * _propertyCount * sizeof(int);
+            var devicePosition = deviceIndex * _propertyNames.Count * sizeof(int);
             return GetStringValue(
                 BitConverter.ToInt32(
                     _devices,
                     devicePosition + (propertyIndex * sizeof(int))));
         }
-        
+
         /// <summary>
-        /// Returns the integer index of the property in the list of values
-        /// associated with the device.
+        /// Returns the value of the property for the user agent provided.
         /// </summary>
-        /// <param name="property"></param>
-        /// <returns></returns>
-        public int GetPropertyIndex(string property)
+        /// <param name="userAgent">User agent of the request</param>
+        /// <param name="propertyName">Name of the property required</param>
+        /// <returns>The value of the property for the given user agent</returns>
+        public string GetPropertyValue(string userAgent, string propertyName)
         {
-            int index = -1;
-            if (_propertyIndex.TryGetValue(property, out index) == false)
-            {
-                lock (_propertyIndex)
-                {
-                    if (_propertyIndex.TryGetValue(property, out index) == false)
-                    {
-                        // Property does not exist in the cache, so find the index.
-                        for (int i = 0; i < _propertyCount; i++)
-                        {
-                            if (GetStringValue(BitConverter.ToInt32(
-                                _properties, i * sizeof(int))).Equals(property, StringComparison.InvariantCulture))
-                            {
-                                // The property has been found so store it, and return
-                                // the index of the property.
-                                index = i;
-                                _propertyIndex.Add(property, index);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            return index;
+            return GetPropertyValue(GetDeviceIndex(userAgent), propertyName);
         }
 
+        /// <summary>
+        /// Returns the value of the property for the user agent provided.
+        /// </summary>
+        /// <param name="headers">Collection of HTTP headers and values</param>
+        /// <param name="propertyName">Name of the property required</param>
+        /// <returns>The value of the property for the given user agent</returns>
+        public string GetPropertyValue(NameValueCollection headers, string propertyName)
+        {
+            return GetPropertyValue(GetDeviceIndexes(headers), propertyName);
+        }
+        
         /// <summary>
         /// Disposes of the pool assigned to the provider.
         /// </summary>
@@ -281,29 +357,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         #endregion
 
-        #region Private Methods
-
-        /// <summary>
-        /// Initialises the full list of property names available from the
-        /// provider.
-        /// </summary>
-        private void InitPropertyNames()
-        {
-            for (int i = 0; i < _propertyCount; i++)
-            {
-                var value = GetStringValue(BitConverter.ToInt32(_properties, i * sizeof(int)));
-                if (_propertyIndex.ContainsKey(value) == false)
-                    _propertyIndex.Add(value, i);
-                _propertyNames.Insert(~_propertyNames.BinarySearch(value), value);
-            }
-        }
+        #region Protected Methods
 
         /// <summary>
         /// Returns the string at the offset provided.
         /// </summary>
         /// <param name="offset"></param>
         /// <returns></returns>
-        private string GetStringValue(int offset)
+        protected string GetStringValue(int offset)
         {
             var index = 0;
             var builder = new StringBuilder();
@@ -317,6 +378,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
             return builder.ToString();
         }
 
+        #endregion
+
+        #region Private Methods
+
         /// <summary>
         /// Converts a user agent in to a null terminated byte array.
         /// </summary>
@@ -324,10 +389,15 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>A null terminated byte array</returns>
         private static byte[] GetUserAgentByteArray(string userAgent)
         {
-            var result = new byte[userAgent.Length + 1];
-            for (int i = 0; i < userAgent.Length; i++)
-                result[i] = userAgent[i] <= 0x7F ? (byte)userAgent[i] : (byte)' ';
-            result[result.Length - 1] = 0;
+            var result = new byte[userAgent != null ? userAgent.Length + 1 : 0];
+            if (result.Length > 0)
+            {
+                for (int i = 0; i < userAgent.Length; i++)
+                {
+                    result[i] = userAgent[i] <= 0x7F ? (byte)userAgent[i] : (byte)' ';
+                }
+                result[result.Length - 1] = 0;
+            }
             return result;
         }
 
@@ -421,6 +491,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             // Get the lookup list.
             var lookupListOffset = reader.ReadInt32();
+
+            // If there are no more characters in the user agent return
+            // the parent device index.
+            if (index == userAgent.Length)
+            {
+                return parentDeviceIndex;
+            }
 
             // Get the index of the child.
             var childIndex = GetChild(Math.Abs(lookupListOffset), userAgent[index]);
