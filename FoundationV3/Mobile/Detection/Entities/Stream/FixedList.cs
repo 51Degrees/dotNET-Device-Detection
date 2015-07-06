@@ -19,10 +19,7 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
-using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Threading;
 using FiftyOne.Foundation.Mobile.Detection.Entities.Headers;
 using FiftyOne.Foundation.Mobile.Detection.Factories;
 using FiftyOne.Foundation.Mobile.Detection.Readers;
