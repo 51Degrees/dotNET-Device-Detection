@@ -12,9 +12,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Data", "Data", "{403E28D4-A922-40D4-822B-4FA005B595AD}"
 	ProjectSection(SolutionItems) = preProject
 		data\20000 User Agents.csv = data\20000 User Agents.csv
-		data\51Degrees-Lite.trie = data\51Degrees-Lite.trie
+		data\51Degrees-LiteV3.0.trie = data\51Degrees-LiteV3.0.trie
 		data\51Degrees-LiteV3.1.dat = data\51Degrees-LiteV3.1.dat
 		data\51Degrees-LiteV3.2.dat = data\51Degrees-LiteV3.2.dat
+		data\51Degrees-LiteV3.2.trie = data\51Degrees-LiteV3.2.trie
 		data\README.md = data\README.md
 	EndProjectSection
 EndProject
