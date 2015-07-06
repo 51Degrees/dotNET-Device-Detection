@@ -28,14 +28,13 @@ using System.Text.RegularExpressions;
 
 namespace FiftyOne.UnitTests.HttpHeaders
 {
-    public class Combinations : Base
+    public abstract class Combinations : Base
     {
         protected void OperaMini_Samsung()
         {
-            base.HttpHeaders(
+            base.Process(
                 "(?i)Opera Mini",
                 "(?i)SAMSUNG GT-I", 
-                GenericValidate,
                 new Validation(_dataSet) {
                     { "BrowserName", "Opera" },
                     { "HardwareVendor", "Samsung" },
@@ -44,10 +43,9 @@ namespace FiftyOne.UnitTests.HttpHeaders
 
         protected void OperaMini_iPhone()
         {
-            base.HttpHeaders(
+            base.Process(
                 "(?i)Opera Mini",
                 @"^Mozilla/5\.0 \(iPhone; CPU iPhone OS ",
-                GenericValidate,
                 new Validation(_dataSet) {
                     { "BrowserName", "Opera" },
                     { "HardwareVendor", "Apple" },
@@ -56,10 +54,9 @@ namespace FiftyOne.UnitTests.HttpHeaders
 
         protected void OperaMini_HTC()
         {
-            base.HttpHeaders(
+            base.Process(
                 "(?i)Opera Mini",
                 " HTC ",
-                GenericValidate,
                 new Validation(_dataSet) {
                     { "BrowserName", "Opera" },
                     { "HardwareVendor", "HTC" },

@@ -95,5 +95,20 @@ namespace FiftyOne.UnitTests
                 }
             }
         }
+
+        internal static IEnumerable<string> GetRandomUserAgents()
+        {
+            return UserAgentGenerator.GetEnumerable(20000, 0);
+        }
+
+        internal static IEnumerable<string> GetUniqueUserAgents()
+        {
+            return _userAgents;
+        }
+
+        internal static IEnumerable<string> GetBadUserAgents()
+        {
+            return UserAgentGenerator.GetEnumerable(20000, 10);
+        }
     }
 }

@@ -34,6 +34,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>true</RunCodeAnalysis>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -51,13 +52,41 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="API\API.cs" />
+    <Compile Include="API\Lite\V32APITrie.cs" />
+    <Compile Include="API\Lite\V30APITrie.cs" />
+    <Compile Include="API\TrieBase.cs" />
+    <Compile Include="API\Base.cs" />
+    <Compile Include="API\Enterprise\V31API.cs" />
+    <Compile Include="API\Enterprise\V32API.cs" />
+    <Compile Include="API\Lite\V32API.cs" />
+    <Compile Include="API\Lite\V31API.cs" />
+    <Compile Include="API\Premium\V32API.cs" />
+    <Compile Include="API\Premium\V31API.cs" />
+    <Compile Include="HttpHeaders\Enterprise\V32TrieFile.cs" />
+    <Compile Include="HttpHeaders\Premium\V32TrieFile.cs" />
+    <Compile Include="HttpHeaders\TrieBase.cs" />
     <Compile Include="HttpHeaders\Base.cs" />
+    <Compile Include="HttpHeaders\TrieCombinations.cs" />
     <Compile Include="HttpHeaders\Combinations.cs" />
     <Compile Include="HttpHeaders\Enterprise\V31Array.cs" />
     <Compile Include="HttpHeaders\Enterprise\V32Array.cs" />
     <Compile Include="HttpHeaders\Premium\V31Array.cs" />
     <Compile Include="HttpHeaders\Premium\V32Array.cs" />
+    <Compile Include="Memory\Enterprise\V30TrieFile.cs" />
+    <Compile Include="Memory\Enterprise\V30TrieMemory.cs" />
+    <Compile Include="Memory\Enterprise\V32TrieFile.cs" />
+    <Compile Include="Memory\Enterprise\V32TrieMemory.cs" />
+    <Compile Include="Memory\Lite\V30TrieMemory.cs" />
+    <Compile Include="Memory\Lite\V32TrieMemory.cs" />
+    <Compile Include="Memory\Lite\V32TrieFile.cs" />
+    <Compile Include="Memory\Premium\V30TrieFile.cs" />
+    <Compile Include="Memory\Premium\V30TrieMemory.cs" />
+    <Compile Include="Memory\Premium\V32TrieFile.cs" />
+    <Compile Include="Memory\Premium\V32TrieMemory.cs" />
+    <Compile Include="Memory\TrieMemory.cs" />
+    <Compile Include="Memory\TrieFile.cs" />
+    <Compile Include="Memory\Lite\V30TrieFile.cs" />
+    <Compile Include="Memory\TrieBase.cs" />
     <Compile Include="Memory\Enterprise\V31Array.cs" />
     <Compile Include="Memory\Enterprise\V31File.cs" />
     <Compile Include="Memory\Enterprise\V31Memory.cs" />
@@ -96,8 +125,12 @@
     <Compile Include="Performance\Enterprise\V32File.cs" />
     <Compile Include="Performance\Enterprise\V32Memory.cs" />
     <Compile Include="Performance\FileTest.cs" />
+    <Compile Include="Performance\Lite\V30TrieFile.cs" />
+    <Compile Include="Performance\Lite\V30TrieMemory.cs" />
     <Compile Include="Performance\Lite\V32Array.cs" />
+    <Compile Include="Performance\Lite\V32TrieFile.cs" />
     <Compile Include="Performance\Lite\V32File.cs" />
+    <Compile Include="Performance\Lite\V32TrieMemory.cs" />
     <Compile Include="Performance\Lite\V32Memory.cs" />
     <Compile Include="Performance\Memory.cs" />
     <Compile Include="Performance\Premium\V31Array.cs" />
@@ -106,6 +139,9 @@
     <Compile Include="Performance\Premium\V32Array.cs" />
     <Compile Include="Performance\Premium\V32File.cs" />
     <Compile Include="Performance\Premium\V32Memory.cs" />
+    <Compile Include="Performance\TrieBase.cs" />
+    <Compile Include="Performance\TrieFile.cs" />
+    <Compile Include="Performance\TrieMemory.cs" />
     <Compile Include="Properties\Constants.cs" />
     <Compile Include="MetaData\Base.cs" />
     <Compile Include="MetaData\Lite\V31Memory.cs" />
@@ -135,6 +171,7 @@
     <None Include="Playlists\Premium.playlist" />
     <None Include="README.md" />
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

@@ -28,10 +28,16 @@ namespace FiftyOne.UnitTests.MetaData.Lite
     [TestClass]
     public class V31File : Base
     {
+        protected override string DataFile
+        {
+            get { return Constants.LITE_PATTERN_V31; }
+        }
+
         [TestInitialize()]
         public void CreateDataSet()
         {
-            _dataSet = StreamFactory.Create(Path.Combine(Constants.LITE_PATTERN_V31));
+            Utils.CheckFileExists(DataFile);
+            _dataSet = StreamFactory.Create(DataFile);
         }
 
         [TestMethod]

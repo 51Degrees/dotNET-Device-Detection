@@ -49,25 +49,25 @@ namespace FiftyOne.UnitTests.Memory.Lite
         [TestMethod]
         public void LiteV31Array_Memory_RandomUserAgentsMulti()
         {
-            base.UserAgentsMulti(UserAgentGenerator.GetEnumerable(Constants.USERAGENT_COUNT, 0), 60); 
+            base.UserAgentsMulti(UserAgentGenerator.GetRandomUserAgents(), 60); 
         }
 
         [TestMethod]
         public void LiteV31Array_Memory_RandomUserAgentsSingle()
         {
-            base.UserAgentsSingle(UserAgentGenerator.GetEnumerable(Constants.USERAGENT_COUNT, 0), 60);
+            base.UserAgentsSingle(UserAgentGenerator.GetRandomUserAgents(), 60);
         }
 
         [TestMethod]
         public void LiteV31Array_Memory_BadUserAgentsMulti()
         {
-            base.UserAgentsMulti(UserAgentGenerator.GetEnumerable(Constants.USERAGENT_COUNT, 10), 80); 
+            base.UserAgentsMulti(UserAgentGenerator.GetBadUserAgents(), 80); 
         }
 
         [TestMethod]
         public void LiteV31Array_Memory_BadUserAgentsSingle()
         {
-            base.UserAgentsSingle(UserAgentGenerator.GetEnumerable(Constants.USERAGENT_COUNT, 10), 80);
+            base.UserAgentsSingle(UserAgentGenerator.GetBadUserAgents(), 80);
         }
     }
 }

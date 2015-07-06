@@ -21,11 +21,11 @@
 
 using FiftyOne.Foundation.Mobile.Detection;
 using FiftyOne.Foundation.Mobile.Detection.Entities;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -126,6 +126,14 @@ namespace FiftyOne.UnitTests
         public delegate void ProcessMatch(Results results, Match match, object state);
 
         /// <summary>
+        /// Passed a device index and performs tests on the result.
+        /// </summary>
+        /// <param name="results"></param>
+        /// <param name="deviceIndex"></param>
+        /// <param name="state"></param>
+        public delegate void ProcessTrie(Results results, int deviceIndex, object state);
+
+        /// <summary>
         /// In a single thread loops through the useragents in the file
         /// provided perform a match with the data set provided passing
         /// control back to the method provided for further processing.
@@ -146,8 +154,31 @@ namespace FiftyOne.UnitTests
                 results.Count++;
                 results.Methods[match.Method]++;
             }
+            AssertPool(provider);
             ReportMethods(results.Methods);
             ReportProvider(provider);
+            ReportTime(results);
+            return results;
+        }
+
+        /// <summary>
+        /// In a single thread loops through the useragents in the file
+        /// provided perform a match with the data set provided passing
+        /// control back to the method provided for further processing.
+        /// </summary>
+        /// <param name="provider"></param>
+        /// <param name="userAgents"></param>
+        /// <param name="method"></param>
+        /// <returns>Counts for each of the methods used</returns>
+        internal static Results DetectLoopSingleThreaded(TrieProvider provider, IEnumerable<string> userAgents, ProcessTrie method, object state)
+        {
+            var results = new Results();
+            foreach (var line in userAgents)
+            {
+                method(results, provider.GetDeviceIndex(line.Trim()), state);
+                results.Count++;
+            }
+            ReportMethods(results.Methods);
             ReportTime(results);
             return results;
         }
@@ -175,8 +206,31 @@ namespace FiftyOne.UnitTests
                     results.Methods[match.Method] = results.Methods[match.Method] + 1;
                 }
             });
+            AssertPool(provider);
             ReportMethods(results.Methods);
             ReportProvider(provider);
+            ReportTime(results);
+            return results;
+        }
+
+        /// <summary>
+        /// Using multiple threads loops through the useragents in the file
+        /// provided perform a match with the data set provided passing
+        /// control back to the method provided for further processing.
+        /// </summary>
+        /// <param name="provider"></param>
+        /// <param name="userAgents"></param>
+        /// <param name="method"></param>
+        /// <returns>Counts for each of the methods used</returns>
+        internal static Results DetectLoopMultiThreaded(TrieProvider provider, IEnumerable<string> userAgents, ProcessTrie method, object state)
+        {
+            var results = new Results();
+            Parallel.ForEach(userAgents, line =>
+            {
+                method(results, provider.GetDeviceIndex(line.Trim()), state);
+                Interlocked.Increment(ref results.Count);
+            });
+            ReportMethods(results.Methods);
             ReportTime(results);
             return results;
         }
@@ -190,6 +244,12 @@ namespace FiftyOne.UnitTests
                     method.Key,
                     (double)method.Value / (double)total);
             }
+        }
+
+        public static void ReportPool(FiftyOne.Foundation.Mobile.Detection.Entities.Stream.DataSet dataSet)
+        {
+            Console.WriteLine("Readers in queue '{0}'", dataSet.ReadersQueued);
+            Console.WriteLine("Readers created '{0}'", dataSet.ReadersCreated);
         }
 
         public static void ReportCache(DataSet dataSet)
@@ -223,12 +283,29 @@ namespace FiftyOne.UnitTests
                 results.ElapsedTime.TotalMilliseconds / results.Count);
         }
 
+        internal static void AssertPool(Provider provider)
+        {
+            if (provider.DataSet is FiftyOne.Foundation.Mobile.Detection.Entities.Stream.DataSet)
+            {
+                var dataSet = (FiftyOne.Foundation.Mobile.Detection.Entities.Stream.DataSet)provider.DataSet;
+                Assert.IsTrue(dataSet.ReadersCreated == dataSet.ReadersQueued,
+                    String.Format(
+                        "DataSet pooled readers mismatched. '{0}' created and '{1}' queued.",
+                        dataSet.ReadersCreated,
+                        dataSet.ReadersQueued));
+            }
+        }
+
         internal static void ReportProvider(Provider provider)
         {
             Console.WriteLine("User-Agent cache switches '{0}' with '{1:P2} misses",
                 provider.CacheSwitches,
                 provider.PercentageCacheMisses);
             ReportCache(provider.DataSet);
+            if (provider.DataSet is FiftyOne.Foundation.Mobile.Detection.Entities.Stream.DataSet)
+            {
+                ReportPool((FiftyOne.Foundation.Mobile.Detection.Entities.Stream.DataSet)provider.DataSet);
+            }
         }
 
         /// <summary>
@@ -257,6 +334,44 @@ namespace FiftyOne.UnitTests
             {
                 Interlocked.Increment(ref ((Memory)state).MemorySamples);
                 Interlocked.Add(ref ((Memory)state).TotalMemory, GC.GetTotalMemory(true));
+            }
+        }
+
+        public static void MonitorTrieMemory(Results results, int deviceIndex, object state)
+        {
+            if (results.Count % 1000 == 0)
+            {
+                Interlocked.Increment(ref ((Memory)state).MemorySamples);
+                Interlocked.Add(ref ((Memory)state).TotalMemory, GC.GetTotalMemory(true));
+            }
+        }
+
+        public static void TrieDoNothing(Results results, int deviceIndex, object state)
+        {
+            // Do nothing.
+        }
+
+        public static void RetrieveTriePropertyValues(Results results, int deviceIndex, object state)
+        {
+            if (state != null)
+            {
+                var checkSum = 0;
+                foreach (var property in ((TrieProvider)state).PropertyNames)
+                {
+                    checkSum += ((TrieProvider)state).GetPropertyValue(deviceIndex, property).GetHashCode();
+                }
+                Interlocked.Add(ref results.CheckSum, checkSum);
+            }
+        }
+
+        internal static void CheckFileExists(string dataFile)
+        {
+            if (File.Exists(dataFile) == false)
+            {
+                Assert.Inconclusive(
+                    "Data file '{0}' could not be found. " +
+                    "See https://51degrees.com/compare-data-options to complete this test.",
+                    dataFile);
             }
         }
     }

@@ -49,21 +49,6 @@ namespace FiftyOne.UnitTests.Performance
 
         protected abstract int MaxInitializeTime { get; }
 
-        protected IEnumerable<string> GetRandomUserAgents()
-        {
-            return UserAgentGenerator.GetEnumerable(20000, 0);
-        }
-
-        protected IEnumerable<string> GetUniqueUserAgents()
-        {
-            return File.ReadAllLines(Constants.GOOD_USERAGENTS_FILE);
-        }
-
-        protected IEnumerable<string> GetBadUserAgents()
-        {
-            return UserAgentGenerator.GetEnumerable(20000, 10);
-        }
-
         protected virtual void InitializeTime()
         {
             Assert.IsTrue(_testInitializeTime.TotalMilliseconds < MaxInitializeTime,

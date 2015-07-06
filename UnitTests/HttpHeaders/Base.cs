@@ -31,9 +31,9 @@ using System.Threading.Tasks;
 
 namespace FiftyOne.UnitTests.HttpHeaders
 {
-    public class Base : IDisposable
+    public abstract class Base : IDisposable
     {
-        public class Validation : Dictionary<Property, Regex>
+        internal class Validation : Dictionary<Property, Regex>
         {
             private readonly DataSet _dataSet;
 
@@ -48,12 +48,14 @@ namespace FiftyOne.UnitTests.HttpHeaders
             }
         }
 
+        protected abstract string DataFile { get; }
+
         /// <summary>
         /// The data set to be used for the tests.
         /// </summary>
         protected DataSet _dataSet;
         
-        protected Utils.Results HttpHeaders(string userAgentPattern, string devicePattern, Utils.ProcessMatch method, object state)
+        internal Utils.Results Process(string userAgentPattern, string devicePattern, Validation state)
         {
             _dataSet.ResetCache();
             var provider = new Provider(_dataSet);
@@ -73,16 +75,15 @@ namespace FiftyOne.UnitTests.HttpHeaders
                 headers.Add("User-Agent", userAgentIterator.Current);
                 provider.Match(headers, match);
                 Assert.IsTrue(match.Signature == null, "Signature not equal null");
-                method(results, match, state);
+                Validate(match, state);
                 results.Methods[match.Method]++;
             }
 
             return results;
         }
 
-        public static void GenericValidate(Utils.Results results, FiftyOne.Foundation.Mobile.Detection.Match match, object state)
+        private static void Validate(FiftyOne.Foundation.Mobile.Detection.Match match, Validation validation)
         {
-            var validation = (Validation)state;
             foreach(var test in validation)
             {
                 var value = match[test.Key].ToString();

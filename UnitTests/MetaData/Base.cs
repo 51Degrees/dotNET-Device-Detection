@@ -32,6 +32,8 @@ namespace FiftyOne.UnitTests.MetaData
     {
         protected DataSet _dataSet;
 
+        protected abstract string DataFile { get; }
+
         protected void RetrieveComponents()
         {
             foreach (var component in _dataSet.Components)
