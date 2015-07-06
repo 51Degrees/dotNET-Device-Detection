@@ -28,10 +28,16 @@ namespace FiftyOne.UnitTests.MetaData.Enterprise
     [TestClass]
     public class V32File : Base
     {
+        protected override string DataFile
+        {
+            get { return Constants.ENTERPRISE_PATTERN_V32; }
+        }
+
         [TestInitialize()]
         public void CreateDataSet()
         {
-            _dataSet = StreamFactory.Create(Path.Combine(Constants.ENTERPRISE_PATTERN_V32));
+            Utils.CheckFileExists(DataFile);
+            _dataSet = StreamFactory.Create(DataFile);
         }
 
         [TestMethod]

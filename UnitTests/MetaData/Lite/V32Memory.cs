@@ -28,10 +28,16 @@ namespace FiftyOne.UnitTests.MetaData.Lite
     [TestClass]
     public class V32Memory : Base
     {
+        protected override string DataFile
+        {
+            get { return Constants.LITE_PATTERN_V32; }
+        }
+
         [TestInitialize()]
         public void CreateDataSet()
         {
-            _dataSet = MemoryFactory.Create(Path.Combine(Constants.LITE_PATTERN_V32));
+            Utils.CheckFileExists(DataFile);
+            _dataSet = MemoryFactory.Create(DataFile);
         }
 
         [TestMethod]

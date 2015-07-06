@@ -44,7 +44,7 @@ namespace FiftyOne.UnitTests.Performance.Premium
         [TestMethod]
         public void PremiumV31File_Performance_BadUserAgentsMulti()
         {
-            base.BadUserAgentsMulti(null, 1);
+            base.BadUserAgentsMulti(null, 2);
         }
 
         [TestMethod]
@@ -98,7 +98,7 @@ namespace FiftyOne.UnitTests.Performance.Premium
         [TestMethod]
         public void PremiumV31File_Performance_UniqueUserAgentsSingleAll()
         {
-            base.UniqueUserAgentsSingle(_dataSet.Properties, 1);
+            base.UniqueUserAgentsSingle(_dataSet.Properties, 2);
         }
 
         [TestMethod]

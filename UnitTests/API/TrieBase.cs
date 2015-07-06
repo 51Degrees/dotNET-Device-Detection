@@ -18,6 +18,7 @@
  * This Source Code Form is “Incompatible With Secondary Licenses”, as
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
+
 using System;
 using System.Text;
 using System.Collections.Generic;
@@ -31,101 +32,104 @@ using System.Collections.Specialized;
 namespace FiftyOne.UnitTests.API
 {
     /// <summary>
-    /// Summary description for UnitTest1
+    /// Tests the APIs with different combinations of good and bad inputs.
     /// </summary>
-    [TestClass]
-    public class API : IDisposable
+    public abstract class TrieBase : IDisposable
     {
-        private DataSet _dataSet;
-        private Provider _provider;
+        private TrieProvider _provider;
+
+        /// <summary>
+        /// The name of the data file to use with the test.
+        /// </summary>
+        protected abstract string DataFile { get; }
 
         [TestInitialize()]
         public void CreateDataSet()
         {
-            _dataSet = StreamFactory.Create(Path.Combine(Constants.ENTERPRISE_PATTERN_V31));
-            _provider = new Provider(_dataSet);
+            Utils.CheckFileExists(DataFile);
+            _provider = TrieFactory.Create(DataFile, false);
         }
 
         [TestMethod]
-        public void API_NullUserAgent()
+        public void API_Trie_NullUserAgent()
         {
-            FetchAllProperties(_provider.Match((string)null));
+            FetchAllProperties(_provider.GetDeviceIndex((string)null));
         }
 
         [TestMethod]
-        public void API_EmptyUserAgent()
+        public void API_Trie_EmptyUserAgent()
         {
-            FetchAllProperties(_provider.Match(String.Empty));
+            FetchAllProperties(_provider.GetDeviceIndex(String.Empty));
         }
 
         [TestMethod]
-        public void API_LongUserAgent()
+        public void API_Trie_LongUserAgent()
         {
             var userAgent = String.Join(" ", UserAgentGenerator.GetEnumerable(10, 10));
-            FetchAllProperties(_provider.Match(userAgent));
+            FetchAllProperties(_provider.GetDeviceIndex(userAgent));
         }
 
         [TestMethod]
-        public void API_NullHeaders()
+        public void API_Trie_NullHeaders()
         {
-            FetchAllProperties(_provider.Match((NameValueCollection)null));
+            FetchAllProperties(_provider.GetDeviceIndexes((NameValueCollection)null));
         }
 
         [TestMethod]
-        public void API_EmptyHeaders()
-        {
-            var headers = new NameValueCollection();
-            FetchAllProperties(_provider.Match(headers));
-        }
-
-        [TestMethod]
-        public void API_AllHeaders()
+        public void API_Trie_EmptyHeaders()
         {
             var headers = new NameValueCollection();
-            foreach(var header in _dataSet.HttpHeaders)
+            FetchAllProperties(_provider.GetDeviceIndexes(headers));
+        }
+
+        [TestMethod]
+        public void API_Trie_AllHeaders()
+        {
+            var headers = new NameValueCollection();
+            foreach (var header in _provider.HttpHeaders)
             {
                 headers.Add(header, UserAgentGenerator.GetRandomUserAgent(0));
             }
-            FetchAllProperties(_provider.Match(headers));
+            FetchAllProperties(_provider.GetDeviceIndexes(headers));
         }
 
         [TestMethod]
-        public void API_AllHeadersNull()
+        public void API_Trie_AllHeadersNull()
         {
             var headers = new NameValueCollection();
-            foreach (var header in _dataSet.HttpHeaders)
+            foreach (var header in _provider.HttpHeaders)
             {
                 headers.Add(header, null);
             }
-            FetchAllProperties(_provider.Match(headers));
+            FetchAllProperties(_provider.GetDeviceIndexes(headers));
         }
 
         [TestMethod]
-        public void API_DuplicateHeaders()
+        public void API_Trie_DuplicateHeaders()
         {
             var headers = new NameValueCollection();
             for(var i = 0; i < 5; i++)
             {
-                foreach (var header in _dataSet.HttpHeaders)
+                foreach (var header in _provider.HttpHeaders)
                 {
                     headers.Add(header, UserAgentGenerator.GetRandomUserAgent(0));
                 }
             }
-            FetchAllProperties(_provider.Match(headers));
+            FetchAllProperties(_provider.GetDeviceIndexes(headers));
         }
 
         [TestMethod]
-        public void API_DuplicateHeadersNull()
+        public void API_Trie_DuplicateHeadersNull()
         {
             var headers = new NameValueCollection();
             for (var i = 0; i < 5; i++)
             {
-                foreach (var header in _dataSet.HttpHeaders)
+                foreach (var header in _provider.HttpHeaders)
                 {
                     headers.Add(header, null);
                 }
             }
-            FetchAllProperties(_provider.Match(headers));
+            FetchAllProperties(_provider.GetDeviceIndexes(headers));
         }
 
         [TestCleanup]
@@ -137,21 +141,42 @@ namespace FiftyOne.UnitTests.API
 
         protected virtual void Dispose(bool disposing)
         {
-            if (_dataSet != null)
+            if (_provider != null)
             {
-                _dataSet.Dispose();
+                _provider.Dispose();
             }
         }
 
-        private void FetchAllProperties(Match match)
+        private void FetchAllProperties(IDictionary<string, int> deviceIndexes)
         {
             var checkSum = 0;
-            foreach(var property in match.DataSet.Properties)
+            foreach (var propertyName in _provider.PropertyNames)
             {
+                var value = _provider.GetPropertyValue(deviceIndexes, propertyName);
                 Console.WriteLine("Property: {0} with value {1}",
-                    property.Name,
-                    match[property.Name]);
-                checkSum += match[property.Name].ToString().GetHashCode();
+                    propertyName,
+                    value);
+                if (value != null)
+                {
+                    checkSum += _provider.GetPropertyValue(deviceIndexes, propertyName).GetHashCode();
+                }
+            }
+            Console.WriteLine("Check sum: {0}", checkSum);
+        }
+
+        private void FetchAllProperties(int deviceIndex)
+        {
+            var checkSum = 0;
+            foreach(var propertyName in _provider.PropertyNames)
+            {
+                var value = _provider.GetPropertyValue(deviceIndex, propertyName);
+                Console.WriteLine("Property: {0} with value {1}",
+                    propertyName,
+                    value);
+                if (value != null)
+                {
+                    checkSum += _provider.GetPropertyValue(deviceIndex, propertyName).GetHashCode();
+                }
             }
             Console.WriteLine("Check sum: {0}", checkSum);
         }

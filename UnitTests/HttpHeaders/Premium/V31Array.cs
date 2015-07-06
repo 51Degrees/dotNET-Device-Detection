@@ -28,10 +28,16 @@ namespace FiftyOne.UnitTests.HttpHeaders.Premium
     [TestClass]
     public class V31Array : Combinations
     {
+        protected override string DataFile
+        {
+            get { return Constants.PREMIUM_PATTERN_V31; }
+        }
+
         [TestInitialize()]
         public void CreateDataSet()
         {
-            _dataSet = StreamFactory.Create(File.ReadAllBytes(Path.Combine(Constants.PREMIUM_PATTERN_V31)));
+            Utils.CheckFileExists(DataFile);
+            _dataSet = StreamFactory.Create(File.ReadAllBytes(DataFile));
         }
 
         [TestMethod]

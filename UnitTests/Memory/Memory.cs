@@ -33,7 +33,8 @@ namespace FiftyOne.UnitTests.Memory
         public void CreateDataSet()
         {
             _memory = new Utils.Memory();
-            _dataSet = MemoryFactory.Create(Path.Combine(DataFile), true);
+            Utils.CheckFileExists(DataFile);
+            _dataSet = MemoryFactory.Create(DataFile, true);
         }
     }
 }

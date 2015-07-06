@@ -49,25 +49,25 @@ namespace FiftyOne.UnitTests.Memory.Enterprise
         [TestMethod]
         public void EnterpriseV31Array_Memory_RandomUserAgentsMulti()
         {
-            base.UserAgentsMulti(UserAgentGenerator.GetEnumerable(Constants.USERAGENT_COUNT, 0), 200); 
+            base.UserAgentsMulti(UserAgentGenerator.GetRandomUserAgents(), 200); 
         }
 
         [TestMethod]
         public void EnterpriseV31Array_Memory_RandomUserAgentsSingle()
         {
-            base.UserAgentsSingle(UserAgentGenerator.GetEnumerable(Constants.USERAGENT_COUNT, 0), 200);
+            base.UserAgentsSingle(UserAgentGenerator.GetRandomUserAgents(), 200);
         }
 
         [TestMethod]
         public void EnterpriseV31Array_Memory_BadUserAgentsMulti()
         {
-            base.UserAgentsMulti(UserAgentGenerator.GetEnumerable(Constants.USERAGENT_COUNT, 10), 500); 
+            base.UserAgentsMulti(UserAgentGenerator.GetBadUserAgents(), 500); 
         }
 
         [TestMethod]
         public void EnterpriseV31Array_Memory_BadUserAgentsSingle()
         {
-            base.UserAgentsSingle(UserAgentGenerator.GetEnumerable(Constants.USERAGENT_COUNT, 10), 500);
+            base.UserAgentsSingle(UserAgentGenerator.GetBadUserAgents(), 500);
         }
     }
 }

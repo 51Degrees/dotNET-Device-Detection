@@ -40,14 +40,15 @@ namespace FiftyOne.UnitTests.Performance
         public void CreateDataSet()
         {
             var start = DateTime.UtcNow;
-            _dataSet = StreamFactory.Create(Path.Combine(DataFile));
+            Utils.CheckFileExists(DataFile);
+            _dataSet = StreamFactory.Create(DataFile);
             _testInitializeTime = DateTime.UtcNow - start;
         }
 
         protected Utils.Results BadUserAgentsMulti(IEnumerable<Property> properties, int maxDetectionTime)
         {
             var results = base.UserAgentsMulti(
-                base.GetBadUserAgents(), properties, maxDetectionTime);
+                UserAgentGenerator.GetBadUserAgents(), properties, maxDetectionTime);
             Assert.IsTrue(results.GetMethodPercentage(MatchMethods.Exact) < 0.2, "Exact Method");
             Asserts.AssertCacheMissesBad(_dataSet);
             return results;
@@ -56,7 +57,7 @@ namespace FiftyOne.UnitTests.Performance
         protected Utils.Results BadUserAgentsSingle(IEnumerable<Property> properties, int maxDetectionTime)
         {
             var results = base.UserAgentsSingle(
-                base.GetBadUserAgents(), null, maxDetectionTime);
+                UserAgentGenerator.GetBadUserAgents(), null, maxDetectionTime);
             Assert.IsTrue(results.GetMethodPercentage(MatchMethods.Exact) < 0.2, "Exact Method");
             Asserts.AssertCacheMissesBad(_dataSet);
             return results;
@@ -65,7 +66,7 @@ namespace FiftyOne.UnitTests.Performance
         protected Utils.Results RandomUserAgentsMulti(IEnumerable<Property> properties, int maxDetectionTime)
         {
             var results = base.UserAgentsMulti(
-                base.GetRandomUserAgents(), null, maxDetectionTime);
+                UserAgentGenerator.GetRandomUserAgents(), null, maxDetectionTime);
             Assert.IsTrue(results.GetMethodPercentage(MatchMethods.Exact) > 0.95, "Exact Method");
             Asserts.AssertCacheMissesGood(_dataSet);
             return results;
@@ -74,7 +75,7 @@ namespace FiftyOne.UnitTests.Performance
         protected Utils.Results RandomUserAgentsSingle(IEnumerable<Property> properties, int maxDetectionTime)
         {
             var results = base.UserAgentsSingle(
-                base.GetRandomUserAgents(), null, maxDetectionTime);
+                UserAgentGenerator.GetRandomUserAgents(), null, maxDetectionTime);
             Assert.IsTrue(results.GetMethodPercentage(MatchMethods.Exact) > 0.95, "Exact Method");
             Asserts.AssertCacheMissesGood(_dataSet);
             return results;
@@ -83,7 +84,7 @@ namespace FiftyOne.UnitTests.Performance
         protected Utils.Results UniqueUserAgentsMulti(IEnumerable<Property> properties, int maxDetectionTime)
         {
             var results = base.UserAgentsMulti(
-                base.GetUniqueUserAgents(), null, maxDetectionTime);
+                UserAgentGenerator.GetUniqueUserAgents(), null, maxDetectionTime);
             Assert.IsTrue(results.GetMethodPercentage(MatchMethods.Exact) > 0.95, "Exact Method");
             Asserts.AssertCacheMissesGood(_dataSet);
             return results;
@@ -92,7 +93,7 @@ namespace FiftyOne.UnitTests.Performance
         protected Utils.Results UniqueUserAgentsSingle(IEnumerable<Property> properties, int maxDetectionTime)
         {
             var results = base.UserAgentsSingle(
-                base.GetUniqueUserAgents(), properties, maxDetectionTime);
+                UserAgentGenerator.GetUniqueUserAgents(), properties, maxDetectionTime);
             Assert.IsTrue(results.GetMethodPercentage(MatchMethods.Exact) > 0.95, "Exact Method");
             Asserts.AssertCacheMissesGood(_dataSet);
             return results;

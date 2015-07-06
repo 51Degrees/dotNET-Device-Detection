@@ -28,10 +28,16 @@ namespace FiftyOne.UnitTests.MetaData.Enterprise
     [TestClass]
     public class V31Memory : Base
     {
+        protected override string DataFile
+        {
+            get { return Constants.ENTERPRISE_PATTERN_V31; }
+        }
+
         [TestInitialize()]
         public void CreateDataSet()
         {
-            _dataSet = MemoryFactory.Create(Path.Combine(Constants.ENTERPRISE_PATTERN_V31));
+            Utils.CheckFileExists(DataFile);
+            _dataSet = MemoryFactory.Create(DataFile);
         }
 
         [TestMethod]

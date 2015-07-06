@@ -34,19 +34,25 @@ namespace FiftyOne.UnitTests
 
         internal const string LITE_PATTERN_V32 = "../../../data/51Degrees-LiteV3.2.dat";
 
-        internal const string LITE_TRIE_V3 = "../../../data/51Degrees-LiteV3.trie";
+        internal const string LITE_TRIE_V30 = "../../../data/51Degrees-LiteV3.0.trie";
+
+        internal const string LITE_TRIE_V32 = "../../../data/51Degrees-LiteV3.2.trie";
 
         internal const string ENTERPRISE_PATTERN_V31 = "../../../data/51Degrees-EnterpriseV3.1.dat";
 
         internal const string ENTERPRISE_PATTERN_V32 = "../../../data/51Degrees-EnterpriseV3.2.dat";
 
-        internal const string ENTERPRISE_TRIE_V3 = "../../../data/51Degrees-EnterpriseV3.trie";
+        internal const string ENTERPRISE_TRIE_V30 = "../../../data/51Degrees-EnterpriseV3.0.trie";
+
+        internal const string ENTERPRISE_TRIE_V32 = "../../../data/51Degrees-EnterpriseV3.2.trie";
 
         internal const string PREMIUM_PATTERN_V31 = "../../../data/51Degrees-PremiumV3.1.dat";
 
         internal const string PREMIUM_PATTERN_V32 = "../../../data/51Degrees-PremiumV3.2.dat";
 
-        internal const string PREMIUM_TRIE_V3 = "../../../data/51Degrees-PremiumV3.trie";
+        internal const string PREMIUM_TRIE_V30 = "../../../data/51Degrees-PremiumV3.0.trie";
+
+        internal const string PREMIUM_TRIE_V32 = "../../../data/51Degrees-PremiumV3.2.trie";
 
         internal const int USERAGENT_COUNT = 20000;
     }

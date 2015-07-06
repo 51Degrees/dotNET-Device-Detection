@@ -33,7 +33,8 @@ namespace FiftyOne.UnitTests.Memory
         public void CreateDataSet()
         {
             _memory = new Utils.Memory();
-            _dataSet = StreamFactory.Create(File.ReadAllBytes(Path.Combine(DataFile)));
+            Utils.CheckFileExists(DataFile);
+            _dataSet = StreamFactory.Create(File.ReadAllBytes(DataFile));
         }
     }
 }

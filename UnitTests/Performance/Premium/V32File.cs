@@ -44,7 +44,7 @@ namespace FiftyOne.UnitTests.Performance.Premium
         [TestMethod]
         public void PremiumV32File_Performance_BadUserAgentsMulti()
         {
-            base.BadUserAgentsMulti(null, 1);
+            base.BadUserAgentsMulti(null, 2);
         }
 
         [TestMethod]
