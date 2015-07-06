@@ -102,8 +102,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// Creates the source from the file provided.
         /// </summary>
         /// <param name="fileName">File source of the data</param>
-        internal SourceFile(string fileName)
-            : base(fileName)
+        /// <param name="isTempFile">True if the file should be deleted when the source is disposed</param>
+        internal SourceFile(string fileName, bool isTempFile)
+            : base(fileName, isTempFile)
         {
         }
 
@@ -145,17 +146,25 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// </summary>
         protected readonly FileInfo _fileInfo;
 
+        /// <summary>
+        /// True if the file is temporary and should be deleted
+        /// when the source is disposed of.
+        /// </summary>
+        protected readonly bool _isTempFile;
+
         #endregion
 
         #region Constructor
 
         /// <summary>
-        /// 
+        /// Base for all file data sources.
         /// </summary>
         /// <param name="fileName">File source of the data</param>
-        internal SourceFileBase(string fileName)
+        /// <param name="isTempFile">True if the file should be deleted when the source is disposed</param>
+        internal SourceFileBase(string fileName, bool isTempFile)
         {
             _fileInfo = new FileInfo(fileName);
+            _isTempFile = isTempFile;
         }
 
         #endregion
@@ -168,8 +177,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// </summary>
         protected void DeleteFile()
         {
-            if (".tmp".Equals(_fileInfo.Extension) &&
-                _fileInfo.Exists)
+            if (_isTempFile && _fileInfo.Exists)
             {
                 try
                 {
@@ -255,8 +263,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// Creates the source from the file provided.
         /// </summary>
         /// <param name="fileName">File source of the data</param>
-        internal SourceMemoryMappedFile(string fileName)
-            : base(fileName)
+        /// <param name="isTempFile">True if the file should be deleted when the source is disposed</param>
+        internal SourceMemoryMappedFile(string fileName, bool isTempFile)
+            : base(fileName, isTempFile)
         {
             // The mapname must not be the same as the file name.
             var mapName = String.Format(
