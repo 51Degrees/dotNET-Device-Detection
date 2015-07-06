@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.IO;
 using System;
 using FiftyOne.Foundation.Mobile.Detection.Readers;
+using System.Threading;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 {
@@ -42,7 +43,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
     internal class Pool : IDisposable
     {
         #region Fields
-
+        
         /// <summary>
         /// List of readers available to be used.
         /// </summary>
@@ -52,6 +53,31 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// A pool of file readers to use to read data from the file.
         /// </summary>
         private readonly SourceBase Source;
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// The number of readers that have been created. May not be the
+        /// same as the readers in the queue as some may be in use.
+        /// </summary>
+        internal int ReadersCreated 
+        {
+            get { return _readerCount; }
+        }
+        private int _readerCount = 0;
+
+        /// <summary>
+        /// The number of readers in the queue.
+        /// </summary>
+        internal int ReadersQueued
+        {
+            get
+            {
+                return _readers.Count;
+            }
+        }
 
         #endregion
 
@@ -81,8 +107,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
             lock(_readers)
             {
                 if (_readers.Count > 0)
+                {
                     return _readers.Dequeue();
+                }
             }
+            Interlocked.Increment(ref _readerCount);
             return Source.CreateReader();
         }
 
@@ -105,6 +134,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// </summary>
         public void Dispose()
         {
+            _readers.Clear();
             Source.Dispose();
         }
 
