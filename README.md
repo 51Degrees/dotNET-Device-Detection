@@ -47,7 +47,7 @@ Data files which are updated weekly and daily, automatically, and with more prop
 
 ## Recent Changes
 
-### Version 3.2.1 Highlights
+### Version 3.2.2 Highlights
 
 This release focuses on reducing memory consumption and improving performance when the device data file is used directly from the disk.
 
@@ -66,6 +66,13 @@ This release focuses on reducing memory consumption and improving performance wh
 * Web sites using memory mode use a byte array to improve start up time.
 * Version 3.2 data file formats are supported in parallel with version 3.1 data files.
 * 51Degrees unit tests are now part of the open source distribution.
+
+### Changes from 3.2.1
+
+* TrieProvider now support V3.2 data file format which includes embedded HTTP headers in the properties data array.
+* TrieProvider supports NameValueCollection of HTTP headers rather than a single user agent string. An collection of device indexes is returned for each of the relevant headers. The collection can be used with new GetPropertyValue methods to return the property value from the most relevant HTTP header.
+* If a file is used with the StreamFactory it will only be deleted if the IsTemporary parameter is set to true. Previously the extension of the file was used to determine if the file was temporary and eligible for deletion.
+* Stream DataSet now exposes information related to the number of readers created and queued in the underlying Pool.
 
 ### Changes from 3.1.13
 
