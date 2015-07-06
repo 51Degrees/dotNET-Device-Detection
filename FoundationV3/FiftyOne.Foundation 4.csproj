@@ -156,6 +156,7 @@
     <Compile Include="Mobile\Detection\IReadonlyList.cs" />
     <Compile Include="Mobile\Detection\Factories\MemoryFactory.cs" />
     <Compile Include="Mobile\Detection\Factories\TrieFactory.cs" />
+    <Compile Include="Mobile\Detection\TrieProviderV3.cs" />
     <Compile Include="Mobile\Detection\TrieProvider.cs" />
     <Compile Include="Mobile\Detection\Entities\ProfileOffset.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\ICacheList.cs" />
@@ -190,6 +191,9 @@
     <Compile Include="Mobile\Detection\Entities\Memory\MemoryVariableList.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\VariableList.cs" />
     <Compile Include="Mobile\Detection\Readers\Reader.cs" />
+    <Compile Include="Mobile\Detection\TrieProviderV32.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Mobile\Detection\WebProvider.cs" />
     <Compile Include="Properties\BinaryConstants.cs" />
     <Compile Include="LogMessageEntity.cs" />
