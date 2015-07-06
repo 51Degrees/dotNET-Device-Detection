@@ -34,16 +34,37 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
     public static class TrieFactory
     {
         /// <summary>
+        /// Creates a new provider from the byte array supplied.
+        /// </summary>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static TrieProvider Create(byte[] array)
+        {
+            return Create(new Pool(new SourceMemory(array)));
+        }
+
+        /// <summary>
         /// Creates a new provider from the binary file supplied.
         /// </summary>
         /// <param name="file">Binary file to use to create the provider.</param>
         /// <returns>A new provider initialised with data from the file provided.</returns>
         public static TrieProvider Create(string file)
         {
+            return Create(file, false);
+        }
+
+        /// <summary>
+        /// Creates a new provider from the binary file supplied.
+        /// </summary>
+        /// <param name="file">Binary file to use to create the provider.</param>
+        /// <param name="isTempFile">True if the file should be deleted when the source is disposed</param>
+        /// <returns>A new provider initialised with data from the file provided.</returns>
+        public static TrieProvider Create(string file, bool isTempFile)
+        {
             FileInfo fileInfo = new FileInfo(file);
             if (fileInfo.Exists)
             {
-                return Create(new Pool(new SourceMemoryMappedFile(file)));
+                return Create(new Pool(new SourceFile(file, isTempFile)));
             }
             return null;
         }
@@ -55,24 +76,36 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
             {
                 // Check the version number is correct for this API.
                 var version = reader.ReadUInt16();
-                if (BinaryConstants.SupportedTrieFormatVersions.Any(i => i.Value.Major == version) == false)
-                {
-                    throw new MobileException(String.Format(
-                        "Version mismatch. Data is version '{0}' for '{1}' reader",
-                        version,
-                        String.Join(",", BinaryConstants.SupportedTrieFormatVersions.Select(i => i.Value.ToString()))));
-                }
 
-                // Create the new provider.
-                return new TrieProvider(
-                    Encoding.ASCII.GetString(reader.ReadBytes((int)reader.ReadUInt32())),
-                    ReadStrings(reader),
-                    ReadProperties(reader),
-                    ReadDevices(reader),
-                    ReadLookupList(reader),
-                    reader.ReadInt64(),
-                    reader.BaseStream.Position,
-                    pool);
+                // Construct the right provider.
+                switch(version)
+                {
+                    case 3:
+                        return new TrieProviderV3(
+                            Encoding.ASCII.GetString(reader.ReadBytes((int)reader.ReadUInt32())),
+                            ReadStrings(reader),
+                            ReadProperties(reader),
+                            ReadDevices(reader),
+                            ReadLookupList(reader),
+                            reader.ReadInt64(),
+                            reader.BaseStream.Position,
+                            pool);
+                    case 32:
+                        return new TrieProviderV32(
+                            Encoding.ASCII.GetString(reader.ReadBytes((int)reader.ReadUInt32())),
+                            ReadStrings(reader),
+                            ReadProperties(reader),
+                            ReadDevices(reader),
+                            ReadLookupList(reader),
+                            reader.ReadInt64(),
+                            reader.BaseStream.Position,
+                            pool);
+                    default:
+                        throw new MobileException(String.Format(
+                            "Version mismatch. Data is version '{0}' for '{1}' reader",
+                            version,
+                            String.Join(",", BinaryConstants.SupportedTrieFormatVersions.Select(i => i.Value.ToString()))));
+                }
             }
             finally
             {
