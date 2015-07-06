@@ -192,7 +192,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         // Try and create the data set from the existing temporary file.
                         // If the file can't be used then record the exception in debug
                         // logging.
-                        dataSet = StreamFactory.Create(temporaryFile.FullName, File.GetLastWriteTimeUtc(masterFile.FullName));
+                        dataSet = StreamFactory.Create(temporaryFile.FullName, File.GetLastWriteTimeUtc(masterFile.FullName), true);
 
                         // The data set could be created so exit the loop.
                         break;
@@ -214,7 +214,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     // No suitable temp file was found, create one in the
                     // temporary file folder to enable the source file to be updated
                     // without stopping the web site.
-                    dataSet = StreamFactory.Create(CreateNewTemporaryFile(masterFile).FullName, File.GetLastWriteTimeUtc(masterFile.FullName));
+                    dataSet = StreamFactory.Create(CreateNewTemporaryFile(masterFile).FullName, File.GetLastWriteTimeUtc(masterFile.FullName), true);
                 }
                 
             }
