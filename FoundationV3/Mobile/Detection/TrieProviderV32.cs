@@ -46,26 +46,25 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="copyright">The copyright notice for the data file.</param>
         /// <param name="strings">Array containing all strings in the output.</param>
+        /// <param name="httpHeaders">Array of http headers.</param>
         /// <param name="properties">Array of properties.</param>
         /// <param name="devices">Array of devices.</param>
         /// <param name="lookupList">Lookups data array.</param>
         /// <param name="nodesLength">The length of the node data.</param>
         /// <param name="nodesOffset">The position of the start of the nodes in the file provided.</param>
         /// <param name="pool">Pool connected to the data source.</param>
-        internal TrieProviderV32(string copyright, byte[] strings, byte[] properties, byte[] devices,
+        internal TrieProviderV32(string copyright, byte[] strings, byte[] httpHeaders, byte[] properties, byte[] devices,
             byte[] lookupList, long nodesLength, long nodesOffset, Pool pool)
             : base (copyright, strings, properties, devices, lookupList, nodesLength, nodesOffset, pool)
         {
-            var propertiesStart = BitConverter.ToInt32(_properties, 0);
-            var count = (_properties.Length - propertiesStart) / PROPERTY_LENGTH;
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < _properties.Length / PROPERTY_LENGTH; i++)
             {
-                var value = GetStringValue(BitConverter.ToInt32(_properties, propertiesStart + (i * PROPERTY_LENGTH)));
-                var headerCount = BitConverter.ToInt32(_properties, propertiesStart + (i * PROPERTY_LENGTH) + sizeof(int));
-                var headerFirstIndex = BitConverter.ToInt32(_properties, propertiesStart + (i * PROPERTY_LENGTH) + (sizeof(int) * 2));
+                var value = GetStringValue(BitConverter.ToInt32(_properties, i * PROPERTY_LENGTH));
+                var headerCount = BitConverter.ToInt32(_properties, (i * PROPERTY_LENGTH) + sizeof(int));
+                var headerFirstIndex = BitConverter.ToInt32(_properties, (i * PROPERTY_LENGTH) + (sizeof(int) * 2));
                 _propertyIndex.Add(value, i);
                 _propertyNames.Add(value);
-                _propertyHttpHeaders.Add(GetHeaders(headerCount, headerFirstIndex));
+                _propertyHttpHeaders.Add(GetHeaders(httpHeaders, headerCount, headerFirstIndex));
             }
         }
         
@@ -73,15 +72,15 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         #region Private Methods
 
-        private string[] GetHeaders(int headerCount, int headerFirstIndex)
+        private string[] GetHeaders(byte[] httpHeaders, int headerCount, int headerFirstIndex)
         {
             var headers = new List<string>();
             for(int i = 0; i < headerCount; i++)
             {
                 headers.Add(GetStringValue(
                     BitConverter.ToInt32(
-                        _properties, 
-                        sizeof(int) + ((headerFirstIndex + i) * sizeof(int)))));
+                        httpHeaders, 
+                        (headerFirstIndex + i) * sizeof(int))));
             }
             return headers.ToArray();
         }
