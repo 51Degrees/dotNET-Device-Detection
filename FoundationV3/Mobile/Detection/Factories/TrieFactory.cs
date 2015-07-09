@@ -94,6 +94,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
                         return new TrieProviderV32(
                             Encoding.ASCII.GetString(reader.ReadBytes((int)reader.ReadUInt32())),
                             ReadStrings(reader),
+                            ReadHeaders(reader),
                             ReadProperties(reader),
                             ReadDevices(reader),
                             ReadLookupList(reader),
@@ -125,6 +126,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         }
 
         private static byte[] ReadProperties(BinaryReader reader)
+        {
+            return reader.ReadBytes((int)reader.ReadUInt32());
+        }
+
+        private static byte[] ReadHeaders(BinaryReader reader)
         {
             return reader.ReadBytes((int)reader.ReadUInt32());
         }
