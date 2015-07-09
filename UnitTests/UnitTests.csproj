@@ -73,16 +73,10 @@
     <Compile Include="HttpHeaders\Premium\V31Array.cs" />
     <Compile Include="HttpHeaders\Premium\V32Array.cs" />
     <Compile Include="Memory\Enterprise\V30TrieFile.cs" />
-    <Compile Include="Memory\Enterprise\V30TrieMemory.cs" />
     <Compile Include="Memory\Enterprise\V32TrieFile.cs" />
-    <Compile Include="Memory\Enterprise\V32TrieMemory.cs" />
-    <Compile Include="Memory\Lite\V30TrieMemory.cs" />
-    <Compile Include="Memory\Lite\V32TrieMemory.cs" />
     <Compile Include="Memory\Lite\V32TrieFile.cs" />
     <Compile Include="Memory\Premium\V30TrieFile.cs" />
-    <Compile Include="Memory\Premium\V30TrieMemory.cs" />
     <Compile Include="Memory\Premium\V32TrieFile.cs" />
-    <Compile Include="Memory\Premium\V32TrieMemory.cs" />
     <Compile Include="Memory\TrieMemory.cs" />
     <Compile Include="Memory\TrieFile.cs" />
     <Compile Include="Memory\Lite\V30TrieFile.cs" />
