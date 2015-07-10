@@ -137,9 +137,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
             // for static resources and record bandwidth information.
             application.BeginRequest += OnBeginRequestJavascript;
 
-            // Register for the event after the request is authorised so that
-            // images can be optimised.
-            application.PostAuthorizeRequest += OnPostAuthorizeRequest;
+            // If image optimisation is enabled then register for the event after 
+            // authorization so that the image optimser can resize the image if needed
+            // and pass control back to the static file handler.
+            if (Manager.ImageOptimisation.Enabled)
+            {
+                application.PostAuthorizeRequest += OnPostAuthorizeRequest;
+            }
 
             // Used to check for the presence of the handler so that the header
             // can be altered to include the extra javascript.
