@@ -44,8 +44,7 @@ namespace FiftyOne.UnitTests.Performance.Premium
         {
             base.InitializeTime(); 
         }
-
-
+        
         [TestMethod]
         public void PremiumV31Array_Performance_BadUserAgentsMulti()
         {

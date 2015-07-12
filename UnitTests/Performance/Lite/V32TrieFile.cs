@@ -39,8 +39,7 @@ namespace FiftyOne.UnitTests.Performance.Lite
         {
             base.InitializeTime();
         }
-
-
+        
         [TestMethod]
         public void LiteV32TrieFile_Performance_BadUserAgentsMulti()
         {
