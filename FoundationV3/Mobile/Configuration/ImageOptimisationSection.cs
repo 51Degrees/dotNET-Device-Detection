@@ -81,7 +81,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         internal bool Enabled
         {
             get { return ElementInformation.IsPresent && (bool)this["enabled"]; }
-            set { SetImageOptimisation(value); }
+            set { SetImageOptimisation(value); WebConfig.SetWebConfigurationModules(); }
         }
 
         /// <summary>
