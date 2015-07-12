@@ -35,7 +35,7 @@ namespace FiftyOne.Foundation.Image
 
         private Size _size = Size.Empty;
         private ImageFormat _imageFormat = ImageFormat.Png;
-        private int _screenBitDepth = 8;
+        private readonly int _screenBitDepth;
 
         #endregion
 
@@ -44,7 +44,6 @@ namespace FiftyOne.Foundation.Image
         internal int ScreenBitDepth
         {
             get { return _screenBitDepth; }
-            set { _screenBitDepth = value; }
         }
 
         internal ImageFormat Format
@@ -73,6 +72,15 @@ namespace FiftyOne.Foundation.Image
 
         #endregion
 
+        #region Constructor
+
+        internal Processor(int screenBitDepth)
+        {
+            _screenBitDepth = screenBitDepth;
+        }
+
+        #endregion
+
         #region Crop Methods
 
         internal void Crop(Stream inStream, Stream outStream)
@@ -85,8 +93,6 @@ namespace FiftyOne.Foundation.Image
 
         private void Crop(System.Drawing.Image image, Stream outStream)
         {
-            // Ensure the screen depth is set no larger than than source image.
-            SetScreenBitDepth(image);
             using(MemoryStream ms = new MemoryStream())
             {
                 if (CalculateNewSize(image) == true)
@@ -145,18 +151,27 @@ namespace FiftyOne.Foundation.Image
 
         internal void Shrink(System.Drawing.Image image, Stream outStream)
         {
-            // Ensure the screen depth is set no larger than than source image.
-            SetScreenBitDepth(image);
-            using(MemoryStream ms = new MemoryStream())
+            if (outStream.CanSeek)
             {
-                // Get the new image size.
-                CalculateNewSize(image);
-                using (Bitmap shrunk = new Bitmap(Width, Height, GetPixelFormat(image)))
+                ShrinkToSeekStream(image, outStream);
+            }
+            else
+            {
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    Shrink(image, shrunk);
-                    Save(shrunk, ms, image);
+                    ShrinkToSeekStream(image, ms);
+                    outStream.Write(ms.ToArray(), 0, (int)ms.Length);
                 }
-                outStream.Write(ms.ToArray(), 0, (int)ms.Length);
+            }
+        }
+
+        private void ShrinkToSeekStream(System.Drawing.Image image, Stream seekStream)
+        {
+            CalculateNewSize(image);
+            using (Bitmap shrunk = new Bitmap(Width, Height, GetPixelFormat(image)))
+            {
+                Shrink(image, shrunk);
+                Save(shrunk, seekStream, image);
             }
         }
 
@@ -164,14 +179,7 @@ namespace FiftyOne.Foundation.Image
 
         #region Save Methods
 
-        private void SetScreenBitDepth(System.Drawing.Image image)
-        {
-            int screenBitDepth = GetScreenBitDepth(image);
-            if (screenBitDepth < _screenBitDepth)
-                _screenBitDepth = screenBitDepth;
-        }
-
-        private static int GetScreenBitDepth(System.Drawing.Image image)
+        private static int GetImageBitDepth(System.Drawing.Image image)
         {
             if (image.PixelFormat == PixelFormat.Format16bppArgb1555) return 16;
             else if (image.PixelFormat == PixelFormat.Format16bppGrayScale) return 16;
@@ -184,14 +192,15 @@ namespace FiftyOne.Foundation.Image
             else if (image.PixelFormat == PixelFormat.Format48bppRgb) return 48;
             else if (image.PixelFormat == PixelFormat.Format64bppArgb) return 64;
             else if (image.PixelFormat == PixelFormat.Format64bppPArgb) return 64;
+            else if (image.PixelFormat == PixelFormat.Format24bppRgb) return 24;
             return 8;
         }
 
         private PixelFormat GetPixelFormat(System.Drawing.Image image)
         {
-            if (_screenBitDepth > GetScreenBitDepth(image))
+            if (_screenBitDepth > GetImageBitDepth(image))
                 return image.PixelFormat;
-            if (_screenBitDepth <= 32) 
+            if (_screenBitDepth <= 32)
                 return PixelFormat.Format32bppArgb;
             return PixelFormat.Format64bppArgb;
         }
