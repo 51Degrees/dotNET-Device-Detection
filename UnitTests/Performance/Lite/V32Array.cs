@@ -46,7 +46,6 @@ namespace FiftyOne.UnitTests.Performance.Lite
             base.InitializeTime(); 
         }
 
-
         [TestMethod]
         public void LiteV32Array_Performance_BadUserAgentsMulti()
         {
