@@ -75,6 +75,8 @@ This release focuses on reducing memory consumption and improving performance wh
 * TrieProvider supports NameValueCollection of HTTP headers rather than a single user agent string. An collection of device indexes is returned for each of the relevant headers. The collection can be used with new GetPropertyValue methods to return the property value from the most relevant HTTP header.
 * If a file is used with the StreamFactory it will only be deleted if the IsTemporary parameter is set to true. Previously the extension of the file was used to determine if the file was temporary and eligible for deletion.
 * Stream DataSet now exposes information related to the number of readers created and queued in the underlying Pool.
+* Detector module no longer listens for PostAuthorizeRequest if image optimisation is disabled.
+* Changing device detection or image optimisation enabled states will change web.config modules collection to ensure configured to listen for all requests, not just managed code.
 
 ### Changes from 3.1.13
 
