@@ -171,6 +171,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
             DetectionSection element = GetDetectionElement();
             element.Enabled = value;
             Support.SetWebApplicationSection(element);
+            WebConfig.SetWebConfigurationModules();
             Refresh();
         }
 
@@ -183,6 +184,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
             var element = Mobile.Configuration.Manager.ImageOptimisation;
             element.Enabled = value;
             Support.SetWebApplicationSection(element);
+            WebConfig.SetWebConfigurationModules();
             Refresh();
         }
 
