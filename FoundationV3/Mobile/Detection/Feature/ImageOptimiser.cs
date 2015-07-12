@@ -262,16 +262,44 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
                     // Check the directory exists?
                     if (cachedFile.Directory.Exists == false)
                         Directory.CreateDirectory(cachedFile.DirectoryName);
-                    var processor = new Image.Processor();
+
+                    // Shrink the image to the cache file path. Use a bit depth of 32 pixels
+                    // as the image cache is not aware of the specific devices bit depth, only
+                    // the requested screen size.
+                    var processor = new Image.Processor(32);
+                    var source = new FileInfo(sourceFile);
                     processor.Width = size.Width;
                     processor.Height = size.Height;
-                    using (var cachedStream = File.Create(cachedFilePhysicalPath))
+                    using (var cachedStream = new MemoryStream())
                     {
                         try
                         {
-                            processor.Shrink(
-                                File.OpenRead(sourceFile),
-                                cachedStream);
+                            // Make sure the source stream is closed when the shrinking
+                            // process has been completed.
+                            using (var sourceStream = source.OpenRead())
+                            {
+                                processor.Shrink(
+                                    sourceStream,
+                                    cachedStream);
+                            }
+
+                            // Some times the GDI can produce larger files than the original.
+                            // Check for this to ensure the image is smaller.
+                            if (cachedStream.Length < source.Length)
+                            {
+                                // Use the cache stream for the new file.
+                                using (var fileStream = File.Create(cachedFilePhysicalPath))
+                                {
+                                    cachedStream.Position = 0;
+                                    cachedStream.CopyTo(fileStream);
+                                }
+                            }
+                            else
+                            {
+                                // Copy the original file into the cache to avoid doing
+                                // this again in the future.
+                                source.CopyTo(cachedFilePhysicalPath);
+                            }
                         }
                         catch (Exception ex)
                         {
