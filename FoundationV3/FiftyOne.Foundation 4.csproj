@@ -120,6 +120,7 @@
     <Compile Include="Activator.cs" />
     <Compile Include="Image\Processor.cs" />
     <Compile Include="Mobile\Configuration\ImageOptimisationSection.cs" />
+    <Compile Include="Mobile\Configuration\WebConfig.cs" />
     <Compile Include="Mobile\Detection\AutoUpdate.cs">
       <SubType>Code</SubType>
     </Compile>
