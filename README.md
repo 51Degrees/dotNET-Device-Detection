@@ -77,6 +77,7 @@ This release focuses on reducing memory consumption and improving performance wh
 * Stream DataSet now exposes information related to the number of readers created and queued in the underlying Pool.
 * Detector module no longer listens for PostAuthorizeRequest if image optimisation is disabled.
 * Changing device detection or image optimisation enabled states will change web.config modules collection to ensure configured to listen for all requests, not just managed code.
+* Changed image optimiser process to reduce memory consumption slightly, and ensure resized image is smaller than the original.
 
 ### Changes from 3.1.13
 
