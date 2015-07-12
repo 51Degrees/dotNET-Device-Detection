@@ -1,6 +1,4 @@
-<p>
-<img src="https://51degrees.com/DesktopModules/FiftyOne/Distributor/Logo.ashx" title="THE Fastest and Most Accurate Device Detection"/>**Device Detection Unit Tests**
-</p>
+![51Degrees](https://51degrees.com/DesktopModules/FiftyOne/Distributor/Logo.ashx "THE Fastest and Most Accurate Device Detection")**Device Detection Unit Tests**
 
 **Important:** Unit tests are provided for both code and data files. Enterprise and Premium data files needed to be placed in the Data folder of this repository in order for all tests to be executed. These files can be obtained from 51Degrees.
 
