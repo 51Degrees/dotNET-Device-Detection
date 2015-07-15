@@ -90,7 +90,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             return _activeProvider;
         }
         private static WebProvider _activeProvider;
-        private static bool _activeProviderCreated = false;
+        internal static bool _activeProviderCreated = false;
 
         /// <summary>
         /// A reference to the active provider.
