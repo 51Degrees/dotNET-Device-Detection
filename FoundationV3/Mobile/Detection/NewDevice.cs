@@ -169,26 +169,23 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         private static void SendData(Stream stream, Queue<byte[]> queue)
         {
-            
-           
-                using (XmlWriter writer = XmlWriter.Create(new GZipStream(stream, CompressionMode.Compress), GetXmlSettings()))
+            using (XmlWriter writer = XmlWriter.Create(new GZipStream(stream, CompressionMode.Compress), GetXmlSettings()))
+            {
+                writer.WriteStartDocument();
+                writer.WriteStartElement("Devices");
+                while (queue.Count > 0)
                 {
-                    writer.WriteStartDocument();
-                    writer.WriteStartElement("Devices");
-                    while (queue.Count > 0)
+                    byte[] item = queue.Dequeue();
+                    if (item != null && item.Length > 0)
                     {
-                        byte[] item = queue.Dequeue();
-                        if (item != null && item.Length > 0)
-                        {
-                            writer.WriteRaw(
-                                ASCIIEncoding.UTF8.GetString(
-                                    item));
-                        }
+                        writer.WriteRaw(
+                            ASCIIEncoding.UTF8.GetString(
+                                item));
                     }
-                    writer.WriteEndElement();
-                    
                 }
-            
+                writer.WriteEndElement();
+                    
+            }
         }
 
         /// <summary>
