@@ -140,7 +140,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     WriteAssembly(writer);
 
                     // Record information about the active provider.
-                    WriteProvider(writer, WebProvider.ActiveProvider);
+                    if (WebProvider._activeProviderCreated)
+                    {
+                        WriteProvider(writer, WebProvider.ActiveProvider);
+                    }
 
                     // Record either the IP address of the client if not local or the IP
                     // address of the machine.
@@ -268,11 +271,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
             if (provider != null)
             {
                 writer.WriteStartElement("DataSet");
-                if (provider.DataSet.Export != null)
-                {
-                    writer.WriteElementString("Export", provider.DataSet.Export.ToString());
-                }
-                writer.WriteElementString("Tag", provider.DataSet.Tag.ToString());
+                writer.WriteElementString("Version", provider.DataSet.Version.ToString());
+                writer.WriteElementString("Name", provider.DataSet.Name);
                 writer.WriteEndElement();
             }
         }
