@@ -146,7 +146,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             List<string> parameters = new List<string>();
             parameters.Add(String.Format("LicenseKeys={0}", String.Join("|", licences)));
             parameters.Add(String.Format("Download={0}", bool.TrueString));
-            parameters.Add("Type=BinaryV3");
+            parameters.Add("Type=BinaryV32");
 
             return String.Format("{0}?{1}",
                 Constants.AutoUpdateUrl,
