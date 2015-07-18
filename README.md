@@ -49,7 +49,7 @@ Data files which are updated weekly and daily, automatically, and with more prop
 
 ## Recent Changes
 
-### Version 3.2.2 Highlights
+### Version 3.2.3 Highlights
 
 This release focuses on reducing memory consumption and improving performance when the device data file is used directly from the disk.
 
@@ -68,6 +68,11 @@ This release focuses on reducing memory consumption and improving performance wh
 * Web sites using memory mode use a byte array to improve start up time.
 * Version 3.2 data file formats are supported in parallel with version 3.1 data files.
 * 51Degrees unit tests are now part of the open source distribution.
+
+### Changes from 3.2.2
+
+* Automatic download requests version 3.2 data file format.
+* The active provider will not be initialised when data sharing is enabled.
 
 ### Changes from 3.2.1
 
