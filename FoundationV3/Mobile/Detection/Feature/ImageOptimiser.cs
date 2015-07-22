@@ -315,7 +315,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
                 if (File.Exists(cachedFilePhysicalPath))
                     context.RewritePath(cachedFileVirtualPath, true);
                 else
-                    context.RewritePath(sourceFile);
+                    context.RewritePath(context.Request.AppRelativeCurrentExecutionFilePath);
             }
         }
 
