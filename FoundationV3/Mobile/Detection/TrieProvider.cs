@@ -562,9 +562,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>The device id with the most number of matching characters</returns>
         private int GetDeviceIndex(BinaryReader reader, byte[] userAgent, int index, int parentDeviceIndex, StringBuilder matchedUserAgent)
         {
-            // Add the character to the matched user agent.
-            matchedUserAgent.Append((char)userAgent[index]);
-
             // Get the lookup list.
             var lookupListOffset = reader.ReadInt32();
 
@@ -592,6 +589,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
             var numberOfChildren = reader.ReadByte();
             if (childIndex >= numberOfChildren)
                 return deviceIndex;
+
+            // Add the character to the matched user agent.
+            matchedUserAgent.Append((char)userAgent[index]);
 
             // If there's only 1 child then it will appear immediately after
             // this element. The position will already be set at that position.
