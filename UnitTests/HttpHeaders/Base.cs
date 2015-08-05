@@ -75,6 +75,8 @@ namespace FiftyOne.UnitTests.HttpHeaders
                 headers.Add("User-Agent", userAgentIterator.Current);
                 provider.Match(headers, match);
                 Assert.IsTrue(match.Signature == null, "Signature not equal null");
+                Assert.IsTrue(match.Difference == 0, "Match difference not equal to zero");
+                Assert.IsTrue(match.Method == MatchMethods.Exact, "Match method not equal to Exact");
                 Validate(match, state);
                 results.Methods[match.Method]++;
             }
