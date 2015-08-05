@@ -200,13 +200,24 @@ namespace FiftyOne.Foundation.Mobile.Detection
                             Match headerMatch;
                             if (matches.TryGetValue(header, out headerMatch))
                             {
-                                // Update the statistics about the matching process.
-                                match._signaturesCompared += headerMatch._signaturesCompared;
-                                match._signaturesRead += headerMatch._signaturesRead;
-                                match._stringsRead += headerMatch._stringsRead;
-                                match._rootNodesEvaluated += headerMatch._rootNodesEvaluated;
-                                match._nodesEvaluated += headerMatch._nodesEvaluated;
-                                match._elapsed += headerMatch._elapsed;
+                                // Update the statistics about the matching process if this
+                                // header isn't the match instance passed to the method.
+                                if (match != headerMatch)
+                                {
+                                    match._signaturesCompared += headerMatch._signaturesCompared;
+                                    match._signaturesRead += headerMatch._signaturesRead;
+                                    match._stringsRead += headerMatch._stringsRead;
+                                    match._rootNodesEvaluated += headerMatch._rootNodesEvaluated;
+                                    match._nodesEvaluated += headerMatch._nodesEvaluated;
+                                    match._elapsed += headerMatch._elapsed;
+                                }
+
+                                // If the header match used is worst than the current one
+                                // then update the method used for the match returned.
+                                if ((int)headerMatch.Method > (int)match.Method)
+                                {
+                                    match._method = headerMatch.Method;
+                                }
 
                                 // Set the profile for this component.
                                 newProfiles[componentIndex] = headerMatch.Profiles.FirstOrDefault(i =>
@@ -228,9 +239,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     }
 
                     // Reset any fields that relate to the profiles assigned
-                    // to the match result.
+                    // to the match result or that can't contain a value when
+                    // HTTP headers are used.
                     match._signature = null;
                     match._results = null;
+                    match._targetUserAgent = null;
 
                     // Replace the match profiles with the new ones.
                     match._profiles = newProfiles;
@@ -240,22 +253,34 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
 
         /// <summary>
-        /// Matches each of the required headers.
+        /// For each of the important HTTP headers provides a mapping to a match result.
         /// </summary>
-        /// <param name="match"></param>
-        /// <param name="headers"></param>
-        /// <param name="importantHeaders"></param>
-        /// <returns></returns>
+        /// <param name="match">The single match instance passed into the match method</param>
+        /// <param name="headers">The HTTP headers available for matching</param>
+        /// <param name="importantHeaders">HTTP header names important to the match process</param>
+        /// <returns>A map of HTTP headers and match instances containing results for them</returns>
         private Dictionary<string, Match> MatchForHeaders(Match match, NameValueCollection headers, IEnumerable<string> importantHeaders)
         {
+            // Relates HTTP header names to match resutls.
             var matches = new Dictionary<string, Match>();
+
+            // Iterates through the important header names.
             var iterator = importantHeaders.GetEnumerator();
+
+            // Make the first match used the match passed
+            // into the method. Subsequent matches will
+            // use a new instance.
             var currentMatch = match;
             while(iterator.MoveNext())
             {
                 matches.Add(iterator.Current, currentMatch != null ? currentMatch : CreateMatch());
                 currentMatch = null;
             }
+
+            // Using each of the match instances pass the 
+            // value to the match method and set the results.
+            // Done in parallel to improve performance if 
+            // multi threading available.
             Parallel.ForEach(matches, m =>
             {
                 Match(headers[m.Key], m.Value);
