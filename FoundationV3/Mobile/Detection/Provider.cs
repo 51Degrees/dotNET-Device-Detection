@@ -210,6 +210,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                                     match._rootNodesEvaluated += headerMatch._rootNodesEvaluated;
                                     match._nodesEvaluated += headerMatch._nodesEvaluated;
                                     match._elapsed += headerMatch._elapsed;
+                                    match.LowestScore += headerMatch.Difference;
                                 }
 
                                 // If the header match used is worst than the current one
