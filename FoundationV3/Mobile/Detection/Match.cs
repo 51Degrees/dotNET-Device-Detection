@@ -237,23 +237,16 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region External Fields
 
         /// <summary>
-        /// The target user agent string used for the detection.
+        /// The target user agent string used for the detection where a single
+        /// User-Agent was provided. If mutli HTTP headers were provided then
+        /// this value will be null.
         /// </summary>
         public string TargetUserAgent
         {
             get { return _targetUserAgent; }
         }
-        private string _targetUserAgent;
+        internal string _targetUserAgent;
         
-        /// <summary>
-        /// The Http header that provided the user agent.
-        /// </summary>
-        public string HttpHeader
-        {
-            get { return _httpHeader; }
-        }
-        private string _httpHeader = "User-Agent";
-
         #endregion
 
         #region Public Properties
@@ -394,7 +387,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         /// <summary>
         /// The method used to obtain the match. <see cref="MatchMethods"/>
-        /// provides descriptions of the possible return values.
+        /// provides descriptions of the possible return values. When used
+        /// with multi HTTP headers the worst method used for all the HTTP
+        /// headers.
         /// </summary>
         public MatchMethods Method
         {
