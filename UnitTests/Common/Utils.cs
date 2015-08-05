@@ -301,9 +301,9 @@ namespace FiftyOne.UnitTests
             Console.WriteLine("User-Agent cache switches '{0}' with '{1:P2} misses",
                 provider.CacheSwitches,
                 provider.PercentageCacheMisses);
-            ReportCache(provider.DataSet);
             if (provider.DataSet is FiftyOne.Foundation.Mobile.Detection.Entities.Stream.DataSet)
             {
+                ReportCache(provider.DataSet);
                 ReportPool((FiftyOne.Foundation.Mobile.Detection.Entities.Stream.DataSet)provider.DataSet);
             }
         }
