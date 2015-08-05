@@ -109,12 +109,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// The number of maps the property is assigned to.
         /// </summary>
-        internal readonly int MapCount;
+        private readonly int _mapCount;
 
         /// <summary>
         /// The first index in the list of maps.
         /// </summary>
-        internal readonly int FirstMapIndex;
+        private readonly int _firstMapIndex;
 
         #endregion
 
@@ -133,7 +133,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                     {
                         if (_maps == null)
                         {
-                            _maps = DataSet.Maps.Skip(FirstMapIndex).Take(MapCount).Select(i => 
+                            _maps = DataSet.Maps.Skip(_firstMapIndex).Take(_mapCount).Select(i => 
                                 i.Name).ToArray();
                         }
                     }
@@ -389,8 +389,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             _urlOffset = reader.ReadInt32();
             FirstValueIndex = reader.ReadInt32();
             LastValueIndex = reader.ReadInt32();
-            MapCount = reader.ReadInt32();
-            FirstMapIndex = reader.ReadInt32();
+            _mapCount = reader.ReadInt32();
+            _firstMapIndex = reader.ReadInt32();
         }
 
         #endregion
@@ -416,7 +416,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             if (_component == null)
                 _component = DataSet.Components[_componentIndex];
             if (_maps == null)
-                _maps = DataSet.Maps.Skip(FirstMapIndex).Take(MapCount).Select(i =>
+                _maps = DataSet.Maps.Skip(_firstMapIndex).Take(_mapCount).Select(i =>
                             i.Name).ToArray();
         }
 
