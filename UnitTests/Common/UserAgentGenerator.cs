@@ -18,22 +18,35 @@
  * This Source Code Form is “Incompatible With Secondary Licenses”, as
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace FiftyOne.UnitTests
 {
+    /// <summary>
+    /// Used to return user agents for various test cases.
+    /// </summary>
     internal static class UserAgentGenerator
     {
+        /// <summary>
+        /// Array of user agents stored in memory from the source data
+        /// file.
+        /// </summary>
         private static readonly string[] _userAgents;
 
+        /// <summary>
+        /// Used to generate random user agents.
+        /// </summary>
         private static Random _random = new Random();
 
+        /// <summary>
+        /// Initialises the user agents used by the generator.
+        /// </summary>
         static UserAgentGenerator()
         {
             _userAgents = File.ReadAllLines(Constants.GOOD_USERAGENTS_FILE);
@@ -63,6 +76,13 @@ namespace FiftyOne.UnitTests
             return value;
         }
 
+        /// <summary>
+        /// Returns the number of random user agents requested in the count paramemer.
+        /// The user agents are also altered with the randomness provided.
+        /// </summary>
+        /// <param name="count">Number of user agents to return</param>
+        /// <param name="randomness">Number of characters to alter in the user agents</param>
+        /// <returns>Enumerable of user agents</returns>
         internal static IEnumerable<string> GetEnumerable(int count, int randomness)
         {
             for(int i = 0; i < count; i++)
@@ -77,7 +97,7 @@ namespace FiftyOne.UnitTests
         /// </summary>
         /// <param name="count">Nmber of user agents to return.</param>
         /// <param name="pattern">Regular expression for the user agents.</param>
-        /// <returns></returns>
+        /// <returns>An enumerable of user agents</returns>
         internal static IEnumerable<string> GetEnumerable(int count, string pattern)
         {
             var counter = 0;
@@ -96,19 +116,32 @@ namespace FiftyOne.UnitTests
             }
         }
 
+        /// <summary>
+        /// A selection of random user agents which have not been randomly 
+        /// altered.
+        /// </summary>
+        /// <returns>An enumerable of user agents</returns>
         internal static IEnumerable<string> GetRandomUserAgents()
         {
-            return UserAgentGenerator.GetEnumerable(20000, 0);
+            return UserAgentGenerator.GetEnumerable(_userAgents.Length, 0);
         }
 
+        /// <summary>
+        /// A selection of unique user agents in a defined order.
+        /// </summary>
+        /// <returns>An enumerable of user agents</returns>
         internal static IEnumerable<string> GetUniqueUserAgents()
         {
             return _userAgents;
         }
 
+        /// <summary>
+        /// A selection of randomly invalid user agents. 
+        /// </summary>
+        /// <returns>An enumerable of user agents</returns>
         internal static IEnumerable<string> GetBadUserAgents()
         {
-            return UserAgentGenerator.GetEnumerable(20000, 10);
+            return UserAgentGenerator.GetEnumerable(_userAgents.Length, 10);
         }
     }
 }
