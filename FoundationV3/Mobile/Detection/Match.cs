@@ -787,7 +787,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 var maxCount = 1;
 
                 // Get the nodes in ascending order of signature index length.
-                var iterator = Nodes.OrderBy(i => i.RankedSignatureCount).GetEnumerator();
+                var iterator = Nodes.OrderBy(i => 
+                    i.RankedSignatureCount).ThenBy(i => 
+                        i.Position).GetEnumerator();
 
                 // Get the first node and add all the signature indexes.
                 iterator.MoveNext();
