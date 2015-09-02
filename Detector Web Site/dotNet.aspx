@@ -3,12 +3,26 @@
 <asp:Content runat="server" ID="Body" ContentPlaceHolderID="body">
     <p>This page provides the values .NET will report for properties of the HttpBrowserCapabilities class. Many of these properties are no longer relevent but are provided here for convenience.</p>
     <p>ActiveXControls <% =Request.Browser.ActiveXControls %></p>
-    <p>Adapters <% =Request.Browser.Adapters %></p>
+    <p>Adapters:</p>
+    <ul>
+    <% var adapters = Request.Browser.Adapters.GetEnumerator(); %>
+    <% while (adapters.MoveNext()) 
+       { %>
+        <li><% =adapters.Key.ToString() %> = <% =adapters.Value.ToString() %></li>
+    <% } %>
+    </ul>
     <p>AOL <% =Request.Browser.AOL %></p>
     <p>BackgroundSounds <% =Request.Browser.BackgroundSounds %></p>
     <p>Beta <% =Request.Browser.Beta %></p>
     <p>Browser <% =Request.Browser.Browser %></p>
-    <p>Browsers <% =Request.Browser.Browsers %></p>
+    <p>Browsers:</p>
+    <ul>
+    <% var browsers = Request.Browser.Browsers.GetEnumerator(); %>
+    <% while (browsers.MoveNext())
+       { %>
+        <li><% =browsers.Current.ToString() %></li>
+    <% } %>
+    </ul>
     <p>CanCombineFormsInDeck <% =Request.Browser.CanCombineFormsInDeck %></p>
     <p>CanInitiateVoiceCall <% =Request.Browser.CanInitiateVoiceCall %></p>
     <p>CanRenderAfterInputOrSelectElement <% =Request.Browser.CanRenderAfterInputOrSelectElement %></p>
