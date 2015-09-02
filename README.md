@@ -49,7 +49,7 @@ Data files which are updated weekly and daily, automatically, and with more prop
 
 ## Recent Changes
 
-### Version 3.2.3 Highlights
+### Version 3.2.4 Highlights
 
 This release focuses on reducing memory consumption and improving performance when the device data file is used directly from the disk.
 
@@ -68,6 +68,21 @@ This release focuses on reducing memory consumption and improving performance wh
 * Web sites using memory mode use a byte array to improve start up time.
 * Version 3.2 data file formats are supported in parallel with version 3.1 data files.
 * 51Degrees unit tests are now part of the open source distribution.
+
+### Changes from 3.2.3
+
+Summary of API changes:
+
+* Changed the MobileCapabilitiesProvider to continue to support .NET Adapters and Browsers.
+* Matches using multiple headers will return the sum of all difference for each header, not just the last one that was used.
+* Removed redundant properties and some working properties and fields made internal.
+* Nodes with the same number of ranked signatures are now also ordered on their position within the User-Agent to ensure consistency with Java and C APIs.
+
+Summary of Test changes:
+
+* UnitTests now check for zero difference as well as the exact method.
+* UnitTests now only report the cache results for stream based datasets.
+* User-Agent generator contains more comments and new features for more flexible testing.
 
 ### Changes from 3.2.2
 
