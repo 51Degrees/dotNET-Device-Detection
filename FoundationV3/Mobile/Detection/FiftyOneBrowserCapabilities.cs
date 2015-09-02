@@ -27,6 +27,8 @@ using System.Linq;
 using FiftyOne.Foundation.Mobile.Detection.Entities;
 using System.Text.RegularExpressions;
 using System.Web.Configuration;
+using System.Web.UI;
+using System.IO;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
@@ -57,11 +59,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         #endregion
 
-        #region Properties
-
-
-        #endregion
-
         #region Constructor
 
         /// <summary>
@@ -82,22 +79,42 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// The unaltered implementation from <see cref="HttpCapabilitiesDefaultProvider"/>
         /// </summary>
+        public override int DefaultSubmitButtonLimit { get { return _defaultBrowserCapabilities.DefaultSubmitButtonLimit; } }
+        /// <summary>
+        /// The unaltered implementation from <see cref="HttpCapabilitiesDefaultProvider"/>
+        /// </summary>
         public override bool CanCombineFormsInDeck { get { return _defaultBrowserCapabilities.CanCombineFormsInDeck; } }
         /// <summary>
         /// The unaltered implementation from <see cref="HttpCapabilitiesDefaultProvider"/>
-        /// </summary>        public override bool CanRenderAfterInputOrSelectElement { get { return _defaultBrowserCapabilities.CanRenderAfterInputOrSelectElement; } }
+        /// </summary>        
+        public override bool CanRenderAfterInputOrSelectElement { get { return _defaultBrowserCapabilities.CanRenderAfterInputOrSelectElement; } }
+        /// <summary>
+        /// The unaltered implementation from <see cref="HttpCapabilitiesDefaultProvider"/>
+        /// </summary>        
         public override bool CanRenderEmptySelects { get { return _defaultBrowserCapabilities.CanRenderEmptySelects; } }
         /// <summary>
         /// The unaltered implementation from <see cref="HttpCapabilitiesDefaultProvider"/>
-        /// </summary>public override bool CanRenderInputAndSelectElementsTogether { get { return _defaultBrowserCapabilities.CanRenderInputAndSelectElementsTogether; } }
+        /// </summary>
+        public override bool CanRenderInputAndSelectElementsTogether { get { return _defaultBrowserCapabilities.CanRenderInputAndSelectElementsTogether; } }
+        /// <summary>
+        /// The unaltered implementation from <see cref="HttpCapabilitiesDefaultProvider"/>
+        /// </summary>        
         public override bool CanRenderMixedSelects { get { return _defaultBrowserCapabilities.CanRenderMixedSelects; } }
         /// <summary>
         /// The unaltered implementation from <see cref="HttpCapabilitiesDefaultProvider"/>
-        /// </summary>public override bool CanRenderOneventAndPrevElementsTogether { get { return _defaultBrowserCapabilities.CanRenderOneventAndPrevElementsTogether; } }
+        /// </summary>
+        public override bool CanRenderOneventAndPrevElementsTogether { get { return _defaultBrowserCapabilities.CanRenderOneventAndPrevElementsTogether; } }
+        /// <summary>
+        /// The unaltered implementation from <see cref="HttpCapabilitiesDefaultProvider"/>
+        /// </summary>        
         public override bool CanRenderPostBackCards { get { return _defaultBrowserCapabilities.CanRenderPostBackCards; } }
         /// <summary>
         /// The unaltered implementation from <see cref="HttpCapabilitiesDefaultProvider"/>
-        /// </summary>        public override bool CanRenderSetvarZeroWithMultiSelectionList { get { return _defaultBrowserCapabilities.CanRenderSetvarZeroWithMultiSelectionList; } }
+        /// </summary>        
+        public override bool CanRenderSetvarZeroWithMultiSelectionList { get { return _defaultBrowserCapabilities.CanRenderSetvarZeroWithMultiSelectionList; } }
+        /// <summary>
+        /// The unaltered implementation from <see cref="HttpCapabilitiesDefaultProvider"/>
+        /// </summary>        
         public override bool CanSendMail { get { return _defaultBrowserCapabilities.CanSendMail; } }
         /// <summary>
         /// The unaltered implementation from <see cref="HttpCapabilitiesDefaultProvider"/>
@@ -497,7 +514,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             }
         }
         private bool? _cookieSupport;
-                
+
         /// <summary>
         /// Returns version 2.0 if DOM is supported based on Ajax
         /// being supported, otherwise returns false.
@@ -671,7 +688,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         if (_isMobileDevice == null)
                         {
                             var value = _match["IsMobile"];
-                            _isMobileDevice = value != null ? value.ToBool() : _defaultBrowserCapabilities.IsMobileDevice; 
+                            _isMobileDevice = value != null ? value.ToBool() : _defaultBrowserCapabilities.IsMobileDevice;
                         }
                     }
                 }
@@ -683,9 +700,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Returns the height of the display, in pixels.
         /// </summary>
-        public override int ScreenPixelsHeight 
-        { 
-            get 
+        public override int ScreenPixelsHeight
+        {
+            get
             {
                 if (_screenPixelsHeight == null)
                 {
@@ -699,7 +716,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     }
                 }
                 return _screenPixelsHeight.Value;
-            } 
+            }
         }
         private int? _screenPixelsHeight;
 
@@ -730,13 +747,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Gets a value indicating whether the browser device is capable of initiating
         /// a voice call.
         /// </summary>
-        public override bool CanInitiateVoiceCall 
-        { 
-            get 
+        public override bool CanInitiateVoiceCall
+        {
+            get
             {
                 if (_canInitiateVoiceCall == null)
                 {
-                    lock(this)
+                    lock (this)
                     {
                         if (_canInitiateVoiceCall == null)
                         {
@@ -746,7 +763,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     }
                 }
                 return _canInitiateVoiceCall.Value;
-            } 
+            }
         }
         private bool? _canInitiateVoiceCall;
 
@@ -813,7 +830,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         if (_mobileDeviceManufacturer == null)
                         {
                             var value = _match["HardwareVendor"];
-                            _mobileDeviceManufacturer = value != null && value.Count > 0 ? 
+                            _mobileDeviceManufacturer = value != null && value.Count > 0 ?
                                 value[0].Name :
                                 _defaultBrowserCapabilities.MobileDeviceManufacturer;
                         }
@@ -829,8 +846,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// the browser.
         /// </summary>
         public override string PreferredImageMime
-        { 
-            get 
+        {
+            get
             {
                 if (_preferredImageMime == null)
                 {
@@ -864,10 +881,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     }
                 }
                 return _preferredImageMime;
-            } 
+            }
         }
         private string _preferredImageMime;
-        
+
         /// <summary>
         /// Gets a value indicating whether the browser supports callback scripts.
         /// </summary>
@@ -901,9 +918,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Returns the depth of the display, in bits per pixel.
         /// </summary>
-        public override int ScreenBitDepth 
-        { 
-            get 
+        public override int ScreenBitDepth
+        {
+            get
             {
                 if (_screenBitDepth == null)
                 {
@@ -917,10 +934,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     }
                 }
                 return _screenBitDepth.Value;
-            } 
+            }
         }
         private int? _screenBitDepth;
-        
+
         /// <summary>
         /// Returns the value of the property by first checking the results
         /// assigned to the browser capabilities. If no result is found then
@@ -930,10 +947,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>The value of the key, otherwise null.</returns>
         public override string this[string key]
         {
-	        get 
-	        {
-                switch(key)
-                { 
+            get
+            {
+                switch (key)
+                {
                     case "isMobileDevice":
                         return IsMobileDevice.ToString().ToLowerInvariant();
                     case "crawler":
@@ -946,7 +963,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         return MobileDeviceManufacturer;
                     case "platform":
                         return Platform;
-                // property enhancement can be removed with this compiler flag
+                    // property enhancement can be removed with this compiler flag
 #if !REMOVE_OVERRIDE_BROWSER
                     case "browser":
                         return Browser;
@@ -983,7 +1000,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     case "w3cdomversion":
                         return W3CDOMVersion.ToString();
                     case "cookies":
-                        return CookieSupport.ToString().ToLowerInvariant();;
+                        return CookieSupport.ToString().ToLowerInvariant(); ;
                     case "preferredRenderingType":
                         return PreferredHtmlVersion;
                     case "preferredRenderingMime":
@@ -1006,7 +1023,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                             String.Join(Constants.ValueSeperator, value) :
                             _defaultBrowserCapabilities[key];
                 }
-	        }
+            }
         }
 
         #endregion
