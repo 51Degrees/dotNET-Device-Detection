@@ -48,6 +48,20 @@ namespace FiftyOne.Foundation.Mobile.Detection
 #endif
         }
 
+        /// <summary>
+        /// Constructs an instance of <cref see="MobileCapabilitiesProvider"/>.
+        /// All default values remain the same and are unaltered.
+        /// </summary>
+        /// <param name="parent"></param>
+        public MobileCapabilitiesProvider(HttpCapabilitiesDefaultProvider parent)
+            : base(parent)
+        {
+            EventLog.Debug("Constructing MobileCapabilitiesProvider with parent");
+#if DEBUG
+          LogStackTrace();
+#endif
+        }
+
 #if DEBUG
         /// <summary>
         /// If in debug compilation record the stack trace as this class is constructed
@@ -65,27 +79,51 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Provides information to the web server about the requesting device.
         /// </summary>
-        /// <param name="request">An HttpRequest that provides information about the source device.</param>
-        /// <returns>A HttpBrowserCapabilities object containing information relevent to the device 
-        /// sources from 51Degrees.mobi.</returns>
+        /// <param name="request">
+        /// HttpRequest that provides information about the source device.
+        /// </param>
+        /// <returns>
+        /// A HttpBrowserCapabilities object containing information which 
+        /// retrieves device data from 51Degrees.
+        /// </returns>
         public override HttpBrowserCapabilities GetBrowserCapabilities(HttpRequest request)
         {
+            HttpBrowserCapabilities caps;
+            var baseCaps = base.GetBrowserCapabilities(request);
             var match = WebProvider.GetMatch(request);
             if (match != null)
             {
                 // A provider is present so 51Degrees can be used to override
                 // some of the returned values.
-                return new FiftyOneBrowserCapabilities(
-                    base.GetBrowserCapabilities(request), 
+                caps = new FiftyOneBrowserCapabilities(
+                    baseCaps,
                     request,
                     match);
+
+                // Copy the adapters from the original.
+                var adapters = baseCaps.Adapters.GetEnumerator();
+                while (adapters.MoveNext())
+                {
+                    caps.Adapters.Add(adapters.Key, adapters.Value);
+                }
+
+                // Copy the browsers from the original to prevent the Browsers
+                // property returning null.
+                if (baseCaps.Browsers != null)
+                {
+                    foreach (string browser in baseCaps.Browsers)
+                    {
+                        caps.AddBrowser(browser);
+                    }
+                }
             }
             else
             {
                 // No 51Degrees active provider is present so we have to use
                 // the base capabilities only.
-                return base.GetBrowserCapabilities(request);
+                caps = baseCaps;
             }
+            return caps;
         }
     }
 }
