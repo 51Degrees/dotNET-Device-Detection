@@ -6,6 +6,8 @@
     <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
     <TargetDatabaseSet>True</TargetDatabaseSet>
     <PermissionSet>UNSAFE</PermissionSet>
+    <SignAssembly>False</SignAssembly>
+    <AssemblyOriginatorKeyFile></AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -39,7 +41,7 @@
     </TargetFrameworkProfile>
     <DSP>Microsoft.Data.Tools.Schema.Sql.Sql110DatabaseSchemaProvider</DSP>
     <Name>FiftyOne.Founction SQL</Name>
-    <ProjectVersion>4.0</ProjectVersion>
+    <ProjectVersion>4.1</ProjectVersion>
     <ProjectGuid>{334a1d9f-82f5-41c0-8583-76823d8bf2b1}</ProjectGuid>
     <IncludeSchemaNameInFileName>False</IncludeSchemaNameInFileName>
     <GenerateDatabaseFile>False</GenerateDatabaseFile>
@@ -80,7 +82,8 @@
   <PropertyGroup>
     <RootNamespace>FiftyOne.Foundation</RootNamespace>
   </PropertyGroup>
-  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" Condition="'$(SQLDBExtensionsRefPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" Condition="'$(SQLDBExtensionsRefPath)' == ''" />
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -88,43 +91,73 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Mobile\Detection\Entities\RankedSignatureIndex.cs" />  
-    <Compile Include="Mobile\Detection\Cache.cs" />	
-    <Compile Include="Mobile\Detection\Controller.cs" />
-    <Compile Include="Mobile\Detection\DataSet.cs" />
+    <Compile Include="Mobile\Detection\Entities\Memory\EntityFactories.cs" />
+    <Compile Include="Mobile\Detection\Entities\Memory\NodeV32.cs" />
+    <Compile Include="Mobile\Detection\Entities\Memory\NodeV31.cs" />
+    <Compile Include="Mobile\Detection\Entities\Memory\Node.cs" />
+    <Compile Include="Mobile\Detection\Entities\Memory\Profile.cs" />
+    <Compile Include="Mobile\Detection\Entities\Memory\PropertiesList.cs" />
+    <Compile Include="Mobile\Detection\Entities\Memory\MemoryBaseList.cs" />
+    <Compile Include="Mobile\Detection\Entities\Memory\MemoryFixedList.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\FixedList.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\CacheList.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\DataSet.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\EntityFactories.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\Node.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\NodeV32.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\NodeV31.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\Profile.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\Source.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\ICacheList.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\FixedCacheList.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\BaseList.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\Cache.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\Pool.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\VariableList.cs" />
+    <Compile Include="Mobile\Detection\Entities\SignatureV32.cs" />
+    <Compile Include="Mobile\Detection\Entities\SignatureV31.cs" />
+    <Compile Include="Mobile\Detection\Entities\Map.cs" />
+    <Compile Include="Mobile\Detection\Entities\NodeNumericIndex.cs" />
+    <Compile Include="Mobile\Detection\Entities\ComponentV31.cs" />
+    <Compile Include="Mobile\Detection\Entities\ComponentV32.cs" />
+    <Compile Include="Mobile\Detection\Entities\IntegerEntity.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mobile\Detection\Entities\Node.cs" />
+    <Compile Include="Mobile\Detection\Entities\NodeIndex.cs" />
+    <Compile Include="Mobile\Detection\Entities\Profile.cs" />
+    <Compile Include="Mobile\Detection\Entities\Property.cs" />
+    <Compile Include="Mobile\Detection\Entities\Signature.cs" />
+    <Compile Include="Mobile\Detection\Entities\Value.cs" />
+    <Compile Include="Mobile\Detection\Entities\Values.cs" />
+    <Compile Include="Mobile\Detection\Entities\Memory\MemoryVariableList.cs" />
+    <Compile Include="Mobile\Detection\Entities\ProfileOffset.cs" />
     <Compile Include="Mobile\Detection\Entities\AsciiString.cs" />
     <Compile Include="Mobile\Detection\Entities\BaseEntity.cs" />
     <Compile Include="Mobile\Detection\Entities\Component.cs" />
-    <Compile Include="Mobile\Detection\Entities\Headers\Header.cs" />
-    <Compile Include="Mobile\Detection\Entities\Map.cs" />
-    <Compile Include="Mobile\Detection\Entities\Memory\MemoryBaseList.cs" />
-    <Compile Include="Mobile\Detection\Entities\Memory\MemoryFixedList.cs" />
-    <Compile Include="Mobile\Detection\Entities\Memory\MemoryVariableList.cs" />
-    <Compile Include="Mobile\Detection\Entities\Node.cs" />
-    <Compile Include="Mobile\Detection\Entities\NodeIndex.cs" />
-    <Compile Include="Mobile\Detection\Entities\NodeNumericIndex.cs" />
-    <Compile Include="Mobile\Detection\Entities\Profile.cs" />
-    <Compile Include="Mobile\Detection\Entities\ProfileOffset.cs" />
-    <Compile Include="Mobile\Detection\Entities\Property.cs" />
-    <Compile Include="Mobile\Detection\Entities\Signature.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\BaseList.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\Cache.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\FixedList.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\ICacheList.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\Pool.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\Source.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\VariableList.cs" />
-    <Compile Include="Mobile\Detection\Entities\Value.cs" />
-    <Compile Include="Mobile\Detection\Entities\Values.cs" />
     <Compile Include="Mobile\Detection\Factories\EntityFactories.cs" />
+    <Compile Include="Mobile\Detection\Factories\CommonFactory.cs" />
     <Compile Include="Mobile\Detection\Factories\MemoryFactory.cs" />
+    <Compile Include="Mobile\Detection\Factories\TrieFactory.cs" />
     <Compile Include="Mobile\Detection\Factories\StreamFactory.cs" />
-    <Compile Include="Mobile\Detection\IMatch.cs" />
+    <Compile Include="Mobile\Detection\IFixedList.cs" />
     <Compile Include="Mobile\Detection\IReadonlyList.cs" />
+    <Compile Include="Mobile\Detection\TrieProviderV3.cs" />
+    <Compile Include="Mobile\Detection\TrieProvider.cs" />
+    <Compile Include="Mobile\Detection\Controller.cs" />
+    <Compile Include="Mobile\Detection\Cache.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mobile\Detection\IMatch.cs" />
+    <Compile Include="Mobile\Detection\LicenceKeyActivationResults.cs" />
+    <Compile Include="Mobile\Detection\Entities\Headers\Header.cs" />
     <Compile Include="Mobile\Detection\Match.cs" />
     <Compile Include="Mobile\Detection\MatchMethods.cs" />
+    <Compile Include="Mobile\Detection\DataSet.cs" />
+    <Compile Include="Mobile\Detection\TrieProviderV32.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Mobile\Detection\NewDeviceDetails.cs" />
-    <Compile Include="Mobile\Detection\Provider.cs" />
     <Compile Include="Mobile\Detection\Readers\Reader.cs" />
     <Compile Include="Mobile\Detection\SQL.cs" />
     <Compile Include="Mobile\MobileException.cs" />
@@ -132,6 +165,7 @@
     <Compile Include="Properties\BinaryConstants.cs" />
     <Compile Include="Properties\Constants.cs" />
     <Compile Include="Properties\DetectionConstants.cs" />
+    <Compile Include="Mobile\Detection\Provider.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Mobile\Detection\Dataset\" />
