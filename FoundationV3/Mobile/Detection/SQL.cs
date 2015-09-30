@@ -28,6 +28,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using FiftyOne.Foundation.Mobile.Detection.Entities;
+using System.Threading;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
@@ -278,16 +279,19 @@ namespace FiftyOne.Foundation.Mobile.Detection
         private static InternalResult GetMatchById(string id)
         {
             InternalResult result;
-            if (_cacheUserAgent.TryGetValue(id, out result) == false)
+            if (_cacheUserAgent._itemsActive.TryGetValue(id, out result) == false)
             {
                 result = GetMatch(IterateProfileIds(id));
 
                 // Add the results to the cache.
-                _cacheUserAgent.SetActive(id, result);
+                _cacheUserAgent._itemsActive[id] = result;
+
+                Interlocked.Increment(ref _cacheUserAgent.Misses);
             }
 
             // Ensure the result is added to the background cache.
-            _cacheUserAgent.SetBackground(id, result);
+            //_cacheUserAgent.SetBackground(id, result);
+            _cacheUserAgent.AddRecent(id, result);
 
             return result;
         }
@@ -303,16 +307,19 @@ namespace FiftyOne.Foundation.Mobile.Detection
         private static InternalResult GetMatchById(byte[] id)
         {
             InternalResult result;
-            if (_cacheId.TryGetValue(id, out result) == false)
+            if (_cacheId._itemsActive.TryGetValue(id, out result) == false)
             {
                 result = GetMatch(IterateProfileIds(id));
 
                 // Add the results to the cache.
-                _cacheId.SetActive(id, result);
+                _cacheId._itemsActive[id] = result;
+
+                Interlocked.Increment(ref _cacheId.Misses);
             }
 
             // Ensure the result is added to the background cache.
-            _cacheId.SetBackground(id, result);
+            //_cacheId.SetBackground(id, result);
+            _cacheId.AddRecent(id, result);
 
             return result;
         }
@@ -326,7 +333,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         private static InternalResult GetMatchByUserAgent(string userAgent)
         {
             InternalResult result;
-            if (_cacheUserAgent.TryGetValue(userAgent, out result) == false)
+            if (_cacheUserAgent._itemsActive.TryGetValue(userAgent, out result) == false)
             {
                 // The result wasn't in the cache so find it from the 51Degrees provider.
                 var match = _provider.Match(userAgent);
@@ -371,11 +378,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 }
 
                 // Add the results to the cache.
-                _cacheUserAgent.SetActive(userAgent, result);
+                _cacheUserAgent._itemsActive[userAgent] = result;
             }
 
             // Ensure the result is added to the background cache.
-            _cacheUserAgent.SetBackground(userAgent, result);
+            //_cacheUserAgent.SetBackground(userAgent, result);
+            _cacheUserAgent.AddRecent(userAgent, result);
 
             return result;
         }
@@ -442,10 +450,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
             if (_provider != null)
             {
                 // Clear the caches to flush out old results.
+                /*
                 var serviceInternal = expirySeconds.IsNull ?
                             DEFAULT_CACHE_EXPIRY_SECONDS : expirySeconds.Value;
-                _cacheUserAgent = new Cache<string, InternalResult>(serviceInternal);
-                _cacheId = new Cache<byte[], InternalResult>(new ByteArrayEqualityComparer(), serviceInternal);
+                 * */
+                int cacheSize = 1000;
+                _cacheUserAgent = new Cache<string, InternalResult>(cacheSize);
+                _cacheId = new Cache<byte[], InternalResult>(cacheSize);
 
                 // Set the properties that the functions should be returning.
                 _numberOfProperties = 0;
