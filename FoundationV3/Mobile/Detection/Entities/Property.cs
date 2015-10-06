@@ -428,12 +428,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <returns>A values list initialised with the property values</returns>
         private Values GetValues()
         {
-            var list = new List<Value>();
-            for (var index = FirstValueIndex; index <= LastValueIndex; index++)
+            var values = new Value[LastValueIndex - FirstValueIndex + 1];
+            for (int i = FirstValueIndex, v = 0; i <= LastValueIndex; i++, v++)
             {
-                list.Add(DataSet.Values[index]);
+                values[v] = DataSet.Values[i];
             }
-            return new Values(this, list);
+            return new Values(this, values);
         }
 
         #endregion

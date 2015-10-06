@@ -20,6 +20,7 @@
  * ********************************************************************* */
 
 using System;
+using System.Linq;
 using System.Text;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -28,6 +29,8 @@ using System.IO;
 using FiftyOne.Foundation.Mobile.Detection.Factories;
 using FiftyOne.Foundation.Mobile.Detection;
 using System.Collections.Specialized;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace FiftyOne.UnitTests.API
 {
@@ -51,6 +54,66 @@ namespace FiftyOne.UnitTests.API
             Utils.CheckFileExists(DataFile);
             _dataSet = StreamFactory.Create(DataFile, false);
             _provider = new Provider(_dataSet);
+        }
+
+        [TestMethod]
+        public void API_ReadAllSignaturesMissingProperty()
+        {
+            Parallel.ForEach(_dataSet.Signatures, signature =>
+            {
+                Assert.IsNull(
+                    signature["__MissingProperty__"], 
+                    "Missing properties should return null values");
+            });
+        }
+
+        [TestMethod]
+        public void API_ReadAllProfilesMissingProperty()
+        {
+            Parallel.ForEach(_dataSet.Components.SelectMany(i => i.Profiles), profile =>
+            {
+                Assert.IsNull(
+                    profile["__MissingProperty__"],
+                    "Missing properties should return null values");
+            });
+        }
+
+        [TestMethod]
+        public void API_ReadAllSignatures()
+        {
+            int hashcode = 0;
+            Parallel.ForEach(_dataSet.Signatures, signature =>
+            {
+                int signatureHashCode = 0;
+                foreach(var property in _dataSet.Properties)
+                {
+                    foreach(var value in signature[property])
+                    {
+                        signatureHashCode += value.GetHashCode();
+                    }
+                }
+                Interlocked.Add(ref hashcode, signatureHashCode);
+            });
+            Console.WriteLine("Signatures Hashcode '{0}'", hashcode);
+        }
+
+        [TestMethod]
+        public void API_ReadAllProfiles()
+        {
+            int hashcode = 0;
+            Parallel.ForEach(_dataSet.Components.SelectMany(i => i.Profiles), profile =>
+            {
+                int signatureHashCode = 0;
+                foreach (var property in _dataSet.Properties)
+                {
+                    foreach (var value in profile[property])
+                    {
+                        signatureHashCode += value.GetHashCode();
+                    }
+                }
+                Interlocked.Add(ref hashcode, signatureHashCode);
+            });
+            Console.WriteLine("Signatures Hashcode '{0}'", hashcode);
         }
 
         [TestMethod]
