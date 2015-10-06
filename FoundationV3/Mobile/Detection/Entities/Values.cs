@@ -37,7 +37,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// <para>
     /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
-    public class Values : List<Value>
+    public class Values : IList<Value>
     {
         #region Fields
 
@@ -45,6 +45,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// The property the list of values relates to.
         /// </summary>
         private readonly Property _property;
+
+        /// <summary>
+        /// An array of values to expose.
+        /// </summary>
+        private readonly Value[] _values;
 
         #endregion
 
@@ -70,11 +75,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// Constructs a new instance of the values list.
         /// </summary>
         /// <param name="property">Property the values list relates to</param>
-        /// <param name="values">IEnumerable of values to use to initialise the list</param>
-        internal Values(Property property, IEnumerable<Value> values)
-            : base (values)
+        /// <param name="values">An array of values to use with the list</param>
+        internal Values(Property property, Value[] values)
         {
             _property = property;
+            _values = values;
         }
 
         #endregion
@@ -190,8 +195,80 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
 
         #endregion
 
+        #region IList Interface Members
 
+        public int IndexOf(Value item)
+        {
+            throw new NotImplementedException();
+        }
 
+        public void Insert(int index, Value item)
+        {
+            throw new NotImplementedException();
+        }
 
+        public void RemoveAt(int index)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Value this[int index]
+        {
+            get
+            {
+                return _values[index];
+            }
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public void Add(Value item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Clear()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Contains(Value item)
+        {
+            return _values.Contains(item);
+        }
+
+        public void CopyTo(Value[] array, int arrayIndex)
+        {
+            _values.CopyTo(array, arrayIndex);
+        }
+
+        public int Count
+        {
+            get { return _values.Length; }
+        }
+
+        public bool IsReadOnly
+        {
+            get { return true; }
+        }
+
+        public bool Remove(Value item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerator<Value> GetEnumerator()
+        {
+            return _values.Select(i => i).GetEnumerator();
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return _values.GetEnumerator();
+        }
+
+        #endregion
     }
 }

@@ -60,9 +60,66 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Fields
 
         /// <summary>
+        /// Returned when the property has no values in the provide.
+        /// </summary>
+        private static readonly Value[] EmptyValues = new Value[0];
+
+        /// <summary>
         /// Offsets to profiles associated with the signature.
         /// </summary>
         internal readonly int[] ProfileOffsets;
+
+        #endregion
+
+        #region Private Properties
+
+        /// <summary>
+        /// A dictionary relating the index of a property to the
+        /// values returned by the signature. Used to speed up
+        /// subsequent data processing.
+        /// </summary>
+        private IDictionary<int, Values> PropertyIndexToValues
+        {
+            get
+            {
+                if (_propertyIndexToValues == null)
+                {
+                    lock (this)
+                    {
+                        if (_propertyIndexToValues == null)
+                        {
+                            _propertyIndexToValues = new Dictionary<int, Values>();
+                        }
+                    }
+                }
+                return _propertyIndexToValues;
+            }
+        }
+        private IDictionary<int, Values> _propertyIndexToValues;
+
+        /// <summary>
+        /// A dictionary relating the name of a property to the
+        /// values returned by the signature. Used to speed up
+        /// subsequent data processing.
+        /// </summary>
+        private IDictionary<string, Values> PropertyNameToValues
+        {
+            get
+            {
+                if (_propertyNameToValues == null)
+                {
+                    lock (this)
+                    {
+                        if (_propertyNameToValues == null)
+                        {
+                            _propertyNameToValues = new Dictionary<string, Values>();
+                        }
+                    }
+                }
+                return _propertyNameToValues;
+            }
+        }
+        private IDictionary<string, Values> _propertyNameToValues;
 
         #endregion
 
@@ -109,7 +166,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                     {
                         if (_profiles == null)
                         {
-                            _profiles = GetProfiles().ToArray();
+                            _profiles = GetProfiles();
                         }
                     }
                 }
@@ -127,9 +184,19 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         {
             get
             {
-                if (property != null)
-                    return this[property.Name];
-                return null;
+                Values values = null;
+                if (PropertyIndexToValues.TryGetValue(property.Index, out values) == false)
+                {
+                    lock (this)
+                    {
+                        if (PropertyIndexToValues.TryGetValue(property.Index, out values) == false)
+                        {
+                            values = GetPropertyValues(property);
+                            PropertyIndexToValues.Add(property.Index, values);
+                        }
+                    }
+                }
+                return values;
             }
         }
 
@@ -142,46 +209,25 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         {
             get
             {
-                // Does the storage structure already exist?
-                if (_nameToValues == null)
+                Values values = null;
+                if (PropertyNameToValues.TryGetValue(propertyName, out values) == false)
                 {
                     lock (this)
                     {
-                        if (_nameToValues == null)
+                        if (PropertyNameToValues.TryGetValue(propertyName, out values) == false)
                         {
-                            _nameToValues = new SortedList<string, Values>();
+                            var property = DataSet.Properties[propertyName];
+                            if (property != null)
+                            {
+                                values = this[property];
+                            }
+                            PropertyNameToValues.Add(propertyName, values);
                         }
                     }
                 }
-
-                // Do the values already exist for the property?
-                lock (_nameToValues)
-                {
-                    Values values = null;
-                    if (_nameToValues.TryGetValue(propertyName, out values))
-                        return values;
-
-                    // Does not exist already so get the property.
-                    var property = DataSet.Properties[propertyName];
-                    if (property != null) 
-                    {
-                        // Create the list of values.
-                        values = new Values(
-                            property,
-                            Values.Where(i => i.Property.Index == property.Index));
-
-                        if (values.Count == 0)
-                            values = null;
-                    }
-
-                    // Store for future reference.
-                    _nameToValues.Add(propertyName, values);
-
-                    return values;
-                }
+                return values;
             }
         }
-        private SortedList<string, Values> _nameToValues;
 
         /// <summary>
         /// The unique Device Id for the signature.
@@ -311,47 +357,24 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
 
         #endregion
 
-        #region Methods
-
+        #region Private Methods
+       
         /// <summary>
-        /// The number of characters in the signature.
+        /// Gets the values associated with the property for this signature.
         /// </summary>
-        /// <returns>The number of characters in the signature</returns>
-        internal abstract int GetSignatureLength();
-
-        /// <summary>
-        /// Returns an array of nodes associated with the signature.
-        /// </summary>
-        /// <returns></returns>
-        internal Node[] GetNodes()
+        /// <param name="property">Property to be returned.</param>
+        /// <returns>
+        /// Array of values associated with the property and signature, 
+        /// or an empty array if property not found
+        /// </returns>
+        private Values GetPropertyValues(Property property)
         {
-            var nodes = new Node[NodeOffsets.Length];
-            for (int i = 0; i < NodeOffsets.Length; i++)
-            {
-                nodes[i] = DataSet.Nodes[NodeOffsets[i]];
-            }
-            return nodes;
+            var profileForProperty = Profiles.FirstOrDefault(i => property.Component.Equals(i.Component));
+            return profileForProperty != null ?
+                    profileForProperty[property] :
+                    null;
         }
 
-        /// <summary>
-        /// Called after the entire data set has been loaded to ensure 
-        /// any further initialisation steps that require other items in
-        /// the data set can be completed.
-        /// </summary>
-        internal void Init()
-        {
-            if (_nodes == null)
-                _nodes = GetNodes();
-            if (_profiles == null)
-                _profiles = GetProfiles().ToArray();
-            if (_values == null)
-                _values = GetValues();
-            if (_deviceId == null)
-                _deviceId = GetDeviceId();
-            if (_length == 0)
-                _length = GetSignatureLength();
-        }
-        
         /// <summary>
         /// Returns the unique device Id for the signature based on the
         /// profile Ids it contains.
@@ -393,18 +416,61 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
 
         /// <summary>
-        /// Returns an enumeration of profiles associated with the signature.
+        /// Returns an array of profiles associated with the signature.
         /// </summary>
-        /// <returns>Enumeration of profiles for the signature</returns>
-        internal IEnumerable<Profile> GetProfiles()
+        /// <returns>Array of profiles for the signature</returns>
+        private Profile[] GetProfiles()
         {
-            return ProfileOffsets.Select(i =>
-                DataSet.Profiles[i]).ToArray();
+            var profiles = new Profile[ProfileOffsets.Length];
+            for (int i = 0; i < ProfileOffsets.Length; i++)
+            {
+                profiles[i] = DataSet.Profiles[ProfileOffsets[i]];
+            }
+            return profiles;
         }
 
         #endregion
 
         #region Internal Methods
+        
+        /// <summary>
+        /// The number of characters in the signature.
+        /// </summary>
+        /// <returns>The number of characters in the signature</returns>
+        internal abstract int GetSignatureLength();
+
+        /// <summary>
+        /// Returns an array of nodes associated with the signature.
+        /// </summary>
+        /// <returns></returns>
+        internal Node[] GetNodes()
+        {
+            var nodes = new Node[NodeOffsets.Length];
+            for (int i = 0; i < NodeOffsets.Length; i++)
+            {
+                nodes[i] = DataSet.Nodes[NodeOffsets[i]];
+            }
+            return nodes;
+        }
+
+        /// <summary>
+        /// Called after the entire data set has been loaded to ensure 
+        /// any further initialisation steps that require other items in
+        /// the data set can be completed.
+        /// </summary>
+        internal void Init()
+        {
+            if (_nodes == null)
+                _nodes = GetNodes();
+            if (_profiles == null)
+                _profiles = GetProfiles();
+            if (_values == null)
+                _values = GetValues();
+            if (_deviceId == null)
+                _deviceId = GetDeviceId();
+            if (_length == 0)
+                _length = GetSignatureLength();
+        }
 
         /// <summary>
         /// Returns true if the signature starts with the nodes provided.

@@ -40,6 +40,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Fields
 
         /// <summary>
+        /// Returned when the property has no values in the provide.
+        /// </summary>
+        private static readonly Value[] EmptyValues = new Value[0];
+
+        /// <summary>
         /// Unique Id of the profile. Does not change between different data sets.
         /// </summary>
         public readonly int ProfileId;
@@ -128,7 +133,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                         {
                             values = new Entities.Values(
                                 property,
-                                GetPropertyValuesEnumerable(property));
+                                GetPropertyValues(property));
                             PropertyIndexToValues.Add(property.Index, values);
                         }
                     }
@@ -162,6 +167,30 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         private IDictionary<int, Values> _propertyIndexToValues;
 
         /// <summary>
+        /// A dictionary relating the name of a property to the
+        /// values returned by the profile. Used to speed up
+        /// subsequent data processing.
+        /// </summary>
+        private IDictionary<string, Values> PropertyNameToValues
+        {
+            get
+            {
+                if (_propertyNameToValues == null)
+                {
+                    lock (this)
+                    {
+                        if (_propertyNameToValues == null)
+                        {
+                            _propertyNameToValues = new Dictionary<string, Values>();
+                        }
+                    }
+                }
+                return _propertyNameToValues;
+            }
+        }
+        private IDictionary<string, Values> _propertyNameToValues;
+
+        /// <summary>
         /// Gets the values associated with the property name.
         /// </summary>
         /// <param name="propertyName">Name of the property whose values are required</param>
@@ -178,31 +207,24 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             get
             {
                 Values values = null;
-                if (_nameToValues == null ||
-                    _nameToValues.TryGetValue(propertyName, out values) == false)
+                if (PropertyNameToValues.TryGetValue(propertyName, out values) == false)
                 {
                     lock (this)
                     {
-                        if (_nameToValues == null ||
-                            _nameToValues.TryGetValue(propertyName, out values) == false)
+                        if (PropertyNameToValues.TryGetValue(propertyName, out values) == false)
                         {
                             var property = DataSet.Properties[propertyName];
                             if (property != null)
                             {
                                 values = this[property];
                             }
-                            if (_nameToValues == null)
-                            {
-                                _nameToValues = new SortedList<string, Values>();
-                            }
-                            _nameToValues.Add(propertyName, values);
+                            PropertyNameToValues.Add(propertyName, values);
                         }
                     }
                 }
                 return values;
             }
         }
-        private SortedList<string, Values> _nameToValues;
 
         /// <summary>
         /// Array of signatures associated with the profile.
@@ -262,7 +284,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                     {
                         if (_values == null)
                         {
-                            _values = GetValues().ToArray();
+                            _values = GetValues();
                         }
                     }
                 }
@@ -333,7 +355,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                 _properties = GetProperties();
             if (_values == null)
             {
-                _values = GetValues().ToArray();
+                _values = GetValues();
             }
             if (_signatures == null)
             {
@@ -342,53 +364,75 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             if (_component == null)
                 _component = DataSet.Components[_componentIndex];
         }
-
-        private int GetValuesIndex(int valueIndex, int lower = 0)
-        {
-            var upper = ValueIndexes.Length - 1;
-            int middle = 0;
-
-            while (lower <= upper)
-            {
-                middle = lower + (upper - lower) / 2;
-                var comparisonResult = ValueIndexes[middle].CompareTo(valueIndex);
-                if (comparisonResult == 0)
-                    return middle;
-                else if (comparisonResult > 0)
-                    upper = middle - 1;
-                else
-                    lower = middle + 1;
-            }
-
-            return ~middle;
-        }
-
-
+                
         /// <summary>
         /// Gets the values associated with the property for this profile.
         /// </summary>
-        /// <param name="property"></param>
-        /// <returns>Iterator providing access to the values for the property for this profile</returns>
-        private IEnumerable<Value> GetPropertyValuesEnumerable(Property property)
+        /// <param name="property">Property to be returned.</param>
+        /// <returns>Array of values associated with the property and profile</returns>
+        private Value[] GetPropertyValues(Property property)
         {
-            var start = GetValuesIndex(property.FirstValueIndex);
-            if (start < 0) start = ~start;
-            var end = GetValuesIndex(property.LastValueIndex, start);
-            if (end < 0) end = ~end;
+            Value[] result;
 
-            Debug.Assert(start == 0 ||
-                DataSet.Values[ValueIndexes[start - 1]].Property.Index != property.Index);
-            Debug.Assert(end == ValueIndexes.Length - 1 ||
-                DataSet.Values[ValueIndexes[end + 1]].Property.Index != property.Index);
-
-            for (int i = start; i <= end; i++)
+            // Work out the start and end index in the values associated
+            // with the profile that relate to this property.
+            var start = Array.BinarySearch<int>(
+                ValueIndexes, 
+                property.FirstValueIndex);
+            // If the start is negative then the first value doesn't exist.
+            // Take the complement and use this as the first index. 
+            if (start < 0)
             {
-                var value = DataSet.Values[ValueIndexes[i]];
-                if (value.Property.Index == property.Index)
+                start = ~start;
+            }
+
+            var end = Array.BinarySearch<int>(
+                ValueIndexes, 
+                start,
+                ValueIndexes.Length - start, 
+                property.LastValueIndex);
+            // If the end is negative then the last value doesn't exist. Take
+            // the complement and use this as the last index. However if this 
+            // value doesn't relate to the property then it's the first value
+            // for the next property and we need to move back one in the list.
+            if (end < 0)
+            {
+                end = ~end;
+                if (end >= ValueIndexes.Length ||
+                    ValueIndexes[end] > property.LastValueIndex)
                 {
-                    yield return DataSet.Values[ValueIndexes[i]];
+                    end--;
                 }
             }
+
+            // If start is greater than end then there are no values for this
+            // property in this profile. Return an empty array.
+            if (start > end)
+            {
+                result = EmptyValues;
+            }
+            else
+            {
+                // Perform gross error checks on the start and end values.
+                Debug.Assert(start == 0 ||
+                    DataSet.Values[ValueIndexes[start - 1]].Property.Index != property.Index);
+                Debug.Assert(end == ValueIndexes.Length - 1 ||
+                    DataSet.Values[ValueIndexes[end + 1]].Property.Index != property.Index);
+                Debug.Assert(DataSet.Values[ValueIndexes[start]].Property.Index == property.Index);
+                Debug.Assert(DataSet.Values[ValueIndexes[end]].Property.Index == property.Index);
+
+                // Create the array and populate it with the values for the profile
+                // and property.
+                result = new Value[end - start + 1];
+                for (int i = start, v = 0; i <= end; i++, v++)
+                {
+                    var value = DataSet.Values[ValueIndexes[i]];
+                    Debug.Assert(value.Property.Index == property.Index);
+                    result[v] = value;
+                }
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -422,13 +466,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
 
         /// <summary>
-        /// Returns an iterator of values the profile relates to.
+        /// Returns an array of values the profile relates to.
         /// </summary>
         /// <returns></returns>
-        private IEnumerable<Value> GetValues()
+        private Value[] GetValues()
         {
-            return ValueIndexes.Select(i =>
-                DataSet.Values[i]);
+            var values = new Value[ValueIndexes.Length];
+            for (int i = 0; i < ValueIndexes.Length; i++)
+            {
+                values[i] = DataSet.Values[ValueIndexes[i]];
+            }
+            return values;
         }
 
         /// <summary>
