@@ -37,7 +37,7 @@ using System.Security;
 //      Build Number
 //      Revision
 
-[assembly: AssemblyVersion("3.2.4.4")]
-[assembly: AssemblyFileVersion("3.2.4.4")]
+[assembly: AssemblyVersion("3.2.5.3")]
+[assembly: AssemblyFileVersion("3.2.5.3")]
 [assembly: NeutralResourcesLanguage("en-GB")]
 [assembly: AllowPartiallyTrustedCallers]
