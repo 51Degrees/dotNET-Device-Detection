@@ -279,10 +279,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 {
                     // Keep a copy of the old data in case we need to go back to it.
                     File.Move(BinaryFile.FullName, tempCopyofCurrentMaster);
+                    BinaryFile.Refresh();
                 }
 
                 // Copy the new file to the master file.
                 File.Move(uncompressedTempFile, BinaryFile.FullName);
+                BinaryFile.Refresh();
 
                 // Get the published date from the new data file.
                 var publishedDate = WebProvider.GetDataFileDate(BinaryFile.FullName);
@@ -310,6 +312,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             }
             catch (Exception ex)
             {
+                BinaryFile.Refresh();
                 if (BinaryFile.Exists == false)
                 {
                     File.Move(tempCopyofCurrentMaster, BinaryFile.FullName);
