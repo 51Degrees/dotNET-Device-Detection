@@ -15,7 +15,7 @@
 </p>
 
 <div style="width: 100%; padding: 0.5em; background-color: yellow;">
-<h2>Upgrading? - Important Change</h2>
+<h2>Upgrading from version 3.1 or lower? - Important Change</h2>
 <p>The embedded free Lite device data has been removed from the assembly and by default placed in the App_Data folder for both web and non-web projects. The solution will not work without the associated data file being provided. The WebProvider.ActiveProvider property can now return null.</p>
 </div>
 
@@ -80,49 +80,12 @@ var deviceType = detectionProvider.Match("[YOUR USERAGENT]")["DeviceType"];
 <ul>
 <li>The SQL project now works as expected with the 3.2 device detection logic.</li>
 <li>Methods used to retrieve property values from Profiles and Signatures have been made clearer, memory use reduced and performance improved further.</li>
+<li>Automatic data file updates explicitly refresh file status during the update in case .NET did not do this automatically. Avoids a possible cause of automatic update failure.</li>
 </ul>
 
-<h3>Changes from 3.2.3</h3>
-<ul>
-<li>Changed the MobileCapabilitiesProvider to continue to support .NET Adapters and Browsers.</li>
-<li>Matches using multiple headers will return the sum of all difference for each header, not just the last one that was used.</li>
-<li>Removed redundant properties and some working properties and fields made internal.</li>
-<li>Nodes with the same number of ranked signatures are now also ordered on their position within the User-Agent to ensure consistency with Java and C APIs.</li>
-</ul>
-
-<h3>Changes from 3.2.2</h3>
-
-<ul>
-<li>Automatic download requests version 3.2 data file format.</li>
-<li>The active provider will not be initialised when data sharing is enabled.</li>
-</ul>
-
-<h3>Changes from 3.2.1</h3>
-
-<ul>
-<li>TrieProvider now support V3.2 data file format which includes embedded HTTP headers in the properties data array.</li>
-<li>TrieProvider supports NameValueCollection of HTTP headers rather than a single user agent string. An collection of device indexes is returned for each of the relevant headers. The collection can be used with new GetPropertyValue methods to return the property value from the most relevant HTTP header.</li>
-<li>If a file is used with the StreamFactory it will only be deleted if the IsTemporary parameter is set to true. Previously the extension of the file was used to determine if the file was temporary and eligible for deletion.</li>
-<li>Stream DataSet now exposes information related to the number of readers created and queued in the underlying Pool.</li>
-<li>Detector module no longer listens for PostAuthorizeRequest if image optimisation is disabled.</li>
-<li>Changing device detection or image optimisation enabled states will change web.config modules collection to ensure configured to listen for all requests, not just managed code.</li>
-<li>Changed image optimiser process to reduce memory consumption slightly, and ensure resized image is smaller than the original.</li>
-</ul>
-
-<h3>Changes from 3.1.13</h3>
-
-<ul>
-<li>The entity RankedSignatureIndex has been renamed to IntegerEntity along with the associated factories. This is so that the entity can be reused in the new lists for Nodes related to Signatures and Signatures related to Nodes where each list also contains 4 byte integer data types.</li>
-<li>A potential threading problem has been resolved in Profile entity by only referencing the property PropertyIndexToValues rather than its backed private field.</li>
-<li>Cache service method thread start is now synchronised.</li>
-<li>Memory/Profile.cs Init() method has been removed as the ValueIndexes and SignatureIndexes arrays are needed to support other methods and don’t need to be freed.</li>
-<li>Changed the Cache classes AddRecent and ServiceCache methods to prevent multiple service operations in multiple threads.</li>
-<li>Added a ResetCache method to the dataset.</li>
-<li>WebProvider in memory mode now uses a byte array in memory rather than constructing all instances of every entity. This reduces start up time.</li>
-<li>Unit tests have been added for performance, memory and major data error checks.</li>
-<li>V3.2 data format is now supported.</li>
-</ul>
+<p>See <a href="https://github.com/51Degrees/dotNET-Device-Detection/commits/master" title="51Degrees .NET Device Detection commit history">GitHub commit history</a> for changes details and earlier versions.</p>
 
 </div>
 </body>
 </html>
+
