@@ -297,6 +297,6 @@
     </VisualStudio>
   </ProjectExtensions>
   <PropertyGroup>
-    <PostBuildEvent>copy "$(SolutionDir)data\51Degrees-LiteV3.2.dat" "$(ProjectDir)App_Data\51Degrees.dat"</PostBuildEvent>
+    <PostBuildEvent>if not exist "$(ProjectDir)App_Data\51Degrees.dat" (copy "$(SolutionDir)data\51Degrees-LiteV3.2.dat" "$(ProjectDir)App_Data\51Degrees.dat")</PostBuildEvent>
   </PropertyGroup>
 </Project>
