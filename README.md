@@ -49,7 +49,7 @@ Data files which are updated weekly and daily, automatically, and with more prop
 
 ## Recent Changes
 
-### Version 3.2.4 Highlights
+### Version 3.2.5 Highlights
 
 This release focuses on reducing memory consumption and improving performance when the device data file is used directly from the disk.
 
@@ -69,44 +69,10 @@ This release focuses on reducing memory consumption and improving performance wh
 * Version 3.2 data file formats are supported in parallel with version 3.1 data files.
 * 51Degrees unit tests are now part of the open source distribution.
 
-### Changes from 3.2.3
+### Changes from 3.2.4
 
 Summary of API changes:
 
-* Changed the MobileCapabilitiesProvider to continue to support .NET Adapters and Browsers.
-* Matches using multiple headers will return the sum of all difference for each header, not just the last one that was used.
-* Removed redundant properties and some working properties and fields made internal.
-* Nodes with the same number of ranked signatures are now also ordered on their position within the User-Agent to ensure consistency with Java and C APIs.
-
-Summary of Test changes:
-
-* UnitTests now check for zero difference as well as the exact method.
-* UnitTests now only report the cache results for stream based datasets.
-* User-Agent generator contains more comments and new features for more flexible testing.
-
-### Changes from 3.2.2
-
-* Automatic download requests version 3.2 data file format.
-* The active provider will not be initialised when data sharing is enabled.
-
-### Changes from 3.2.1
-
-* TrieProvider now support V3.2 data file format which includes embedded HTTP headers in the properties data array.
-* TrieProvider supports NameValueCollection of HTTP headers rather than a single user agent string. An collection of device indexes is returned for each of the relevant headers. The collection can be used with new GetPropertyValue methods to return the property value from the most relevant HTTP header.
-* If a file is used with the StreamFactory it will only be deleted if the IsTemporary parameter is set to true. Previously the extension of the file was used to determine if the file was temporary and eligible for deletion.
-* Stream DataSet now exposes information related to the number of readers created and queued in the underlying Pool.
-* Detector module no longer listens for PostAuthorizeRequest if image optimisation is disabled.
-* Changing device detection or image optimisation enabled states will change web.config modules collection to ensure configured to listen for all requests, not just managed code.
-* Changed image optimiser process to reduce memory consumption slightly, and ensure resized image is smaller than the original.
-
-### Changes from 3.1.13
-
-* The entity RankedSignatureIndex has been renamed to IntegerEntity along with the associated factories. This is so that the entity can be reused in the new lists for Nodes related to Signatures and Signatures related to Nodes where each list also contains 4 byte integer data types.
-* A potential threading problem has been resolved in Profile entity by only referencing the property PropertyIndexToValues rather than its backed private field.
-* Cache service method thread start is now synchronised.
-* Memory/Profile.cs Init() method has been removed as the ValueIndexes and SignatureIndexes arrays are needed to support other methods and don’t need to be freed.
-* Changed the Cache classes AddRecent and ServiceCache methods to prevent multiple service operations in multiple threads.
-* Added a ResetCache method to the dataset.
-* WebProvider in memory mode now uses a byte array in memory rather than constructing all instances of every entity. This reduces start up time.
-* Unit tests have been added for performance, memory and major data error checks.
-* V3.2 data format is now supported.
+* The SQL project now works as expected with the 3.2 device detection logic.
+* Methods used to retrieve property values from Profiles and Signatures have been made clearer, memory use reduced and performance improved further.
+* Automatic data file updates explicitly refresh file status during the update in case .NET did not do this automatically. Avoids a possible cause of automatic update failure.
