@@ -197,21 +197,48 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
 
         #region IList Interface Members
 
+        /// <summary>
+        /// Determines the index of a specific <see cref="Value"/> item in the Values.
+        /// </summary>
+        /// <param name="item">The value to locate in the list of values.</param>
+        /// <returns>The index of value if found in the list; otherwise, -1.</returns>
         public int IndexOf(Value item)
         {
-            throw new NotImplementedException();
+            for (var index = 0; index < _values.Length; index++)
+            {
+                if (_values[index].Equals(item))
+                {
+                    return index;
+                }
+            }
+            return -1;
         }
 
+        /// <summary>
+        /// Not implemented as values list is readonly.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="item"></param>
         public void Insert(int index, Value item)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Not implemented as values list is readonly.
+        /// </summary>
+        /// <param name="index"></param>
         public void RemoveAt(int index)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Gets the <see cref="Value"/> at the specified index. Set is not implemented
+        /// as the values list is readonly.
+        /// </summary>
+        /// <param name="index">The zero-based index of the value to get.</param>
+        /// <returns>The value at the specified index.</returns>
         public Value this[int index]
         {
             get
@@ -224,46 +251,82 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             }
         }
 
+        /// <summary>
+        /// Not implemented as values list is readonly.
+        /// </summary>
+        /// <param name="item"></param>
         public void Add(Value item)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Not implemented as values list is readonly.
+        /// </summary>
         public void Clear()
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Determines whether the values list contains a specific <see cref="Value"/>.
+        /// </summary>
+        /// <param name="item">The value to locate in the values list.</param>
+        /// <returns>true if the value is found in the values list; otherwise, false.</returns>
         public bool Contains(Value item)
         {
             return _values.Contains(item);
         }
 
+        /// <summary>
+        /// Copies the elements of the values list to an Array, starting at a particular Array index.
+        /// </summary>
+        /// <param name="array">The one-dimensional Array that is the destination of the values copied from the values list. The Array must have zero-based indexing.</param>
+        /// <param name="arrayIndex">The zero-based index in array at which copying begins.</param>
         public void CopyTo(Value[] array, int arrayIndex)
         {
             _values.CopyTo(array, arrayIndex);
         }
 
+        /// <summary>
+        /// Gets the number of elements contained in the values list.
+        /// </summary>
         public int Count
         {
             get { return _values.Length; }
         }
 
+        /// <summary>
+        /// Always returns true as the values list is read-only.
+        /// </summary>
         public bool IsReadOnly
         {
             get { return true; }
         }
 
+        /// <summary>
+        /// Not implemented as values list is readonly.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
         public bool Remove(Value item)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Returns an enumerator that iterates through the values list.
+        /// </summary>
+        /// <returns>An IEnumerator&lt;<see cref="Value"/>&gt; object that can be used to iterate through the collection.</returns>
         public IEnumerator<Value> GetEnumerator()
         {
             return _values.Select(i => i).GetEnumerator();
         }
 
+        /// <summary>
+        /// Returns an enumerator that iterates through the values list.
+        /// </summary>
+        /// <returns>An IEnumerator&lt;<see cref="Value"/>&gt; object that can be used to iterate through the collection.</returns>
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return _values.GetEnumerator();
