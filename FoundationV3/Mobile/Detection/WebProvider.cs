@@ -109,7 +109,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>A temporary file in the App_Data folder</returns>
         internal static string GetTempFileName()
         {
-            var directoryInfo = new DirectoryInfo(
+            var directoryInfo = Directory.CreateDirectory(
                 Mobile.Configuration.Support.GetFilePath(Constants.TemporaryFilePath));
             var fileInfo = new FileInfo(Manager.BinaryFilePath);
             return Path.Combine(
