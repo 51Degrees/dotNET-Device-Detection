@@ -255,10 +255,25 @@ namespace FiftyOne.Foundation.Mobile.Detection
             }
             finally
             {
-                File.Delete(compressedTempFile);
-                File.Delete(uncompressedTempFile);
-                client.Dispose();
-                _autoDownloadUpdateSignal.Set();
+                try
+                {
+                    // Delete the temporary files if they exit.
+                    if (File.Exists(compressedTempFile))
+                    {
+                        File.Delete(compressedTempFile);
+                    }
+                    if (File.Exists(uncompressedTempFile))
+                    {
+                        File.Delete(uncompressedTempFile);
+                    }
+                    client.Dispose();
+                }
+                finally
+                {
+                    // Ensure that whatever happens the signal is reset to
+                    // allow another auto update operation to proceed.
+                    _autoDownloadUpdateSignal.Set();
+                }
             }
             return status;
         }
