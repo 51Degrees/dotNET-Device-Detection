@@ -252,16 +252,16 @@ namespace FiftyOne.Foundation.UI.Web
                     {
                         if (_topModels == null)
                         {
-                            if (DataSet.GetProperty("HardwareImages") != null &&
-                                DataSet.GetProperty("IsMobile") != null)
+                            if (DataSet.Properties["HardwareImages"] != null &&
+                                DataSet.Properties["IsMobile"] != null)
                             {
                                 var list = DataSet.Hardware.Profiles.Where(i =>
                                     i["IsMobile"] != null &&
                                     i["IsMobile"].ToBool() == true &&
                                     i["HardwareVendor"] != null &&
-                                    i["HardwareVendor"].Contains(DataSet.GetProperty("HardwareVendor").DefaultValue) == false &&
+                                    i["HardwareVendor"].Contains(DataSet.Properties["HardwareVendor"].DefaultValue) == false &&
                                     i["HardwareFamily"] != null &&
-                                    i["HardwareFamily"].Contains(DataSet.GetProperty("HardwareFamily").DefaultValue) == false &&
+                                    i["HardwareFamily"].Contains(DataSet.Properties["HardwareFamily"].DefaultValue) == false &&
                                     i["HardwareImages"] != null &&
                                     i["HardwareImages"].Any(v => v.Name.StartsWith("Image Unavailable")) == false).Distinct(_profileEqualityComparer).ToList();
                                 list.Sort(_profileComparer);

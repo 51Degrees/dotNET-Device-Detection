@@ -332,7 +332,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
             get
             {
                 Values value = null;
-                
                 if (property != null)
                 {
                     // Get the property value from the profile returned
@@ -351,7 +350,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     }
                 }
                 return value;
-
             }
         }
         
@@ -366,7 +364,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             get
             {
-                return this[DataSet.GetProperty(propertyName)];
+                return this[DataSet.Properties[propertyName]];
             }
         }
 

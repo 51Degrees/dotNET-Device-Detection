@@ -817,8 +817,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         {
             _disposed = true;
         }
-
-
+        
         /// <summary>
         /// Searches the list of profile Ids and returns the profile if the profile 
         /// id is valid.
@@ -860,6 +859,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// </summary>
         /// <param name="propertyName">Name of the property whose values are required</param>
         /// <returns><see cref="Property"/> object associated with the name</returns>
+        [Obsolete("Replaced by the Properties list string accessor.")]
         public Property GetProperty(string propertyName)
         {
             return _properties[propertyName];
