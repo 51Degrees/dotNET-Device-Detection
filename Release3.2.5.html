@@ -81,6 +81,8 @@ var deviceType = detectionProvider.Match("[YOUR USERAGENT]")["DeviceType"];
 <li>The SQL project now works as expected with the 3.2 device detection logic.</li>
 <li>Methods used to retrieve property values from Profiles and Signatures have been made clearer, memory use reduced and performance improved further.</li>
 <li>Automatic data file updates explicitly refresh file status during the update in case .NET did not do this automatically. Avoids a possible cause of automatic update failure.</li>
+<li>Automatic data file updates bug fixed, if temporary folder does not exist, it is created. And ensures that subsequent updates operations can occur.</li>
+<li>GetProperty method now marked as deprecated.</li>
 </ul>
 
 <p>See <a href="https://github.com/51Degrees/dotNET-Device-Detection/commits/master" title="51Degrees .NET Device Detection commit history">GitHub commit history</a> for changes details and earlier versions.</p>
