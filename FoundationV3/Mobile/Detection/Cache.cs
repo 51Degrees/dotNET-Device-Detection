@@ -161,14 +161,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             var cache = (Cache<K, V>)state;
 
-            // Create a temporary copy of the new active list.
-            var temp = cache._itemsInactive;
-
-            // Clear the inactive list.
-            cache._itemsInactive.Clear();
-
             // Switch over the cached items dictionaries.
+            var temp = cache._itemsInactive;
+            cache._itemsInactive = cache._itemsActive;
             cache._itemsActive = temp;
+
+            // Clear the inactive list ready to build 
+            // it up again.
+            cache._itemsInactive.Clear();
 
             // Increase the switch count for the cache.
             cache.Switches++;
