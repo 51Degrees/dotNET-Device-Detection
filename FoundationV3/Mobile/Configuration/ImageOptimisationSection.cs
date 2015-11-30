@@ -61,7 +61,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         /// <summary>
         /// Returns the XML that needs to be written to the configuration file.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>XML</returns>
         internal string GetXmlElement()
         {
             StringBuilder sb = new StringBuilder();
@@ -155,9 +155,10 @@ namespace FiftyOne.Foundation.Mobile.Configuration
         #region Methods
         
         /// <summary>
-        /// Sets the shared usage value.
+        /// Sets the image optimisation value.
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="value">True or false depending on whether
+        /// image optimisation should be enabled.</param>
         private void SetImageOptimisation(bool value)
         {
             this["enabled"] = value;

@@ -34,134 +34,149 @@ using FiftyOne.Foundation.Mobile.Detection.Factories;
 using System.IO.Compression;
 using System.Globalization;
 using System.Security;
+using System.Text.RegularExpressions;
+using FiftyOne.Foundation.Licence;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
     /// <summary>
-    /// Used to fetch new device data from 51Degrees.mobi if a premium
-    /// licence has been installed.
+    /// Used to fetch new device data from 51Degrees if a Premium or 
+    /// Enterprise. Requires a valid 51Degrees licence key and 
+    /// read/write access to the file system folder where the downloaded
+    /// file should be written.
     /// </summary>
+    /// <para>
+    /// Requires a valid 51Degrees licence key and read/write access to the file 
+    /// system folder where the downloaded file should be written.
+    /// Get a licence key: https://51degrees.com/compare-data-options
+    /// </para>
+    /// <para>
+    /// Auto update can be enabled/disabled in the 51Degrees.config file.
+    /// Licence key should be placed in a .lic file in the bin folder.
+    /// </para>
+    /// <para>
+    /// For general information on how 51Degrees automatic updates work see: 
+    /// https://51degrees.com/support/documentation/automatic-updates"/>
+    /// </para>
     internal static class AutoUpdate
     {
+        #region Classes & Enumerations
+
+        public enum AutoUpdateStatus
+        {
+            /// <summary>
+            /// Update completed successfully. 
+            /// </summary>
+            AUTO_UPDATE_SUCCESS,
+            /// <summary>
+            /// HTTPS connection could not be established. 
+            /// </summary>
+            AUTO_UPDATE_HTTPS_ERR,
+            /// <summary>
+            /// No need to perform update. 
+            /// </summary>
+            AUTO_UPDATE_NOT_NEEDED,
+            /// <summary>
+            /// Update currently under way. 
+            /// </summary>
+            AUTO_UPDATE_IN_PROGRESS,
+            /// <summary>
+            /// Path to master file is directory not file
+            /// </summary>
+            AUTO_UPDATE_MASTER_FILE_CANT_RENAME,
+            /// <summary>
+            /// 51Degrees server responded with 429: too many attempts. 
+            /// /// </summary>
+            AUTO_UPDATE_ERR_429_TOO_MANY_ATTEMPTS,
+            /// <summary>
+            /// 51Degrees server responded with 403 meaning key is blacklisted. 
+            /// </summary>
+            AUTO_UPDATE_ERR_403_FORBIDDEN,
+            /// <summary>
+            /// Used when IO oerations with input or output stream failed. 
+            /// </summary>
+            AUTO_UPDATE_ERR_READING_STREAM,
+            /// <summary>
+            /// MD5 validation failed 
+            /// </summary>
+            AUTO_UPDATE_ERR_MD5_VALIDATION_FAILED,
+            /// <summary>
+            /// The new data file can't be renamed to replace the previous one.
+            /// </summary>
+            AUTO_UPDATE_NEW_FILE_CANT_RENAME
+        }
+
+        /// <summary>
+        /// Stores critical data set attributes used to determine if the 
+        /// downloaded data should be used to replace the current data file. 
+        /// Using this class avoids the need for two Stream generated data sets
+        /// to be held at the same time reducing memory consumption.
+        /// </summary>
+        private class DataSetAttributes
+        {
+
+            /// <summary>
+            /// Date the data set was published.
+            /// </summary>
+            internal readonly DateTime Published;
+
+            /// <summary>
+            /// Number of properties contained in the data set.
+            /// </summary>
+            internal readonly int PropertyCount;
+
+            /// <summary>
+            /// Constructs a new instance of CriticalDataSetAttributes using 
+            /// the data set provided. Assumes the file passed to the 
+            /// constructor exists.
+            /// </summary>
+            /// <param name="dataFile">
+            /// The data file whose attributes should be copied.
+            /// </param>
+            internal DataSetAttributes(FileInfo dataFile)
+            {
+                DataSet dataSet = StreamFactory.Create(
+                        dataFile.FullName, false);
+                try
+                {
+                    Published = dataSet.Published;
+                    PropertyCount = dataSet.Properties.Count;
+                }
+                finally
+                {
+                    dataSet.Dispose();
+                }
+            }
+        }
+
+        #endregion
+
         #region Fields
 
         /// <summary>
-        /// Maps to the binary file path.
+        /// Used to validate licence keys before using them for automatic
+        /// downloads.
         /// </summary>
-        private static FileInfo _binaryFile = null;
+        private readonly static Regex LicenceKeyValidation = new Regex(
+            Constants.LicenceKeyValidationRegex, RegexOptions.Compiled);
 
         /// <summary>
         /// Used to signal between multiple instances of the update
         /// threads.
         /// </summary>
-        private static AutoResetEvent _autoUpdateSignal = new AutoResetEvent(true);
-
-        private static AutoResetEvent _autoDownloadUpdateSignal = new AutoResetEvent(true);
-
-        #endregion
-
-        #region Internal Properties
-
-        /// <summary>
-        /// Returns details of the binary file to be updated.
-        /// </summary>
-        internal static FileInfo BinaryFile
-        {
-            get
-            {
-                if (_binaryFile == null)
-                {
-                    _binaryFile = DataOnDisk();
-                }
-                return _binaryFile;
-            }
-        }
-
-        #endregion
-
-        #region Static Methods
-
-        /// <summary>
-        /// Gets FileInfo on the data file currently on disk. Returns null if no file was found.
-        /// </summary>
-        /// <returns></returns>
-        private static FileInfo DataOnDisk()
-        {
-            if (String.IsNullOrEmpty(Manager.BinaryFilePath) == false)
-                return new FileInfo(Manager.BinaryFilePath);
-            return null;
-        }
-
-        private static string GetMd5Hash(Stream stream)
-        {
-            using (MD5 md5Hash = MD5.Create())
-                return GetMd5Hash(md5Hash, stream);
-        }
-
-        private static string GetMd5Hash(MD5 md5Hash, Stream stream)
-        {
-            // Convert the input string to a byte array and compute the hash.
-            byte[] data = md5Hash.ComputeHash(stream);
-
-            // Create a new Stringbuilder to collect the bytes
-            // and create a string.
-            StringBuilder sBuilder = new StringBuilder();
-
-            // Loop through each byte of the hashed data 
-            // and format each one as a hexadecimal string.
-            for (int i = 0; i < data.Length; i++)
-            {
-                sBuilder.Append(data[i].ToString("x2"));
-            }
-
-            // Return the hexadecimal string.
-            return sBuilder.ToString();
-        }
-
-        /// <summary>
-        /// Checks the MD5 hash of the data against the expected value.
-        /// </summary>
-        /// <param name="client">Used to make HTTP request to check for new data</param>
-        /// <param name="stream">Open stream to the data to be validated</param>
-        internal static void ValidateMD5(WebClient client, Stream stream)
-        {
-            string mdHash = client.ResponseHeaders["Content-MD5"];
-            if (mdHash != GetMd5Hash(stream))
-            {
-                throw new MobileException(String.Format(
-                    "MD5 hash '{0}' validation failure with data downloaded from update URL '{1}'.",
-                    mdHash,
-                    client.BaseAddress));
-            }
-        }
-        
-        /// <summary>
-        /// Used to get the url for data download.
-        /// </summary>
-        /// <param name="licences">An array of licences to try.</param>
-        /// <returns>The full url including all parameters needed to download
-        /// the device data file.</returns>
-        internal static string FullUrl(string[] licences)
-        {
-            List<string> parameters = new List<string>();
-            parameters.Add(String.Format("LicenseKeys={0}", String.Join("|", licences)));
-            parameters.Add(String.Format("Download={0}", bool.TrueString));
-            parameters.Add("Type=BinaryV32");
-
-            return String.Format("{0}?{1}",
-                Constants.AutoUpdateUrl,
-                String.Join("&", parameters.ToArray()));
-        }
+        private static AutoResetEvent _autoUpdateSignal = 
+            new AutoResetEvent(true);
 
         #endregion
 
         #region Thread Methods
-        
+
         /// <summary>
-        /// Checks if a new data file is available for download and if it is newer than
-        /// the current data on disk, if enough time has passed between now and the write 
-        /// time of the current data in memory. See Constants.AutoUpdateWait. This method 
-        /// is designed to be used in a seperate thread from the one performing detection.
+        /// Checks if a new data file is available for download and if it is
+        /// newer than the current data on disk, if enough time has passed 
+        /// between now and the write time of the current data in memory. See 
+        /// Constants.AutoUpdateWait. This method is designed to be used in a 
+        /// seperate thread from the one performing detection.
         /// </summary>
         internal static void CheckForUpdate(object state)
         {
@@ -170,16 +185,19 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 // If licence keys are available auto update.
                 if (LicenceKey.Keys.Length > 0)
                 {
-                    // Check that there is a binary file, and that either the active provider
-                    // is not available indicating no source data file, or if is available
-                    // that the next update is in the past, or that the device data being used
-                    // is the free lite version.
-                    if (BinaryFile != null &&
+                    // Check that there is a binary file, and that either the
+                    // active provider is not available indicating no source 
+                    // data file, or if is available that the next update is 
+                    // in the past, or that the device data being used is the
+                    // free lite version.
+                    if (MasterBinaryDataFile != null &&
                         (WebProvider.ActiveProvider == null ||
-                        WebProvider.ActiveProvider.DataSet.NextUpdate < DateTime.UtcNow ||
+                        WebProvider.ActiveProvider.DataSet.NextUpdate < 
+                            DateTime.UtcNow ||
                         WebProvider.ActiveProvider.DataSet.Name == "Lite"))
                     {
-                        if (Download(LicenceKey.Keys) == LicenceKeyResults.Success)
+                        if (Download(LicenceKey.Keys) == 
+                            LicenceKeyResults.Success)
                         {
                             WebProvider.Refresh();
                         }
@@ -194,11 +212,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
             }
             catch (Exception ex)
             {
-                if (BinaryFile != null && BinaryFile.FullName != null)
+                if (MasterBinaryDataFile != null && MasterBinaryDataFile.FullName != null)
                 {
                     EventLog.Warn(new MobileException(String.Format(
                         "Exception auto update download binary data file '{0}'.",
-                        BinaryFile.FullName), ex));
+                        MasterBinaryDataFile.FullName), ex));
                 }
                 else
                 {
@@ -207,268 +225,611 @@ namespace FiftyOne.Foundation.Mobile.Detection
             }
         }
 
+        #endregion
+
+        #region Internal Methods
+
+        /// <summary>
+        /// Returns details of the master binary file. Refreshes the file
+        /// info incase anything has changed since the instance was 
+        /// created.
+        /// </summary>
+        internal static FileInfo MasterBinaryDataFile
+        {
+            get
+            {
+                if (_binaryFile == null)
+                {
+                    _binaryFile = new FileInfo(Manager.BinaryFilePath);
+                }
+                _binaryFile.Refresh();
+                return _binaryFile;
+            }
+        }
+        private static FileInfo _binaryFile = null;
+
+        /// <summary>
+        /// Uses the given license key to perform a device data update, writing
+        /// the data to the file system and filling providers from this factory 
+        /// instance with it.
+        /// </summary>
+        /// <param name="licenseKeys">
+        /// The licence keys to submit to the server for authentication.
+        /// </param>
+        /// <returns>
+        /// The result of the update to enable user reporting.
+        /// </returns>
+        internal static LicenceKeyResults Download(string[] licenseKeys)
+        {
+            switch (Update(licenseKeys, MasterBinaryDataFile))
+            {
+                case AutoUpdateStatus.AUTO_UPDATE_ERR_403_FORBIDDEN:
+                case AutoUpdateStatus.AUTO_UPDATE_ERR_429_TOO_MANY_ATTEMPTS:
+                case AutoUpdateStatus.AUTO_UPDATE_ERR_MD5_VALIDATION_FAILED:
+                case AutoUpdateStatus.AUTO_UPDATE_ERR_READING_STREAM:
+                case AutoUpdateStatus.AUTO_UPDATE_HTTPS_ERR:
+                    return LicenceKeyResults.Https;
+                case AutoUpdateStatus.AUTO_UPDATE_MASTER_FILE_CANT_RENAME:
+                case AutoUpdateStatus.AUTO_UPDATE_NEW_FILE_CANT_RENAME:
+                    return LicenceKeyResults.WriteDataFile;
+                case AutoUpdateStatus.AUTO_UPDATE_NOT_NEEDED:
+                    return LicenceKeyResults.UpdateNotNeeded;
+                case AutoUpdateStatus.AUTO_UPDATE_SUCCESS:
+                    return LicenceKeyResults.Success;
+                default:
+                    return LicenceKeyResults.GenericFailure;
+            }
+        }
+
+        #endregion
+
+        #region Public Methods
+
+        /// <summary>
+        /// Uses the given license key to perform a device data update, 
+        /// writing the data to the file system and filling providers from 
+        /// this factory instance with it.
+        /// </summary>
+        /// <param name="dataFile">
+        /// Location of the data file to update or create.
+        /// </param>
+        /// <param name="licenseKey">
+        /// The licence key to use for the update request.
+        /// </param>
+        /// <returns>
+        /// The result of the update to enable user reporting.
+        /// </returns>
+        public static AutoUpdateStatus Update(
+            string licenseKey, FileInfo dataFile)
+        {
+            return Update(new string[] { licenseKey }, dataFile);
+        }
+
+        /// <summary>
+        /// Uses the given license keys to perform a device data update, 
+        /// writing the data to the file system and filling providers from 
+        /// this factory instance with it.
+        /// </summary>
+        /// <param name="dataFile">
+        /// Location of the data file to update or create.
+        /// </param>
+        /// <param name="licenseKeys">
+        /// The licence keys to use for the update request.
+        /// </param>
+        /// <returns>
+        /// The result of the update to enable user reporting.
+        /// </returns>
+        public static AutoUpdateStatus Update(
+            IList<string> licenseKeys, FileInfo dataFile)
+        {
+            if (licenseKeys == null || licenseKeys.Count == 0)
+            {
+                throw new ArgumentException(
+                    "At least one valid licence key is required to update " +
+                    "device data. See " +
+                    "https://51degrees.com/compare-data-options " +
+                    "to acquire valid licence keys.");
+            }
+
+            var validKeys = GetValidKeys(licenseKeys);
+            if (validKeys.Count == 0)
+            {
+                throw new ArgumentException(
+                    "The license key(s) provided were invalid. See " +
+                    "https://51degrees.com/compare-data-options " +
+                    "to acquire valid licence keys.");
+            }
+            return Download(validKeys, dataFile);
+        }
+
+        #endregion
+
+        #region Private Methods
+
         /// <summary>
         /// Downloads and updates the premium data file.
         /// </summary>
-        internal static LicenceKeyResults Download(string[] licenceKeys)
+        /// <param name="licenceKeys">
+        /// The licence key to use for the update request.
+        /// </param>
+        /// <param name="binaryFile">
+        /// Location of the master data file.
+        /// </param>
+        /// <returns>
+        /// The result of the download to enable user reporting.
+        /// </returns>
+        private static AutoUpdateStatus Download(
+            IList<string> licenceKeys, FileInfo binaryFile)
         {
-            var status = LicenceKeyResults.InProgress;
-            WebClient client = new WebClient();
+            AutoUpdateStatus result = AutoUpdateStatus.AUTO_UPDATE_IN_PROGRESS;
 
-            var compressedTempFile = WebProvider.GetTempFileName();
-            var uncompressedTempFile = String.Format("{0}.new", Manager.BinaryFilePath);
+            // Set the three files needed to support the download, verification
+            // and eventual activation.
+            var compressedTempFile = GetTempFileName(binaryFile);
+            var uncompressedTempFile = GetTempFileName(binaryFile);
+
             try
             {
-                // Wait until any other threads have finished executing.
-                _autoDownloadUpdateSignal.WaitOne();
+                // Acquire a lock so that only one thread can enter this 
+                // critical section at any given time. This is required to 
+                // prevent multiple threads from performing the update 
+                // simultaneously, i.e. if more than one thread is capable of 
+                // invoking AutoUpdate.
+                _autoUpdateSignal.WaitOne();
 
-                // Download the data file to the compressed temporary file.
-                status = DownloadFile(client, Manager.BinaryFilePath, compressedTempFile, licenceKeys);
+                // Download the device data, decompress, check validity and
+                // finally replace the existing data file if all okay.
+                var client = new WebClient();
+                result = DownloadFile(
+                    binaryFile,
+                    compressedTempFile,
+                    client,
+                    FullUrl(licenceKeys));
 
-                // Validate the MD5 hash of the download.
-                if (status == LicenceKeyResults.InProgress)
+                if (result == AutoUpdateStatus.AUTO_UPDATE_IN_PROGRESS)
                 {
-                    status = CheckedDownloadedFileMD5(client, compressedTempFile);
+                    result = CheckedDownloadedFileMD5(
+                        client,
+                        compressedTempFile);
                 }
 
-                // Decompress the data file ready to create the data set.
-                if (status == LicenceKeyResults.InProgress)
+                if (result == AutoUpdateStatus.AUTO_UPDATE_IN_PROGRESS)
                 {
-                    status = Decompress(compressedTempFile, uncompressedTempFile);
+                    result = Decompress(
+                        compressedTempFile, uncompressedTempFile);
                 }
 
-                // Validate that the data file can be used to create a provider.
-                if (status == LicenceKeyResults.InProgress)
+                if (result == AutoUpdateStatus.AUTO_UPDATE_IN_PROGRESS)
                 {
-                    status = ValidateDownloadedFile(uncompressedTempFile);
+                    result = ValidateDownloadedFile(
+                        binaryFile, uncompressedTempFile);
                 }
 
-                // Activate the data file downloaded for future use.
-                if (status == LicenceKeyResults.InProgress)
+                if (result == AutoUpdateStatus.AUTO_UPDATE_IN_PROGRESS)
                 {
-                    status = ActivateDownloadedFile(client, uncompressedTempFile);
+                    result = ActivateDownloadedFile(
+                            client, binaryFile, uncompressedTempFile);
                 }
-            }
-            catch(Exception)
-            {
-                status = LicenceKeyResults.GenericFailure;
             }
             finally
             {
                 try
                 {
-                    // Delete the temporary files if they exit.
-                    if (File.Exists(compressedTempFile))
+                    if (compressedTempFile.Exists)
                     {
-                        File.Delete(compressedTempFile);
+                        compressedTempFile.Delete();
                     }
-                    if (File.Exists(uncompressedTempFile))
+                    if (uncompressedTempFile.Exists)
                     {
-                        File.Delete(uncompressedTempFile);
+                        uncompressedTempFile.Delete();
                     }
-                    client.Dispose();
                 }
                 finally
                 {
-                    // Ensure that whatever happens the signal is reset to
-                    // allow another auto update operation to proceed.
-                    _autoDownloadUpdateSignal.Set();
+                    // No matter what, release the critical section lock.
+                    _autoUpdateSignal.Set();
                 }
             }
-            return status;
+            return result;
         }
 
-        private static LicenceKeyResults ActivateDownloadedFile(WebClient client, string uncompressedTempFile)
+        /// <summary>
+        /// Method performs the actual download by setting up and sending 
+        /// request and processing the response.
+        /// </summary>
+        /// <param name="binaryFile">
+        /// File reference for the current data file.
+        /// </param>
+        /// <param name="client">
+        /// Web client used to download the URL provided.
+        /// </param>
+        /// <param name="compressedTempFile">
+        /// File to write compressed downloaded.
+        /// </param>
+        /// <param name="fullUrl">
+        /// URL to use to download the data file.
+        /// </param>
+        /// <returns>The current status of the overall process.</returns>
+        private static AutoUpdateStatus DownloadFile(
+                FileInfo binaryFile,
+                FileInfo compressedTempFile,
+                WebClient client,
+                Uri fullUrl)
         {
-            var status = LicenceKeyResults.Success;
+            AutoUpdateStatus result = AutoUpdateStatus.AUTO_UPDATE_IN_PROGRESS;
 
-            // Rename the current master file to a temp file so enable the new
-            // master file to take it's place and to rollback if there's a problem.
-            var tempCopyofCurrentMaster = String.Format("{0}.tmp", BinaryFile.FullName);
+            // Set the last modified header if available from the current
+            // binary data file.
+            if (binaryFile.Exists)
+            {
+                client.Headers.Add(
+                    HttpRequestHeader.LastModified,
+                    binaryFile.LastWriteTimeUtc.ToString("R"));
+            }
+
+            // If the response is okay then download the file to the temporary
+            // compressed data file. If not then set the response code 
+            // accordingly.
             try
             {
-                // Both the MD5 hash was good and the provider was created.
-                // Save the data and force the factory to reload.
-
-                if (BinaryFile.Exists)
-                {
-                    // Keep a copy of the old data in case we need to go back to it.
-                    File.Move(BinaryFile.FullName, tempCopyofCurrentMaster);
-                    BinaryFile.Refresh();
-                }
-
-                // Copy the new file to the master file.
-                File.Move(uncompressedTempFile, BinaryFile.FullName);
-                BinaryFile.Refresh();
-
-                // Get the published date from the new data file.
-                var publishedDate = WebProvider.GetDataFileDate(BinaryFile.FullName);
-
-                // Sets the last modified time of the file downloaded to the one
-                // provided in the HTTP header, or if not valid then the published
-                // date of the data set.
-                DateTime lastModified;
-                if (DateTime.TryParseExact(
-                    client.ResponseHeaders[HttpResponseHeader.LastModified],
-                    "R",
-                    CultureInfo.InvariantCulture,
-                    DateTimeStyles.AssumeUniversal,
-                    out lastModified) == false)
-                {
-                    lastModified = publishedDate.Value;
-                }
-                BinaryFile.LastWriteTimeUtc = lastModified.ToUniversalTime();
-
-                EventLog.Info(String.Format(
-                    "Automatically updated binary data file '{0}' with version " +
-                    "published on the '{1:d}'.",
-                    BinaryFile.FullName,
-                    publishedDate));
+                client.DownloadFile(fullUrl, compressedTempFile.FullName);
             }
-            catch (Exception ex)
+            catch (SecurityException)
             {
-                BinaryFile.Refresh();
-                if (BinaryFile.Exists == false)
-                {
-                    File.Move(tempCopyofCurrentMaster, BinaryFile.FullName);
-                }
-                EventLog.Warn(ex);
-                status = LicenceKeyResults.WriteDataFile;
+                result = AutoUpdateStatus.AUTO_UPDATE_HTTPS_ERR;
             }
-            finally
+            catch (WebException ex)
             {
-                File.Delete(tempCopyofCurrentMaster);
+                //Server response was not 200. Data download can not commence.
+                switch (((HttpWebResponse)ex.Response).StatusCode)
+                {
+                    // Note: needed because TooManyRequests is not available in
+                    // earlier versions of the HttpStatusCode enum.
+                    case ((HttpStatusCode)429):
+                        result = AutoUpdateStatus.
+                            AUTO_UPDATE_ERR_429_TOO_MANY_ATTEMPTS;
+                        break;
+                    case HttpStatusCode.NotModified:
+                        result = AutoUpdateStatus.AUTO_UPDATE_NOT_NEEDED;
+                        break;
+                    case HttpStatusCode.Forbidden:
+                        result = AutoUpdateStatus.AUTO_UPDATE_ERR_403_FORBIDDEN;
+                        break;
+                    default:
+                        result = AutoUpdateStatus.AUTO_UPDATE_HTTPS_ERR;
+                        break;
+                }
             }
-            
-            return status;
+
+            return result;
         }
 
-        private static LicenceKeyResults ValidateDownloadedFile(string uncompressedTempFile)
+        /// <summary>
+        /// Verifies that the data has been downloaded correctly by comparing 
+        /// an MD5 hash off the downloaded data with one taken before the data
+        /// was sent, which is stored in a response header.
+        /// </summary>
+        /// <param name="client">
+        /// The Premium data download connection.
+        /// </param>
+        /// <param name="compressedTempFile">
+        /// The path to compressed data file that has been downloaded.
+        /// </param>
+        /// <returns>True if the hashes match, otherwise false.</returns>
+        private static AutoUpdateStatus CheckedDownloadedFileMD5(
+                WebClient client, FileInfo compressedTempFile)
         {
-            LicenceKeyResults status = LicenceKeyResults.InProgress;
-            try
+            AutoUpdateStatus status = AutoUpdateStatus.AUTO_UPDATE_IN_PROGRESS;
+            string serverHash = client.ResponseHeaders["Content-MD5"];
+            string downloadHash = GetMd5Hash(compressedTempFile);
+            if (serverHash == null ||
+                serverHash.Equals(downloadHash) == false)
             {
-                using (var dataSet = StreamFactory.Create(uncompressedTempFile, File.GetLastWriteTimeUtc(uncompressedTempFile)))
-                {
-                    var currentProvider = WebProvider.ActiveProvider;
-                    status = currentProvider == null ||
-                        dataSet.Published != currentProvider.DataSet.Published ||
-                        dataSet.Properties.Count != currentProvider.DataSet.Properties.Count ?
-                        LicenceKeyResults.InProgress : LicenceKeyResults.UpdateNotNeeded;
-                }
-            }
-            catch (MobileException ex)
-            {
-                EventLog.Warn(ex);
-                return LicenceKeyResults.Invalid;
-            }
-            return status;
-        }
-
-        private static LicenceKeyResults CheckedDownloadedFileMD5(WebClient client, string downloadedFile)
-        {
-            var status = LicenceKeyResults.InProgress;
-            try
-            {
-                using (var stream = File.OpenRead(downloadedFile))
-                {
-                    ValidateMD5(client, stream);
-                }
-            }
-            catch (MobileException ex)
-            {
-                EventLog.Warn(ex);
-                status = LicenceKeyResults.Invalid;
+                status = AutoUpdateStatus.AUTO_UPDATE_ERR_MD5_VALIDATION_FAILED;
             }
             return status;
         }
 
         /// <summary>
-        /// Downloads the data associated with 
+        /// Reads a source GZip file and writes the uncompressed data to 
+        /// destination file.
         /// </summary>
-        /// <param name="client">Connect to make HTTP request for the data file</param>
-        /// <param name="currentFile">Path to the current active data file</param>
-        /// <param name="destination">Destination of the file to download</param>
-        /// <param name="licenceKeys">Array of licence keys to use to authenticate</param>
-        /// <returns>The current status of the overall activity</returns>
-        private static LicenceKeyResults DownloadFile(WebClient client, string currentFile, string destination, string[] licenceKeys)
+        /// <param name="destinationPath">
+        /// Path to GZip file to load from.
+        /// </param>
+        /// <param name="sourcePath">
+        /// Path to file to write the uncompressed data to.
+        /// </param>
+        /// <returns>The current state of the update process.</returns>
+        private static AutoUpdateStatus Decompress(
+                FileInfo sourcePath, FileInfo destinationPath)
         {
-            var status = LicenceKeyResults.InProgress;
-
-            // Only set the last modified data if we're not dealing with Lite data
-            // at the moment.
-            if (BinaryFile.Exists)
+            AutoUpdateStatus status = AutoUpdateStatus.AUTO_UPDATE_IN_PROGRESS;
+            using (var fis = new GZipStream(
+                sourcePath.OpenRead(), CompressionMode.Decompress))
             {
-                client.Headers.Add(
-                    HttpRequestHeader.LastModified,
-                    BinaryFile.LastWriteTimeUtc.ToString("R"));
-            }
-
-            try
-            {
-                // Download the data to the temporary file.
-                client.DownloadFile(FullUrl(licenceKeys), destination);
-            }
-            catch (SecurityException ex)
-            {
-                EventLog.Warn(ex);
-                status = LicenceKeyResults.Https;
-            }
-            catch (WebException ex)
-            {
-                // Use the server response text if available. Otherwise the exception
-                // message being handled.
-                string responseText;
-                try
+                using (var fos = destinationPath.Create())
                 {
-                    responseText = new StreamReader(ex.Response.GetResponseStream()).ReadToEnd();
-                    if (String.IsNullOrEmpty(responseText))
-                    {
-                        responseText = ex.Message;
-                    }
+                    fis.CopyTo(fos);
                 }
-                catch (Exception)
-                {
-                    responseText = ex.Message;
-                }
-                EventLog.Info(String.Format(
-                    "No device data was returned, probably because no newer data is available. " +
-                    "The server responded with the message '{0}'.",
-                    responseText));
-                EventLog.Debug(ex);
-                status = LicenceKeyResults.Https;
             }
-            catch (MobileException ex)
-            {
-                EventLog.Warn(ex);
-                status = LicenceKeyResults.Https;
-            }
-
             return status;
         }
 
-        private static LicenceKeyResults Decompress(string source, string destination)
+        /// <summary>
+        /// Method compares the downloaded data file to the existing data 
+        /// file to check if the update is required. This will prevent file 
+        /// switching if the data file was downloaded but is not newer than 
+        /// the existing data file.
+        /// </summary>
+        /// <remarks>
+        /// The following conditions must be met for the data file to be 
+        /// considered newer than the current master data file:
+        /// 1. Current master data file does not exist.
+        /// 2. If the published dates are not the same.
+        /// 3. If the number of properties is not the same.
+        /// </remarks>
+        /// <param name="binaryFile">
+        /// Current file to compare against.
+        /// </param>
+        /// <param name="decompressedTempFile">
+        /// Path to the decompressed downloaded file.
+        /// </param>
+        /// <returns>The current state of the update process.</returns>
+        private static AutoUpdateStatus ValidateDownloadedFile(
+                FileInfo binaryFile, FileInfo decompressedTempFile)
         {
-            var status = LicenceKeyResults.InProgress;
+            AutoUpdateStatus status = AutoUpdateStatus.AUTO_UPDATE_IN_PROGRESS;
+            if (decompressedTempFile.Exists)
+            {
+
+                // This will throw an exception if the downloaded data file 
+                // can't be used to get the required attributes. The exception 
+                // is a key part of the validation process.
+                DataSetAttributes tempAttrs = new DataSetAttributes(
+                        decompressedTempFile);
+
+                // If the current binary file exists then compare the two for
+                // the same published date and same properties. If either value
+                // is different then the data file should be accepted. If 
+                // they're the same then the update is not needed.
+                if (binaryFile.Exists)
+                {
+                    DataSetAttributes binaryAttrs = new DataSetAttributes(
+                        binaryFile);
+                    if (binaryAttrs.Published != tempAttrs.Published ||
+                        binaryAttrs.PropertyCount != tempAttrs.PropertyCount)
+                    {
+                        status = AutoUpdateStatus.AUTO_UPDATE_IN_PROGRESS;
+                    }
+                    else
+                    {
+                        status = AutoUpdateStatus.AUTO_UPDATE_NOT_NEEDED;
+                    }
+                }
+            }
+            return status;
+        }
+
+        /// <summary>
+        /// Method represents the final stage of the auto update process. The 
+        /// uncompressed file is swapped in place of the existing master file.
+        /// </summary>
+        /// <param name="binaryFile">
+        /// Path to a binary data that should be set to the downloaded data.
+        /// </param>
+        /// <param name="client">
+        /// Used to get the Last-Modified HTTP header value.
+        /// </param>
+        /// <param name="uncompressedTempFile">
+        /// File object containing the uncompressed version of the data file 
+        /// downloaded from 51Degrees update server.
+        /// </param>
+        /// <returns>The current state of the update process.</returns>
+        private static AutoUpdateStatus ActivateDownloadedFile(
+                WebClient client,
+                FileInfo binaryFile,
+                FileInfo uncompressedTempFile)
+        {
+            AutoUpdateStatus status = AutoUpdateStatus.AUTO_UPDATE_IN_PROGRESS;
+            bool backedUp = true;
+            FileInfo tempCopyofCurrentMaster = new FileInfo(
+                    binaryFile.FullName + ".replacing");
             try
             {
-                using (var fs = File.Create(destination))
+                // Keep a copy of the old data in case we need to go back to it.
+                binaryFile.Refresh();
+                if (binaryFile.Exists)
                 {
-                    using (var gs = new GZipStream(
-                        File.OpenRead(source), CompressionMode.Decompress))
+                    try
                     {
-                        gs.CopyTo(fs);
+                        File.Move(binaryFile.FullName, 
+                            tempCopyofCurrentMaster.FullName);
+                        backedUp = true;
                     }
+                    catch
+                    {
+                        // The current master file can not be moved so the
+                        // backup has not happened. Do not continue to try and 
+                        // update the data file.
+                        backedUp = false;
+                    }
+                }
+
+                // If the backup of the master data file exists then switch the 
+                // files.
+                if (backedUp)
+                {
+                    try
+                    {
+                        // Copy the new file to the master file.
+                        File.Move(uncompressedTempFile.FullName, 
+                            binaryFile.FullName);
+                        
+                        // Set the binary file's last modified date to the one 
+                        // provided from the web server with the download. This
+                        // date will be used when checking for future updates
+                        // to avoid downloading the file if there is no update.
+                        binaryFile.LastWriteTimeUtc = GetLastModified(client);
+                        status = AutoUpdateStatus.AUTO_UPDATE_SUCCESS;
+                    }
+                    catch
+                    {
+                        status = AutoUpdateStatus.AUTO_UPDATE_NEW_FILE_CANT_RENAME;
+                    }
+                }
+                else
+                {
+                    status = AutoUpdateStatus.AUTO_UPDATE_MASTER_FILE_CANT_RENAME;
                 }
             }
             catch (Exception ex)
             {
-                EventLog.Warn(ex);
-                status = LicenceKeyResults.WriteDataFile;
+                binaryFile.Refresh();
+                if (binaryFile.Exists == false &&
+                    tempCopyofCurrentMaster.Exists == true)
+                {
+                    tempCopyofCurrentMaster.MoveTo(binaryFile.FullName);
+                }
+                throw ex;
+            }
+            finally
+            {
+                tempCopyofCurrentMaster.Refresh();
+                if (tempCopyofCurrentMaster.Exists)
+                {
+                    tempCopyofCurrentMaster.Delete();
+                }
             }
             return status;
         }
-        
+
+        /// <summary>
+        /// Method initialises path to the a temporary file used during the
+        /// auto update process.
+        /// </summary>
+        /// <remarks>
+        /// The original data file does not have to exist, but the directory
+        /// provided must exist and the path should not be a directory.
+        /// </remarks>
+        /// <param name="dataFile">
+        /// Data file to use as the prefix of the temp file.
+        /// </param>
+        private static FileInfo GetTempFileName(FileInfo dataFile)
+        {
+            var sb = new StringBuilder();
+            sb.Append(dataFile.FullName);
+            sb.Append(".");
+            sb.Append(Guid.NewGuid().ToString());
+            sb.Append(".tmp");
+            return new FileInfo(sb.ToString());
+        }
+
+        /// <summary>
+        /// Returns the last modified date from the HTTP response.
+        /// </summary>
+        /// <param name="client">Webclient used to download the data.</param>
+        /// <returns>
+        /// The last modified date from the HTTP response, or min date if not 
+        /// provided.
+        /// </returns>
+        private static DateTime GetLastModified(WebClient client)
+        {
+            DateTime lastModified;
+            if (DateTime.TryParseExact(
+                client.ResponseHeaders[HttpResponseHeader.LastModified],
+                "R",
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.AssumeUniversal,
+                out lastModified) == false)
+            {
+                lastModified = DateTime.MinValue;
+            }
+            return lastModified;
+        }
+
+        /// <summary>
+        /// Validate the supplied keys to exclude keys from 3rd party products
+        /// from being used.
+        /// </summary>
+        /// <param name="licenseKeys">
+        /// An array of licence key strings to validate.
+        /// </param>
+        /// <returns>An array of valid licence keys.</returns>
+        private static List<string> GetValidKeys(IList<string> licenseKeys)
+        {
+            List<string> validKeys = new List<string>();
+            foreach (string key in licenseKeys)
+            {
+                if (LicenceKeyValidation.IsMatch(key) &&
+                    new Key(key).IsValid)
+                {
+                    validKeys.Add(key);
+                }
+            }
+            return validKeys;
+        }
+
+        /// <summary>
+        /// Constructs the URL needed to download Enhanced device data.
+        /// </summary>
+        /// <param name="licenseKeys">Array of licence key strings.</param>
+        /// <returns>The URL for the data download.</returns>
+        private static Uri FullUrl(IList<string> licenseKeys)
+        {
+            string[] parameters = {
+                "LicenseKeys=" + String.Join("|", licenseKeys),
+                "Download=True",
+                "Type=BinaryV32"};
+            string url = String.Concat(
+                Constants.AutoUpdateUrl,
+                "?",
+                String.Join("&", parameters));
+            return new Uri(url);
+        }
+
+        /// <summary>
+        /// Calculates the MD5 hash of the given data array.
+        /// </summary>
+        /// <param name="file">calculate MD5 of this file.</param>
+        /// <returns>The MD5 hash of the given data.</returns>
+        private static string GetMd5Hash(FileInfo file)
+        {
+            using (MD5 md5Hash = MD5.Create())
+            {
+                using (var stream = file.OpenRead())
+                {
+                    return GetMd5Hash(md5Hash, stream);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Calculates the MD5 hash of the given data array.
+        /// </summary>
+        /// <param name="stream">calculate MD5 of this stream</param>
+        /// <param name="md5Hash">instance of MD5 hash calculator</param>
+        /// <returns>The MD5 hash of the given data.</returns>
+        private static string GetMd5Hash(MD5 md5Hash, Stream stream)
+        {
+            // Convert the input string to a byte array and compute the hash.
+            byte[] data = md5Hash.ComputeHash(stream);
+
+            // Create a new stringbuilder to collect the bytes
+            // and create a string.
+            StringBuilder sb = new StringBuilder();
+
+            // Loop through each byte of the hashed data 
+            // and format each one as a hexadecimal string.
+            for (int i = 0; i < data.Length; i++)
+            {
+                sb.Append(data[i].ToString("x2"));
+            }
+
+            // Return the hexadecimal string.
+            return sb.ToString();
+        }
+
         #endregion
     }
 }

@@ -2,6 +2,7 @@
 
 using System.Reflection;
 using System.Resources;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
 
@@ -30,6 +31,10 @@ using System.Security;
 
 [assembly: Guid("71439680-d7e5-4497-96ff-3acfb9f68a72")]
 
+// Enable the unit test assemly to access internal classes.
+
+[assembly: InternalsVisibleToAttribute("FiftyOne.Tests.Unit")]
+
 // Version information for an assembly consists of the following four values:
 //
 //      Major Version
@@ -37,7 +42,7 @@ using System.Security;
 //      Build Number
 //      Revision
 
-[assembly: AssemblyVersion("3.2.5.6")]
-[assembly: AssemblyFileVersion("3.2.5.6")]
+[assembly: AssemblyVersion("3.2.6.17")]
+[assembly: AssemblyFileVersion("3.2.6.17")]
 [assembly: NeutralResourcesLanguage("en-GB")]
 [assembly: AllowPartiallyTrustedCallers]

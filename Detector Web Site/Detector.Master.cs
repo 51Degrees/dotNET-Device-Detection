@@ -93,7 +93,7 @@ namespace Detector
                     buffer.AddRange(BitConverter.GetBytes((byte)DateTime.UtcNow.Day));
                     buffer.AddRange(BitConverter.GetBytes((short)DateTime.UtcNow.TimeOfDay.TotalMinutes));
 
-                    // Use a hash code of the user agent for the final part.
+                    // Use a hash code of the User-Agent for the final part.
                     buffer.AddRange(BitConverter.GetBytes(Request.UserAgent.GetHashCode()));
 
                     var clientIdCookie = new HttpCookie(
@@ -114,7 +114,7 @@ namespace Detector
                     parameters.Add("sc", "start");
                 }
 
-                // Add user agent and device information.
+                // Add User-Agent and device information.
                 parameters.Add("ua", Request.UserAgent);
                 parameters.Add("je", Request.Browser.JavaScript ? "1" : "0");
                 if (Request.Browser.IsMobileDevice)

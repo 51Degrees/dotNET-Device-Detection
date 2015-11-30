@@ -33,13 +33,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// </summary>
     /// <para>
     /// The process uses 3 steps to determine the properties associated with the
-    /// provided user agent.
+    /// provided User-Agent.
     /// </para>
     /// <para>
-    /// Step 1 - each of the character positions of the target user agent are checked
+    /// Step 1 - each of the character positions of the target User-Agent are checked
     /// from right to left to determine if a complete node or sub string is present
     /// at that position. For example; the sub string Chrome/11 might indicate the 
-    /// user agent relates to Chrome version 11 from Google. Once every character
+    /// User-Agent relates to Chrome version 11 from Google. Once every character
     /// position is checked a list of matching nodes will be available.
     /// </para>
     /// <para>
@@ -49,38 +49,38 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// devices. This is termed the Exact match method.
     /// </para>
     /// <para>
-    /// Step 3 - If a match has not been found exactly then the target user agent is
+    /// Step 3 - If a match has not been found exactly then the target User-Agent is
     /// evaluated to find nodes that have the smallest numeric difference. For example
-    /// if Chrome/40 were in the target user agent at the same position as Chrome/32 
+    /// if Chrome/40 were in the target User-Agent at the same position as Chrome/32 
     /// in the signature then Chrome/32 with a numeric difference score of 8 would be
     /// used. If a signature can then be matched exactly against the new set of nodes
     /// this will be returned. This is termed the Numeric match method.
     /// </para>
     /// <para>
-    /// Step 4 - If the target user agent is less popular, or newer than the creation time
+    /// Step 4 - If the target User-Agent is less popular, or newer than the creation time
     /// of the data set, a small sub set of possible signatures are identified from the
     /// matchied nodes. The sub set is limited to the most popular 200 signatures.
     /// </para>
     /// <para>
     /// Step 5 - The sub strings of the signatures from Step 4 are then evaluated to determine
-    /// if they exist in the target user agent. For example if Chrome/32 in the target 
+    /// if they exist in the target User-Agent. For example if Chrome/32 in the target 
     /// appears one character to the left of Chrome/32 in the signature then a difference
     /// of 1 would be returned between the signature and the target. This is termed the
     /// Nearest match method.
     /// </para>
     /// <para>
-    /// Step 6 - The signatures from Step 4 are evaluated against the target user agent to 
+    /// Step 6 - The signatures from Step 4 are evaluated against the target User-Agent to 
     /// determine the difference in relevent characters between them. The signature with the 
     /// lowest difference in ASCII character values with the target is returned. This is termed
     /// the Closest match method.
     /// </para>
     /// <remarks>
-    /// Random user agents will not identify any matching nodes. In these situations a 
+    /// Random User-Agents will not identify any matching nodes. In these situations a 
     /// default set of profiles are returned.
     /// </remarks>
     /// <remarks>
     /// The characteristics of the detection data set will determine the accuracy of the
-    /// result match. Older data sets that are unaware of the latest devices, or user agent
+    /// result match. Older data sets that are unaware of the latest devices, or User-Agent
     /// formats in use will be less accurate.
     /// </remarks>
     /// <para>
@@ -90,45 +90,248 @@ namespace FiftyOne.Foundation.Mobile.Detection
     {
         #region Classes used by Nearest and Closest methods
 
+        /// <summary>
+        /// Used to filter multiple lists of ordered ranked signature indexes
+        /// so that those that appear the most times are set in the top
+        /// indexes list.
+        /// </summary>
+        internal class MostFrequentFilter : List<int>
+        {
+            /// <summary>
+            /// Fronts an array of integers. Used to identify duplicate items 
+            /// in the lists that are being filtered.
+            /// </summary>
+            private class OrderedList
+            {
+                internal readonly int[] Items;
+                private int _nextStartIndex = 0;
+                private int _currentIndex = -1;
+
+                /// <summary>
+                /// Constructs a new instance of the OrderedList.
+                /// </summary>
+                /// <param name="items">
+                /// Array of integers to incldue in the list
+                /// </param>
+                internal OrderedList(int[] items)
+                {
+                    Items = items;
+                }
+                
+                /// <summary>
+                /// Determines if the ordered list contains the value requested. 
+                /// Updates the start index as we know the next request to Contains
+                /// will always be for a value larger than the one just passed.
+                /// </summary>
+                /// <param name="value">Value to be checked in the list</param>
+                /// <returns>
+                /// True if the list contains the value, otherwise false
+                /// </returns>
+                internal bool Contains(int value)
+                {
+                    var index = Array.BinarySearch<int>(
+                        Items,
+                        _nextStartIndex,
+                        Items.Length - _nextStartIndex,
+                        value);
+                    if (index < 0)
+                    {
+                        _nextStartIndex = ~index;
+                    }
+                    else
+                    {
+                        _nextStartIndex = index + 1;
+                    }
+                    return index >= 0;
+                }
+
+                internal int Current
+                {
+                    get { return Items[_currentIndex]; }
+                }
+
+                internal bool MoveNext()
+                {
+                    _currentIndex++;
+                    return _currentIndex < Items.Length;
+                }
+
+                internal void Reset()
+                {
+                    _currentIndex = -1;
+                    _nextStartIndex = 0;
+                }
+            }
+
+            /// <summary>
+            /// Constructs a new instance of <see cref="MostFrequentFilter"/>
+            /// </summary>
+            /// <remarks>
+            /// The nodes are always ordered based on the ascending lowest value
+            /// in each list that is current.
+            /// </remarks>
+            /// <param name="state">Current state of the match process</param>
+            internal MostFrequentFilter(MatchState state)
+            {
+                Init(state.Nodes.OrderBy(i => 
+                    i.RankedSignatureIndexes.Length).Select(i =>
+                        new OrderedList(i.RankedSignatureIndexes)).ToArray(),
+                    state.DataSet.MaxSignatures);
+            }
+
+            /// <summary>
+            /// Constructs a new instance of <see cref="MostFrequentFilter"/> for unit testing.
+            /// </summary>
+            /// <param name="lists">Lists of arrays to be used as input</param>
+            /// <param name="maxResults">The maxmimum number of results to return</param>
+            internal MostFrequentFilter(int[][] lists, int maxResults)
+            {
+                Init(lists.OrderBy(i => i.Length).Select(i =>
+                    new OrderedList(i)).ToArray(),
+                    maxResults);
+            }
+
+            /// <summary>
+            /// Keep adding integers to the list until there are insufficient
+            /// lists remaining to make a difference or we've reached the
+            /// maxmium number of results to return.
+            /// </summary>
+            private void Init(OrderedList[] lists, int maxResults)
+            {
+                int topCount = 0;
+                if (lists.Length == 1)
+                {
+                    AddRange(lists[0].Items.Take(maxResults));
+                }
+                else if (lists.Length > 1)
+                {
+                    for (var listIndex = 0;
+                        listIndex < lists.Length &&
+                        lists.Length - listIndex >= topCount;
+                        listIndex++)
+                    {
+                        foreach (var list in lists)
+                        {
+                            list.Reset();
+                        }
+                        while (lists[listIndex].MoveNext())
+                        {
+                            if (GetHasProcessed(lists, listIndex) == false)
+                            {
+                                var count = GetCount(lists, listIndex, topCount);
+                                if (count > topCount)
+                                {
+                                    topCount = count;
+                                    Clear();
+                                }
+                                if (count == topCount)
+                                {
+                                    Add(lists[listIndex].Current);
+                                }
+                            }
+                        }
+                    }
+                }
+                Sort();
+                if (Count > maxResults)
+                {
+                    RemoveRange(maxResults, Count - maxResults);
+                }
+            }
+
+            /// <summary>
+            /// If the value of the target node has already been processed because
+            /// it's contained in a previous list then return true. If not and
+            /// it still needs to be checked return false.
+            /// </summary>
+            /// <param name="lists">Lists being filtered</param>
+            /// <param name="index">
+            /// Index of the list whose current value should be checked in 
+            /// prior lists.
+            /// </param>
+            /// <returns>True if the value has been processed, otherwise false</returns>
+            private bool GetHasProcessed(OrderedList[] lists, int index)
+            {
+                for (var i = index - 1; i >= 0; i--)
+                {
+                    if (lists[i].Contains(lists[index].Current))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            /// <summary>
+            /// Returns the number of lists the target value is contained in.
+            /// </summary>
+            /// <param name="lists">Lists being filtered</param>
+            /// <param name="index">
+            /// Index of the list whose current value should be counted
+            /// </param>
+            /// <param name="topCount">Highest count so far</param>
+            /// <returns>
+            /// Number of lists that contain the value held by the list at the index
+            /// </returns>
+            private int GetCount(OrderedList[] lists, int index, int topCount)
+            {
+                var count = 1;
+                for (var i = index + 1; 
+                     i < lists.Length &&
+                     lists.Length - index + count > topCount; 
+                     i++)
+                {
+                    if (lists[i].Contains(lists[index].Current))
+                    {
+                        count++;
+                    }
+                }
+                return count;
+            }
+        }
+
         private abstract class BaseScore
         {
             /// <summary>
             /// Gets the score for the specific node of the signature.
             /// </summary>
-            /// <param name="match"></param>
+            /// <param name="state"></param>
             /// <param name="node"></param>
             /// <returns></returns>
-            protected abstract int GetScore(Match match, Node node);
+            protected abstract int GetScore(MatchState state, Node node);
 
             /// <summary>
             /// Sets any initial score before each node is evaluated.
             /// </summary>
-            /// <param name="match"></param>
             /// <param name="signature"></param>
             /// <param name="lastNodeCharacter"></param>
             /// <returns></returns>
-            protected abstract int GetInitialScore(Match match, Signature signature, int lastNodeCharacter);
+            protected abstract int GetInitialScore(Signature signature, int lastNodeCharacter);
 
             /// <summary>
             /// Checks all the signatures using the scoring method provided.
             /// </summary>
-            /// <param name="signatures"></param>
-            /// <param name="match"></param>
-            internal void EvaluateSignatures(Match match, IEnumerable<Signature> signatures)
+            /// <param name="state">Current state of the match process</param>
+            /// <param name="rankedSignatureIndexes">List of ranked signature indexes</param>
+            internal void EvaluateSignatures(MatchState state, IList<int> rankedSignatureIndexes)
             {
-                match.LowestScore = int.MaxValue;
-                var lastNodeCharacter = match.Nodes.Last().Root.Position;
-                foreach (var signature in signatures.Take(match.DataSet.MaxSignatures))
-                    EvaluateSignature(match, signature, lastNodeCharacter);
+                state.LowestScore = int.MaxValue;
+                var lastNodeCharacter = state.Nodes.Last().Root.Position;
+                foreach (var rankedSignatureIndex in rankedSignatureIndexes.Take(state.DataSet.MaxSignatures))
+                {
+                    var signatureIndex = state.DataSet.RankedSignatureIndexes[rankedSignatureIndex].Value;
+                    var signature = state.DataSet.Signatures[signatureIndex];
+                    EvaluateSignature(state, signature, lastNodeCharacter);
+                }
             }
 
             /// <summary>
             /// Compares all the characters up to the max length between the 
-            /// signature and the target user agent updating the match
+            /// signature and the target User-Agent updating the match
             /// information if this signature is better than any evaluated
             /// previously.
             /// </summary>
-            /// <param name="match">Information about the detection</param>
+            /// <param name="state">Information about the detection</param>
             /// <param name="lastNodeCharacter">
             /// The position of the last character in the matched nodes
             /// </param>
@@ -136,37 +339,37 @@ namespace FiftyOne.Foundation.Mobile.Detection
             /// The siganture to be evaluated.
             /// </param>
             private void EvaluateSignature(
-                Match match,
+                MatchState state,
                 Signature signature,
                 int lastNodeCharacter)
             {
-                match._signaturesCompared++;
+                state.SignaturesCompared++;
 
                 // Get the score between the target and the signature stopping if it's
                 // going to be larger than the lowest score already found.
-                int score = GetScore(match, signature, lastNodeCharacter);
+                int score = GetScore(state, signature, lastNodeCharacter);
 
                 // If the score is lower than the current lowest then use this signature.
-                if (score < match.LowestScore)
+                if (score < state.LowestScore)
                 {
-                    match.LowestScore = score;
-                    match._signature = signature;
+                    state.LowestScore = score;
+                    state.Signature = signature;
                 }
             }
 
             /// <summary>
             /// Steps through the nodes of the signature comparing those that aren't
             /// contained in the matched nodes to determine a score between the signature
-            /// and the target user agent. If that score becomes greater or equal to the
+            /// and the target User-Agent. If that score becomes greater or equal to the
             /// lowest score determined so far then stop.
             /// </summary>
-            /// <param name="match"></param>
+            /// <param name="state"></param>
             /// <param name="signature"></param>
             /// <param name="lastNodeCharacter"></param>
             /// <returns></returns>
-            private int GetScore(Match match, Signature signature, int lastNodeCharacter)
+            private int GetScore(MatchState state, Signature signature, int lastNodeCharacter)
             {
-                var runningScore = GetInitialScore(match, signature, lastNodeCharacter);
+                var runningScore = GetInitialScore(signature, lastNodeCharacter);
 
                 // We only need to check the nodes that are different. As the nodes
                 // are in the same order we can simply look for those that are different.
@@ -174,20 +377,21 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 int signatureNodeIndex = 0;
 
                 while (signatureNodeIndex < signature.NodeOffsets.Length &&
-                       runningScore < match.LowestScore)
+                       runningScore < state.LowestScore)
                 {
-                    var matchNodeOffset = matchNodeIndex >= match.Nodes.Count ? int.MaxValue : match.Nodes[matchNodeIndex].Index;
+                    var matchNodeOffset = matchNodeIndex >= state.Nodes.Count ?
+                        int.MaxValue : state.Nodes[matchNodeIndex].Index;
                     var signatureNodeOffset = signature.NodeOffsets[signatureNodeIndex];
                     if (matchNodeOffset > signatureNodeOffset)
                     {
                         // The matched node is either not available, or is higher than
                         // the current signature node. The signature node is not contained
                         // in the match so we must score it.
-                        var score = GetScore(match, signature.Nodes[signatureNodeIndex]);
+                        var score = GetScore(state, signature.Nodes[signatureNodeIndex]);
 
                         // If the score is less than zero then a score could not be 
                         // determined and the signature can't be compared to the target
-                        // user agent. Exit with a high score.
+                        // User-Agent. Exit with a high score.
                         if (score < 0)
                             return int.MaxValue;
                         runningScore += score;
@@ -218,13 +422,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             /// <summary>
             /// Calculate the initial score based on the difference in length of 
-            /// the right most node and the target user agent.
+            /// the right most node and the target User-Agent.
             /// </summary>
-            /// <param name="match"></param>
             /// <param name="signature"></param>
             /// <param name="lastNodeCharacter"></param>
             /// <returns></returns>
-            protected override int GetInitialScore(Match match, Signature signature, int lastNodeCharacter)
+            protected override int GetInitialScore(Signature signature, int lastNodeCharacter)
             {
                 return Math.Abs(lastNodeCharacter + 1 - signature.Length);
             }
@@ -233,38 +436,42 @@ namespace FiftyOne.Foundation.Mobile.Detection
             /// Returns the difference score between the node and the target user
             /// agent working from right to left.
             /// </summary>
-            /// <param name="match"></param>
+            /// <param name="state"></param>
             /// <param name="node"></param>
             /// <returns></returns>
-            protected override int GetScore(Match match, Node node)
+            protected override int GetScore(MatchState state, Node node)
             {
                 int score = 0;
                 int nodeIndex = node.Characters.Length - 1, targetIndex = node.Position + node.Length;
 
                 // Adjust the score and indexes if the node is too long.
-                if (targetIndex >= match.TargetUserAgentArray.Length)
+                if (targetIndex >= state.TargetUserAgentArray.Length)
                 {
-                    score = targetIndex - match.TargetUserAgentArray.Length;
+                    score = targetIndex - state.TargetUserAgentArray.Length;
                     nodeIndex -= score;
-                    targetIndex = match.TargetUserAgentArray.Length - 1;
+                    targetIndex = state.TargetUserAgentArray.Length - 1;
                 }
 
-                while (nodeIndex >= 0 && score < match.LowestScore)
+                while (nodeIndex >= 0 && score < state.LowestScore)
                 {
                     var difference = Math.Abs(
-                        match.TargetUserAgentArray[targetIndex] -
+                        state.TargetUserAgentArray[targetIndex] -
                         node.Characters[nodeIndex]);
                     if (difference != 0)
                     {
                         var numericDifference = NumericDifference(
                             node.Characters,
-                            match.TargetUserAgentArray,
+                            state.TargetUserAgentArray,
                             ref nodeIndex,
                             ref targetIndex);
                         if (numericDifference != 0)
+                        {
                             score += numericDifference;
+                        }
                         else
+                        {
                             score += (difference * 10);
+                        }
                     }
                     nodeIndex--;
                     targetIndex--;
@@ -272,11 +479,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
                 return score;
             }
-
-
+            
             /// <summary>
             /// Checks for a numeric rather than character difference 
-            /// between the signature and the target user agent at the
+            /// between the signature and the target User-Agent at the
             /// character position provided by the index. 
             /// Updates the difference variable based on the result.
             /// </summary>
@@ -284,7 +490,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             /// Node array of characters
             /// </param>
             /// <param name="target">
-            /// Target user agent array
+            /// Target User-Agent array
             /// </param>
             /// <param name="nodeIndex">
             /// Start character to be checked in the node array
@@ -344,7 +550,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         private class NearestScore : BaseScore
         {
-            protected override int GetInitialScore(Match match, Signature signature, int lastNodeCharacter)
+            protected override int GetInitialScore(Signature signature, int lastNodeCharacter)
             {
                 return 0;
             }
@@ -353,14 +559,16 @@ namespace FiftyOne.Foundation.Mobile.Detection
             /// If the sub string is contained in the target but in a different position
             /// return the difference between the two sub string positions.
             /// </summary>
-            /// <param name="match"></param>
+            /// <param name="state"></param>
             /// <param name="node"></param>
             /// <returns>-1 if a score can't be determined, or the difference in positions</returns>
-            protected override int GetScore(Match match, Node node)
+            protected override int GetScore(MatchState state, Node node)
             {
-                var index = match.IndexOf(node);
+                var index = state.IndexOf(node);
                 if (index >= 0)
+                {
                     return Math.Abs(node.Position + 1 - index);
+                }
 
                 // Return -1 to indicate that a score could not be calculated.
                 return -1;
@@ -372,12 +580,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Static Fields
 
         /// <summary>
-        /// Used to calculate nearest scores between the match and the user agent.
+        /// Used to calculate nearest scores between the match and the User-Agent.
         /// </summary>
         private static readonly NearestScore _nearest = new NearestScore();
 
         /// <summary>
-        /// Used to calculate closest scores between the match and the user agent.
+        /// Used to calculate closest scores between the match and the User-Agent.
         /// </summary>
         private static readonly ClosestScore _closest = new ClosestScore();
 
@@ -393,64 +601,63 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// The dataSet may be used by other threads in parallel and is not assumed to be used
         /// by only one detection process at a time.
         /// </remarks>
-        /// <param name="match">
-        /// The match object to be updated.
-        /// </param>
+        /// <param name="state">The match state object to be updated.</param>
         /// <remarks>
         /// The memory implementation of the data set will always perform fastest but does
         /// consume more memory. 
         /// </remarks>
-        internal static void Match(
-            Match match)
+        internal static void Match(MatchState state)
         {
-            if (match.DataSet.Disposed)
+            if (state.DataSet.Disposed)
+            {
                 throw new InvalidOperationException(
                     "Data Set has been disposed and can't be used for match");
+            }
 
-            // If the user agent is too short then don't try to match and 
+            // If the User-Agent is too short then don't try to match and 
             // return defaults.
-            if (match.TargetUserAgentArray.Length == 0 ||
-                match.TargetUserAgentArray.Length < match.DataSet.MinUserAgentLength)
+            if (state.TargetUserAgentArray.Length == 0 ||
+                state.TargetUserAgentArray.Length < state.DataSet.MinUserAgentLength)
             {
                 // Set the default values.
-                MatchDefault(match);
+                MatchDefault(state);
             }
             else
             {
                 // Starting at the far right evaluate the nodes in the data
                 // set recording matched nodes. Continue until all character
                 // positions have been checked.
-                Evaluate(match);
+                Evaluate(state);
 
                 // Can a precise match be found based on the nodes?
-                var signatureIndex = match.GetExactSignatureIndex();
+                var signatureIndex = GetExactSignatureIndex(state);
 
                 if (signatureIndex >= 0)
                 {
                     // Yes a precise match was found.
-                    match._signature = match.DataSet.Signatures[signatureIndex];
-                    match._method = MatchMethods.Exact;
-                    match.LowestScore = 0;
+                    state.Signature = state.DataSet.Signatures[signatureIndex];
+                    state.Method = MatchMethods.Exact;
+                    state.LowestScore = 0;
                 }
                 else
                 {
                     // No. So find any other nodes that match if numeric differences
                     // are considered.
-                    EvaluateNumeric(match);
+                    EvaluateNumeric(state);
 
                     // Can a precise match be found based on the nodes?
-                    signatureIndex = match.GetExactSignatureIndex();
+                    signatureIndex = GetExactSignatureIndex(state);
 
                     if (signatureIndex >= 0)
                     {
                         // Yes a precise match was found.
-                        match._signature = match.DataSet.Signatures[signatureIndex];
-                        match._method = MatchMethods.Numeric;
+                        state.Signature = state.DataSet.Signatures[signatureIndex];
+                        state.Method = MatchMethods.Numeric;
                     }
-                    else if (match.Nodes.Count > 0)
+                    else if (state.Nodes.Count > 0)
                     {
                         // Look for the closest signatures to the nodes found.
-                        var closestSignatures = match.GetClosestSignatures();
+                        var closestSignatures = GetClosestSignatures(state);
 
 #if DEBUG
                         // Validate the list is in ascending order of ranked signature index.
@@ -463,35 +670,74 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         }
 #endif
 
-                        // Try finding a signature with identical nodes just not in exactly the 
-                        // same place.
-                        _nearest.EvaluateSignatures(match, closestSignatures.Select(i =>
-                            match.DataSet.Signatures[match.DataSet.RankedSignatureIndexes[i].Value]));
+                        // Try finding a signature with identical nodes just 
+                        // not in exactly the same place.
+                        _nearest.EvaluateSignatures(state, closestSignatures);
 
-                        if (match._signature != null)
+                        if (state.Signature != null)
                         {
-                            // All the sub strings matched, just in different character positions.
-                            match._method = MatchMethods.Nearest;
+                            // All the sub strings matched, just in different 
+                            // character positions.
+                            state.Method = MatchMethods.Nearest;
                         }
                         else
                         {
                             // Find the closest signatures and compare them
                             // to the target looking at the smallest character
                             // difference.
-                            _closest.EvaluateSignatures(match, closestSignatures.Select(i =>
-                                match.DataSet.Signatures[match.DataSet.RankedSignatureIndexes[i].Value]));
-                            match._method = MatchMethods.Closest;
+                            _closest.EvaluateSignatures(state, closestSignatures);
+                            state.Method = MatchMethods.Closest;
                         }
                     }
                 }
 
                 // If there still isn't a signature then set the default.
-                if (match._profiles == null &&
-                    match._signature == null)
-                    MatchDefault(match);
+                if (state.Signature == null)
+                {
+                    MatchDefault(state);
+                }
             }
         }
-                        
+
+        /// <summary>
+        /// If the nodes of the match correspond exactly to a signature then
+        /// return the index of the signature found. Otherwise -1.
+        /// </summary>
+        /// <returns></returns>
+        private static int GetExactSignatureIndex(MatchState state)
+        {
+            int iterations;
+            int index = state.DataSet.SignatureSearch.BinarySearch(
+                state.Nodes, out iterations);
+            state.SignaturesRead += iterations;
+            return index;
+        }
+
+        /// <summary>
+        /// Returns an enumeration of the closest signatures which most closely 
+        /// match the target User-Agent string. Where a single signature
+        /// is not present across all the nodes the signatures which match
+        /// the most nodes from the target User-Agent string are returned.
+        /// </summary>
+        /// <returns>An enumeration of the closest signatures</returns>
+        private static IList<int> GetClosestSignatures(MatchState state)
+        {
+            IList<int> result;
+            if (state.Nodes.Count == 1)
+            {
+                // Return the single nodes list of ranked signature indexes.
+                result = state.Nodes[0].RankedSignatureIndexes;
+            }
+            else
+            {
+                // There are multiple lists so filter them to return the most
+                // frequently occuring ranked signature indexes.
+                result = new MostFrequentFilter(state);
+            }
+            state.ClosestSignatures = result.Count;
+            return result;
+        }
+                
         #endregion
 
         #region Step 1 - Initial Match Methods
@@ -500,29 +746,29 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Evaluates the match at the current character position until there
         /// are no more characters left to evaluate.
         /// </summary>
-        /// <param name="match">Information about the detection</param>
-        private static void Evaluate(Match match)
+        /// <param name="state">Information about the detection</param>
+        private static void Evaluate(MatchState state)
         {
-            while (match.NextCharacterPositionIndex >= 0)
+            while (state.NextCharacterPositionIndex >= 0)
             {
-                match._rootNodesEvaluated++;
-                var node = match.DataSet.RootNodes[match.NextCharacterPositionIndex].GetCompleteNode(match);
+                state.RootNodesEvaluated++;
+                var node = state.DataSet.RootNodes[state.NextCharacterPositionIndex].GetCompleteNode(state);
                 if (node != null)
                 {
                     // Insert this node into the list for the match. It will always
                     // have a lower index than it's predecessors.
-                    match.Nodes.Insert(
+                    state.Nodes.Insert(
                         0,
                         node);
 
                     // Check from the next root node that can be positioned to 
                     // the left of this one.
-                    match.NextCharacterPositionIndex = node.NextCharacterPosition;
+                    state.NextCharacterPositionIndex = node.NextCharacterPosition;
                 }
                 else
                     // No nodees matched at the character position, move to the next 
                     // root node to the left.
-                    match.NextCharacterPositionIndex--;
+                    state.NextCharacterPositionIndex--;
             }
         }
         
@@ -531,42 +777,44 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Step 2 - Numeric Match Methods
 
         /// <summary>
-        /// Evaluate the target user agent again, but this time
+        /// Evaluate the target User-Agent again, but this time
         /// </summary>
-        /// <param name="match"></param>
-        private static void EvaluateNumeric(Match match)
+        /// <param name="state"></param>
+        private static void EvaluateNumeric(MatchState state)
         {
-            match.ResetNextCharacterPositionIndex();
-            var existingNodeIndex = match.Nodes.Count - 1;
-            while (match.NextCharacterPositionIndex > 0)
+            state.ResetNextCharacterPositionIndex();
+            var existingNodeIndex = state.Nodes.Count - 1;
+            while (state.NextCharacterPositionIndex > 0)
             {
-                if (existingNodeIndex < 0 || 
-                    match.Nodes[existingNodeIndex].Root.Position < match.NextCharacterPositionIndex)
+                if (existingNodeIndex < 0 ||
+                    state.Nodes[existingNodeIndex].Root.Position < state.NextCharacterPositionIndex)
                 {
-                    match._rootNodesEvaluated++;
-                    var node = match.DataSet.RootNodes[match.NextCharacterPositionIndex].GetCompleteNumericNode(match);
+                    state.RootNodesEvaluated++;
+                    var node = state.DataSet.RootNodes[state.NextCharacterPositionIndex].GetCompleteNumericNode(state);
                     // If there is a node and it doesn't overlap with an existing one then
                     // add it to the list.
                     if (node != null &&
-                        node.GetIsOverlap(match) == false)
+                        node.GetIsOverlap(state) == false)
                     {
                         // Insert the node and update the existing index so that
                         // it's the node to the left of this one.
-                        existingNodeIndex = match.InsertNode(node) - 1;
+                        existingNodeIndex = state.InsertNode(node) - 1;
 
                         // Move to the position of the node found as 
                         // we can't use the next node incase there's another
                         // not part of the same signatures closer.
-                        match.NextCharacterPositionIndex = node.Position;
+                        state.NextCharacterPositionIndex = node.Position;
                     }
                     else
-                        match.NextCharacterPositionIndex--;
+                    {
+                        state.NextCharacterPositionIndex--;
+                    }
                 }
                 else
                 {
                     // The next position to evaluate should be to the left
                     // of the existing node already in the list.
-                    match.NextCharacterPositionIndex = match.Nodes[existingNodeIndex].Position;
+                    state.NextCharacterPositionIndex = state.Nodes[existingNodeIndex].Position;
 
                     // Swap the existing node for the next one in the list.
                     existingNodeIndex--;
@@ -581,11 +829,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// The detection failed and a default match needs to be returned.
         /// </summary>
-        /// <param name="match">Information about the detection</param>
-        internal static void MatchDefault(Match match)
+        /// <param name="state">Information about the match state</param>
+        internal static void MatchDefault(MatchState state)
         {
-            match._method = MatchMethods.None;
-            match._profiles = match.DataSet.Components.Select(i => i.DefaultProfile).ToArray();
+            state.Method = MatchMethods.None;
+            state.ExplicitProfiles.Clear();
+            state.ExplicitProfiles.AddRange(state.DataSet.Components.Select(i => i.DefaultProfile));
         }
                         
         #endregion

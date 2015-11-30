@@ -85,7 +85,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         /// <summary>
         /// The name of the unique property key used to return the relevent characters
-        /// from the target user agent string.
+        /// from the target User-Agent string.
         /// </summary>
         public const string Nodes = "Nodes";
 
@@ -118,7 +118,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         internal const string EmptyImageResourceName = "FiftyOne.Foundation.Image.E.gif";
 
         /// <summary>
-        /// The number of user agents to cache.
+        /// The number of User-Agents to cache.
         /// </summary>
         internal const int UserAgentCacheSize = 1000;
 
@@ -232,7 +232,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             };
 
         /// <summary>
-        /// The Http header field that contains the user agent.
+        /// The Http header field that contains the User-Agent.
         /// </summary>
         [Obsolete("Replaced with embedded Http Headers in V3.2 data file.")]
         internal const string UserAgentHeader = "User-Agent";

@@ -36,7 +36,7 @@ namespace FiftyOne.Foundation.Mobile.Configuration
     /// to physical paths, or retrieving configuration sections.
     /// </summary>
     /// <remarks>
-    /// This class should not be used in developers code.
+    /// This class should not be called as it is part of the internal logic.
     /// </remarks>
     public static class Support
     {

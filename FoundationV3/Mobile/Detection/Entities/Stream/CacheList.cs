@@ -31,26 +31,28 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 {
     /// <summary>
     /// <para>
-    /// Lists can be stored as a set of related objects entirely within memory, or 
-    /// the relevent objects loaded as required from a file or other permanent store
-    /// as required.
+    /// Lists can be stored as a set of related objects entirely within memory, 
+    /// or as the relevent objects loaded as required from a file or other 
+    /// permanent stor.
     /// </para>
     /// </summary>
     /// <para>
     /// This class provides core functions needed for lists which load objects
-    /// as required. It implements the <see cref="Cache{T}"/> to store frequently requested
-    /// objects and improve memory usage and performance.
+    /// as required. It implements the <see cref="Cache{T}"/> to store 
+    /// frequently requested objects and improve memory usage and performance.
     /// </para>
     /// <remarks>
-    /// Delegate methods are used to create new instances of items to add to the list
-    /// in order to avoid creating many inherited list classes for each 
-    /// <see cref="BaseEntity"/> type.
+    /// Delegate methods are used to create new instances of items to add to 
+    /// the list in order to avoid creating many inherited list classes for 
+    /// each <see cref="BaseEntity"/> type.
     /// </remarks>
     /// <remarks>
     /// Should not be referenced directly.
     /// </remarks>
-    /// <typeparam name="T">The type of <see cref="BaseEntity"/> the list will contain</typeparam>
-    public abstract class CacheList<T> : BaseList<T>, ICacheList where T : BaseEntity
+    /// <typeparam name="T">
+    /// The type of <see cref="BaseEntity"/> the list will contain.
+    /// </typeparam>
+    public abstract class CacheList<T> : BaseList<T>, IDisposable, ICacheList, ICacheLoader<int, T> where T : BaseEntity
     {
         #region Fields
 
@@ -76,9 +78,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <summary>
         /// The number of times the cache has been switched.
         /// </summary>
+        [Obsolete("Replacement LRU cache does not support switching.")]
         long ICacheList.Switches
         {
-            get { return _cache != null ? _cache.Switches : 0; }
+            get { return 0; }
         }
 
         #endregion
@@ -86,20 +89,63 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         #region Constructor
         
         /// <summary>
-        /// Constructs a new instance of <see cref="BaseList{T}"/> ready to read entities from 
-        /// the source.
+        /// Constructs a new instance of <see cref="BaseList{T}"/> ready to 
+        /// read entities from the source.
         /// </summary>
-        /// <param name="dataSet">Dataset being created</param>
-        /// <param name="reader">Reader used to initialise the header only</param>
-        /// <param name="entityFactory">Used to create new instances of the entity</param>
-        /// <param name="cacheSize">Number of items in list to have capacity to cache</param>
+        /// <param name="dataSet">
+        /// <see cref="DataSet"/> being created.
+        /// </param>
+        /// <param name="reader">
+        /// Reader used to initialise the header only.
+        /// </param>
+        /// <param name="entityFactory">
+        /// Used to create new instances of the entity.
+        /// </param>
+        /// <param name="cacheSize">
+        /// Number of items in list to have capacity to cache.
+        /// </param>
         internal CacheList(
             DataSet dataSet, 
             Reader reader,
             BaseEntityFactory<T> entityFactory,
             int cacheSize) : base (dataSet, reader, entityFactory)
         {
-            _cache = new Cache<T>(cacheSize);
+            _cache = new Cache<T>(cacheSize, this);
+        }
+
+        #endregion
+
+        #region Destructor
+
+        /// <summary>
+        /// Disposes of the cache.
+        /// </summary>
+        /// <param name="disposing">
+        /// True if the calling method is Dispose, false for the finaliser.
+        /// </param>
+        protected override void Dispose(bool disposing)
+        {
+            _cache.Dispose();
+            base.Dispose(disposing);
+        }
+
+        #endregion
+
+        #region Interface Methods
+
+        /// <summary>
+        /// Used to retrieve items from the underlying list. Called by
+        /// <see cref="Cache{T}"/> when a cache miss occurs.
+        /// </summary>
+        /// <param name="key">
+        /// Index or offset of the entity required.
+        /// </param>
+        /// <returns>
+        /// Returns the base lists item for the key provideded.
+        /// </returns>
+        T ICacheLoader<int, T>.Fetch(int key)
+        {
+            return base[key];
         }
 
         #endregion
@@ -117,26 +163,20 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <summary>
         /// Retrieves the entity at the offset or index requested.
         /// </summary>
-        /// <param name="key">Index or offset of the entity required</param>
-        /// <returns>A new instance of the entity at the offset or index</returns>
+        /// <param name="key">
+        /// Index or offset of the entity required.
+        /// </param>
+        /// <returns>
+        /// A new instance of the entity at the offset or index.
+        /// </returns>
         public override T this[int key]
         {
             get
             {
-                T item;
-                // No need to lock the dictionaries as they support concurrency.
-                if (_cache._itemsActive.TryGetValue(key, out item) == false)
-                {
-                    item = base[key];
-                    _cache._itemsActive[key] = item;
-                    _cache.Misses++;
-                }
-                _cache.AddRecent(item);
-                _cache.Requests++;
-                return item;
+                return _cache[key];
             }
         }
-       
+
         #endregion
     }
 }

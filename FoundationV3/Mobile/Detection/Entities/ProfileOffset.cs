@@ -53,13 +53,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of <see cref="ProfileOffset"/>
+        /// Constructs a new instance of <see cref="ProfileOffset"/>.
         /// </summary>
         /// <param name="dataSet">
-        /// The data set whose strings list the string is contained within
+        /// The data set whose strings list the string is contained within.
         /// </param>
         /// <param name="offset">
-        /// The offset to the start of the profile within the profiles data structure
+        /// The offset to the start of the profile within the profiles 
+        /// data structure.
         /// </param>
         /// <param name="reader">
         /// Binary reader positioned at the start of the ProfileOffset.

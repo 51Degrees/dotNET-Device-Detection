@@ -386,7 +386,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
 
         /// <summary>
-        /// Uses the user agent of the device, the query string of the request and
+        /// Uses the User-Agent of the device, the query string of the request and
         /// the published data of the detection data set to work out an MD5 hash
         /// for the response which will be used to avoid requests to find the
         /// matching device. This is quicker than hashing the result as it avoids
@@ -522,7 +522,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     if (context.Request.CurrentExecutionFilePath.EndsWith("Empty.gif"))
                     {
                         EventLog.Debug(String.Format(
-                            "Image processor detected request for empty image",
+                            "Image processor detected request for empty image '{0}'",
                             context.Request.CurrentExecutionFilePath));
 
                         Feature.ImageOptimiser.EmptyImageResponse(context);

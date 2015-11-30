@@ -30,30 +30,22 @@ using FiftyOne.Foundation.Mobile.Detection.Readers;
 namespace FiftyOne.Foundation.Mobile.Detection.Entities
 {
     /// <summary>
-    /// Signature of a user agent.
+    /// Signature of a User-Agent.
     /// </summary>
     /// <para>
-    /// A signature contains those characters of a user agent which are relevent for the
-    /// purposes of device detection. For example; most user agents will start with
-    /// "Mozilla" and therefore these characters are of very little use when detecting
-    /// devices. Other characters such as those that represent the model of the hardware
-    /// are very relevent.
+    /// A signature contains those characters of a User-Agent which are 
+    /// relevent for the purposes of device detection. For example; most 
+    /// User-Agents will start with "Mozilla" and therefore these characters 
+    /// are of very little use when detecting devices. Other characters such 
+    /// as those that represent the model of the hardware are very relevent.
     /// </para>
     /// <para>
-    /// A signature contains both an array of relevent characters from user agents identified
-    /// when the data was created and the unique complete node identifies of relevent sub strings
-    /// contained in multiple signatures and user agents. Together this information is used
-    /// at detection time to rapidly identify the signature matching a target user agent.
+    /// Signatures relate to device properties via <see cref="Profile"/> 
+    /// entities. Each signature relates to one profile for each component type.
     /// </para>
     /// <para>
-    /// Signatures relate to device properties via profiles. Each signature relates to one
-    /// profile for each component type.
-    /// </para>
-    /// <para>
-    /// For more information about signature see https://51degrees.com/Support/Documentation/Net
-    /// </para>
-    /// <para>
-    /// For more information see https://51degrees.com/Support/Documentation/Net
+    /// For more information about signature see 
+    /// https://51degrees.com/Support/Documentation/Net
     /// </para>
     public abstract class Signature : BaseEntity, IComparable<Signature>
     {
@@ -126,8 +118,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Public Properties
 
         /// <summary>
-        /// Gets the rank, where a lower number means the signature is more popular, of
-        /// the signature compared to other signatures.
+        /// Gets the rank, where a lower number means the signature is more 
+        /// popular, of the signature compared to other signatures.
         /// </summary>
         public abstract int Rank { get; }
 
@@ -178,8 +170,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Gets the values associated with the property.
         /// </summary>
-        /// <param name="property">The property whose values are required</param>
-        /// <returns>Value(s) associated with the property, or null if the property does not exist</returns>
+        /// <param name="property">
+        /// The property whose values are required.
+        /// </param>
+        /// <returns>
+        /// Value(s) associated with the property, or null if the property 
+        /// does not exist.
+        /// </returns>
         public Values this[Property property]
         {
             get
@@ -203,8 +200,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Gets the values associated with the property name.
         /// </summary>
-        /// <param name="propertyName">Name of the property whose values are required</param>
-        /// <returns>Value(s) associated with the property, or null if the property does not exist</returns>
+        /// <param name="propertyName">
+        /// Name of the property whose values are required.
+        /// </param>
+        /// <returns>
+        /// Value(s) associated with the property, or null if the property 
+        /// does not exist.
+        /// </returns>
         public Values this[string propertyName]
         {
             get
@@ -233,7 +235,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// The unique Device Id for the signature.
         /// </summary>
         /// <para>
-        /// The unique Id is formed by concatentating the profile Ids of the 
+        /// The unique Id is formed by concatentating the profile IDs of the 
         /// profiles associated with it in ascending order of the component Id
         /// the profile relates to.
         /// </para>
@@ -315,16 +317,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Constructors
 
         /// <summary>
-        /// Constructs a new instance of <see cref="Signature"/>
+        /// Constructs a new instance of <see cref="Signature"/>.
         /// </summary>
         /// <param name="dataSet">
-        /// The data set the signature is contained within
+        /// The data set the signature is contained within.
         /// </param>
         /// <param name="index">
-        /// The index in the data structure to the signature
+        /// The index in the data structure to the signature.
         /// </param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
         /// </param>
         internal Signature(
             DataSet dataSet,
@@ -336,13 +339,22 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
 
         /// <summary>
-	    /// Uses the offsets list which must be locked to read in the arrays of nodes 
-	    /// or profiles that relate to the signature.
+	    /// Uses the offsets list which must be locked to read in the arrays 
+        /// of nodes or profiles that relate to the signature.
         /// </summary>
-        /// <param name="dataSet">The data set the signature is contained within</param>
-        /// <param name="reader">Reader connected to the source data structure and positioned to start reading</param>
-        /// <param name="length">The number of offsets to read in</param>
-        /// <returns>An array of the offsets as integers read from the reader</returns>
+        /// <param name="dataSet">
+        /// The data set the signature is contained within.
+        /// </param>
+        /// <param name="reader">
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
+        /// </param>
+        /// <param name="length">
+        /// The number of offsets to read in.
+        /// </param>
+        /// <returns>
+        /// An array of the offsets as integers read from the reader.
+        /// </returns>
 	    internal static int[] ReadOffsets(DataSet dataSet, Reader reader, int length) 
         {
             reader.List.Clear();
@@ -490,7 +502,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// </summary>
         /// <param name="nodes">The nodes to be compared against</param>
         /// <returns>Indication of relative value based on the node offsets</returns>
-        internal int CompareTo(List<Node> nodes)
+        internal int CompareTo(IList<Node> nodes)
         {
             var length = Math.Min(
                 NodeOffsets.Length,
@@ -516,11 +528,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Public Methods
 
         /// <summary>
-        /// Compares this signature to another based on the node offsets. The node
-        /// offsets in both signtures must be in ascending order.
+        /// Compares this signature to another based on the node offsets. 
+        /// The node offsets in both signtures must be in ascending order.
         /// </summary>
-        /// <param name="other">The signature to be compared against</param>
-        /// <returns>Indication of relative value based based on node offsets</returns>
+        /// <param name="other">
+        /// The signature to be compared against.
+        /// </param>
+        /// <returns>
+        /// Indication of relative value based based on node offsets.
+        /// </returns>
         public int CompareTo(Signature other)
         {
             var length = Math.Min(
@@ -546,7 +562,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// String representation of the signature where irrelevant characters 
         /// are removed.
         /// </summary>
-        /// <returns>The signature as a string</returns>
+        /// <returns>
+        /// The signature as a string.
+        /// </returns>
         public override string ToString()
         {
             if (_stringValue == null)

@@ -20,9 +20,9 @@
  * ********************************************************************* */
 
 using System;
-using System.IO;
 using FiftyOne.Foundation.Mobile.Detection.Entities.Memory;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Entities
 {
@@ -48,6 +48,76 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// </para>
     public class DataSet : IDisposable
     {
+        #region Classes
+
+        /// <summary>
+        /// Used to search for a signature from a list of nodes.
+        /// </summary>
+        internal class SearchSignatureByNodes : SearchBase<Signature, IList<Node>, IReadonlyList<Signature>>
+        {
+            private readonly IReadonlyList<Signature> _signatures;
+
+            internal SearchSignatureByNodes(IReadonlyList<Signature> signatures)
+            {
+                _signatures = signatures;
+            }
+
+            internal int BinarySearch(IList<Node> nodes, out int iterations)
+            {
+                return BinarySearchBase(this._signatures, nodes, out iterations);
+            }
+
+            protected override int GetCount(IReadonlyList<Signature> signatures)
+            {
+                return signatures.Count;
+            }
+
+            protected override Signature GetValue(IReadonlyList<Signature> signatures, int index)
+            {
+                return signatures[index];
+            }
+
+            protected override int CompareTo(Signature signature, IList<Node> nodes)
+            {
+                return signature.CompareTo(nodes);
+            }
+        }
+
+        /// <summary>
+        /// Used to search for a profile offset from a profile id.
+        /// </summary>
+        private class SearchProfileOffsetByProfileId : SearchBase<ProfileOffset, int, IReadonlyList<ProfileOffset>>
+        {
+            private readonly IReadonlyList<ProfileOffset> _profileOffsets;
+
+            internal SearchProfileOffsetByProfileId(IReadonlyList<ProfileOffset> profileOffsets)
+            {
+                _profileOffsets = profileOffsets;
+            }
+
+            internal int BinarySearch(int profileId)
+            {
+                return BinarySearchBase(this._profileOffsets, profileId);
+            }
+
+            protected override int GetCount(IReadonlyList<ProfileOffset> profiles)
+            {
+                return profiles.Count;
+            }
+
+            protected override ProfileOffset GetValue(IReadonlyList<ProfileOffset> profiles, int index)
+            {
+                return _profileOffsets[index];
+            }
+
+            protected override int CompareTo(ProfileOffset profileOffset, int profileId)
+            {
+                return profileOffset.ProfileId.CompareTo(profileId);
+            }
+        }
+
+        #endregion
+
         #region Enumerations
 
         /// <summary>
@@ -177,6 +247,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <remarks>
         /// A value is only returned when operating in Stream mode.
         /// </remarks>
+        [Obsolete("Cache no longer requires switching")]
         public long SignatureCacheSwitches
         {
             get
@@ -191,6 +262,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <remarks>
         /// A value is only returned when operating in Stream mode.
         /// </remarks>
+        [Obsolete("Cache no longer requires switching")]
         public long NodeCacheSwitches
         {
             get
@@ -205,6 +277,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <remarks>
         /// A value is only returned when operating in Stream mode.
         /// </remarks>
+        [Obsolete("Cache no longer requires switching")]
         public long StringsCacheSwitches
         {
             get
@@ -219,6 +292,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <remarks>
         /// A value is only returned when operating in Stream mode.
         /// </remarks>
+        [Obsolete("Cache no longer requires switching")]
         public long ProfilesCacheSwitches
         {
             get
@@ -233,6 +307,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <remarks>
         /// A value is only returned when operating in Stream mode.
         /// </remarks>
+        [Obsolete("Cache no longer requires switching")]
         public long ValuesCacheSwitches
         {
             get
@@ -247,6 +322,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <remarks>
         /// A value is only returned when operating in Stream mode.
         /// </remarks>
+        [Obsolete("Cache no longer requires switching")]
         public long RankedSignatureCacheSwitches
         {
             get
@@ -314,7 +390,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         public DateTime NextUpdate { get; internal set; }
 
         /// <summary>
-        /// The minimum number times a user agent should have been seen before
+        /// The minimum number times a User-Agent should have been seen before
         /// it was included in the dataset.
         /// </summary>
         public int MinUserAgentCount { get; internal set; }
@@ -330,12 +406,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         public BinaryConstants.FormatVersions VersionEnum { get; internal set; }
 
         /// <summary>
-        /// The maximum length of a user agent string.
+        /// The maximum length of a User-Agent string.
         /// </summary>
         public short MaxUserAgentLength { get; internal set; }
 
         /// <summary>
-        /// The minimum length of a user agent string.
+        /// The minimum length of a User-Agent string.
         /// </summary>
         public short MinUserAgentLength { get; internal set; }
         
@@ -356,7 +432,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
 
         /// <summary>
         /// The maximum number of signatures that can be checked. Needed to avoid
-        /// bogus user agents which deliberately require so many signatures to be 
+        /// bogus User-Agents which deliberately require so many signatures to be 
         /// checked that performance is degraded.
         /// </summary>
         public int MaxSignatures { get; internal set; }
@@ -711,7 +787,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         internal IReadonlyList<Node> Nodes;
 
         /// <summary>
-        /// Nodes for each of the possible character positions in the user agent.
+        /// Nodes for each of the possible character positions in the User-Agent.
         /// </summary>
         internal IReadonlyList<Node> RootNodes;
 
@@ -719,6 +795,56 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// A list of ASCII byte arrays for strings used by the dataset.
         /// </summary>
         internal IReadonlyList<AsciiString> Strings;
+
+        #endregion
+
+        #region Internal Properties
+
+        /// <summary>
+        /// An instance of the signature sarch.
+        /// </summary>
+        internal DataSet.SearchSignatureByNodes SignatureSearch
+        {
+            get
+            {
+                if (_signatureSearch == null)
+                {
+                    lock (this)
+                    {
+                        if (_signatureSearch == null)
+                        {
+                            _signatureSearch = new 
+                                DataSet.SearchSignatureByNodes(this.Signatures);
+                        }
+                    }
+                }
+                return _signatureSearch;
+            }
+        }
+        private SearchSignatureByNodes _signatureSearch;
+        
+        /// <summary>
+        /// An instance of the profile offset search.
+        /// </summary>
+        private DataSet.SearchProfileOffsetByProfileId ProfileOffsetSearch
+        {
+            get
+            {
+                if (_profileOffsetSearch == null)
+                {
+                    lock (this)
+                    {
+                        if (_profileOffsetSearch == null)
+                        {
+                            _profileOffsetSearch = new 
+                                SearchProfileOffsetByProfileId(ProfileOffsets);
+                        }
+                    }
+                }
+                return _profileOffsetSearch;
+            }
+        }
+        private SearchProfileOffsetByProfileId _profileOffsetSearch;
 
         #endregion
 
@@ -794,6 +920,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// </summary>
         /// <param name="list"></param>
         /// <returns></returns>
+        [Obsolete("Cache no longer requires switching")]
         private static long Switches(object list)
         {
             if (list is Stream.ICacheList)
@@ -807,17 +934,79 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
 
         #endregion
-        
-        #region Public Methods
+
+        #region Destructor
 
         /// <summary>
         /// Disposes of all the lists that form the dataset.
         /// </summary>
-        public virtual void Dispose()
+        ~DataSet()
         {
-            _disposed = true;
+            Dispose(false);
         }
-        
+
+        /// <summary>
+        /// Disposes of all the lists that form the dataset.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        /// <summary>
+        /// Disposes of the readonly lists used by the dataset.
+        /// </summary>
+        /// <param name="disposing">True if the calling method is Dispose, false for the finaliser.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (Values != null)
+            {
+                Values.Dispose();
+            }
+            if (Signatures != null)
+            {
+                Signatures.Dispose();
+            }
+            if (ProfileOffsets != null)
+            {
+                ProfileOffsets.Dispose();
+            }
+            if (Profiles != null)
+            {
+                Profiles.Dispose();
+            }
+            if (Nodes != null)
+            {
+                Nodes.Dispose();
+            }
+            if (RootNodes != null)
+            {
+                RootNodes.Dispose();
+            }
+            if (Strings != null)
+            {
+                Strings.Dispose();
+            }
+            if (RankedSignatureIndexes != null)
+            {
+                RankedSignatureIndexes.Dispose();
+            }
+            if (NodeRankedSignatureIndexes != null)
+            {
+                NodeRankedSignatureIndexes.Dispose();
+            }
+            if (SignatureNodeOffsets != null)
+            {
+                SignatureNodeOffsets.Dispose();
+            }
+            _disposed = true;
+            GC.SuppressFinalize(this);
+        }
+
+        #endregion
+
+        #region Public Methods
+
         /// <summary>
         /// Searches the list of profile Ids and returns the profile if the profile 
         /// id is valid.
@@ -826,22 +1015,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <returns>Profile related to the id, or null if none found</returns>
         public Profile FindProfile(int profileId)
         {
-            var lower = 0;
-            var upper = ProfileOffsets.Count - 1;
-
-            while (lower <= upper)
-            {
-                var middle = lower + (upper - lower) / 2;
-                var comparisonResult = ProfileOffsets[middle].ProfileId.CompareTo(profileId);
-                if (comparisonResult == 0)
-                    return Profiles[ProfileOffsets[middle].Offset];
-                else if (comparisonResult > 0)
-                    upper = middle - 1;
-                else
-                    lower = middle + 1;
-            }
-
-            return null;
+            int index = ProfileOffsetSearch.BinarySearch(profileId);
+            return index < 0 ? null : Profiles[ProfileOffsets[index].Offset];
         }
 
         /// <summary>

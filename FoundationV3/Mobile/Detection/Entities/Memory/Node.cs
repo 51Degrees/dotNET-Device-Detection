@@ -35,16 +35,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         #region Constructors
 
         /// <summary>
-        /// Constructs a new instance of <see cref="Node"/>
+        /// Constructs a new instance of <see cref="Node"/>.
         /// </summary>
         /// <param name="dataSet">
-        /// The data set the node is contained within
+        /// The data set the node is contained within.
         /// </param>
         /// <param name="offset">
-        /// The offset in the data structure to the node
+        /// The offset in the data structure to the node.
         /// </param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
         /// </param>
         internal Node(
             DataSet dataSet,
@@ -52,7 +53,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
             BinaryReader reader)
             : base(dataSet, offset, reader)
         {
-            _numericChildren = ReadNodeNumericIndexes(dataSet, reader, _numericChildrenCount);
         }
 
         #endregion  
@@ -66,7 +66,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         {
             get { return _numericChildren; }
         }
-        private NodeNumericIndex[] _numericChildren;
+        protected NodeNumericIndex[] _numericChildren;
 
         #endregion
     }

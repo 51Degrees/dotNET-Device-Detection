@@ -31,20 +31,22 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 {
     /// <summary>
     /// <para>
-    /// Lists can be stored as a set of related objects entirely within memory, or 
-    /// the relevent objects loaded as required from a file or other permanent store
-    /// as required.
+    /// Lists can be stored as a set of related objects entirely within memory, 
+    /// or the relevent objects loaded as required from a file or other 
+    /// permanent store.
     /// </para>
     /// </summary>
     /// <remarks>
-    /// Delegate methods are used to create new instances of items to add to the list
-    /// in order to avoid creating many inherited list classes for each 
-    /// <see cref="BaseEntity"/> type.
+    /// Delegate methods are used to create new instances of items to add to 
+    /// the list in order to avoid creating many inherited list classes for 
+    /// each <see cref="BaseEntity"/> type.
     /// </remarks>
     /// <remarks>
     /// Should not be referenced directly.
     /// </remarks>
-    /// <typeparam name="T">The type of <see cref="BaseEntity"/> the list will contain</typeparam>
+    /// <typeparam name="T">
+    /// The type of <see cref="BaseEntity"/> the list will contain.
+    /// </typeparam>
     public abstract class BaseList<T> where T : BaseEntity
     {
         #region Fields
@@ -81,16 +83,21 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         #region Abstract Methods
 
         /// <summary>
-        /// Used to create a new entity of type T when an item is required from the list.
+        /// Used to create a new entity of type T when an item is required 
+        /// from the list.
         /// </summary>
         /// <param name="key">
-        /// The offset position in the data structure to the entity to be returned from the list,
-        /// or the index of the entity to be returned from the list.
+        /// The offset position in the data structure to the entity to be 
+        /// returned from the list, or the index of the entity to be returned 
+        /// from the list.
         /// </param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
         /// </param>
-        /// <returns>A new instance of type T</returns>
+        /// <returns>
+        /// A new instance of type T.
+        /// </returns>
         internal abstract T CreateEntity(int key, Reader reader);
 
         #endregion
@@ -98,12 +105,18 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         #region Constructor
         
         /// <summary>
-        /// Constructs a new instance of <see cref="BaseList{T}"/> ready to read entities from 
-        /// the source.
+        /// Constructs a new instance of <see cref="BaseList{T}"/> ready to 
+        /// read entities from the source.
         /// </summary>
-        /// <param name="dataSet">Dataset being created</param>
-        /// <param name="reader">Reader used to initialise the header only</param>
-        /// <param name="entityFactory">Used to create new instances of the entity</param>
+        /// <param name="dataSet">
+        /// Dataset being created.
+        /// </param>
+        /// <param name="reader">
+        /// Reader used to initialise the header only.
+        /// </param>
+        /// <param name="entityFactory">
+        /// Used to create new instances of the entity.
+        /// </param>
         internal BaseList(
             DataSet dataSet, 
             Reader reader,
@@ -116,13 +129,48 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 
         #endregion
 
+        #region Destructor
+
+        /// <summary>
+        /// Ensures any resources used by the list are disposed.
+        /// </summary>
+        ~BaseList()
+        {
+            Dispose(false);
+        }
+
+        /// <summary>
+        /// Disposes of any resources used by the list.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        /// <summary>
+        /// Disposes of any resources used by the list.
+        /// </summary>
+        /// <param name="disposing">
+        /// True if the calling method is Dispose, false for the finaliser.
+        /// </param>
+        protected virtual void Dispose(bool disposing)
+        {
+            GC.SuppressFinalize(this);
+        }
+
+        #endregion
+
         #region Public Methods
 
         /// <summary>
         /// Retrieves the entity at the offset or index requested.
         /// </summary>
-        /// <param name="key">Index or offset of the entity required</param>
-        /// <returns>A new instance of the entity at the offset or index</returns>
+        /// <param name="key">
+        /// Index or offset of the entity required.
+        /// </param>
+        /// <returns>
+        /// A new instance of the entity at the offset or index.
+        /// </returns>
         public virtual T this[int key]
         {
             get

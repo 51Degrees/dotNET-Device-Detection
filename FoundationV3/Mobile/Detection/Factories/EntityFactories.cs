@@ -32,10 +32,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// Creates a new instance of <see cref="BaseEntity"/>
         /// </summary>
         /// <param name="dataSet">
-        /// The data set whose entity list the index or offset is contained within
+        /// The data set whose entity list the index or offset is contained
+        /// within
         /// </param>
         /// <param name="index">
-        /// The index of offset to the start of the entity within the data structure
+        /// The index of offset to the start of the entity within the data
+        /// structure
         /// </param>
         /// <param name="reader">
         /// Binary reader positioned at the start of the entity
@@ -58,7 +60,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         }
 
         /// <summary>
-        /// Returns the length of the entity type as stored in the data structure.
+        /// Returns the length of the entity type as stored in the data
+        /// structure.
         /// </summary>
         /// <remarks>
         /// The method is implement on entities which are part of fixed 
@@ -107,7 +110,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// Creates a new instance of <see cref="ProfileOffset"/>
         /// </summary>
         /// <param name="dataSet">
-        /// The data set whose profile offset list the offset is contained within
+        /// The data set whose profile offset list the offset is contained 
+        /// ithin
         /// </param>
         /// <param name="index">
         /// The index to the start of the profile within the data structure
@@ -140,7 +144,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// The data set whose strings list the string is contained within
         /// </param>
         /// <param name="offset">
-        /// The offset to the start of the string within the string data structure
+        /// The offset to the start of the string within the string data
+        /// structure
         /// </param>
         /// <param name="reader">
         /// Binary reader positioned at the start of the AsciiString
@@ -152,10 +157,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         }
 
         /// <summary>
-        /// Returns the length of the <see cref="AsciiString"/> entity including
+        /// Returns the length of the
+        /// <see cref="AsciiString"/> entity including
         /// the null terminator and length indicator.
         /// </summary>
-        /// <param name="entity">Entity of type <see cref="AsciiString"/></param>
+        /// <param name="entity">Entity of type
+        /// <see cref="AsciiString"/></param>
         /// <returns>Length in bytes of the AsciiString</returns>
         internal override int GetLength(AsciiString entity)
         {
@@ -169,11 +176,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// Creates a new instance of <see cref="ComponentV31"/>
         /// </summary>
         /// <param name="dataSet">
-        /// The data set whose components list the component is contained within
+        /// The data set whose components list the component is contained
+        /// within
         /// </param>
         /// <param name="index">Index of the entity within the list</param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to
+        /// start reading
         /// </param>
         /// <returns>A new instance of an <see cref="ComponentV31"/></returns>
         internal override Component Create(DataSet dataSet, int index, Reader reader)
@@ -188,13 +197,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// Creates a new instance of <see cref="ComponentFactoryV32"/>
         /// </summary>
         /// <param name="dataSet">
-        /// The data set whose components list the component is contained within
+        /// The data set whose components list the component is contained
+        /// within
         /// </param>
         /// <param name="index">Index of the entity within the list</param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to
+        /// start reading
         /// </param>
-        /// <returns>A new instance of an <see cref="ComponentFactoryV32"/></returns>
+        /// <returns>A new instance of an
+        /// <see cref="ComponentFactoryV32"/></returns>
         internal override Component Create(DataSet dataSet, int index, Reader reader)
         {
             return new ComponentV32(dataSet, index, reader);
@@ -223,7 +235,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// </param>
         /// <param name="index">Index of the entity within the list</param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to
+        /// start reading
         /// </param>
         /// <returns>A new instance of an <see cref="Map"/></returns>
         internal override Map Create(DataSet dataSet, int index, Reader reader)
@@ -374,7 +387,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// The data set whose node list the node is contained within
         /// </param>
         /// <param name="offset">
-        /// The offset to the start of the node within the string data structure
+        /// The offset to the start of the node within the string data
+        /// structure
         /// </param>
         /// <param name="reader">
         /// Binary reader positioned at the start of the Node
@@ -401,7 +415,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// <param name="reader">
         /// Binary reader positioned at the start of the integer offset
         /// </param>
-        /// <returns>An instance of <see cref="Node"/> which is a root node</returns>
+        /// <returns>An instance of <see cref="Node"/> which is a root node
+        /// </returns>
         internal override Node Create(DataSet dataSet, int index, Reader reader)
         {
             return dataSet.Nodes[reader.ReadInt32()];
@@ -437,7 +452,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// The data set whose profile list the profile is contained within
         /// </param>
         /// <param name="offset">
-        /// The offset to the start of the profile within the profile data structure
+        /// The offset to the start of the profile within the profile data
+        /// structure
         /// </param>
         /// <param name="reader">
         /// Binary reader positioned at the start of the Profile
@@ -497,7 +513,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// The data set whose properties list the property is contained within
         /// </param>
         /// <param name="offset">
-        /// The offset to the start of the property within the string data structure
+        /// The offset to the start of the property within the string data
+        /// structure
         /// </param>
         /// <param name="reader">
         /// Binary reader positioned at the start of the Property

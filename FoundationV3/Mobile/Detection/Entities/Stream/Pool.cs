@@ -28,24 +28,24 @@ using System.Threading;
 namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 {
     /// <summary>
-    /// As multiple threads need to read from the <see cref="SourceBase"/> concurrently
-    /// this class provides a mechanisim for readers to be recycled across threads
-    /// and requests.
+    /// As multiple threads need to read from the <see cref="SourceBase"/> 
+    /// concurrently this class provides a mechanisim for readers to be 
+    /// recycled across threads and requests.
     /// </summary>
     /// <para>
-    /// Used by the <see cref="BaseList{T}"/> to provide multiple readers for the
-    /// list.
+    /// Used by the <see cref="BaseList{T}"/> to provide multiple readers for 
+    /// the list.
     /// </para>
     /// <remarks>
     /// The <see cref="DataSet"/> must be disposed of to ensure the readers
     /// in the pool are closed.
     /// </remarks>
-    internal class Pool : IDisposable
+    internal class Pool
     {
         #region Fields
         
         /// <summary>
-        /// List of readers available to be used.
+        /// List of readers available for use.
         /// </summary>
         private readonly Queue<Reader> _readers = new Queue<Reader>();
 
@@ -73,10 +73,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// </summary>
         internal int ReadersQueued
         {
-            get
-            {
-                return _readers.Count;
-            }
+            get { return _readers.Count; }
         }
 
         #endregion
@@ -84,9 +81,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         #region Constructor
 
         /// <summary>
-        /// Constructs a new pool of readers for <see cref="SourceBase"/> provided.
+        /// Constructs a new pool of readers for <see cref="SourceBase"/> 
+        /// provided.
         /// </summary>
-        /// <param name="source">The data source for the list</param>
+        /// <param name="source">
+        /// The data source for the list.
+        /// </param>
         internal Pool(SourceBase source)
         {
             Source = source;
@@ -101,7 +101,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// Release method must be called to return the reader to 
         /// the pool when finished.
         /// </summary>
-        /// <returns>Reader open and ready to read from the temp file</returns>
+        /// <returns>
+        /// Reader open and ready to read from the temp file.
+        /// </returns>
         internal Reader GetReader()
         {
             lock(_readers)
@@ -119,7 +121,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// Returns the reader to the pool to be used by another
         /// process later.
         /// </summary>
-        /// <param name="reader">Reader open and ready to read from the temp file</param>
+        /// <param name="reader">
+        /// Reader open and ready to read from the temp file.
+        /// </param>
         internal void Release(Reader reader)
         {
             lock (_readers)
@@ -127,17 +131,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
                 _readers.Enqueue(reader);
             }
         }
-
-        /// <summary>
-        /// Disposes of the source ensuring all the readers
-        /// are also closed.
-        /// </summary>
-        public void Dispose()
-        {
-            _readers.Clear();
-            Source.Dispose();
-        }
-
+        
         #endregion
     }
 }
