@@ -35,15 +35,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         #region Constructors
 
         /// <summary>
-        /// Constructs a new instance of the <see cref="Profile"/>
+        /// Constructs a new instance of the <see cref="Profile"/>.
         /// </summary>
         /// <param name="dataSet">
-        /// The data set whose profile list the profile will be contained within
+        /// The data set whose profile list the profile will be contained within.
         /// </param>
         /// <param name="offset">
-        /// The offset position in the data structure to the profile</param>
+        /// The offset position in the data structure to the profile.
+        /// </param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
         /// </param>
         internal Profile(
             DataSet dataSet,

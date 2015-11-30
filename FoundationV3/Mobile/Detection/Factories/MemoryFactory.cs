@@ -30,26 +30,44 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
 {
     /// <summary>
     /// Factory class used to create a <see cref="DataSet"/> from a source data
-    /// structure. All the entities are held in memory and the source data structure not
-    /// referenced once the data set is created.
-    /// </summary>
+    /// structure. All the entities are held in memory and the source data 
+    /// structure not referenced once the data set is created.
     /// <para>
-    /// The memory usage of the resulting data set following initialisation will be consistent. 
-    /// The performance of the data set will be very fast compared to the stream based
-    /// implementation as all required data is loaded into memory and references between
-    /// related objects set at initialisation. However overall memory usage will be higher
+    /// The memory usage of the resulting data set following initialisation
+    /// will be consistent. The performance of the data set will be very fast
+    /// compared to the stream based implementation as all required data is
+    /// loaded into memory and references between related objects set at 
+    /// initialisation. However overall memory usage will be higher
     /// than the stream based implementation on lightly loaded environments.
     /// </para>
-    /// <remarks>
-    /// Initialisation may take several seconds depending on system performance. Initialisation
-    /// calculates all the references between entities. If initialisation is not performed
-    /// then references will be calculated when needed. As such avoiding initialisation
-    /// improves the time taken to create the data set, at the expense of performance for
-    /// the initial detections. The default setting is to initialise the data set.
-    /// </remarks>
+    /// <para>
+    /// Create a fully initialised <see cref="DataSet"/>:
+    /// <code>
+    /// DataSet dataSet = MemoryFactory.Create("path_to_file", true);
+    /// </code>
+    /// The resulting data set can then be used to work with data or used in a
+    /// <see cref="FiftyOne.Foundation.Mobile.Detection.Provider"/>
+    /// to perform device detections. Use in provider like:
+    /// <code>Provider p = new Provider(dataSet);</code>
+    /// </para>
+    /// <para>
+    /// This is a factory that creates a memory resident version of the 51Degrees 
+    /// device data in the form of a
+    /// <see cref="DataSet"/> object.
+    /// </para>
     /// <para>
     /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
+    /// </summary>
+    /// <remarks>
+    /// Initialisation may take several seconds depending on system performance.
+    /// Initialisation calculates all the references between entities. If
+    /// initialisation is not performed then references will be calculated
+    /// when needed. As such avoiding initialisation
+    /// improves the time taken to create the data set, at the expense of 
+    /// performance for the initial detections. The default setting is to
+    /// initialise the data set.
+    /// </remarks>
     public static class MemoryFactory
     {
         #region Public Create Methods
@@ -68,8 +86,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// Creates a new <see cref="DataSet"/> from the byte array.
         /// </summary>
         /// <param name="array">Array of bytes to build the data set from</param>
-        /// <param name="init">True to indicate that the data set should be fulling initialised</param>
-        /// <returns>A <see cref="DataSet"/> filled with data from the array</returns>
+        /// <param name="init">True to indicate that the data set should be fulling
+        /// initialised</param>
+        /// <returns>A <see cref="DataSet"/> filled with data from the array
+        /// </returns>
         public static DataSet Create(byte[] array, bool init)
         {
             DataSet dataSet = new DataSet(DateTime.MinValue, DataSet.Modes.Memory);
@@ -81,13 +101,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         }
         
         /// <summary>
-        /// Creates a new <see cref="DataSet"/> from the file provided. The last modified
-        /// date of the data set is the last write time of the data file provided.
+        /// Creates a new <see cref="DataSet"/> from the file provided. The
+        /// last modified date of the data set is the last write time of the
+        /// data file provided.
         /// </summary>
         /// <param name="filePath">
         /// Uncompressed file containing the data for the data set
         /// </param>
-        /// <returns>A <see cref="DataSet"/> filled with data from the array</returns>
+        /// <returns>A <see cref="DataSet"/> filled with data from the array
+        /// </returns>
         public static DataSet Create(string filePath)
         {
             return Create(filePath, false, File.GetLastWriteTimeUtc(filePath));
@@ -100,9 +122,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// Uncompressed file containing the data for the data set
         /// </param>
         /// <param name="init">
-        /// True to indicate that the data set should be fulling initialised
+        /// True to indicate that the data set should be fully initialised
         /// </param>
-        /// <returns>A <see cref="DataSet"/> filled with data from the array</returns>
+        /// <returns>A <see cref="DataSet"/> filled with data from the array
+        /// </returns>
         public static DataSet Create(string filePath, bool init)
         {
             return Create(filePath, init, File.GetLastWriteTimeUtc(filePath));
@@ -115,10 +138,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// Uncompressed file containing the data for the data set
         /// </param>
         /// <param name="init">
-        /// True to indicate that the data set should be fulling initialised
+        /// True to indicate that the data set should be fully initialised
         /// </param>
-        /// <param name="lastModified">Date and time the source data was last modified.</param>
-        /// <returns>A <see cref="DataSet"/> filled with data from the array</returns>
+        /// <param name="lastModified">Date and time the source data was last 
+        /// modified.</param>
+        /// <returns>A <see cref="DataSet"/> filled with data from the array
+        /// </returns>
         public static DataSet Create(string filePath, bool init, DateTime lastModified)
         {
             DataSet dataSet = new DataSet(lastModified, DataSet.Modes.Memory);

@@ -116,8 +116,12 @@ namespace FiftyOne.Foundation.UI
         }
 
         /// <summary>
-        /// Returns true if the device is one that should be considered unknown.
+        /// Returns true if the <see cref="Device"/> is one that should be
+        /// considered unknown.
         /// </summary>
+        /// <returns>
+        /// True if the <see cref="Device"/> should be considered
+        /// unknown</returns>
         [Obsolete("Device is deprecated. All data access should use DataSet.")]
         public bool IsUnknown
         {
@@ -130,9 +134,12 @@ namespace FiftyOne.Foundation.UI
         }
 
         /// <summary>
-        /// Returns the caption for the device including only the software and browser 
+        /// Returns the caption for the <see cref="Device"/> including only
+        /// the software and browser 
         /// details.
         /// </summary>
+        /// <returns>
+        /// The software and browser caption.</returns>
         [Obsolete("Device is deprecated. All data access should use DataSet.")]
         public string SoftwareBrowserCaption
         {
@@ -145,8 +152,10 @@ namespace FiftyOne.Foundation.UI
         }
 
         /// <summary>
-        /// Returns the full caption of the device.
+        /// Returns the full caption of the <see cref="Device"/>.
         /// </summary>
+        /// <returns>
+        /// The full caption of the <see cref="Device"/></returns>
         [Obsolete("Device is deprecated. All data access should use DataSet.")]
         public string Caption
         {
@@ -160,8 +169,10 @@ namespace FiftyOne.Foundation.UI
         }
 
         /// <summary>
-        /// Returns the hardware caption for the device.
+        /// Returns the hardware caption for the <see cref="Device"/>.
         /// </summary>
+        /// <returns>
+        /// The hardware caption.</returns>
         [Obsolete("Device is deprecated. All data access should use DataSet.")]
         public string HardwareCaption
         {
@@ -172,8 +183,10 @@ namespace FiftyOne.Foundation.UI
         }
 
         /// <summary>
-        /// Returns the software caption for the device.
+        /// Returns the software caption for the <see cref="Device"/>.
         /// </summary>
+        /// <returns>
+        /// The software caption.</returns>
         [Obsolete("Device is deprecated. All data access should use DataSet.")]
         public string SoftwareCaption
         {
@@ -184,8 +197,10 @@ namespace FiftyOne.Foundation.UI
         }
 
         /// <summary>
-        /// Returns the browser caption for the device.
+        /// Returns the browser caption for the <see cref="Device"/>.
         /// </summary>
+        /// <return>
+        /// The browser caption.</return>
         [Obsolete("Device is deprecated. All data access should use DataSet.")]
         public string BrowserCaption
         {
@@ -196,8 +211,11 @@ namespace FiftyOne.Foundation.UI
         }
 
         /// <summary>
-        /// Returns the seperate profile IDs for the device.
+        /// Returns the seperate profile IDs for the <see cref="Device"/>.
         /// </summary>
+        /// <returns>
+        /// The separate profile ids for the
+        /// <see cref="Device"/>.</returns>
         [Obsolete("Device is deprecated. All data access should use DataSet.")]
         public string[] ProfileIDs
         {
@@ -219,8 +237,10 @@ namespace FiftyOne.Foundation.UI
         }
 
         /// <summary>
-        /// Returns the signature as a string related to the device.
+        /// Returns the signature as a string related to the <see cref="Device"/>.
         /// </summary>
+        /// <returns>
+        /// The signature as a string.</returns>
         [Obsolete("Device is deprecated. All data access should use DataSet.")]
         public string UserAgent
         {
@@ -230,6 +250,8 @@ namespace FiftyOne.Foundation.UI
         /// <summary>
         /// Returns the device ID.
         /// </summary>
+        /// <returns>
+        /// The device id.</returns>
         [Obsolete("Device is deprecated. All data access should use DataSet.")]
         public string DeviceID
         {
@@ -239,6 +261,8 @@ namespace FiftyOne.Foundation.UI
         /// <summary>
         /// Returns the hardware vendor.
         /// </summary>
+        /// <returns>
+        /// The hardware vendor.</returns>
         [Obsolete("Device is deprecated. All data access should use DataSet.")]
         public string HardwareVendor
         {
@@ -255,6 +279,8 @@ namespace FiftyOne.Foundation.UI
         /// <summary>
         /// Returns the hardware model.
         /// </summary>
+        /// <returns>
+        /// The hardware model.</returns>
         [Obsolete("Device is deprecated. All data access should use DataSet.")]
         public string HardwareModel
         {
@@ -271,6 +297,8 @@ namespace FiftyOne.Foundation.UI
         /// <summary>
         /// Returns the hardware name.
         /// </summary>
+        /// <returns>
+        /// The hardware name.</returns>
         [Obsolete("Device is deprecated. All data access should use DataSet.")]
         public string HardwareName
         {
@@ -282,6 +310,8 @@ namespace FiftyOne.Foundation.UI
         /// <summary>
         /// Returns the content suitable for the search system.
         /// </summary>
+        /// <returns>
+        /// The content suitable for the search system.</returns>
         [Obsolete("Device is deprecated. All data access should use DataSet.")]
         public string Content
         {

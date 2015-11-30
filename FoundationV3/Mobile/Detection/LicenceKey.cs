@@ -134,7 +134,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Adds a licence key to the list of available licence keys at runtime.
         /// This method can be used by 3rd party assemblies to set licence keys.
         /// </summary>
-        /// <param name="key"></param>
+        /// <param name="key">Valid licence key</param>
         public static void AddKey(string key)
         {
             if (IsKeyFormatValid(key) &&
@@ -216,7 +216,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 EventLog.Info(String.Format(
                     "Activated binary data file '{0}' with new version " +
                     "dated the '{1:d}'.",
-                    AutoUpdate.BinaryFile.FullName,
+                    AutoUpdate.MasterBinaryDataFile.FullName,
                     dataSet.Published));
             }
             catch (Exception ex)

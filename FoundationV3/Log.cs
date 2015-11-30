@@ -142,29 +142,28 @@ namespace FiftyOne
         {
             while (IsQueueEmpty() == false)
             {
-                FileStream stream = null;
                 try
                 {
                     if (String.IsNullOrEmpty(LogFile) == false)
                     {
-                        stream = File.Open(LogFile, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
-                        StreamWriter writer = null;
                         try
                         {
-                            writer = new StreamWriter(stream);
-                            while (IsQueueEmpty() == false)
+                            using (var writer = new StreamWriter(
+                                File.Open(LogFile, FileMode.Append, FileAccess.Write, FileShare.ReadWrite)))
                             {
-                                lock (_syncQueue)
+                                while (IsQueueEmpty() == false)
                                 {
-                                    string message = _queue.Peek();
-                                    if (message != null)
+                                    lock (_syncQueue)
                                     {
-                                        writer.WriteLine(message);
-                                        _queue.Dequeue();
+                                        string message = _queue.Peek();
+                                        if (message != null)
+                                        {
+                                            writer.WriteLine(message);
+                                            _queue.Dequeue();
+                                        }
                                     }
                                 }
                             }
-                            writer.Flush();
                         }
                         catch
                         {
@@ -172,14 +171,6 @@ namespace FiftyOne
                             // arrives to resume writing.
                             _running = false;
                             return;
-                        }
-                        finally
-                        {
-                            if (writer != null)
-                            {
-                                writer.Close();
-
-                            }
                         }
                     }
                 }
@@ -189,14 +180,6 @@ namespace FiftyOne
                     // arrives to resume writing.
                     _running = false;
                     return;
-                }
-                finally
-                {
-                    if (stream != null)
-                    {
-                        stream.Close();
-
-                    }
                 }
                 // Sleep for 50ms incase any new messages come in.
                 Thread.Sleep(50);

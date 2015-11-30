@@ -28,14 +28,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// A node index contains the characters and related child nodes of the 
     /// node should any of the characters match at the position.
     /// </summary>
-    internal class NodeIndex : BaseEntity, IComparable<NodeIndex>
+    internal class NodeIndex : NodeIndexBase, IComparable<NodeIndex>
     {
         #region Fields
-
-        /// <summary>
-        /// The node offset which relates to this sequence of characters.
-        /// </summary>
-        internal readonly int RelatedNodeOffset;
 
         /// <summary>
         /// True if the value is an index to a sub string. False
@@ -80,55 +75,19 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             }
         }
         private byte[] _characters;
-        
-        /// <summary>
-        /// The node this index relates to.
-        /// </summary>
-        /// <remarks>
-        /// This property will not store a reference to the node if one
-        /// does not exist. This is needed so that root nodes can be stored
-        /// when used in stream mode without maintaining a reference to the entire 
-        /// tree.
-        /// </remarks>
-        internal Node Node
-        {
-            get 
-            {
-                if (_node != null)
-                    return _node;
-
-                if (DataSet.Nodes is Memory.MemoryBaseList<Node>)
-                {
-                    if (_node == null)
-                    {
-                        lock (this)
-                        {
-                            if (_node == null)
-                            {
-                                _node = DataSet.Nodes[RelatedNodeOffset];
-                            }
-                        }
-                    }
-                    return _node;
-                }
-
-                return DataSet.Nodes[RelatedNodeOffset];
-            }
-        }
-        private Node _node;
               
         #endregion
 
         #region Constructors
 
         /// <summary>
-        /// Constructs a new instance of <see cref="NodeIndex"/>
+        /// Constructs a new instance of <see cref="NodeIndex"/>.
         /// </summary>
         /// <param name="dataSet">
-        /// The data set the node is contained within
+        /// The data set the node is contained within.
         /// </param>
         /// <param name="index">
-        /// The index of this object in the Node
+        /// The index of this object in the Node.
         /// </param>
         /// <param name="isString">
         /// True if the value is an integer offset to a string, or false 
@@ -139,7 +98,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// the array of characters to be used by the node.
         /// </param>
         /// <param name="relatedNodeOffset">
-        /// The offset in the list of nodes to the node the index relates to
+        /// The offset in the list of nodes to the node the index relates to.
         /// </param>
         internal NodeIndex(
             DataSet dataSet,
@@ -147,10 +106,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             bool isString,
             byte[] value,
             int relatedNodeOffset)
-            : base(dataSet, index)
+            : base(dataSet, index, relatedNodeOffset)
         {
             IsString = isString;
-            RelatedNodeOffset = relatedNodeOffset;
             _value = value;
         }
 
@@ -163,12 +121,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// any further initialisation steps that require other items in
         /// the data set can be completed.
         /// </summary>
-        internal void Init()
+        internal override void Init()
         {
+            base.Init();
             if (_characters == null)
+            {
                 _characters = GetCharacters();
-            if (_node == null)
-                _node = DataSet.Nodes[RelatedNodeOffset];
+            }
         }
 
         /// <summary>
@@ -201,7 +160,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// The relative position of the node in relation to the other array
         /// </returns>
         /// <para>
-        /// Used to determine if a target user agent contains the node.
+        /// Used to determine if a target User-Agent contains the node.
         /// </para>
         internal int CompareTo(byte[] other, int startIndex)
         {
@@ -222,8 +181,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Compares this node index to another.
         /// </summary>
-        /// <param name="other">The node index to compare</param>
-        /// <returns>Indication of relative value based on ComponentId field</returns>
+        /// <param name="other">
+        /// The node index to compare.
+        /// </param>
+        /// <returns>
+        /// Indication of relative value based on ComponentId field.
+        /// </returns>
         public int CompareTo(NodeIndex other)
         {
             return CompareTo(other.Characters, 0);
@@ -232,7 +195,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Converts the node index into a string.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// A string representation of the node characters.
+        /// </returns>
         public override string ToString()
         {
             return String.Format(

@@ -58,16 +58,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of see <see cref="Map"/>
+        /// Constructs a new instance of see <see cref="Map"/>.
         /// </summary>
         /// <param name="dataSet">
-        /// The <see cref="DataSet"/> being created
+        /// The <see cref="DataSet"/> being created.
         /// </param>
         /// <param name="index">
-        /// Index of the map within the list
+        /// Index of the map within the list.
         /// </param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
         /// </param>
         internal Map(
             DataSet dataSet,
@@ -83,8 +84,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Methods
 
         /// <summary>
-        /// Initialises the references to profiles. Called from the
-        /// <see cref="Factories.MemoryFactory"/> if initialisation is enabled.
+        /// Initialises the references to profiles. 
+        /// Called from the <see cref="Factories.MemoryFactory"/> if 
+        /// initialisation is enabled.
         /// </summary>
         internal void Init()
         {
@@ -95,7 +97,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Returns the map name.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// Name of this map as a string.
+        /// </returns>
         public override string ToString()
         {
             return Name;

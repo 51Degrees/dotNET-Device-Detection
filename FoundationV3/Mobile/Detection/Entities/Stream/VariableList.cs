@@ -28,44 +28,58 @@ using FiftyOne.Foundation.Mobile.Detection.Readers;
 namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 {
     /// <summary>
-    /// A readonly list of variable length entity types held on persistent storage rather
-    /// than in memory.
+    /// A readonly list of variable length entity types held on persistent 
+    /// storage rather than in memory.
     /// </summary>
     /// <para>
-    /// Entities in the underlying data structure are either fixed length where the 
-    /// data that represents them always contains the same number of bytes, or variable
-    /// length where the number of bytes to represent the entity varies.
+    /// Entities in the underlying data structure are either fixed length where 
+    /// the data that represents them always contains the same number of bytes, 
+    /// or variable length where the number of bytes to represent the entity 
+    /// varies.
     /// </para>
     /// <para>
-    /// This class uses the offset of the first byte of the entities data in the underlying
-    /// data structure in the accessor. As such the list isn't being used as a traditional
-    /// list because items are not retrieved by their index in the list, but by there offset
-    /// in the underlying data structure.
+    /// This class uses the offset of the first byte of the entities data in 
+    /// the underlying data structure in the accessor. As such the list isn't 
+    /// being used as a traditional list because items are not retrieved by 
+    /// their index in the list, but by there offset in the underlying data 
+    /// structure.
     /// </para>
     /// <remarks>
-    /// The constructor will read the header information about the underlying data structure.
-    /// The data for each entity is only loaded when requested via the accessor. A cache is used
-    /// to avoid creating duplicate objects when requested multiple times.
+    /// The constructor will read the header information about the underlying 
+    /// data structure. The data for each entity is only loaded when requested 
+    /// via the accessor. A cache is used to avoid creating duplicate objects 
+    /// when requested multiple times.
     /// </remarks>
     /// <remarks>
-    /// Data sources which don't support seeking can not be used. Specifically compressed data 
-    /// structures can not be used with these lists.
+    /// Data sources which don't support seeking can not be used. Specifically 
+    /// compressed data structures can not be used with these lists.
     /// </remarks>
     /// <remarks>
     /// Should not be referenced directly.
     /// </remarks>
-    /// <typeparam name="T">The type of <see cref="BaseEntity"/> the list will contain</typeparam>
+    /// <typeparam name="T">
+    /// The type of <see cref="BaseEntity"/> the list will contain.
+    /// </typeparam>
     public class VariableList<T> : CacheList<T>, IReadonlyList<T> where T : BaseEntity
     {
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of <see cref="VariableList{T}"/>
+        /// Constructs a new instance of <see cref="VariableList{T}"/>.
         /// </summary>
-        /// <param name="dataSet">The <see cref="DataSet"/> being created</param>
-        /// <param name="reader">Reader connected to the source data structure and positioned to start reading</param>
-        /// <param name="entityFactory">Used to create new instances of the entity</param>
-        /// <param name="cacheSize">Number of items in list to have capacity to cache</param>
+        /// <param name="dataSet">
+        /// The <see cref="DataSet"/> being created.
+        /// </param>
+        /// <param name="reader">
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
+        /// </param>
+        /// <param name="entityFactory">
+        /// Used to create new instances of the entity.
+        /// </param>
+        /// <param name="cacheSize">
+        /// Number of items in list to have capacity to cache.
+        /// </param>
         internal VariableList(
             DataSet dataSet, 
             Reader reader,
@@ -77,16 +91,36 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 
         #endregion
 
+        #region Destructor
+
+        /// <summary>
+        /// Needed to overcome CA1063 in Code Analysis.
+        /// </summary>
+        /// <param name="disposing">
+        /// True if the calling method is Dispose, false for the finaliser.
+        /// </param>
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+        }
+
+        #endregion
+
         #region Methods
 
         /// <summary>
         /// Creates a new entity of type T.
         /// </summary>
-        /// <param name="offset">The offset of the entity being created</param>
-        /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// <param name="offset">
+        /// The offset of the entity being created.
         /// </param>
-        /// <returns>A new entity of type T at the offset provided</returns>
+        /// <param name="reader">
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
+        /// </param>
+        /// <returns>
+        /// A new entity of type T at the offset provided.
+        /// </returns>
         internal override T CreateEntity(int offset, Reader reader)
         {
             reader.BaseStream.Position = Header.StartPosition + offset;
@@ -96,7 +130,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <summary>
         /// An enumerator for the list.
         /// </summary>
-        /// <returns>An enumerator for the list</returns>
+        /// <returns>
+        /// An enumerator for the list.
+        /// </returns>
         public IEnumerator<T> GetEnumerator()
         {
             var offset = 0;
@@ -111,7 +147,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <summary>
         /// An enumerator for the list.
         /// </summary>
-        /// <returns>An enumerator for the list</returns>
+        /// <returns>
+        /// An enumerator for the list.
+        /// </returns>
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return GetEnumerator();

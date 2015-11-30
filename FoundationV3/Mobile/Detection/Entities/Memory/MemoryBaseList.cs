@@ -30,28 +30,30 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
 {
     /// <summary>
     /// <para>
-    /// Lists can be stored as a set of related objects entirely within memory, or 
-    /// the relevent objects loaded as required from a file or other permanent store
-    /// as required.
+    /// Lists can be stored as a set of related objects entirely within memory, 
+    /// or as the relevant objects loaded as required from a file or other 
+    /// permanent store.
     /// </para>
     /// </summary>
     /// <para>
-    /// This class provides base functions for lists implemented in memory using 
-    /// arrays of type T. 
+    /// This class provides base functions for lists implemented in memory 
+    /// using arrays of type T. 
     /// </para>
     /// <remarks>
-    /// Delegate methods are used to create new instances of items to add to the list
-    /// in order to avoid creating many inherited list classes for each 
-    /// <see cref="BaseEntity"/> type.
+    /// Delegate methods are used to create new instances of items to add to 
+    /// the list in order to avoid creating many inherited list classes for 
+    /// each <see cref="BaseEntity"/> type.
     /// </remarks>
     /// <remarks>
-    /// The data is held in the private readonly variable _array.
+    /// The data is held in the private readonly variable _listArray.
     /// </remarks>
     /// <remarks>
     /// Should not be referenced directly.
     /// </remarks>
-    /// <typeparam name="T">The type of <see cref="BaseEntity"/> the list will contain</typeparam>
-    public abstract class MemoryBaseList<T> : IEnumerable<T>, IDisposable
+    /// <typeparam name="T">
+    /// The type of <see cref="BaseEntity"/> the list will contain
+    /// </typeparam>
+    public abstract class MemoryBaseList<T> : IEnumerable<T>
     {
         #region Fields
 
@@ -104,13 +106,19 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of <see cref="MemoryBaseList{T}"/>. The Read method needs
-        /// to be called following construction to read all the entities which form the list
-        /// before the list can be used.
+        /// Constructs a new instance of <see cref="MemoryBaseList{T}"/>. 
+        /// The Read method needs to be called following construction to read 
+        /// all the entities which form the list before the list can be used.
         /// </summary>
-        /// <param name="dataSet">Dataset being created</param>
-        /// <param name="reader">Reader used to initialise the header only</param>
-        /// <param name="entityFactory">Used to create new instances of the entity</param>
+        /// <param name="dataSet">
+        /// Dataset being created.
+        /// </param>
+        /// <param name="reader">
+        /// Reader used to initialise the header only.
+        /// </param>
+        /// <param name="entityFactory">
+        /// Used to create new instances of the entity.
+        /// </param>
         internal MemoryBaseList(DataSet dataSet, Reader reader, BaseEntityFactory<T> entityFactory)
         {
             Header = new Header(reader);
@@ -121,12 +129,45 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
 
         #endregion
 
+        #region Destructor
+
+        /// <summary>
+        /// Ensures any resources used by the list are disposed.
+        /// </summary>
+        ~MemoryBaseList()
+        {
+            Dispose(false);
+        }
+
+        /// <summary>
+        /// Disposes of any resources used by the list.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        /// <summary>
+        /// Disposes of any resources used by the list.
+        /// </summary>
+        /// <param name="disposing">
+        /// True if the calling method is Dispose, false for the finaliser.
+        /// </param>
+        protected virtual void Dispose(bool disposing)
+        {
+            GC.SuppressFinalize((object)this);
+        }
+
+        #endregion
+
         #region Public Methods
 
         /// <summary>
         /// An enumerator to the array of items.
         /// </summary>
-        /// <returns>An enumerator to the array of items</returns>
+        /// <returns>
+        /// An enumerator to the array of items.
+        /// </returns>
         public IEnumerator<T> GetEnumerator()
         {
             foreach (var entity in _array)
@@ -137,14 +178,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         {
             return GetEnumerator();
         }
-
-        /// <summary>
-        /// Dispose of any items the list holds open. Currently unimplemented.
-        /// </summary>
-        public void Dispose()
-        {
-        }
-
+        
         #endregion
     }
 }

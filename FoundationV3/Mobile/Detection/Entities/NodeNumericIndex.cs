@@ -26,7 +26,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// character values. Used to support the Numeric matching method
     /// if an exact match can't be found.
     /// </summary>
-    internal class NodeNumericIndex : BaseEntity
+    internal class NodeNumericIndex : NodeIndexBase
     {
         #region Properties
 
@@ -38,53 +38,25 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             get { return base.Index; }
         }
 
-        /// <summary>
-        /// The node offset which relates to this sequence of characters.
-        /// </summary>
-        internal readonly int RelatedNodeOffset;
-
-        /// <summary>
-        /// The node the numeric index relates to.
-        /// </summary>
-        internal Node Node
-        {
-            get
-            {
-                if (_node == null)
-                {
-                    lock (this)
-                    {
-                        if (_node == null)
-                        {
-                            _node = DataSet.Nodes[RelatedNodeOffset];
-                        }
-                    }
-                }
-                return _node;
-            }
-        }
-        private Node _node;
-
         #endregion
 
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of <see cref="NodeNumericIndex"/>
+        /// Constructs a new instance of <see cref="NodeNumericIndex"/>.
         /// </summary>
         /// <param name="dataSet">
-        /// The data set the node is contained within
+        /// The data set the node is contained within.
         /// </param>
         /// <param name="value">
         /// The value of the numeric index. Added to it's index field.
         /// </param>
         /// <param name="relatedNodeOffset">
-        /// The offset in the list of nodes to the node the index relates to
+        /// The offset in the list of nodes to the node the index relates to.
         /// </param>
         internal NodeNumericIndex(DataSet dataSet, short value, int relatedNodeOffset) 
-            : base (dataSet, value)
+            : base (dataSet, value, relatedNodeOffset)
         {
-            RelatedNodeOffset = relatedNodeOffset;
         }
 
         #endregion

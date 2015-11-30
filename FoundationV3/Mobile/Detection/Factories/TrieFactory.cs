@@ -24,6 +24,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using FiftyOne.Foundation.Mobile.Detection.Entities.Stream;
+using FiftyOne.Foundation.Mobile.Detection.Readers;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Factories
 {

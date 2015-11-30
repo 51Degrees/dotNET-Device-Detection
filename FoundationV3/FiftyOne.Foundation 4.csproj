@@ -42,27 +42,29 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\Reconcile-Device-Detection\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug4\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug4\FiftyOne.Foundation.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\FiftyOne.Foundation.xml</DocumentationFile>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Release4\</OutputPath>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release4\FiftyOne.Foundation.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\FiftyOne.Foundation.xml</DocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
@@ -119,7 +121,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Activator.cs" />
+    <Compile Include="Bases\Base32.cs" />
     <Compile Include="Image\Processor.cs" />
+    <Compile Include="Licence\Key.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Licence\LicenceTypes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Licence\Keys.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Licence\Product.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Mobile\Configuration\ImageOptimisationSection.cs" />
     <Compile Include="Mobile\Configuration\WebConfig.cs" />
     <Compile Include="Mobile\Detection\AutoUpdate.cs">
@@ -130,6 +145,7 @@
     </Compile>
     <Compile Include="Mobile\Detection\Entities\ComponentV31.cs" />
     <Compile Include="Mobile\Detection\Entities\ComponentV32.cs" />
+    <Compile Include="Mobile\Detection\Entities\NodeIndexBase.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\FixedList.cs" />
     <Compile Include="Mobile\Detection\Entities\IntegerEntity.cs">
       <SubType>Code</SubType>
@@ -151,13 +167,17 @@
     <Compile Include="Mobile\Detection\Entities\Stream\NodeV32.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\NodeV31.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\Profile.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\Source.cs" />
     <Compile Include="Mobile\Detection\Factories\EntityFactories.cs" />
     <Compile Include="Mobile\Detection\Factories\CommonFactory.cs" />
     <Compile Include="Mobile\Detection\IFixedList.cs" />
     <Compile Include="Mobile\Detection\IReadonlyList.cs" />
     <Compile Include="Mobile\Detection\Factories\MemoryFactory.cs" />
     <Compile Include="Mobile\Detection\Factories\TrieFactory.cs" />
+    <Compile Include="Mobile\Detection\LicenceKeyActivationResults.cs" />
+    <Compile Include="Mobile\Detection\Readers\Source.cs" />
+    <Compile Include="Mobile\Detection\Search.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Mobile\Detection\TrieProviderV3.cs" />
     <Compile Include="Mobile\Detection\TrieProvider.cs" />
     <Compile Include="Mobile\Detection\Entities\ProfileOffset.cs" />
@@ -176,7 +196,6 @@
     <Compile Include="Mobile\Detection\Feature\ProfileOverride.cs" />
     <Compile Include="Mobile\Detection\IMatch.cs" />
     <Compile Include="Mobile\Detection\LicenceKey.cs" />
-    <Compile Include="Mobile\Detection\LicenceKeyActivationResults.cs" />
     <Compile Include="Mobile\Detection\Entities\AsciiString.cs" />
     <Compile Include="Mobile\Detection\Entities\BaseEntity.cs" />
     <Compile Include="Mobile\Detection\Entities\Component.cs" />
@@ -216,6 +235,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Mobile\Detection\FiftyOneBrowserCapabilities.cs" />
+    <Compile Include="Properties\LicenceConstants.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Properties\RedirectionConstants.cs" />
     <Compile Include="Image\Support.cs" />
     <Compile Include="Mobile\Configuration\FilterElement.cs" />
@@ -321,6 +343,13 @@
     <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -25,7 +25,7 @@ using FiftyOne.Foundation.Mobile.Detection.Readers;
 namespace FiftyOne.Foundation.Mobile.Detection.Entities
 {
     /// <summary>
-    /// Signature of a user agent in version 3.2 data format.
+    /// Signature of a User-Agent in version 3.2 data format.
     /// </summary>
     public sealed class SignatureV32 : Signature
     {
@@ -52,8 +52,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Public Properties
 
         /// <summary>
-        /// Gets the rank, where a lower number means the signature is more popular, of
-        /// the signature compared to other signatures.
+        /// Gets the rank, where a lower number means the signature is more 
+        /// popular, of the signature compared to other signatures.
         /// </summary>
         public override int Rank
         {
@@ -69,8 +69,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Internal Properties
 
         /// <summary>
-        /// List of the node offsets the signature relates to ordered
-        /// by offset of the node.
+        /// List of the node offsets the signature relates to ordered by offset 
+        /// of the node.
         /// </summary>
         internal override int[] NodeOffsets
         {
@@ -82,7 +82,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                     {
                         if (_nodeOffsets == null)
                         {
-                            _nodeOffsets = DataSet.SignatureNodeOffsets.GetRange(FirstNodeOffsetIndex, NodeCount).Select(i => i.Value).ToArray();
+                            var range = DataSet.SignatureNodeOffsets.GetRange(FirstNodeOffsetIndex, NodeCount);
+                            var enumerator = range.GetEnumerator();
+                            var nodeOffsets = new int[NodeCount];
+                            var i = 0;
+                            while (enumerator.MoveNext())
+                            {
+                                nodeOffsets[i] = enumerator.Current.Value;
+                                i++;
+                            }
+                            _nodeOffsets = nodeOffsets;
                         }
                     }
                 }
@@ -96,16 +105,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Constructors
 
         /// <summary>
-        /// Constructs a new instance of <see cref="SignatureV32"/>
+        /// Constructs a new instance of <see cref="SignatureV32"/>.
         /// </summary>
         /// <param name="dataSet">
-        /// The data set the signature is contained within
+        /// The data set the signature is contained within.
         /// </param>
         /// <param name="index">
-        /// The index in the data structure to the signature
+        /// The index in the data structure to the signature.
         /// </param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
         /// </param>
         internal SignatureV32(
             DataSet dataSet,
@@ -126,7 +136,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// The number of characters in the signature.
         /// </summary>
-        /// <returns>The number of characters in the signature</returns>
+        /// <returns>
+        /// The number of characters in the signature.
+        /// </returns>
         internal override int GetSignatureLength()
         {
             var lastNode = DataSet.Nodes[DataSet.SignatureNodeOffsets[NodeCount + FirstNodeOffsetIndex - 1].Value];

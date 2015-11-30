@@ -37,7 +37,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <summary>
         /// Constructs a new instance of <see cref="NodeStreamFactory"/>.
         /// </summary>
-        /// <param name="pool">Pool from the data set to be used when creating new <see cref="Entities.Node"/> entities</param>
+        /// <param name="pool">
+        /// Pool from the data set to be used when creating 
+        /// new <see cref="Entities.Node"/> entities.
+        /// </param>
         internal NodeStreamFactory(Pool pool)
         {
             _pool = pool;
@@ -52,24 +55,31 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <summary>
         /// Constructs a new instance of <see cref="NodeStreamFactoryV31"/>.
         /// </summary>
-        /// <param name="pool">Pool from the data set to be used when creating new <see cref="Entities.Node"/> entities</param>
+        /// <param name="pool">
+        /// Pool from the data set to be used when creating 
+        /// new <see cref="Entities.Node"/> entities.
+        /// </param>
         internal NodeStreamFactoryV31(Pool pool) : base(pool)
         {
         }
 
         /// <summary>
-        /// Constructs a new <see cref="Entities.Stream.NodeV31"/> entity from the offset provided.
+        /// Constructs a new <see cref="Entities.Stream.NodeV31"/> entity from 
+        /// the offset provided.
         /// </summary>
         /// <param name="dataSet">
-        /// The data set the node is contained within
+        /// The data set the node is contained within.
         /// </param>
         /// <param name="offset">
-        /// The offset in the data structure to the node
+        /// The offset in the data structure to the node.
         /// </param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
         /// </param>
-        /// <returns>A new <see cref="Entities.Node"/> entity from the data set</returns>
+        /// <returns>
+        /// A new <see cref="Entities.Node"/> entity from the data set.
+        /// </returns>
         protected override Entities.Node Construct(Entities.DataSet dataSet, int offset, Reader reader)
         {
             return new Entities.Stream.NodeV31((DataSet)dataSet, offset, reader);
@@ -84,25 +94,32 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <summary>
         /// Constructs a new instance of <see cref="NodeStreamFactoryV32"/>.
         /// </summary>
-        /// <param name="pool">Pool from the data set to be used when creating new <see cref="Entities.Node"/> entities</param>
+        /// <param name="pool">
+        /// Pool from the data set to be used when creating new 
+        /// <see cref="Entities.Node"/> entities
+        /// </param>
         internal NodeStreamFactoryV32(Pool pool)
             : base(pool)
         {
         }
 
         /// <summary>
-        /// Constructs a new <see cref="Entities.Stream.NodeV32"/> entity from the offset provided.
+        /// Constructs a new <see cref="Entities.Stream.NodeV32"/> entity from 
+        /// the offset provided.
         /// </summary>
         /// <param name="dataSet">
-        /// The data set the node is contained within
+        /// The data set the node is contained within.
         /// </param>
         /// <param name="offset">
-        /// The offset in the data structure to the node
+        /// The offset in the data structure to the node.
         /// </param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
         /// </param>
-        /// <returns>A new <see cref="Entities.Node"/> entity from the data set</returns>
+        /// <returns>
+        /// A new <see cref="Entities.Node"/> entity from the data set.
+        /// </returns>
         protected override Entities.Node Construct(Entities.DataSet dataSet, int offset, Reader reader)
         {
             return new Entities.Stream.NodeV32((DataSet)dataSet, offset, reader);
@@ -122,25 +139,32 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <summary>
         /// Constructs a new instance of <see cref="ProfileStreamFactory"/>.
         /// </summary>
-        /// <param name="pool">Pool from the data set to be used when creating new <see cref="Entities.Profile"/> entities</param>
+        /// <param name="pool">
+        /// Pool from the data set to be used when creating 
+        /// new <see cref="Entities.Profile"/> entities.
+        /// </param>
         internal ProfileStreamFactory(Pool pool)
         {
             _pool = pool;
         }
 
         /// <summary>
-        /// Constructs a new <see cref="Entities.Profile"/> entity from the offset provided.
+        /// Constructs a new <see cref="Entities.Profile"/> entity from the 
+        /// offset provided.
         /// </summary>
         /// <param name="dataSet">
-        /// The data set the profile is contained within
+        /// The data set the profile is contained within.
         /// </param>
         /// <param name="offset">
-        /// The offset in the data structure to the profile
+        /// The offset in the data structure to the profile.
         /// </param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
         /// </param>
-        /// <returns>A new <see cref="Entities.Profile"/> entity from the data set</returns>
+        /// <returns>
+        /// A new <see cref="Entities.Profile"/> entity from the data set.
+        /// </returns>
         protected override Entities.Profile Construct(Entities.DataSet dataSet, int offset, Reader reader)
         {
             return new Entities.Stream.Profile((DataSet)dataSet, offset, reader);

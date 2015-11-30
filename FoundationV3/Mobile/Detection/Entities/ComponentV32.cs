@@ -71,13 +71,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// Reads the string offsets to the Http Headers during the constructor.
         /// </remarks>
         /// <param name="dataSet">
-        /// The <see cref="DataSet"/> being created
+        /// The <see cref="DataSet"/> being created.
         /// </param>
         /// <param name="index">
-        /// Index of the component within the list
+        /// Index of the component within the list.
         /// </param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
         /// </param>
         internal ComponentV32(
             DataSet dataSet,

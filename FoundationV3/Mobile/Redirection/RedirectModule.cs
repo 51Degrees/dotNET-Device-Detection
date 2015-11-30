@@ -118,7 +118,8 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// Initiliases the HttpMobile registering this modules interest in
         /// all new requests and handler mappings.
         /// </summary>
-        /// <param name="application">HttpApplication object for the web application.</param>
+        /// <param name="application">
+        /// <see cref="HttpApplication"/> object for the web application.</param>
         public virtual void Init(HttpApplication application)
         {
             EventLog.Debug("Initialising redirection module");
@@ -141,7 +142,8 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// <summary>
         /// Registers the event handlers if they've not done so already.
         /// </summary>
-        /// <param name="application">HttpApplication object for the web application.</param>
+        /// <param name="application">
+        /// <see cref="HttpApplication"/> object for the web application.</param>
         private void RegisterEventHandlersInit(HttpApplication application)
         {
             // Record the original requesting URL.
@@ -288,6 +290,8 @@ namespace FiftyOne.Foundation.Mobile.Redirection
         /// Returns true if the current handler relates to a mobile web page.
         /// </summary>
         /// <param name="context">The context associated with the Http request.</param>
+        /// <returns>
+        /// True if the current handler relates to a mobile web page.</returns>
         public static bool IsMobilePage(HttpContext context)
         {
             return IsMobileType(context.Handler.GetType()) ||

@@ -19,6 +19,7 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
+using System;
 namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 {
     /// <summary>
@@ -36,6 +37,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <summary>
         /// The number of times the lists have been switched.
         /// </summary>
+        [Obsolete("Cache no longer requires switching")]
         long Switches { get; }
 
         /// <summary>

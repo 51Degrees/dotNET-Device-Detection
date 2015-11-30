@@ -98,7 +98,7 @@ namespace FiftyOne.Foundation.UI.Web
         #region Properties
 
         /// <summary>
-        /// The user agent of the device to be displayed.
+        /// The User-Agent of the device to be displayed.
         /// </summary>
         public string UserAgent
         {
@@ -201,7 +201,7 @@ namespace FiftyOne.Foundation.UI.Web
 
         /// <summary>
         /// The CssClass used to display the caption indicating the 
-        /// results of the user agent test.
+        /// results of the User-Agent test.
         /// </summary>
         public string MatchCssClass
         {
@@ -528,7 +528,7 @@ namespace FiftyOne.Foundation.UI.Web
             writer.WriteEndElement();
             writer.WriteEndElement();
 
-            // Add the target user agent provided.
+            // Add the target User-Agent provided.
             BuildRowForResultFormatted(writer, "Target UserAgent", result.TargetUserAgent);
 
             // Add the signature found.

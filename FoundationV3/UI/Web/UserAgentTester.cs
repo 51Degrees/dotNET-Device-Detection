@@ -26,7 +26,7 @@ using FiftyOne.Foundation.Mobile.Detection;
 namespace FiftyOne.Foundation.UI.Web
 {
     /// <summary>
-    /// Class to test a user agent and display the resulting device.
+    /// Class to test a User-Agent and display the resulting device.
     /// </summary>
     public class UserAgentTester : BaseUserControl
     {
@@ -58,7 +58,7 @@ namespace FiftyOne.Foundation.UI.Web
         }
 
         /// <summary>
-        /// Gets or sets the text box css class for user agent entry.
+        /// Gets or sets the text box css class for User-Agent entry.
         /// </summary>
         public string TextBoxCssClass
         {
@@ -98,7 +98,7 @@ namespace FiftyOne.Foundation.UI.Web
         #region Events
 
         /// <summary>
-        /// Creates the new controls used by the user agent tester.
+        /// Creates the new controls used by the User-Agent tester.
         /// </summary>
         /// <param name="e"></param>
         protected override void OnInit(EventArgs e)

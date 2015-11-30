@@ -34,7 +34,7 @@ namespace FiftyOne
     /// Utility class, contains implementation for logging support.
     /// </summary>
     /// <remarks>
-    /// This class should not be used in developers code.
+    /// This class should not be called as it is part of the internal logic.
     /// </remarks>
     public class EventLog : Log
     {
@@ -289,6 +289,7 @@ namespace FiftyOne
                 Write("Fatal", String.Format(message, args));
         }
 
+        [SecuritySafeCriticalAttribute]
         private static int GetProcessId()
         {
             return Process.GetCurrentProcess().Id;

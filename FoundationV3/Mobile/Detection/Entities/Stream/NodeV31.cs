@@ -39,16 +39,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         #region Constructors
 
         /// <summary>
-        /// Constructs a new instance of <see cref="NodeV31"/>
+        /// Constructs a new instance of <see cref="NodeV31"/>.
         /// </summary>
         /// <param name="dataSet">
-        /// The data set the node is contained within
+        /// The data set the node is contained within.
         /// </param>
         /// <param name="offset">
-        /// The offset in the data structure to the node
+        /// The offset in the data structure to the node.
         /// </param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
         /// </param>
         internal NodeV31(
             DataSet dataSet,
@@ -56,23 +57,18 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
             BinaryReader reader)
             : base(dataSet, offset, reader)
         {
+            _rankedSignatureCount = reader.ReadInt32();
+            _children = NodeFactoryShared.ReadNodeIndexesV31(
+                (FiftyOne.Foundation.Mobile.Detection.Entities.DataSet)dataSet, 
+                reader, 
+                (int)((long)offset + reader.BaseStream.Position - this._nodeStartStreamPosition), 
+                (int)_childrenCount);
+            _position = reader.BaseStream.Position;
         }
 
         #endregion     
        
         #region Overrides
-
-        /// <summary>
-        /// Reads the ranked signature count from a 4 byte integer.
-        /// </summary>
-        /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
-        /// </param>
-        /// <returns>The count of ranked signatures associated with the node.</returns>
-        protected override int ReaderRankedSignatureCount(BinaryReader reader)
-        {
-            return reader.ReadInt32();
-        }
 
         /// <summary>
         /// An array of the ranked signature indexes for the node.
@@ -90,8 +86,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
                             var reader = _pool.GetReader();
                             try
                             {
-                                reader.BaseStream.Position = _position + ((sizeof(short) + sizeof(int)) * _numericChildrenCount);
-                                _rankedSignatureIndexes = ReadIntegerArray(reader, RankedSignatureCount);
+                                reader.BaseStream.Position = 
+                                    _position + ((sizeof(short) + sizeof(int)) * NumericChildrenCount);
+                                _rankedSignatureIndexes = 
+                                    ReadIntegerArray(reader, RankedSignatureCount);
                             }
                             finally
                             {
@@ -104,30 +102,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
             }
         }
         private int[] _rankedSignatureIndexes;
-
-        /// <summary>
-        /// Used by the constructor to read the variable length list of child
-        /// node indexes associated with the node. Returns node indexes from V32
-        /// data format.
-        /// </summary>
-        /// <param name="dataSet">
-        /// The data set the node is contained within
-        /// </param>
-        /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
-        /// </param>
-        /// <param name="offset">
-        /// The offset in the data structure to the node
-        /// </param>
-        /// <param name="count">
-        /// The number of node indexes that need to be read.
-        /// </param>
-        /// <returns>An array of child node indexes for the node</returns>
-        protected override NodeIndex[] ReadNodeIndexes(Entities.DataSet dataSet, BinaryReader reader, int offset, int count)
-        {
-            return NodeFactoryShared.ReadNodeIndexesV31(dataSet, reader, offset, count);
-        }
-
+        
         #endregion
     }
 }

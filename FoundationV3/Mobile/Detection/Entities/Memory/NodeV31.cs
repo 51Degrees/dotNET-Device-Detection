@@ -36,16 +36,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         #region Constructors
 
         /// <summary>
-        /// Constructs a new instance of <see cref="NodeV31"/>
+        /// Constructs a new instance of <see cref="NodeV31"/>.
         /// </summary>
         /// <param name="dataSet">
-        /// The data set the node is contained within
+        /// The data set the node is contained within.
         /// </param>
         /// <param name="offset">
-        /// The offset in the data structure to the node
+        /// The offset in the data structure to the node.
         /// </param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
         /// </param>
         internal NodeV31(
             DataSet dataSet,
@@ -53,7 +54,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
             BinaryReader reader)
             : base(dataSet, offset, reader)
         {
-            _rankedSignatureIndexes = BaseEntity.ReadIntegerArray(reader, RankedSignatureCount);
+            _rankedSignatureCount = reader.ReadInt32();
+            _children = 
+                NodeFactoryShared.ReadNodeIndexesV31(
+                    dataSet, 
+                    reader, 
+                    (int)((long)offset + reader.BaseStream.Position - _nodeStartStreamPosition), 
+                    (int)_childrenCount);
+            _numericChildren = 
+                ReadNodeNumericIndexes(dataSet, reader, NumericChildrenCount);
+            _rankedSignatureIndexes = 
+                BaseEntity.ReadIntegerArray(reader, RankedSignatureCount);
         }
 
         #endregion  
@@ -68,42 +79,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
             get { return _rankedSignatureIndexes; }
         }
         private int[] _rankedSignatureIndexes;
-
-        /// <summary>
-        /// Reads the ranked signature count from a 4 byte integer.
-        /// </summary>
-        /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
-        /// </param>
-        /// <returns>The count of ranked signatures associated with the node.</returns>
-        protected override int ReaderRankedSignatureCount(BinaryReader reader)
-        {
-            return reader.ReadInt32();
-        }
         
-        /// <summary>
-        /// Used by the constructor to read the variable length list of child
-        /// node indexes associated with the node. Returns node indexes from V32
-        /// data format.
-        /// </summary>
-        /// <param name="dataSet">
-        /// The data set the node is contained within
-        /// </param>
-        /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
-        /// </param>
-        /// <param name="offset">
-        /// The offset in the data structure to the node
-        /// </param>
-        /// <param name="count">
-        /// The number of node indexes that need to be read.
-        /// </param>
-        /// <returns>An array of child node indexes for the node</returns>
-        protected override NodeIndex[] ReadNodeIndexes(Entities.DataSet dataSet, BinaryReader reader, int offset, int count)
-        {
-            return NodeFactoryShared.ReadNodeIndexesV31(dataSet, reader, offset, count);
-        }
-
         #endregion
     }
 }

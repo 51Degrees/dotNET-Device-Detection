@@ -25,7 +25,7 @@ using FiftyOne.Foundation.Mobile.Detection.Readers;
 namespace FiftyOne.Foundation.Mobile.Detection.Entities
 {
     /// <summary>
-    /// Signature of a user agent in version 3.1 data format.
+    /// Signature of a User-Agent in version 3.1 data format.
     /// </summary>
     public sealed class SignatureV31 : Signature
     {
@@ -49,13 +49,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Public Properties
 
         /// <summary>
-        /// Gets the rank, where a lower number means the signature is more popular, of
-        /// the signature compared to other signatures.
+        /// Gets the rank, where a lower number means the signature is more 
+        /// popular, of the signature compared to other signatures.
         /// </summary>
         /// <remarks>
-        /// As the property uses the ranked signature indexes list to obtain the rank
-        /// it will be comparatively slow compared to other methods the firs time
-        /// the property is accessed.
+        /// As the property uses the ranked signature indexes list to obtain 
+        /// the rank it will be comparatively slow compared to other methods 
+        /// the firs time the property is accessed.
         /// </remarks>
         public override int Rank
         {
@@ -81,16 +81,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Constructors
 
         /// <summary>
-        /// Constructs a new instance of <see cref="SignatureV31"/>
+        /// Constructs a new instance of <see cref="SignatureV31"/>.
         /// </summary>
         /// <param name="dataSet">
-        /// The data set the signature is contained within
+        /// The data set the signature is contained within.
         /// </param>
         /// <param name="index">
-        /// The index in the data structure to the signature
+        /// The index in the data structure to the signature.
         /// </param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
         /// </param>
         internal SignatureV31(
             DataSet dataSet,
@@ -108,7 +109,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// The number of characters in the signature.
         /// </summary>
-        /// <returns>The number of characters in the signature</returns>
+        /// <returns>
+        /// The number of characters in the signature.
+        /// </returns>
         internal override int GetSignatureLength()
         {
             var lastNode = DataSet.Nodes[NodeOffsets[NodeOffsets.Length - 1]];
@@ -116,9 +119,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
 
         /// <summary>
-        /// Gets the signature rank by iterating through the list of signature ranks.
+        /// Gets the signature rank by iterating through the list of signature 
+        /// ranks.
         /// </summary>
-        /// <returns>Rank compared to other signatures starting at 0.</returns>
+        /// <returns>
+        /// Rank compared to other signatures starting at 0.
+        /// </returns>
         private int GetSignatureRank()
         {
             for (var rank = 0; rank < DataSet.RankedSignatureIndexes.Count; rank++)

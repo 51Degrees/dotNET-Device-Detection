@@ -35,10 +35,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// <para>
     /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
-    public abstract class BaseEntity : IComparable<BaseEntity>
+    public abstract class BaseEntity : IComparable<BaseEntity>, IComparable<int>
     {
         #region Constants
 
+        /// <summary>
+        /// List if powers used to determine numeric differences.
+        /// </summary>
         private static readonly int[] Powers = new[] { 1, 10, 100, 1000, 10000 };
 
         #endregion
@@ -63,22 +66,28 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Used to create a new instance of an entity.
         /// </summary>
-        /// <param name="dataSet">The <see cref="DataSet"/> being created or added to</param>
-        /// <param name="indexOrOffset">The unique index of offset of the entity in the list</param>
+        /// <param name="dataSet">
+        /// The <see cref="DataSet"/> being created or added to.
+        /// </param>
+        /// <param name="indexOrOffset">
+        /// The unique index of offset of the entity in the list
+        /// </param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
         /// </param>
         /// <returns>A new instance of the entity</returns>
         /// <para>
-        /// The delegate is used to enable inheriting classes to control how lists containing
-        /// entities of their type are created. When generic types support parameterised 
-        /// constructors the need for this delegate will be removed.
+        /// The delegate is used to enable inheriting classes to control how 
+        /// lists containing entities of their type are created. When generic 
+        /// types support parameterised constructors the need for this 
+        /// delegate will be removed.
         /// </para>
         internal delegate BaseEntity Create(DataSet dataSet, int indexOrOffset, BinaryReader reader);
 
         /// <summary>
-        /// Used to return the length in bytes of an entity when stored in the underlying
-        /// data structure.
+        /// Used to return the length in bytes of an entity when stored in the 
+        /// underlying data structure.
         /// </summary>
         /// <param name="entity">Entity whose length is required</param>
         /// <returns>The length in bytes of the entity</returns>
@@ -91,7 +100,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Constructs the base item for the data set and index provided.
         /// </summary>
-        /// <param name="dataSet">The <see cref="DataSet"/> being created</param>
+        /// <param name="dataSet">
+        /// The <see cref="DataSet"/> being created
+        /// </param>
         /// <param name="indexOrOffset">
         /// The unique index of the item in the collection of items, or
         /// the unique offset to the item in the source data structure.
@@ -107,13 +118,38 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Methods
 
         /// <summary>
+        /// Compares the integer index or offset provided to the this entities.
+        /// </summary>
+        /// <param name="indexOrOffset">
+        /// The unique index of the item in the collection of items, or
+        /// the unique offset to the item in the source data structure.
+        /// </param>
+        /// <returns>
+        /// A signed number indicating the relative values of this instance and 
+        /// value.
+        /// <list type="bullet">
+        /// <item>Less than zero: This instance is less than value.</item>
+        /// <item>Zero: This instance is equal to value.</item>
+        /// <item>Greater than zero: This instance is greater than value.</item>
+        /// </list>
+        /// </returns>
+        public int CompareTo(int indexOrOffset)
+        {
+            return Index.CompareTo(indexOrOffset);
+        }
+
+        /// <summary>
         /// Compares entities based on their Index properties.
         /// </summary>
-        /// <param name="other">The entity to be compared against</param>
-        /// <returns>The position of one entity over the other</returns>
+        /// <param name="other">
+        /// The entity to be compared against.
+        /// </param>
+        /// <returns>
+        /// The position of one entity over the other.
+        /// </returns>
         public int CompareTo(BaseEntity other)
         {
-            return Index.CompareTo(other.Index);
+            return CompareTo(other.Index);
         }
 
         #endregion
@@ -149,32 +185,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             return array;
         }
 
-        /// <summary>
-        /// Uses a divide and conquer method to search the ordered list of indexes.
-        /// </summary>
-        /// <param name="list">List of entities to be searched</param>
-        /// <param name="indexOrOffset">The index or offset to be sought</param>
-        /// <returns>The index of the entity in the list or twos complement of insert index</returns>
-        protected static int BinarySearch(IList<BaseEntity> list, int indexOrOffset)
-        {
-            var lower = 0;
-            var upper = list.Count - 1;
-
-            while (lower <= upper)
-            {
-                var middle = lower + (upper - lower) / 2;
-                var comparisonResult = list[middle].Index.CompareTo(indexOrOffset);
-                if (comparisonResult == 0)
-                    return middle;
-                else if (comparisonResult > 0)
-                    upper = middle - 1;
-                else
-                    lower = middle + 1;
-            }
-
-            return ~lower;
-        }
-        
         /// <summary>
         /// Returns an integer representation of the characters between start and end.
         /// Assumes that all the characters are numeric characters.

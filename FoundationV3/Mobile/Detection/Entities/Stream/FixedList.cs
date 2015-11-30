@@ -28,31 +28,39 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 {
     /// <summary>
     /// <para>
-    /// Lists can be stored as a set of related objects entirely within memory, or 
-    /// the relevent objects loaded as required from a file or other permanent store
-    /// as required.
+    /// Lists can be stored as a set of related objects entirely within memory, 
+    /// or as the relevent objects loaded as required from a file or other 
+    /// permanent store.
     /// </para>
     /// </summary>
     /// <remarks>
-    /// Delegate methods are used to create new instances of items to add to the list
-    /// in order to avoid creating many inherited list classes for each 
-    /// <see cref="BaseEntity"/> type.
+    /// Delegate methods are used to create new instances of items to add to 
+    /// the list in order to avoid creating many inherited list classes for 
+    /// each <see cref="BaseEntity"/> type.
     /// </remarks>
     /// <remarks>
     /// Should not be referenced directly.
     /// </remarks>
-    /// <typeparam name="T">The type of <see cref="BaseEntity"/> the list will contain</typeparam>
+    /// <typeparam name="T">
+    /// The type of <see cref="BaseEntity"/> the list will contain.
+    /// </typeparam>
     public class FixedList<T> : BaseList<T>, IFixedList<T> where T : BaseEntity
     {
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of <see cref="BaseList{T}"/> ready to read entities from 
-        /// the source.
+        /// Constructs a new instance of <see cref="BaseList{T}"/> ready to 
+        /// read entities from the source.
         /// </summary>
-        /// <param name="dataSet">Dataset being created</param>
-        /// <param name="reader">Reader used to initialise the header only</param>
-        /// <param name="entityFactory">Used to create new instances of the entity</param>
+        /// <param name="dataSet">
+        /// Dataset being created.
+        /// </param>
+        /// <param name="reader">
+        /// Reader used to initialise the header only.
+        /// </param>
+        /// <param name="entityFactory">
+        /// Used to create new instances of the entity.
+        /// </param>
         internal FixedList(
             DataSet dataSet,
             Reader reader,
@@ -68,27 +76,43 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <summary>
         /// Creates a new entity of type T.
         /// </summary>
-        /// <param name="index">The index of the entity being created</param>
-        /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// <param name="index">
+        /// The index of the entity being created.
         /// </param>
-        /// <returns>A new entity of type T at the index provided</returns>
+        /// <param name="reader">
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
+        /// </param>
+        /// <returns>
+        /// A new entity of type T at the index provided.
+        /// </returns>
         internal override T CreateEntity(int index, Reader reader)
         {
-            reader.BaseStream.Position = Header.StartPosition + (EntityFactory.GetLength() * index);
+            reader.BaseStream.Position = 
+                Header.StartPosition + (EntityFactory.GetLength() * index);
             return (T)EntityFactory.Create(_dataSet, index, reader);
         }
 
         /// <summary>
-        /// An enumerator for the list between the range provided.
+        /// An enumerable that can return a range of T between index and the 
+        /// count provided.
         /// </summary>
-        /// <returns>An enumerator for the list</returns>
+        /// <param name="index">
+        /// First index of the range required.
+        /// </param>
+        /// <param name="count">
+        /// Number of elements to return.
+        /// </param>
+        /// <returns>
+        /// An enumerator for the list.
+        /// </returns>
         public IEnumerable<T> GetRange(int index, int count)
         {
             var reader = _dataSet.Pool.GetReader();
             try
             {
-                reader.BaseStream.Position = Header.StartPosition + (EntityFactory.GetLength() * index);
+                reader.BaseStream.Position = 
+                    Header.StartPosition + (EntityFactory.GetLength() * index);
                 for (int i = 0; i < count; i++)
                 {
                     yield return (T)EntityFactory.Create(_dataSet, index, reader);

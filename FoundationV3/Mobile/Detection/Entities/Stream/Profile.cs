@@ -59,15 +59,18 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of the <see cref="Profile"/>
+        /// Constructs a new instance of the <see cref="Profile"/>.
         /// </summary>
         /// <param name="dataSet">
-        /// The data set whose profile list the profile will be contained within
+        /// The data set whose profile list the profile will be contained 
+        /// within.
         /// </param>
         /// <param name="offset">
-        /// The offset position in the data structure to the profile</param>
+        /// The offset position in the data structure to the profile.
+        /// </param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
         /// </param>
         internal Profile(
             DataSet dataSet,
@@ -101,8 +104,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
                             var reader = _pool.GetReader();
                             try
                             {
-                                reader.BaseStream.Position = _position;
-                                _valueIndexes = BaseEntity.ReadIntegerArray(reader, _valueIndexesCount);
+                                reader.BaseStream.Position = 
+                                    _position;
+                                _valueIndexes = 
+                                    BaseEntity.ReadIntegerArray(reader, _valueIndexesCount);
                             }
                             finally
                             {
@@ -132,8 +137,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
                             var reader = _pool.GetReader();
                             try
                             {
-                                reader.BaseStream.Position = _position + (_valueIndexesCount * sizeof(int));
-                                _signatureIndexes = BaseEntity.ReadIntegerArray(reader, _signatureIndexesCount);
+                                reader.BaseStream.Position = 
+                                    _position + (_valueIndexesCount * sizeof(int));
+                                _signatureIndexes = 
+                                    BaseEntity.ReadIntegerArray(reader, _signatureIndexesCount);
                             }
                             finally
                             {

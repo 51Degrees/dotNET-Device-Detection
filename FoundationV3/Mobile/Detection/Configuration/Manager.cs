@@ -106,6 +106,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
         /// Access to the memory mode setting. Returns true if the data should be
         /// loaded into memory increasing startup time but improving overall performance.
         /// </summary>
+        /// <returns>
+        /// True if the data should be loaded into memory</returns>
         public static bool MemoryMode
         {
             get
@@ -121,7 +123,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
         }
 
         /// <summary>
-        /// When set to true enables bandwidth monitoring. Also requires the data set specified in 
+        /// When set to true enables bandwidth monitoring. Also requires the
+        /// data set specified in 
         /// the binaryFilePath attribute to support bandwidth monitoring. 
         /// </summary>
         public static bool BandwidthMonitoringEnabled
@@ -133,7 +136,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
         }
 
         /// <summary>
-        /// When set to true enables feature detection. Also requires the data set specified in the
+        /// When set to true enables feature detection. Also requires the
+        /// data set specified in the
         /// binaryFilePath attribute to support feature detection. 
         /// </summary>
         public static bool FeatureDetectionEnabled
@@ -148,6 +152,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Configuration
         /// Returns true or false depending on whether usage information
         /// should be shared with 51Degrees.mobi.
         /// </summary>
+        /// <returns>
+        /// True or false depending on whether usage sharing 
+        /// is enabled</returns>
         public static bool ShareUsage
         {
             get

@@ -32,14 +32,74 @@ using FiftyOne.Foundation.Mobile.Detection.Factories;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
     /// <summary>
-    /// Provider used to perform a detection based on a user agent string. 
+    /// Exposes several match methods to be used for device detection.
+    /// Provider requires a <see cref="DataSet"/>
+    /// object connected to one of the 51Degrees 
+    /// device data files in order to perform device detection. 
+    /// Can be created like:
+    /// <list>
+    /// <item>For use with Stream factory:
+    /// <para>
+    /// <code>
+    /// Provider p = new Provider(StreamFactory.Create("path_to_file"));
+    /// </code>
+    /// </para>
+    /// </item>
+    /// <item>For use with Memory factory:
+    /// <para>
+    /// <code>
+    /// Provider p = new Provider(MemoryFactory.Create("path_to_file"));
+    /// </code>
+    /// </para>
+    /// </item>
+    /// </list>
+    /// For explanation on the difference between stream and memory see:
+    /// <a href="https://51degrees.com/support/documentation/pattern">
+    /// how device detection works</a> "Modes of operation" section.
+    /// <para>
+    /// Match methods return a 
+    /// <see cref="FiftyOne.Foundation.Mobile.Detection.Match"/>
+    /// object that contains detection results 
+    /// for a specific User-Agent string, collection of 
+    /// HTTP headers of a device Id.
+    /// Use it to retrieve detection results like: 
+    /// <code>
+    /// match.Properties["IsMobile"].Values;
+    /// </code>
+    /// </para>
+    /// <para>
+    /// You can access the underlying data set like: 
+    /// <code>
+    /// provider.dataset.publised
+    /// </code>
+    /// to retrieve various meta information like 
+    /// the published date and the next update date as well as the list of various 
+    /// entities like
+    /// <see cref="FiftyOne.Foundation.Mobile.Detection.Entities.Profile"/>
+    /// and 
+    /// <see cref="FiftyOne.Foundation.Mobile.Detection.Entities.Property"/>.
+    /// </para>
+    /// <para>
+    /// Provider used to perform a detection based on a User-Agent string. 
+    /// </para>
     /// </summary>
-    public class Provider
+    
+    public class Provider : IDisposable
     {
+        #region Static Fields
+
+        /// <summary>
+        /// Used to split device Id strings into their integer parts.
+        /// </summary>
+        private static readonly Regex _deviceIdRegex = new Regex(@"\d+", RegexOptions.Compiled);
+
+        #endregion
+
         #region Match Method Stats
 
         /// <summary>
@@ -56,9 +116,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Fields
 
         /// <summary>
-        /// A cache for user agents.
+        /// A cache for User-Agents.
         /// </summary>
-        private readonly Cache<string, MatchState> _userAgentCache = null;
+        private readonly Cache<string, MatchResult> _userAgentCache = null;
 
         /// <summary>
         /// The number of detections performed using the method.
@@ -114,7 +174,43 @@ namespace FiftyOne.Foundation.Mobile.Detection
             MethodCounts.Add(MatchMethods.Numeric, 0);
             MethodCounts.Add(MatchMethods.None, 0);
             RecordDetectionTime = recordDetectionTime;
-            _userAgentCache = cacheSize > 0 ? new Cache<string, MatchState>(cacheSize) : null;
+            _userAgentCache = cacheSize > 0 ? 
+                new Cache<string, MatchResult>(cacheSize) : null;
+        }
+
+        #endregion
+
+        #region Destructor
+
+        /// <summary>
+        /// Ensures the User-Agent cache is disposed if one was created.
+        /// </summary>
+        ~Provider()
+        {
+            Dispose(false);
+        }
+
+        /// <summary>
+        /// Disposes of the User-Agent cache if one was created.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        /// <summary>
+        /// Disposes of the User-Agent cache if one was created.
+        /// </summary>
+        /// <param name="disposing">
+        /// True if the calling method is Dispose, false for the finaliser.
+        /// </param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_userAgentCache != null)
+            {
+                _userAgentCache.Dispose();
+            }
+            GC.SuppressFinalize(this);
         }
 
         #endregion
@@ -122,7 +218,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Properties
 
         /// <summary>
-        /// The percentage of requests for user agents which were not already
+        /// The percentage of requests for User-Agents which were not already
         /// contained in the cache.
         /// </summary>
         public double PercentageCacheMisses
@@ -136,39 +232,245 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Number of times the useragents cache was switched.
         /// </summary>
+        [Obsolete("Replacement LRU cache does not support switching.")]
         public long CacheSwitches
         {
             get
             {
-                return _userAgentCache != null ? _userAgentCache.Switches : 0;
+                return 0;
             }
         }
 
         #endregion
 
-        #region Methods
+        #region Public Methods
 
         /// <summary>
-        /// Resets the match object provided and performs the detection
+        /// Returns the result of a match based on the device Id returned from
+        /// a previous match operation.
+        /// </summary>
+        /// <param name="deviceIdArray">Byte array representation of the device Id</param>
+        /// <returns>
+        /// The <see cref="FiftyOne.Foundation.Mobile.Detection.Match"/>
+        /// object passed to the method updated with
+        /// results for the device id.
+        /// </returns>
+        public Match MatchForDeviceId(byte[] deviceIdArray)
+        {
+            return MatchForDeviceId(deviceIdArray, CreateMatch());
+        }
+
+        /// <summary>
+        /// Returns the result of a match based on the device Id returned from
+        /// a previous match operation.
+        /// </summary>
+        /// <param name="deviceId">String representation of the device Id</param>
+        /// <returns>
+        /// The <see cref="FiftyOne.Foundation.Mobile.Detection.Match"/>
+        /// object passed to the method updated with
+        /// results for the device id.
+        /// </returns>
+        public Match MatchForDeviceId(string deviceId)
+        {
+            return MatchForDeviceId(deviceId, CreateMatch());
+        }
+
+        /// <summary>
+        /// Returns the result of a match based on the device Id returned from
+        /// a previous match operation.
+        /// </summary>
+        /// <param name="profileIds">List of profile ids as integers</param>
+        /// <returns>
+        /// The <see cref="FiftyOne.Foundation.Mobile.Detection.Match"/>
+        /// object passed to the method updated with
+        /// results for the device id.
+        /// </returns>
+        public Match MatchForDeviceId(IList<int> profileIds)
+        {
+            return MatchForDeviceId(profileIds, CreateMatch());
+        }
+
+        /// <summary>
+        /// Returns the result of a match based on the device Id returned from
+        /// a previous match operation.
+        /// </summary>
+        /// <param name="deviceIdArray">Byte array representation of the device Id</param>
+        /// <param name="match">
+        /// A <see cref="FiftyOne.Foundation.Mobile.Detection.Match"/>
+        /// object created by a previous match, or via the 
+        /// <see cref="CreateMatch"/> method.
+        /// </param>
+        /// <returns>
+        /// The Match object passed to the method updated with
+        /// results for the device id.
+        /// </returns>
+        public Match MatchForDeviceId(byte[] deviceIdArray, Match match)
+        {
+            var profileIds = new List<int>();
+            for (int i = 0; i < deviceIdArray.Length; i += 4)
+            {
+                profileIds.Add(BitConverter.ToInt32(deviceIdArray, i));
+            }
+            return MatchForDeviceId(profileIds, match);
+        }
+
+        /// <summary>
+        /// Returns the result of a match based on the device Id returned from
+        /// a previous match operation.
+        /// </summary>
+        /// <param name="deviceId">String representation of the device Id</param>
+        /// <param name="match">
+        /// A <see cref="FiftyOne.Foundation.Mobile.Detection.Match"/>
+        /// object created by a previous match, or via the 
+        /// <see cref="CreateMatch"/> method.
+        /// </param>
+        /// <returns>
+        /// The <see cref="FiftyOne.Foundation.Mobile.Detection.Match"/>
+        /// object passed to the method updated with
+        /// results for the device id.
+        /// </returns>
+        public Match MatchForDeviceId(string deviceId, Match match)
+        {
+            MatchCollection profileIdMatches = _deviceIdRegex.Matches(deviceId);
+            var profileIds = new List<int>(profileIdMatches.Count);
+            foreach(System.Text.RegularExpressions.Match profileIdMatch in profileIdMatches)
+            {
+                int profileId;
+                if (profileIdMatch.Success &&
+                    int.TryParse(profileIdMatch.Value, out profileId))
+                {
+                    profileIds.Add(profileId); 
+                }
+            }
+            return MatchForDeviceId(profileIds, match);
+        }
+
+        /// <summary>
+        /// Returns the result of a match based on the device Id returned from
+        /// a previous match operation.
+        /// </summary>
+        /// <param name="profileIds">List of profile ids as integers</param>
+        /// <param name="match">
+        /// A <see cref="FiftyOne.Foundation.Mobile.Detection.Match"/>
+        /// object created by a previous match, or via the 
+        /// <see cref="CreateMatch"/> method.
+        /// </param>
+        /// <returns>
+        /// The <see cref="FiftyOne.Foundation.Mobile.Detection.Match"/>
+        /// object passed to the method updated with
+        /// results for the device id.
+        /// </returns>
+        public Match MatchForDeviceId(IList<int> profileIds, Match match)
+        {
+            match.Reset();
+            foreach(var profileId in profileIds)
+            {
+                var profile = DataSet.FindProfile(profileId);
+                if (profile != null)
+                {
+                    match.State.ExplicitProfiles.Add(profile);
+                }
+            }
+            return match;
+        }
+
+        /// <summary>
+        /// For a given User-Agent returns a match containing 
+        /// information about the capabilities of the device and 
+        /// it's components.
+        /// </summary>
+        /// <param name="targetUserAgent">
+        /// The User-Agent string to use as the target
+        /// </param>
+        /// <returns>
+        /// A fresh <see cref="FiftyOne.Foundation.Mobile.Detection.Match"/>
+        /// object populated with the results
+        /// for the target User-Agent.
+        /// </returns>
+        public Match Match(string targetUserAgent)
+        {
+            return Match(targetUserAgent, CreateMatch());
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="FiftyOne.Foundation.Mobile.Detection.Match"/>
+        /// object to be used for matching.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="FiftyOne.Foundation.Mobile.Detection.Match"/>
+        /// object ready to be used with the Match methods
+        /// </returns>
+        public Match CreateMatch()
+        {
+            return new Match(this);
+        }
+
+        /// <summary>
+        /// For a given collection of HTTP headers returns a match containing 
+        /// information about the capabilities of the device and 
+        /// it's components.
+        /// </summary>
+        /// <param name="headers">
+        /// List of HTTP headers to use for the detection
+        /// </param>
+        /// <returns>
+        /// A fresh <see cref="FiftyOne.Foundation.Mobile.Detection.Match"/>
+        /// object populated with the results
+        /// for the target User-Agent.
+        /// </returns>
+        public Match Match(NameValueCollection headers)
+        {
+            return Match(headers, CreateMatch());
+        }
+
+        /// <summary>
+        /// Resets the <see cref="FiftyOne.Foundation.Mobile.Detection.Match"/>
+        /// object provided and performs the detection
+        /// using that object rather than creating a new match.
+        /// </summary>
+        /// <param name="targetUserAgent">
+        /// The User-Agent string to use as the target
+        /// </param>
+        /// <param name="match">
+        /// A <see cref="FiftyOne.Foundation.Mobile.Detection.Match"/>
+        /// object created by a previous match, or via the 
+        /// <see cref="CreateMatch"/> method.
+        /// </param>
+        /// <returns>
+        /// The <see cref="FiftyOne.Foundation.Mobile.Detection.Match"/>
+        /// object passed to the method updated with
+        /// results for the target User-Agent
+        /// </returns>
+        public Match Match(string targetUserAgent, Match match)
+        {
+            match.Result = Match(targetUserAgent, match.State);
+            return match;
+        }
+
+        /// <summary>
+        /// Resets the <see cref="FiftyOne.Foundation.Mobile.Detection.Match"/>
+        /// object provided and performs the detection
         /// using that object rather than creating a new match.
         /// </summary>
         /// <param name="headers">
         /// List of HTTP headers to use for the detection
         /// </param>
         /// <param name="match">
-        /// A match object created by a previous match, or via the 
+        /// A <see cref="FiftyOne.Foundation.Mobile.Detection.Match"/>
+        /// object created by a previous match, or via the 
         /// <see cref="CreateMatch"/> method.
         /// </param>
         /// <returns>
-        /// The match object passed to the method updated with
-        /// results for the target user agent
+        /// The <see cref="FiftyOne.Foundation.Mobile.Detection.Match"/>
+        /// object passed to the method updated with
+        /// results for the target User-Agent
         /// </returns>
         public Match Match(NameValueCollection headers, Match match)
         {
             if (headers == null || headers.Count == 0)
             {
                 // Empty headers all default match result.
-                Controller.MatchDefault(match);
+                Controller.MatchDefault(match.State);
             }
             else
             {
@@ -186,54 +488,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     var matches = MatchForHeaders(match, headers, importantHeaders);
 
                     // A list of new profiles to use with the match.
-                    var newProfiles = new Profile[DataSet.Components.Count];
                     var componentIndex = 0;
                     foreach(var component in DataSet.Components)
                     {
-                        // See if any of the headers can be used for this
-                        // components profile. As soon as one matches then
-                        // stop and don't look at any more. They are ordered
-                        // in preferred sequence such that the first item is 
-                        // the most preferred.
-                        foreach(var header in component.HttpHeaders)
-                        {
-                            Match headerMatch;
-                            if (matches.TryGetValue(header, out headerMatch))
-                            {
-                                // Update the statistics about the matching process if this
-                                // header isn't the match instance passed to the method.
-                                if (match != headerMatch)
-                                {
-                                    match._signaturesCompared += headerMatch._signaturesCompared;
-                                    match._signaturesRead += headerMatch._signaturesRead;
-                                    match._stringsRead += headerMatch._stringsRead;
-                                    match._rootNodesEvaluated += headerMatch._rootNodesEvaluated;
-                                    match._nodesEvaluated += headerMatch._nodesEvaluated;
-                                    match._elapsed += headerMatch._elapsed;
-                                    match.LowestScore += headerMatch.Difference;
-                                }
+                        // Get the profile for this component.
+                        var profile = GetMatchingHeaderProfile(match.State, matches, component);
 
-                                // If the header match used is worst than the current one
-                                // then update the method used for the match returned.
-                                if ((int)headerMatch.Method > (int)match.Method)
-                                {
-                                    match._method = headerMatch.Method;
-                                }
-
-                                // Set the profile for this component.
-                                newProfiles[componentIndex] = headerMatch.Profiles.FirstOrDefault(i =>
-                                    component.Equals(i.Component));
-
-                                break;
-                            }
-                        }
-
-                        // If no profile could be found for the component
-                        // then use the default profile.
-                        if (newProfiles[componentIndex] == null)
-                        {
-                            newProfiles[componentIndex] = component.DefaultProfile;
-                        }
+                        // Add the profile found, or the default one if not found.
+                        match.State.ExplicitProfiles.Add(profile == null ? component.DefaultProfile : profile);
 
                         // Move to the next array element.
                         componentIndex++;
@@ -242,28 +504,74 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     // Reset any fields that relate to the profiles assigned
                     // to the match result or that can't contain a value when
                     // HTTP headers are used.
-                    match._signature = null;
-                    match._results = null;
-                    match._targetUserAgent = null;
-
-                    // Replace the match profiles with the new ones.
-                    match._profiles = newProfiles;
+                    match.State.Signature = null;
+                    match.State.TargetUserAgent = null;
                 }
             }
             return match;
         }
 
+        #endregion
+
+        #region Internal & Private Methods
+
+        /// <summary>
+        /// See if any of the headers can be used for this
+        /// components profile. As soon as one matches then
+        /// stop and don't look at any more. They are ordered
+        /// in preferred sequence such that the first item is 
+        /// the most preferred.
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="matches"></param>
+        /// <param name="component"></param>
+        /// <returns></returns>
+        private static Profile GetMatchingHeaderProfile(MatchState state, Dictionary<string, MatchState> matches, Component component)
+        {
+            foreach (var header in component.HttpHeaders)
+            {
+                MatchState headerMatchState;
+                if (matches.TryGetValue(header, out headerMatchState) &&
+                    headerMatchState.Signature != null)
+                {
+                    // Update the statistics about the matching process.
+                    state.SignaturesCompared += headerMatchState.SignaturesCompared;
+                    state.SignaturesRead += headerMatchState.SignaturesRead;
+                    state.StringsRead += headerMatchState.StringsRead;
+                    state.RootNodesEvaluated += headerMatchState.RootNodesEvaluated;
+                    state.NodesEvaluated += headerMatchState.NodesEvaluated;
+                    state.Elapsed += headerMatchState.Elapsed;
+                    state.LowestScore += headerMatchState.LowestScore;
+
+                    // If the header match used is worst than the current one
+                    // then update the method used for the match returned.
+                    if ((int)headerMatchState.Method > (int)state.Method)
+                    {
+                        state.Method = headerMatchState.Method;
+                    }
+
+                    // Return the profile for this component.
+                    return headerMatchState.Signature.Profiles.FirstOrDefault(i =>
+                        component.Equals(i.Component));
+                }
+            }
+            return null;
+        }
+
         /// <summary>
         /// For each of the important HTTP headers provides a mapping to a match result.
         /// </summary>
-        /// <param name="match">The single match instance passed into the match method</param>
+        /// <param name="match">
+        /// A match object created by a previous match, or via the 
+        /// <see cref="CreateMatch"/> method.
+        /// </param>
         /// <param name="headers">The HTTP headers available for matching</param>
         /// <param name="importantHeaders">HTTP header names important to the match process</param>
         /// <returns>A map of HTTP headers and match instances containing results for them</returns>
-        private Dictionary<string, Match> MatchForHeaders(Match match, NameValueCollection headers, IEnumerable<string> importantHeaders)
+        private Dictionary<string, MatchState> MatchForHeaders(Match match, NameValueCollection headers, IEnumerable<string> importantHeaders)
         {
             // Relates HTTP header names to match resutls.
-            var matches = new Dictionary<string, Match>();
+            var matches = new Dictionary<string, MatchState>();
 
             // Iterates through the important header names.
             var iterator = importantHeaders.GetEnumerator();
@@ -271,11 +579,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
             // Make the first match used the match passed
             // into the method. Subsequent matches will
             // use a new instance.
-            var currentMatch = match;
             while(iterator.MoveNext())
             {
-                matches.Add(iterator.Current, currentMatch != null ? currentMatch : CreateMatch());
-                currentMatch = null;
+                matches.Add(iterator.Current, new MatchState(match) { TargetUserAgent = headers[iterator.Current] });
             }
 
             // Using each of the match instances pass the 
@@ -290,136 +596,76 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
         
         /// <summary>
-        /// For a given collection of HTTP headers returns a match containing 
-        /// information about the capabilities of the device and 
-        /// it's components.
-        /// </summary>
-        /// <param name="headers">
-        /// List of HTTP headers to use for the detection
-        /// </param>
-        /// <returns>
-        /// A fresh match object populated with the results
-        /// for the target user agent.
-        /// </returns>
-        public Match Match(NameValueCollection headers)
-        {
-            return Match(headers, CreateMatch());
-        }
-
-        /// <summary>
         /// Resets the match object provided and performs the detection
         /// using that object rather than creating a new match.
         /// </summary>
         /// <param name="targetUserAgent">
-        /// The user agent string to use as the target
+        /// The User-Agent string to use as the target
         /// </param>
-        /// <param name="match">
+        /// <param name="state">
         /// A match object created by a previous match, or via the 
         /// <see cref="CreateMatch"/> method.
         /// </param>
         /// <returns>
         /// The match object passed to the method updated with
-        /// results for the target user agent
+        /// results for the target User-Agent
         /// </returns>
-        public Match Match(string targetUserAgent, Match match)
+        private MatchResult Match(string targetUserAgent, MatchState state)
         {
-            MatchState state;
+            MatchResult result;
 
-            if (_userAgentCache != null &&
-                String.IsNullOrEmpty(targetUserAgent) == false)
+            if (targetUserAgent == null)
             {
-                // Increase the cache requests.
-                Interlocked.Increment(ref _userAgentCache.Requests);
+                // Handle null User-Agents as empty strings.
+                targetUserAgent = String.Empty;
+            }
 
-                if (_userAgentCache._itemsActive.TryGetValue(targetUserAgent, out state) == false)
-                {
-                    // The user agent has not been checked previously. Therefore perform
-                    // the match and store the results in the cache.
-                    MatchNoCache(targetUserAgent, match);
-
-                    // Record the match state in the cache for next time.
-                    state = new MatchState(match);
-                    _userAgentCache._itemsActive[targetUserAgent] = state;
-
-                    // Increase the cache misses.
-                    Interlocked.Increment(ref _userAgentCache.Misses);
-                }
-                else
-                {
-                    // The state of a previous match exists so the match should
-                    // be configured based on the results of the previous state.
-                    match.SetState(state);
-                }
-                _userAgentCache.AddRecent(targetUserAgent, state);
+            if (_userAgentCache != null)
+            {
+                // Fetch the item using the cache.
+                result = _userAgentCache[targetUserAgent, state];
             }
             else
             {
                 // The cache does not exist so call the non caching method.
-                MatchNoCache(targetUserAgent, match);
+                MatchNoCache(targetUserAgent, state);
+                result = new MatchResult(state);
             }
 
-            return match;
+            return result;
         }
 
-        private void MatchNoCache(string targetUserAgent, Match match)
+        /// <summary>
+        /// Matches the User-Agent setting the state without using a cache.
+        /// </summary>
+        /// <param name="targetUserAgent"></param>
+        /// <param name="state"></param>
+        internal void MatchNoCache(string targetUserAgent, MatchState state)
         {
-            // Reset the match instance ready to use the target user agent provided.
-            match.Reset(targetUserAgent);
+            long startTickCount = 0;
+
+            state.Reset(targetUserAgent);
 
             if (RecordDetectionTime)
             {
-                match.Timer.Start();
+                startTickCount = DateTime.UtcNow.Ticks;
             }
 
-            Controller.Match(match);
+            Controller.Match(state);
 
             if (RecordDetectionTime)
             {
-                match.Timer.Stop();
-                match._elapsed = match.Timer.ElapsedTicks;
-                match.Timer.Reset();
+                state.Elapsed = DateTime.UtcNow.Ticks - startTickCount;
             }
 
             // Update the counts for the provider.
             Interlocked.Increment(ref _detectionCount);
             lock (MethodCounts)
             {
-                MethodCounts[match.Method]++;
+                MethodCounts[state.Method]++;
             }
         }
-
-        /// <summary>
-        /// For a given user agent returns a match containing 
-        /// information about the capabilities of the device and 
-        /// it's components.
-        /// </summary>
-        /// <param name="targetUserAgent">
-        /// The user agent string to use as the target
-        /// </param>
-        /// <returns>
-        /// A fresh match object populated with the results
-        /// for the target user agent.
-        /// </returns>
-        public Match Match(string targetUserAgent)
-        {
-            return Match(targetUserAgent, CreateMatch());
-        }
         
-        /// <summary>
-        /// Creates a new match object to be used for matching.
-        /// </summary>
-        /// <returns>
-        /// A match object ready to be used with the Match methods
-        /// </returns>
-        public Match CreateMatch()
-        {
-            return new Match(DataSet);
-        }
-
-        #region Private Methods
-
-        #endregion
-
         #endregion
     }
 }

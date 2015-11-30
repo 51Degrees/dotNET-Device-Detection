@@ -129,61 +129,59 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>byte array in XML string form of request content.</returns>
         internal static byte[] GetContent(HttpRequest request, bool maximumDetail, bool fragment)
         {
-            using (MemoryStream ms = new MemoryStream())
+            MemoryStream ms = new MemoryStream();
+            using (XmlWriter writer = XmlWriter.Create(ms, GetXmlSettings(fragment)))
             {
-                using (XmlWriter writer = XmlWriter.Create(ms, GetXmlSettings(fragment)))
+                writer.WriteStartElement("Device");
+                writer.WriteElementString("DateSent", DateTime.UtcNow.ToString("s"));
+
+                // Record details about the assembly for diagnosis purposes.
+                WriteAssembly(writer);
+
+                // Record information about the active provider.
+                if (WebProvider._activeProviderCreated)
                 {
-                    writer.WriteStartElement("Device");
-                    writer.WriteElementString("DateSent", DateTime.UtcNow.ToString("s"));
-
-                    // Record details about the assembly for diagnosis purposes.
-                    WriteAssembly(writer);
-
-                    // Record information about the active provider.
-                    if (WebProvider._activeProviderCreated)
-                    {
-                        WriteProvider(writer, WebProvider.ActiveProvider);
-                    }
-
-                    // Record either the IP address of the client if not local or the IP
-                    // address of the machine.
-                    if (request.IsLocal == false ||
-                        IsLocalHost(IPAddress.Parse(request.UserHostAddress)) == false)
-                    {
-                        writer.WriteElementString("ClientIP", request.UserHostAddress);
-                    }
-                    else
-                    {
-                        WriteHostIP(writer, "ClientIP");
-                    }
-
-                    WriteHostIP(writer, "ServerIP");
-
-                    foreach (string key in request.Headers.AllKeys)
-                    {
-                        // Determine if the field should be treated as a blank.
-                        bool blank = IsBlankField(key);
-
-                        // Include all header values if maximumDetail is enabled, or
-                        // header values related to the useragent or any header
-                        // key containing profile or information helpful to determining
-                        // mobile devices.
-                        if (maximumDetail ||
-                            key == "User-Agent" ||
-                            key == "Host" ||
-                            key.Contains("profile") ||
-                            blank)
-                        {
-                            // Record the header content if it's not a cookie header.
-                            if (blank)
-                                WriteHeader(writer, key);
-                            else
-                                WriteHeaderValue(writer, key, request.Headers[key]);
-                        }
-                    }
-                    writer.WriteEndElement();
-                    writer.Flush();
+                    WriteProvider(writer, WebProvider.ActiveProvider);
                 }
+
+                // Record either the IP address of the client if not local or the IP
+                // address of the machine.
+                if (request.IsLocal == false ||
+                    IsLocalHost(IPAddress.Parse(request.UserHostAddress)) == false)
+                {
+                    writer.WriteElementString("ClientIP", request.UserHostAddress);
+                }
+                else
+                {
+                    WriteHostIP(writer, "ClientIP");
+                }
+
+                WriteHostIP(writer, "ServerIP");
+
+                foreach (string key in request.Headers.AllKeys)
+                {
+                    // Determine if the field should be treated as a blank.
+                    bool blank = IsBlankField(key);
+
+                    // Include all header values if maximumDetail is enabled, or
+                    // header values related to the useragent or any header
+                    // key containing profile or information helpful to determining
+                    // mobile devices.
+                    if (maximumDetail ||
+                        key == "User-Agent" ||
+                        key == "Host" ||
+                        key.Contains("profile") ||
+                        blank)
+                    {
+                        // Record the header content if it's not a cookie header.
+                        if (blank)
+                            WriteHeader(writer, key);
+                        else
+                            WriteHeaderValue(writer, key, request.Headers[key]);
+                    }
+                }
+                writer.WriteEndElement();
+                writer.Flush();
                 return ms.ToArray();
             }
         }

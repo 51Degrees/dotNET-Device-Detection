@@ -56,8 +56,27 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="dataSet"></param>
         private WebProvider(DataSet dataSet)
-            : base(dataSet, false, Constants.UserAgentCacheSize)
+            : base(dataSet, true, Constants.UserAgentCacheSize)
         {
+        }
+
+        #endregion
+
+        #region Destructor
+
+        /// <summary>
+        /// Disposes of the DataSet if one is available.
+        /// </summary>
+        /// <param name="disposing">
+        /// True if the calling method is Dispose, false for the finaliser.
+        /// </param>        
+        protected override void Dispose(bool disposing)
+        {
+            if (DataSet != null)
+            {
+                DataSet.Dispose();
+            }
+            base.Dispose(disposing);
         }
 
         #endregion
@@ -130,15 +149,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             try
             {
-                using (var stream = File.OpenRead(fileName))
+                using (var reader = new BinaryReader(File.OpenRead(fileName)))
                 {
-                    using (var reader = new BinaryReader(stream))
+                    using (var dataSet = new DataSet(File.GetLastWriteTimeUtc(fileName), DataSet.Modes.File))
                     {
-                        using (var dataSet = new DataSet(File.GetLastWriteTimeUtc(fileName), DataSet.Modes.File))
-                        {
-                            CommonFactory.LoadHeader(dataSet, reader);
-                            return dataSet.Published;
-                        }
+                        CommonFactory.LoadHeader(dataSet, reader);
+                        return dataSet.Published;
                     }
                 }
             }
@@ -402,7 +418,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Returns true if a newer data set is now available.
         /// </summary>
         /// <param name="dataSet">The data set to be checked for changes to the master source</param>
-        /// <returns></returns>
+        /// <returns>true is a newer data set is available</returns>
         private static bool CheckDataFileHasRefreshed(DataSet dataSet)
         {
             if (Manager.BinaryFilePath != null &&
@@ -417,18 +433,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
             return false;
         }
         
-        /// <summary>
-        /// Disposes of the <see cref="DataSet"/> created by the 
-        /// web provider.
-        /// </summary>
-        public void Dispose()
-        {
-            if (DataSet != null)
-            {
-                DataSet.Dispose();
-            }
-        }
-
         #endregion
 
         #region Internal Methods
@@ -508,14 +512,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     match = items != null ? items[matchKey] as Match : null;
                     if ((match == null || hasOverrides) && ActiveProvider != null)
                     {
-                        // Create the match object ready to store the results.
-                        match = ActiveProvider.CreateMatch();
-                        match.Timer.Reset();
-                        match.Timer.Start();
-
                         // Get the match and store the list of properties and values 
                         // in the context and session.
-                        match = ActiveProvider.Match(GetRequiredHeaders(request), match);
+                        match = ActiveProvider.Match(GetRequiredHeaders(request));
                             
                         // Allow other feature detection methods to override profiles.
                         Feature.ProfileOverride.Override(request, match);
@@ -523,9 +522,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         {
                             items[matchKey] = match;
                         }
-
-                        match.Timer.Stop();
-                        match.Elapsed = new TimeSpan(match.Timer.ElapsedTicks);
                     }
                 }
             }
@@ -535,7 +531,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         /// <summary>
         /// Gets the required headers. If the MVC method SetBrowserOverride has been used
-        /// the user agent will be escapted and may contain + characters which need to 
+        /// the User-Agent will be escapted and may contain + characters which need to 
         /// be removed.
         /// </summary>
         /// <remarks>

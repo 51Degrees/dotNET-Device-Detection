@@ -28,8 +28,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
 {
     /// <summary>
     /// Every device can be split into the major components of hardware,
-    /// operating system and browser. The properties and values 
-    /// associated with these components are accessed via this class.
+    /// operating system, crawler and browser. The <see cref="Property"/> and 
+    /// <see cref="Value"/> associated with these components are accessed via 
+    /// this class. A complete list of components can be accessed via the 
+    /// <see cref="FiftyOne.Foundation.Mobile.Detection.Entities.DataSet.Components"/>
     /// </summary>
     /// <remarks>
     /// As there are a small number of components they are always held in memory.
@@ -153,16 +155,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of see <see cref="Component"/>
+        /// Constructs a new instance of see <see cref="Component"/>.
         /// </summary>
         /// <param name="dataSet">
-        /// The <see cref="DataSet"/> being created
+        /// The <see cref="DataSet"/> being created.
         /// </param>
         /// <param name="index">
-        /// Index of the component within the list
+        /// Index of the component within the list.
         /// </param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
         /// </param>
         internal Component(
             DataSet dataSet,
@@ -180,8 +183,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Methods
 
         /// <summary>
-        /// Initialises the references to profiles. Called from the
-        /// <see cref="Factories.MemoryFactory"/> if initialisation is enabled.
+        /// Initialises the references to profiles. 
+        /// Called from the <see cref="Factories.MemoryFactory"/> if 
+        /// initialisation is enabled.
         /// </summary>
         internal void Init()
         {
@@ -196,7 +200,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Returns an array of the properties associated with the component.
         /// </summary>
-        /// <returns>Array of properties for the component</returns>
+        /// <returns>
+        /// Array of properties for the component.
+        /// </returns>
         private Property[] GetProperties()
         {
             return DataSet.Properties.Where(i =>
@@ -204,8 +210,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
 
         /// <summary>
-        /// Returns an array of all the profiles that relate to this
-        /// component.
+        /// Returns an array of all the profiles that relate to this component.
         /// </summary>
         /// <returns></returns>
         private Profile[] GetProfiles()
@@ -218,8 +223,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// Compares this component to another using the numeric
         /// ComponentId field.
         /// </summary>
-        /// <param name="other">The component to be compared against</param>
-        /// <returns>Indication of relative value based on ComponentId field</returns>
+        /// <param name="other">
+        /// The component to be compared against.
+        /// </param>
+        /// <returns>
+        /// Indication of relative value based on ComponentId field.
+        /// </returns>
         public int CompareTo(Component other)
         {
             return ComponentId.CompareTo(other.ComponentId);
@@ -237,8 +246,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Compares this instance to another using the component Id.
         /// </summary>
-        /// <param name="other"></param>
-        /// <returns></returns>
+        /// <param name="other">
+        /// The component to be compared against.
+        /// </param>
+        /// <returns>
+        /// True if <see cref="Component.ComponentId"/> of this component is 
+        /// equal to the ComponentId of the other component.
+        /// </returns>
         public bool Equals(Component other)
         {
             return ComponentId.Equals(other.ComponentId);
