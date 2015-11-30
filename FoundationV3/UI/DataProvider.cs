@@ -223,7 +223,8 @@ namespace FiftyOne.Foundation.UI
         /// Returns true if the property is only available in the premium data.
         /// </summary>
         /// <param name="property"></param>
-        /// <returns></returns>
+        /// <returns>True if property is only available in
+        /// premium data.</returns>
         [Obsolete("DataProvider is deprecated. All data access should use DataSet.")]
         public static bool GetIsPremium(Property property)
         {
@@ -231,10 +232,10 @@ namespace FiftyOne.Foundation.UI
         }
 
         /// <summary>
-        /// Returns the device from the user agent.
+        /// Returns the device from the User-Agent.
         /// </summary>
         /// <param name="userAgent"></param>
-        /// <returns></returns>
+        /// <returns>The device from the User-Agent.</returns>
         [Obsolete("DataProvider is deprecated. All data access should use DataSet.")]
         public static Device GetDevice(string userAgent)
         {
@@ -250,10 +251,10 @@ namespace FiftyOne.Foundation.UI
         }
 
         /// <summary>
-        /// Returns the device ID for the device matching the user agent provided.
+        /// Returns the device ID for the device matching the User-Agent provided.
         /// </summary>
         /// <param name="userAgent"></param>
-        /// <returns></returns>
+        /// <returns>The device id for the User-Agent.</returns>
         [Obsolete("DataProvider is deprecated. All data access should use DataSet.")]
         public static string GetDeviceID(string userAgent)
         {
@@ -267,7 +268,7 @@ namespace FiftyOne.Foundation.UI
         /// Get the property for the name provided.
         /// </summary>
         /// <param name="name"></param>
-        /// <returns></returns>
+        /// <returns>The property for the name provided.</returns>
         [Obsolete("DataProvider is deprecated. All data access should use DataSet.")]
         public static Property GetProperty(string name)
         {
@@ -276,10 +277,10 @@ namespace FiftyOne.Foundation.UI
         }
 
         /// <summary>
-        /// Returns properties based on the unique ID of the device.
+        /// Returns <see cref="Device"/> based on the unique ID of the device.
         /// </summary>
         /// <param name="deviceID"></param>
-        /// <returns></returns>
+        /// <returns><see cref="Device"/> from the device id.</returns>
         [Obsolete("DataProvider is deprecated. All data access should use DataSet.")]
         public static Device GetDeviceFromDeviceID(string deviceID)
         {
@@ -290,10 +291,12 @@ namespace FiftyOne.Foundation.UI
         }
 
         /// <summary>
-        /// Returns the first device which contains the profile ID passed.
+        /// Returns the first <see cref="Device"/> which contains the
+        /// profile ID passed.
         /// </summary>
         /// <param name="profileID"></param>
-        /// <returns></returns>
+        /// <returns>The first <see cref="Device"/> containg
+        /// the profile id.</returns>
         [Obsolete("DataProvider is deprecated. All data access should use DataSet.")]
         public static Device GetDeviceFromProfileID(string profileID)
         {
@@ -312,11 +315,12 @@ namespace FiftyOne.Foundation.UI
         }
 
         /// <summary>
-        /// Returns a device based on the hardware vendor and model seperated by a pipe sign.
+        /// Returns a <see cref="Device"/> based on the hardware vendor
+        /// and model seperated by a pipe sign.
         /// </summary>
         /// <param name="vendor"></param>
         /// <param name="model"></param>
-        /// <returns></returns>
+        /// <returns><see cref="Device"/></returns>
         [Obsolete("DataProvider is deprecated. All data access should use DataSet.")]
         public static Device GetDeviceFromModel(string vendor, string model)
         {
@@ -332,9 +336,11 @@ namespace FiftyOne.Foundation.UI
         }
 
         /// <summary>
-        /// Get any device which has the same hardware model as the one provided.
+        /// Get any <see cref="Device"/> which has the same hardware model as
+        /// the one provided.
         /// </summary>
-        /// <param name="device">The device which others should relate to.</param>
+        /// <param name="device">The <see cref="Device"/> which others should
+        /// relate to.</param>
         /// <returns>A list of related devices.</returns>
         [Obsolete("DataProvider is deprecated. All data access should use DataSet.")]
         public static List<Device> GetRelatedInfo(Device device)
@@ -357,7 +363,7 @@ namespace FiftyOne.Foundation.UI
         /// Returns a list of devices that match the search value provided.
         /// </summary>
         /// <param name="value"></param>
-        /// <returns></returns>
+        /// <returns>A list of devices.</returns>
         [Obsolete("DataProvider is deprecated. All data access should use DataSet.")]
         public static List<Device> FindDevices(string value)
         {

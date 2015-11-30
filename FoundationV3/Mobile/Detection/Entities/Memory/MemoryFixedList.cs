@@ -30,36 +30,47 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
     /// A readonly list of fixed length entity types held in memory.
     /// </summary>
     /// <para>
-    /// Entities in the underlying data structure are either fixed length where the 
-    /// data that represents them always contains the same number of bytes, or variable
-    /// length where the number of bytes to represent the entity varies.
+    /// Entities in the underlying data structure are either fixed length where 
+    /// the data that represents them always contains the same number of bytes, 
+    /// or variable length where the number of bytes to represent the entity 
+    /// varies.
     /// </para>
     /// <para>
-    /// This class uses the index of the entity in the accessor. The list is typically
-    /// used by entities that need to be found quickly using a divide and conquer 
-    /// algorithm.
+    /// This class uses the index of the entity in the accessor. The list is 
+    /// typically used by entities that need to be found quickly using a divide 
+    /// and conquer algorithm.
     /// </para>
     /// <remarks>
-    /// The constructor will read the header information about the underlying data structure
-    /// and the entities are added to the list when the Read method is called.
+    /// The constructor will read the header information about the underlying 
+    /// data structure and the entities are added to the list when the Read 
+    /// method is called.
     /// </remarks>
     /// <remarks>
-    /// The class supports source stream that do not support seeking.
+    /// The class supports source stream that doesn't support seeking.
     /// </remarks>
     /// <remarks>
     /// Should not be referenced directly.
     /// </remarks>
-    /// <typeparam name="T">The type of <see cref="BaseEntity"/> the list will contain</typeparam>
+    /// <typeparam name="T">
+    /// The type of <see cref="BaseEntity"/> the list will contain
+    /// </typeparam>
     public class MemoryFixedList<T> : MemoryBaseList<T>, IFixedList<T> where T : BaseEntity
     {
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of <see cref="MemoryFixedList{T}"/>
+        /// Constructs a new instance of <see cref="MemoryFixedList{T}"/>.
         /// </summary>
-        /// <param name="dataSet">The <see cref="DataSet"/> being created</param>
-        /// <param name="reader">Reader connected to the source data structure and positioned to start reading</param>
-        /// <param name="entityFactory">Used to create new instances of the entity</param>
+        /// <param name="dataSet">
+        /// The <see cref="DataSet"/> being created.
+        /// </param>
+        /// <param name="reader">
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
+        /// </param>
+        /// <param name="entityFactory">
+        /// Used to create new instances of the entity.
+        /// </param>
         internal MemoryFixedList(DataSet dataSet, Reader reader, BaseEntityFactory<T> entityFactory)
             : base(dataSet, reader, entityFactory)
         {
@@ -73,7 +84,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         /// Reads the list into memory.
         /// </summary>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
         /// </param>
         internal override void Read(Reader reader)
         {
@@ -90,8 +102,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         /// <summary>
         /// Accessor for the fixed list.
         /// </summary>
-        /// <param name="index">The index of the entity to be returned from the list</param>
-        /// <returns>Entity at the index requested</returns>
+        /// <param name="index">
+        /// The index of the entity to be returned from the list.
+        /// </param>
+        /// <returns>
+        /// Entity at the index requested.
+        /// </returns>
         public T this[int index]
         {
             get { return _array[index]; }
@@ -101,9 +117,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         /// An enumerable that can return a range of T between index
         /// and the count provided.
         /// </summary>
-        /// <param name="index"></param>
-        /// <param name="count"></param>
-        /// <returns></returns>
+        /// <param name="index">
+        /// First index of the range required.
+        /// </param>
+        /// <param name="count">
+        /// Number of elements to return.
+        /// </param>
+        /// <returns>
+        /// An enumerator for the list.
+        /// </returns>
         public IEnumerable<T> GetRange(int index, int count)
         {
             for (int key = index; key < index + count; key++)
@@ -115,7 +137,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         /// <summary>
         /// An enumeration for the underlying array.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// An enumeration for the underlying array.
+        /// </returns>
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return _array.GetEnumerator();

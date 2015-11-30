@@ -55,13 +55,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of <see cref="AsciiString"/>
+        /// Constructs a new instance of <see cref="AsciiString"/>.
         /// </summary>
         /// <param name="dataSet">
-        /// The data set whose strings list the string is contained within
+        /// The data set whose strings list the string is contained within.
         /// </param>
         /// <param name="offset">
-        /// The offset to the start of the string within the string data structure
+        /// The offset to the start of the string within the string data 
+        /// structure.
         /// </param>
         /// <param name="reader">
         /// Binary reader positioned at the start of the AsciiString.

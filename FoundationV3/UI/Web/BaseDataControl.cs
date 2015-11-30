@@ -314,7 +314,7 @@ namespace FiftyOne.Foundation.UI.Web
                     return new ActivityResult(String.Format(
                         ActivationFailureCouldNotWriteDataFileHtml,
                         ErrorCssClass,
-                        AutoUpdate.BinaryFile.FullName,
+                        AutoUpdate.MasterBinaryDataFile.FullName,
                         WindowsIdentity.GetCurrent().Name));
                 case Mobile.Detection.LicenceKeyResults.GenericFailure:
                 default:

@@ -39,9 +39,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         /// <summary>
         /// Constructs a new instance of <see cref="PropertiesList"/>
         /// </summary>
-        /// <param name="dataSet">The <see cref="DataSet"/> being created</param>
-        /// <param name="reader">Reader connected to the source data structure and positioned to start reading</param>
-        /// <param name="entityFactory">Used to create new instances of the entity</param>
+        /// <param name="dataSet">
+        /// The <see cref="DataSet"/> being created.
+        /// </param>
+        /// <param name="reader">
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
+        /// </param>
+        /// <param name="entityFactory">
+        /// Used to create new instances of the entity.
+        /// </param>
         internal PropertiesList(DataSet dataSet, Reader reader, BaseEntityFactory<Property> entityFactory)
             : base(dataSet, reader, entityFactory)
         {
@@ -83,8 +90,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         /// Returns the property matching the name provided, or null
         /// if no such property is available.
         /// </summary>
-        /// <param name="propertyName">Property name required</param>
-        /// <returns>The property matching the name, otherwise null</returns>
+        /// <param name="propertyName">
+        /// Property name required.
+        /// </param>
+        /// <returns>
+        /// The property matching the name, otherwise null.
+        /// </returns>
         public Property this[string propertyName]
         {
             get

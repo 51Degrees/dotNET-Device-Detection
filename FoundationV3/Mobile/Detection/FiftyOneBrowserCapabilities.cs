@@ -494,6 +494,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         /// <summary>
         /// Returns if the request is from a browser that supports cookies.
+        /// If the 51Degrees value is not available then the default .NET
+        /// detection result is returned. If the 51Degrees value is 
+        /// anything other than False then True will be returned. This
+        /// behaviour ensures down stream logic which is configured to
+        /// depend on cookie support such as forms authentication does
+        /// not fail due to a conservative approach to device detection
+        /// results.
         /// </summary>
         private bool CookieSupport
         {
@@ -506,7 +513,22 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         if (_cookieSupport == null)
                         {
                             var value = _match["CookiesCapable"];
-                            _cookieSupport = value != null ? value.ToBool() : _defaultBrowserCapabilities.Cookies;
+                            if (value == null)
+                            {
+                                _cookieSupport = _defaultBrowserCapabilities.Cookies;
+                            }
+                            else
+                            {
+                                switch (value.ToString())
+                                {
+                                    case "False":
+                                        _cookieSupport = false;
+                                        break;
+                                    default:
+                                        _cookieSupport = true;
+                                        break;
+                                }
+                            }
                         }
                     }
                 }

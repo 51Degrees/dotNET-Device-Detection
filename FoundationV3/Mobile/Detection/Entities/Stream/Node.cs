@@ -29,9 +29,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 {
     /// <summary>
     /// Represents a <see cref="Entities.Node"/> which can be used with the 
-    /// Stream data set. NumericChidren and RankedSignatureIndexes are not loaded
-    /// into memory when the entity is constructed, they're only loaded from the
-    /// data source when requested.
+    /// Stream data set. NumericChidren and RankedSignatureIndexes are not 
+    /// loaded into memory when the entity is constructed, they're only loaded 
+    /// from the data source when requested.
     /// </summary>
     internal abstract class Node : Entities.Node
     {
@@ -40,7 +40,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <summary>
         /// The position in the data set where the NumericChildren start.
         /// </summary>
-        protected readonly long _position;
+        protected long _position;
 
         /// <summary>
         /// Pool used to load NumericChildren and RankedSignatureIndexes.
@@ -52,16 +52,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         #region Constructors
 
         /// <summary>
-        /// Constructs a new instance of <see cref="Node"/>
+        /// Constructs a new instance of <see cref="Node"/>.
         /// </summary>
         /// <param name="dataSet">
-        /// The data set the node is contained within
+        /// The data set the node is contained within.
         /// </param>
         /// <param name="offset">
-        /// The offset in the data structure to the node
+        /// The offset in the data structure to the node.
         /// </param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
         /// </param>
         internal Node(
             DataSet dataSet,
@@ -94,7 +95,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
                             try
                             {
                                 reader.BaseStream.Position = _position;
-                                _numericChildren = ReadNodeNumericIndexes(DataSet, reader, _numericChildrenCount);
+                                _numericChildren = 
+                                    ReadNodeNumericIndexes(DataSet, reader, NumericChildrenCount);
                             }
                             finally
                             {

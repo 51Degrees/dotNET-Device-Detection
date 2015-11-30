@@ -49,7 +49,7 @@ Data files which are updated weekly and daily, automatically, and with more prop
 
 ## Recent Changes
 
-### Version 3.2.5 Highlights
+### Version 3.2.6 Highlights
 
 This release focuses on reducing memory consumption and improving performance when the device data file is used directly from the disk.
 
@@ -69,10 +69,16 @@ This release focuses on reducing memory consumption and improving performance wh
 * Version 3.2 data file formats are supported in parallel with version 3.1 data files.
 * 51Degrees unit tests are now part of the open source distribution.
 
-### Changes from 3.2.4
+### Changes from 3.2.5
 
 Summary of API changes:
 
-* The SQL project now works as expected with the 3.2 device detection logic.
-* Methods used to retrieve property values from Profiles and Signatures have been made clearer, memory use reduced and performance improved further.
-* Automatic data file updates explicitly refresh file status during the update in case .NET did not do this automatically. Avoids a possible cause of automatic update failure.
+* Provider supports retrieving match results using device ids generated from previous matches.
+* The classes to update device data files are now public and can be used to update device data files from non web environments.
+* Licence keys are now verified against the 51Degrees public signature before being used to retrieve updates.
+* The cache has been upgraded to use a least recently used (LRU) design. This removes the need to service the cache in a background thread, and results in a more predictable performance under load. 
+* Duplicate code has been consolidated with a focus on improving documentation and implementing recommendations from code analysis and peer reviews. Testing coverage has been included with initial unit tests for new features.
+* Consistent examples have been added in parallel with APIs in other languages. The examples are designed to highlight specific use cases for the API. They relate to example specific documentation on the 51Degrees web site under Support -> Documentation -> .NET. 
+* The override to indicate if cookies are supported now defaults to True when the value is unknown. This prevents 3rd party components such as forms authentication from failing where an assumption that cookies are always supported has been made but not verified against the server side browser capabilities.
+* The demo web site project no longer includes the 51Degrees.dat file in the project. It is instead copied from the repositories data folder when the project is built.
+* The signed assembly is now compiled with "Optimise Code" option enabled.

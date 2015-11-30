@@ -27,9 +27,9 @@ using System.Text;
 namespace FiftyOne.Foundation.Mobile.Detection.Entities
 {
     /// <summary>
-    /// Encapsulates a list of one or more values. Provides methods
-    /// to return boolean, double and string representations of the
-    /// values list.
+    /// Encapsulates a list of one or more <see cref="Value"/> entities. 
+    /// Provides methods to return boolean, double and string representations 
+    /// of the values list.
     /// </summary>
     /// <para>
     /// The class contains helper methods to make consuming the data set easier.
@@ -39,6 +39,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// </para>
     public class Values : IList<Value>
     {
+        #region Static Fields
+
+        /// <summary>
+        /// Used to find values based on name.
+        /// </summary>
+        private static readonly SearchLists<Value, string> _valuesNameSearch = 
+            new SearchLists<Value, string>();
+
+        #endregion
+
         #region Fields
 
         /// <summary>
@@ -74,42 +84,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Constructs a new instance of the values list.
         /// </summary>
-        /// <param name="property">Property the values list relates to</param>
-        /// <param name="values">An array of values to use with the list</param>
+        /// <param name="property">
+        /// Property the values list relates to.
+        /// </param>
+        /// <param name="values">
+        /// An array of values to use with the list.
+        /// </param>
         internal Values(Property property, Value[] values)
         {
             _property = property;
             _values = values;
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        /// <summary>
-        /// Gets the index of the value name.
-        /// </summary>
-        /// <param name="valueName">Value name required</param>
-        /// <returns>The index matching the value name, otherwise a negative number</returns>
-        private int GetValueIndex(string valueName)
-        {
-            int lower = 0;
-            var upper = Count - 1;
-            int middle = 0;
-
-            while (lower <= upper)
-            {
-                middle = lower + (upper - lower) / 2;
-                var comparisonResult = this[middle].Name.CompareTo(valueName);
-                if (comparisonResult == 0)
-                    return middle;
-                else if (comparisonResult > 0)
-                    upper = middle - 1;
-                else
-                    lower = middle + 1;
-            }
-
-            return ~middle;
         }
 
         #endregion
@@ -125,7 +109,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         {
             get
             {
-                var index = GetValueIndex(valueName);
+                var index = _valuesNameSearch.BinarySearch(_values, valueName);
                 return index >= 0 ? this[index] : null;
             }
         }
@@ -133,10 +117,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// The value represented as a boolean.
         /// </summary>
-        /// <returns>A boolean representation of the only item in the list.</returns>
         /// <exception cref="MobileException">
-        /// Thrown if the method is called for a property with multiple values
+        /// Thrown if the method is called for a property with multiple values.
         /// </exception>
+        /// <returns>
+        /// A boolean representation of the only item in the list.
+        /// </returns>
         public bool ToBool()
         {
             if (_property.IsList)
@@ -147,10 +133,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// The value represented as a double.
         /// </summary>
-        /// <returns>A double representation of the only item in the list.</returns>
         /// <exception cref="MobileException">
-        /// Thrown if the method is called for a property with multiple values
+        /// Thrown if the method is called for a property with multiple values.
         /// </exception>
+        /// <returns>
+        /// A double representation of the only item in the list.
+        /// </returns>
         public double ToDouble()
         {
             if (_property.IsList)
@@ -161,10 +149,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// The value represented as a integer.
         /// </summary>
-        /// <returns>A integer representation of the only item in the list.</returns>
         /// <exception cref="MobileException">
-        /// Thrown if the method is called for a property with multiple values
+        /// Thrown if the method is called for a property with multiple values.
         /// </exception>
+        /// <returns>
+        /// A integer representation of the only item in the list.
+        /// </returns>
         public int ToInt()
         {
             if (_property.IsList)
@@ -175,17 +165,21 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Returns the values as a string array.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// Values as a string array.
+        /// </returns>
         public string[] ToStringArray()
         {
             return this.Select(i => i.Name).ToArray();
         }
 
         /// <summary>
-        /// The values represented as a string where multiple values are seperated 
-        /// by colons.
+        /// The values represented as a string where multiple values are 
+        /// seperated by colons.
         /// </summary>
-        /// <returns>The values as a string</returns>
+        /// <returns>
+        /// The values as a string.
+        /// </returns>
         public override string ToString()
         {
             return String.Join(

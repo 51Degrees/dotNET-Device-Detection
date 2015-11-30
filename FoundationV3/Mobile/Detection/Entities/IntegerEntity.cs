@@ -44,10 +44,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of <see cref="Integer"/>
+        /// Constructs a new instance of <see cref="Integer"/>.
         /// </summary>
         /// <param name="dataSet">
-        /// The data set whose strings list the string is contained within
+        /// The data set whose strings list the string is contained within.
         /// </param>
         /// <param name="index">
         /// The index in the data structure to the integer.

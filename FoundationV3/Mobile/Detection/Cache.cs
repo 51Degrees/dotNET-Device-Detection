@@ -23,48 +23,74 @@ using System.Collections.Generic;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Diagnostics;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
     /// <summary>
-    /// Many of the entities used by the detector data set are requested repeatably. 
+    /// Source of items for the cache if the key does not 
+    /// already exist.
+    /// </summary>
+    /// <typeparam name="K">Key for the cache items</typeparam>
+    /// <typeparam name="V">Value for the cache items</typeparam>
+    internal interface ICacheLoader<K, V>
+    {
+        V Fetch(K key);
+    }
+
+    /// <summary>
+    /// Many of the entities used by the detector are requested repeatably. 
     /// The cache improves memory usage and reduces strain on the garbage collector
-    /// by storing previously requested entities for a short period of time to avoid the
-    /// need to refetch them from the underlying storage mechanisim.
+    /// by storing previously requested entities for a short period of time to avoid 
+    /// the need to refetch them from the underlying storage mechanisim.
     /// </summary>
     /// <para>
-    /// The cache works by maintaining two dictionaries of entities keyed on their offset
-    /// or index. The inactive list contains all items requested since the cache was
-    /// created or last serviced. The active list contains all the items currently in 
-    /// the cache. The inactive list is always updated when an item is requested.
+    /// The Least Recently Used (LRU) cache is used. LRU cache keeps track of what
+    /// was used when in order to discard the least recently used items first.
+    /// Every time a cache item is used the "age" of the item used is updated.
     /// </para>
     /// <para>
-    /// When the cache is serviced the active list is destroyed and the inactive list
-    /// becomes the active list. i.e. all the items that were requested since the cache
-    /// was last serviced are now in the cache. A new inactive list is created to store
-    /// all items being requested since the cache was last serviced.
+    /// For a vast majority of the real life environments a constant stream of unique 
+    /// User-Agents is a fairly rare event. Usually the same User-Agent can be
+    /// encountered multiple times within a fairly short period of time as the user
+    /// is making a subsequent request. Caching frequently occurring User-Agents
+    /// improved detection speed considerably.
+    /// </para>
+    /// <para>
+    /// Some devices are also more popular than others and while the User-Agents for
+    /// such devices may differ, the combination of components used would be very
+    /// similar. Therefore internal caching is also used to take advantage of the 
+    /// more frequently occurring entities.
     /// </para>
     /// <typeparam name="K">Key for the cache items</typeparam>
     /// <typeparam name="V">Value for the cache items</typeparam>
-    internal class Cache<K, V>
+    internal class Cache<K, V> : IDisposable
     {
         #region Fields
 
         /// <summary>
-        /// The active list of cached items.
+        /// Used to synchronise access to the the dictionary and linked
+        /// list in the function of the cache.
         /// </summary>
-        internal ConcurrentDictionary<K, V> _itemsActive;
+        private readonly object _writeLock = new object();
 
         /// <summary>
-        /// The list of inactive cached items.
+        /// Loader used to fetch items not in the cache.
         /// </summary>
-        internal ConcurrentDictionary<K, V> _itemsInactive;
+        private readonly ICacheLoader<K, V> _loader;
 
         /// <summary>
-        /// When this number of items are in the cache the lists should
-        /// be switched.
+        /// Hash map of keys to item values.
         /// </summary>
-        private readonly int _cacheServiceSize;
+        private readonly ConcurrentDictionary<K, LinkedListNode<KeyValuePair<K, V>>> _dictionary;
+
+        /// <summary>
+        /// Linked list of items in the cache.
+        /// </summary>
+        /// <remarks>
+        /// Marked internal as checked as part of the unit tests.
+        /// </remarks>
+        internal readonly LinkedList<KeyValuePair<K,V>> _linkedList;
 
         /// <summary>
         /// The number of items the cache lists should have capacity for.
@@ -74,22 +100,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// The number of requests made to the cache.
         /// </summary>
-        internal long Requests;
+        internal long Requests { get { return _requests; } }
+        private long _requests;
 
         /// <summary>
         /// The number of times an item was not available.
         /// </summary>
-        internal long Misses;
-
-        /// <summary>
-        /// The number of times the cache was switched.
-        /// </summary>
-        internal long Switches;
-
-        /// <summary>
-        /// Indicates a switch operation is in progress.
-        /// </summary>
-        private bool _swtiching = false;
+        internal long Misses { get { return _misses; } }
+        private long _misses;
 
         #endregion
 
@@ -106,6 +124,82 @@ namespace FiftyOne.Foundation.Mobile.Detection
             }
         }
 
+        /// <summary>
+        /// Retrieves the value for key requested. If the key does not exist
+        /// in the cache then the loader provided in the constructor is used
+        /// to fetch the item.
+        /// </summary>
+        /// <param name="key">Key for the item required</param>
+        /// <returns>An instance of the value associated with the key</returns>
+        internal V this[K key]
+        {
+            get
+            {
+                return this[key, _loader];
+            }
+        }
+
+        /// <summary>
+        /// Retrieves the value for key requested. If the key does not exist
+        /// in the cache then the Fetch method is used to retrieve the value
+        /// from another source.
+        /// </summary>
+        /// <param name="key">Key for the item required</param>
+        /// <param name="loader">Loader to fetch the item from if not in the cache</param>
+        /// <returns>An instance of the value associated with the key</returns>
+        internal V this[K key, ICacheLoader<K, V> loader]
+        {
+            get
+            {
+                bool added = false;
+                Interlocked.Increment(ref _requests);
+                LinkedListNode<KeyValuePair<K,V>> node, newNode = null;
+                if (_dictionary.TryGetValue(key, out node) == false)
+                {
+                    // Get the item fresh from the loader before trying
+                    // to write the item to the cache.
+                    Interlocked.Increment(ref _misses);
+                    newNode = new LinkedListNode<KeyValuePair<K, V>>(
+                        new KeyValuePair<K, V>(key, loader.Fetch(key)));
+                    
+                    lock (_writeLock)
+                    {
+                        // If the node has already been added to the dictionary
+                        // then get it, otherise add the one just fetched.
+                        node = _dictionary.GetOrAdd(key, newNode);
+                    
+                        // If the node got from the dictionary is the new one
+                        // just feteched then it needs to be added to the linked
+                        // list.
+                        if (node == newNode)
+                        {
+                            added = true;
+                            _linkedList.AddFirst(node);
+
+                            // Check to see if the cache has grown and if so remove
+                            // the last element.
+                            RemoveLeastRecent();
+                        }
+                    }
+                }
+
+                // The item is in the dictionary. Check it's still in the list
+                // and if so them move it to the head of the linked list.
+                if (added == false)
+                {
+                    lock (_writeLock)
+                    {
+                        if (node.List != null)
+                        {
+                            _linkedList.Remove(node);
+                            _linkedList.AddFirst(node);
+                        }
+                    }
+                }
+                return node.Value.Value;
+            }
+        }
+        
         #endregion
 
         #region Constructor
@@ -114,69 +208,92 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Constucts a new instance of the cache.
         /// </summary>
         /// <param name="cacheSize">The number of items to store in the cache</param>
-        internal Cache(int cacheSize)
+        internal Cache(int cacheSize) 
         {
             _cacheSize = cacheSize;
-            _cacheServiceSize = cacheSize / 2;
-            _itemsInactive = new ConcurrentDictionary<K, V>(Environment.ProcessorCount, cacheSize);
-            _itemsActive = new ConcurrentDictionary<K, V>(Environment.ProcessorCount, cacheSize);
+            _dictionary = new ConcurrentDictionary<K, LinkedListNode<KeyValuePair<K, V>>>(
+                Environment.ProcessorCount, cacheSize);
+            _linkedList = new LinkedList<KeyValuePair<K, V>>();
+        }
+        
+        /// <summary>
+        /// Constucts a new instance of the cache.
+        /// </summary>
+        /// <param name="cacheSize">The number of items to store in the cache</param>
+        /// <param name="loader">Loader used to fetch items not in the cache</param>
+        internal Cache(int cacheSize, ICacheLoader<K,V> loader) : this (cacheSize)
+        {
+            _loader = loader;
+        }
+
+        #endregion
+
+        #region Destructor
+
+        /// <summary>
+        /// Ensures the lock used to synchronise the cache is disposed.
+        /// </summary>
+        ~Cache()
+        {
+            Dispose(false);
+        }
+
+        /// <summary>
+        /// Disposes of the lock used to synchronise the cache.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        /// <summary>
+        /// Disposes of the lock used to synchronise the cache.
+        /// </summary>
+        /// <param name="disposing">
+        /// True if the calling method is Dispose, false for the finaliser.
+        /// </param>
+        protected void Dispose(bool disposing)
+        {
+            GC.SuppressFinalize(this);
         }
 
         #endregion
 
         #region Methods
-
+        
         /// <summary>
-        /// Indicates an item has been retrieved from the data set and should
-        /// be reset in the cache so it's not removed at the next service.
-        /// If the inactive cache is now more than 1/2 the total cache size
-        /// the the lists should be switched.
+        /// Removes the last item in the cache if the cache size is reached.
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        internal void AddRecent(K key, V value)
+        private void RemoveLeastRecent()
         {
-            _itemsInactive[key] = value;
-            if (_itemsInactive.Count > _cacheServiceSize &&
-                _swtiching == false)
+            if (_linkedList.Count > _cacheSize)
             {
-                lock (this)
-                {
-                    if (_itemsInactive.Count > _cacheServiceSize &&
-                        _swtiching == false)
-                    {
-                        ThreadPool.QueueUserWorkItem(ServiceCache, this);
-                        _swtiching = true;
-                    }
-                }
+                LinkedListNode<KeyValuePair<K, V>> lastNode;
+                _dictionary.TryRemove(_linkedList.Last.Value.Key, out lastNode);
+                _linkedList.Remove(lastNode);
+
+                Debug.Assert(_linkedList.Count == _cacheSize, String.Format(
+                    "The linked list has '{0}' elements but should contain '{1}'.",
+                    _linkedList.Count,
+                    _cacheSize));
+                Debug.Assert(_dictionary.Count == _cacheSize, String.Format(
+                    "The dictionary has '{0}' elements but should contain '{1}'.",
+                    _dictionary.Count,
+                    _cacheSize));
             }
         }
 
         /// <summary>
-        /// Locks the cache before removing old items from the cache.
-        /// Call when the cache becomes full and needs to be switched.
+        /// Resets the stats for the cache.
         /// </summary>
-        /// <param name="state">Reference to the cache being serviced.</param>
-        private static void ServiceCache(object state)
+        internal void ResetCache()
         {
-            var cache = (Cache<K, V>)state;
-
-            // Switch over the cached items dictionaries.
-            var temp = cache._itemsInactive;
-            cache._itemsInactive = cache._itemsActive;
-            cache._itemsActive = temp;
-
-            // Clear the inactive list ready to build 
-            // it up again.
-            cache._itemsInactive.Clear();
-
-            // Increase the switch count for the cache.
-            cache.Switches++;
-
-            // Allow other switch operations to proceed.
-            cache._swtiching = false;
+            _linkedList.Clear();
+            _dictionary.Clear();
+            _misses = 0;
+            _requests = 0;
         }
-
+        
         #endregion
     }
 }

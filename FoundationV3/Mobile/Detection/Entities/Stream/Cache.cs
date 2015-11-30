@@ -1,6 +1,6 @@
 ﻿/* *********************************************************************
  * This Source Code Form is copyright of 51Degrees Mobile Experts Limited. 
- * Copyright 2014 51Degrees Mobile Experts Limited, 5 Charlotte Close,
+ * Copyright © 2015 51Degrees Mobile Experts Limited, 5 Charlotte Close,
  * Caversham, Reading, Berkshire, United Kingdom RG4 7BY
  * 
  * This Source Code Form is the subject of the following patent 
@@ -27,40 +27,26 @@ using System.Collections.Concurrent;
 namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 {
     /// <summary>
-    /// Provides an additional method to reduce the number of parameters
-    /// passed when adding an item to the cache.
+    /// Cache class used by <see cref="FixedCacheList{T}"/> and 
+    /// <see cref="CacheList{T}"/> to cache frequently accessed items.
     /// </summary>
-    /// <typeparam name="T">The type of <see cref="BaseEntity"/> the cache will contain</typeparam>
+    /// <typeparam name="T">
+    /// The type of <see cref="BaseEntity"/> the cache will contain.
+    /// </typeparam>
     internal class Cache<T> : Cache<int, T> where T : BaseEntity 
     {
         /// <summary>
         /// Constructs a new instance of <see cref="Cache{T}"/> for
         /// use with entities.
         /// </summary>
-        /// <param name="cacheSize"></param>
-        internal Cache(int cacheSize) : base(cacheSize)
+        /// <param name="cacheSize">
+        /// The number of items to store in the cache.
+        /// </param>
+        /// <param name="loader">
+        /// Loader used to fetch items not in the cache.
+        /// </param>
+        internal Cache(int cacheSize, ICacheLoader<int, T> loader) : base(cacheSize, loader)
         {
-        }
-
-        /// <summary>
-        /// Adds the item to the using it's index as the key.
-        /// </summary>
-        /// <param name="item"></param>
-        internal void AddRecent(T item)
-        {
-            base.AddRecent(item.Index, item);
-        }
-
-        /// <summary>
-        /// Resets the stats for the cache.
-        /// </summary>
-        internal void ResetCache()
-        {
-            base._itemsActive.Clear();
-            base._itemsInactive.Clear();
-            base.Misses = 0;
-            base.Requests = 0;
-            base.Switches = 0;
         }
     }
 }

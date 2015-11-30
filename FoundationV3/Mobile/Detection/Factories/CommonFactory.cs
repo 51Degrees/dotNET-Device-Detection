@@ -28,6 +28,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
 {
     /// <summary>
     /// Extension methods used to load data into the data set entity.
+    /// Used at the start of both memory and stream factories.
+    /// Objects of this class should not be created directly as they 
+    /// are part of the internal logic.
     /// </summary>
     internal static class CommonFactory
     {
@@ -35,7 +38,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// Loads the data set headers information.
         /// </summary>
         /// <param name="dataSet">The data set to be loaded</param>
-        /// <param name="reader">Reader positioned at the beginning of the data source</param>
+        /// <param name="reader">Reader positioned at the beginning of the
+        /// data source</param>
         internal static void LoadHeader(DataSet dataSet, BinaryReader reader)
         {
             // Check for an exception which would indicate the file is the 
@@ -53,8 +57,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
                 throw new MobileException(String.Format(
                     "Data file is invalid. Check that the data file is " +
                     "decompressed and is version '{0}' format.",
-                    String.Join(",", BinaryConstants.SupportedPatternFormatVersions.Select(i => 
-                        i.Value.ToString())), ex));
+                    String.Join(",", BinaryConstants.SupportedPatternFormatVersions.Select(i =>
+                        i.Value.ToString()))), ex);
             }
 
             // Throw exception if the data file does not have the correct
@@ -111,8 +115,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// <summary>
         /// Reads a date in year, month and day order from the reader.
         /// </summary>
-        /// <param name="reader">Reader positioned at the start of the date</param>
-        /// <returns>A date time with the year, month and day set from the reader</returns>
+        /// <param name="reader">Reader positioned at the start of the date
+        /// </param>
+        /// <returns>A date time with the year, month and day set from the
+        /// reader</returns>
         private static DateTime ReadDate(BinaryReader reader)
         {
             return new DateTime(reader.ReadInt16(), reader.ReadByte(), reader.ReadByte());

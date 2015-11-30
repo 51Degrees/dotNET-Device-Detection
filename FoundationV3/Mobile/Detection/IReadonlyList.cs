@@ -21,6 +21,7 @@
 
 using System.Collections.Generic;
 using FiftyOne.Foundation.Mobile.Detection.Entities;
+using System;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
@@ -29,7 +30,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// the list.
     /// </summary>
     /// <typeparam name="T">The type of <see cref="BaseEntity"/> the list will contain</typeparam>
-    public interface IReadonlyList<T> : IEnumerable<T> where T : BaseEntity
+    public interface IReadonlyList<T> : IDisposable, IEnumerable<T> where T : BaseEntity
     {
         /// <summary>
         /// Accessor for the list.

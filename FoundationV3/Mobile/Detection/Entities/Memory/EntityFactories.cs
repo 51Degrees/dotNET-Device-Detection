@@ -24,6 +24,10 @@ using FiftyOne.Foundation.Mobile.Detection.Readers;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
 {
+    /// <summary>
+    /// Factory class used to create the new instances of Node V3.1 object.
+    /// Difference is in the length of the Node entity.
+    /// </summary>
     internal class NodeMemoryFactoryV31 : NodeFactory
     {
         protected override Entities.Node Construct(DataSet dataSet, int offset, Reader reader)
@@ -34,8 +38,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         /// <summary>
         /// Returns the length of the <see cref="NodeV31"/> entity provided.
         /// </summary>
-        /// <param name="entity">An entity of type Node who length is required</param>
-        /// <returns>The number of bytes used to store the node</returns>
+        /// <param name="entity">
+        /// An entity of type Node who length is required.
+        /// </param>
+        /// <returns>
+        /// The number of bytes used to store the node.
+        /// </returns>
         internal override int GetLength(Entities.Node entity)
         {
             return BaseLength + 
@@ -46,6 +54,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         }
     }
 
+    /// <summary>
+    /// Factory class used to create the new instances of Node V3.2 object.
+    /// Difference is in the length of the Node entity.
+    /// </summary>
     internal class NodeMemoryFactoryV32 : NodeFactory
     {
         protected override Entities.Node Construct(DataSet dataSet, int offset, Reader reader)
@@ -56,8 +68,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         /// <summary>
         /// Returns the length of the <see cref="NodeV32"/> entity provided.
         /// </summary>
-        /// <param name="entity">An entity of type Node who length is required</param>
-        /// <returns>The number of bytes used to store the node</returns>
+        /// <param name="entity">
+        /// An entity of type Node who length is required.
+        /// </param>
+        /// <returns>
+        /// The number of bytes used to store the node.
+        /// </returns>
         internal override int GetLength(Entities.Node entity)
         {
             return BaseLength +
@@ -70,6 +86,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         }
     }
 
+    /// <summary>
+    /// Creates Profile entities for use with memory data set.
+    /// </summary>
     internal class ProfileMemoryFactory : ProfileFactory
     {
         protected override Entities.Profile Construct(DataSet dataSet, int offset, Reader reader)

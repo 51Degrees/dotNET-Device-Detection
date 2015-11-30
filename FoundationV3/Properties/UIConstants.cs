@@ -60,7 +60,7 @@ namespace FiftyOne.Foundation.UI
         internal const string LogoAltText = "51Degrees";
 
         /// <summary>
-        /// The number of characters per line when the user agent is broken down.
+        /// The number of characters per line when the User-Agent is broken down.
         /// </summary>
         internal const int UserAgentCharactersPerLine = 80;
     }
