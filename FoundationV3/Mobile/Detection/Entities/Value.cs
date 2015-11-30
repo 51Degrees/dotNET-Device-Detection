@@ -27,24 +27,37 @@ using System.IO;
 namespace FiftyOne.Foundation.Mobile.Detection.Entities
 {
     /// <summary>
-    /// A value associated with a property and component within the dataset.
+    /// A value associated with a <see cref="Property"/> and 
+    /// <see cref="Profile"/> within the dataset.
     /// </summary>
     /// <para>
-    /// Every property can return one of many values, or multiple values if it's a list 
-    /// property. For example; SupportedBearers returns a list of the bearers that the
-    /// device can support.
+    /// Every property can return one of many values, or multiple values if 
+    /// it's a list property. For example; SupportedBearers returns a list of 
+    /// the bearers that the device can support.
     /// </para>
     /// <para>
-    /// The value class contains all the information associated with the value including
-    /// the display name, and also other information such as a description or URL to find
-    /// out additional information. These other properties can be used by UI developers to
-    /// provide users with more information about the meaning and intended use of a value.
+    /// The value class contains all the information associated with the value 
+    /// including the display name, and also other information such as a 
+    /// description or URL to find out additional information. These other 
+    /// properties can be used by UI developers to provide users with more 
+    /// information about the meaning and intended use of a value.
     /// </para>
     /// <para>
-    /// For more information see https://51degrees.com/Support/Documentation/Net
+    /// For more information see 
+    /// https://51degrees.com/Support/Documentation/Net
     /// </para>
-    public class Value : BaseEntity, IComparable<Value>
+    public class Value : BaseEntity, IComparable<Value>, IComparable<string>
     {
+        #region Static Fields
+
+        /// <summary>
+        /// Used to find profiles with values that include this one.
+        /// </summary>
+        private static readonly SearchLists<Value, int> _valuesIndexSearch = 
+            new SearchLists<Value, int>();
+
+        #endregion
+
         #region Properties
 
         /// <summary>
@@ -85,8 +98,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// Array containing the signatures that the value is associated with.
         /// </summary>
         /// <remarks>
-        /// If time taken to determine the signatures associated with a value can
-        /// take a long time as the entire list of signatures needs to be read.
+        /// If time taken to determine the signatures associated with a value 
+        /// can take a long time as the entire list of signatures needs to be 
+        /// read.
         /// </remarks>
         public Signature[] Signatures
         {
@@ -218,16 +232,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Constructors
 
         /// <summary>
-        /// Constructs a new instance of <see cref="Value"/>
+        /// Constructs a new instance of <see cref="Value"/>.
         /// </summary>
         /// <param name="dataSet">
-        /// The data set the value is contained within
+        /// The data set the value is contained within.
         /// </param>
         /// <param name="index">
-        /// The index in the data structure to the value
+        /// The index in the data structure to the value.
         /// </param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
         /// </param>
         internal Value(
             DataSet dataSet,
@@ -250,8 +265,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// the data set can be completed.
         /// </summary>
         /// <remarks>
-        /// The Profiles and Signatures are not initialised as they are very rarely
-        /// used and take a long time to initialise.
+        /// The Profiles and Signatures are not initialised as they are very 
+        /// rarely used and take a long time to initialise.
         /// </remarks>
         internal void Init()
         {
@@ -268,17 +283,21 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Gets all the profiles associated with the value.
         /// </summary>
-        /// <returns>Returns the profiles from the component that relate to this value</returns>
+        /// <returns>
+        /// Returns the profiles from the component that relate to this value.
+        /// </returns>
         private Profile[] GetProfiles()
         {
             return Component.Profiles.Where(i =>
-                BinarySearch(i.Values, Index) >= 0).ToArray();
+                _valuesIndexSearch.BinarySearch(i.Values, Index) >= 0).ToArray();
         }
 
         /// <summary>
         /// Gets all the signatures associated with the value.
         /// </summary>
-        /// <returns>Returns the signatures associated with the value</returns>
+        /// <returns
+        /// >Returns the signatures associated with the value.
+        /// </returns>
         private Signature[] GetSignatures()
         {
             var list = new List<Signature>();
@@ -297,16 +316,34 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Public Methods
 
         /// <summary>
+        /// Compares the name of this value to the one provided.
+        /// </summary>
+        /// <param name="name">
+        /// String containing a name of another value to compare to this value.
+        /// </param>
+        /// <returns>
+        /// Indication of relative value based on name.
+        /// </returns>
+        public int CompareTo(string name)
+        {
+            return Name.CompareTo(name);
+        }
+
+        /// <summary>
         /// Compares this value to another using the index field if they're in the
         /// same list other wise the name value.
         /// </summary>
-        /// <param name="other">The value to be compared against</param>
-        /// <returns>Indication of relative value based on index field</returns>
+        /// <param name="other">
+        /// The value to be compared against.
+        /// </param>
+        /// <returns>
+        /// Indication of relative value based on index field.
+        /// </returns>
         public int CompareTo(Value other)
         {
             if (DataSet == other.DataSet)
                 return Index.CompareTo(other.Index);
-            return Name.CompareTo(other.Name);
+            return CompareTo(other.Name);
         }
 
         /// <summary>

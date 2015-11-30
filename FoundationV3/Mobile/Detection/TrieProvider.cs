@@ -178,10 +178,39 @@ namespace FiftyOne.Foundation.Mobile.Detection
         
         #endregion
 
+        #region Destructor
+
+        /// <summary>
+        /// Disposes of all the resources used by the provider.
+        /// </summary>
+        ~TrieProvider()
+        {
+            Dispose(false);
+        }
+
+        /// <summary>
+        /// Disposes of all the resources used by the provider.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        /// <summary>
+        /// Disposes of all the resources used by the provider.
+        /// </summary>
+        /// <param name="disposing">True if the calling method is Dispose, false for the finaliser.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            GC.SuppressFinalize(this);
+        }
+
+        #endregion
+
         #region Public Methods
 
         /// <summary>
-        /// Returns the user agent matched against the one provided.
+        /// Returns the User-Agent matched against the one provided.
         /// </summary>
         /// <param name="userAgent"></param>
         /// <returns></returns>
@@ -201,7 +230,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
 
         /// <summary>
-        /// Returns the index of the device associated with the given user agent. The
+        /// Returns the index of the device associated with the given User-Agent. The
         /// index returned may vary across different versions of the source data file
         /// and should not be stored. The "Id" property will remain unique.
         /// </summary>
@@ -294,7 +323,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Returns the value of the property index provided from the device indexes provided.
         /// Matches the Http header to the property index.
         /// </summary>
-        /// <param name="deviceIndexes">Indexes for the device.</param>
+        /// <param name="deviceIndexes">_indexes for the device.</param>
         /// <param name="propertyIndex">Index of the property required.</param>
         /// <returns>The value of the property for the given device indexes</returns>
         public string GetPropertyValue(IDictionary<string, int> deviceIndexes, int propertyIndex)
@@ -326,35 +355,27 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
 
         /// <summary>
-        /// Returns the value of the property for the user agent provided.
+        /// Returns the value of the property for the User-Agent provided.
         /// </summary>
         /// <param name="userAgent">User agent of the request</param>
         /// <param name="propertyName">Name of the property required</param>
-        /// <returns>The value of the property for the given user agent</returns>
+        /// <returns>The value of the property for the given User-Agent</returns>
         public string GetPropertyValue(string userAgent, string propertyName)
         {
             return GetPropertyValue(GetDeviceIndex(userAgent), propertyName);
         }
 
         /// <summary>
-        /// Returns the value of the property for the user agent provided.
+        /// Returns the value of the property for the User-Agent provided.
         /// </summary>
         /// <param name="headers">Collection of HTTP headers and values</param>
         /// <param name="propertyName">Name of the property required</param>
-        /// <returns>The value of the property for the given user agent</returns>
+        /// <returns>The value of the property for the given User-Agent</returns>
         public string GetPropertyValue(NameValueCollection headers, string propertyName)
         {
             return GetPropertyValue(GetDeviceIndexes(headers), propertyName);
         }
         
-        /// <summary>
-        /// Disposes of the pool assigned to the provider.
-        /// </summary>
-        public void Dispose()
-        {
-            _pool.Dispose();
-        }
-
         #endregion
 
         #region Protected Methods
@@ -383,7 +404,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Private Methods
 
         /// <summary>
-        /// Converts a user agent in to a null terminated byte array.
+        /// Converts a User-Agent in to a null terminated byte array.
         /// </summary>
         /// <param name="userAgent">The useragent to be tested</param>
         /// <returns>A null terminated byte array</returns>
@@ -483,7 +504,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// the useragent provided.
         /// </summary>
         /// <param name="reader">Reader with exclusive access to the underlying file</param>
-        /// <param name="userAgent">A null terminated byte array of the user agent to be tested</param>
+        /// <param name="userAgent">A null terminated byte array of the User-Agent to be tested</param>
         /// <param name="index">The index in the array of the current character</param>
         /// <param name="parentDeviceIndex">The device index of the parent node</param>
         /// <returns>The device id with the most number of matching characters</returns>
@@ -492,7 +513,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             // Get the lookup list.
             var lookupListOffset = reader.ReadInt32();
 
-            // If there are no more characters in the user agent return
+            // If there are no more characters in the User-Agent return
             // the parent device index.
             if (index == userAgent.Length)
             {
@@ -555,10 +576,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// the useragent provided.
         /// </summary>
         /// <param name="reader">Reader with exclusive access to the underlying file</param>
-        /// <param name="userAgent">A null terminated byte array of the user agent to be tested</param>
+        /// <param name="userAgent">A null terminated byte array of the User-Agent to be tested</param>
         /// <param name="index">The index in the array of the current character</param>
         /// <param name="parentDeviceIndex">The parent device index to be used if this node doesn't have a different one</param>
-        /// <param name="matchedUserAgent">The characters of the user agent matched</param>
+        /// <param name="matchedUserAgent">The characters of the User-Agent matched</param>
         /// <returns>The device id with the most number of matching characters</returns>
         private int GetDeviceIndex(BinaryReader reader, byte[] userAgent, int index, int parentDeviceIndex, StringBuilder matchedUserAgent)
         {
@@ -590,7 +611,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             if (childIndex >= numberOfChildren)
                 return deviceIndex;
 
-            // Add the character to the matched user agent.
+            // Add the character to the matched User-Agent.
             matchedUserAgent.Append((char)userAgent[index]);
 
             // If there's only 1 child then it will appear immediately after

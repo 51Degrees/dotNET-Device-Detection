@@ -30,19 +30,22 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
     /// A readonly list of variable length entity types held in memory.
     /// </summary>
     /// <para>
-    /// Entities in the underlying data structure are either fixed length where the 
-    /// data that represents them always contains the same number of bytes, or variable
-    /// length where the number of bytes to represent the entity varies.
+    /// Entities in the underlying data structure are either fixed length where 
+    /// the data that represents them always contains the same number of bytes, 
+    /// or variable length where the number of bytes to represent the entity 
+    /// varies.
     /// </para>
     /// <para>
-    /// This class uses the offset of the first byte of the entities data in the underlying
-    /// data structure in the accessor. As such the list isn't being used as a traditional
-    /// list because items are not retrieved by their index in the list, but by there offset
-    /// in the underlying data structure.
+    /// This class uses the offset of the first byte of the entities data in 
+    /// the underlying data structure in the accessor. As such the list isn't 
+    /// being used as a traditional list because items are not retrieved by 
+    /// their index in the list, but by there offset in the underlying data 
+    /// structure.
     /// </para>
     /// <remarks>
-    /// The constructor will read the header information about the underlying data structure
-    /// and the entities are added to the list when the Read method is called.
+    /// The constructor will read the header information about the underlying 
+    /// data structure and the entities are added to the list when the Read 
+    /// method is called.
     /// </remarks>
     /// <remarks>
     /// The class supports source stream that do not support seeking.
@@ -50,17 +53,69 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
     /// <remarks>
     /// Should not be referenced directly.
     /// </remarks>
-    /// <typeparam name="T">The type of <see cref="BaseEntity"/> the list will contain</typeparam>
+    /// <typeparam name="T">
+    /// The type of <see cref="BaseEntity"/> the list will contain.
+    /// </typeparam>
     public class MemoryVariableList<T> : MemoryBaseList<T>, IReadonlyList<T> where T : BaseEntity
     {
-        #region Constructor
-        
+        #region Classes
+
+        private class SearchVariableList : SearchBase<T, int, T[]>
+        {
+            private readonly T[] _array;
+
+            internal SearchVariableList(T[] array)
+            {
+                _array = array;
+            }
+
+            internal int BinarySearch(int offset)
+            {
+                return base.BinarySearchBase(_array, offset);
+            }
+
+            protected override int GetCount(T[] array)
+            {
+                return array.Length;
+            }
+
+            protected override T GetValue(T[] array, int index)
+            {
+                return array[index];
+            }
+
+            protected override int CompareTo(T item, int offset)
+            {
+                return item.Index.CompareTo(offset);
+            }
+        }
+
+        #endregion
+
+        #region Fields
+
         /// <summary>
-        /// Constructs a new instance of <see cref="MemoryVariableList{T}"/>
+        /// Used to search for items in the list.
         /// </summary>
-        /// <param name="dataSet">The <see cref="DataSet"/> being created</param>
-        /// <param name="reader">Reader connected to the source data structure and positioned to start reading</param>
-        /// <param name="entityFactory">Used to create new instances of the entity</param>
+        private SearchVariableList _search;
+
+        #endregion
+
+        #region Constructor
+
+        /// <summary>
+        /// Constructs a new instance of <see cref="MemoryVariableList{T}"/>.
+        /// </summary>
+        /// <param name="dataSet">
+        /// The <see cref="DataSet"/> being created.
+        /// </param>
+        /// <param name="reader">
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
+        /// </param>
+        /// <param name="entityFactory">
+        /// Used to create new instances of the entity.
+        /// </param>
         internal MemoryVariableList(
             DataSet dataSet, 
             Reader reader,
@@ -77,7 +132,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         /// Reads the list into memory.
         /// </summary>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
         /// </param>
         internal override void Read(Reader reader)
         {
@@ -88,6 +144,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
                 _array[index] = entity;
                 offset += EntityFactory.GetLength(entity);
             }
+            _search = new SearchVariableList(_array);
         }
 
         #endregion
@@ -95,50 +152,25 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         #region Methods
 
         /// <summary>
-        /// Uses a divide and conquer method to search the ordered list of entities
-        /// that are held in memory.
-        /// </summary>
-        /// <param name="offset">
-        /// The offset position in the data structure to the entity to be returned from the list
-        /// </param>
-        /// <returns>Entity at the offset requested</returns>
-        private int BinarySearch(int offset)
-        {
-            var lower = 0;
-            var upper = Count - 1;
-
-            while (lower <= upper)
-            {
-                var middle = lower + (upper - lower) / 2;
-                var comparisonResult = _array[middle].Index.CompareTo(offset);
-                if (comparisonResult == 0)
-                    return middle;
-                else if (comparisonResult > 0)
-                    upper = middle - 1;
-                else
-                    lower = middle + 1;
-            }
-
-            return -1;
-        }
-
-        /// <summary>
         /// Accessor for the fixed list.
         /// </summary>
         /// <param name="offset">
-        /// The offset position in the data structure to the entity to be returned from the list
+        /// The offset position in the data structure to the entity to be 
+        /// returned from the list.
         /// </param>
         /// <remarks>
-        /// As all the entities are held in memory and in ascending order of offset a 
-        /// BinarySearch can be used to determine the one that relates to the given offset
-        /// rapidly.
+        /// As all the entities are held in memory and in ascending order of 
+        /// offset a BinarySearch can be used to determine the one that relates 
+        /// to the given offset rapidly.
         /// </remarks>
-        /// <returns>Entity at the offset requested</returns>
+        /// <returns>
+        /// Entity at the offset requested.
+        /// </returns>
         public T this[int offset]
         {
             get 
             {
-                var index = BinarySearch(offset);
+                var index = _search.BinarySearch(offset);
                 if (index >= 0)
                     return _array[index];
                 return null;

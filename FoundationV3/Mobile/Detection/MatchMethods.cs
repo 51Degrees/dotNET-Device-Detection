@@ -27,7 +27,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
     public enum MatchMethods
     {
         /// <summary>
-        /// No match could be determined between the target user agent
+        /// No match could be determined between the target User-Agent
         /// and the list of signatures. Defaults were used.
         /// </summary>
         None = 0,
@@ -37,19 +37,19 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         Exact = 1,
         /// <summary>
-        /// The signature returned matches the target user agent with only
+        /// The signature returned matches the target User-Agent with only
         /// minor differences between numeric numbers.
         /// </summary>
         Numeric = 2,
         /// <summary>
         /// The signature returned contains all the same sub strings as the
-        /// target user agent, but there are minor differences in position.
+        /// target User-Agent, but there are minor differences in position.
         /// </summary>
         Nearest = 3,
         /// <summary>
         /// No signature matched precisely and some relevant characters 
         /// may be different between the returned signature and the 
-        /// target user agent. The <see cref="Match.Difference"/>
+        /// target User-Agent. The <see cref="Match.Difference"/>
         /// property should be used to determine the degree of difference.
         /// </summary>
         Closest = 4

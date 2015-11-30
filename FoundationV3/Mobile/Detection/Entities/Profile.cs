@@ -29,11 +29,33 @@ using System.Collections.Concurrent;
 namespace FiftyOne.Foundation.Mobile.Detection.Entities
 {
     /// <summary>
-    /// Represents a collection of properties and values relating to a profile
-    /// which in turn relates to a component.
+    /// Represents a collection of <see cref="Property"/> and 
+    /// <see cref="Value"/> entities relating to a profile which in turn 
+    /// relates to a component.
     /// </summary>
     /// <para>
+    /// All profiles belong to one of the four <see cref="Component"/>: 
+    /// hardware, software, crawler and browser and have a number of values 
+    /// associated with each profile. The contents of existing profiles should 
+    /// not change over time. Each <see cref="Value"/> contains a getter method 
+    /// for the corresponding <see cref="Property"/>. Device Id is composed of 
+    /// one profile per component.
+    /// </para>
+    /// <para>
+    /// One physical device can have multiple profiles associated with it. 
+    /// While the hardware does not generally change, the browser will almost 
+    /// certainly vary over time as new versions get released and perhaps even 
+    /// a different browser is used.
+    /// </para>
+    /// <para>
     /// Each <see cref="Signature"/> relates to one profile for each component.
+    /// </para>
+    /// <para>
+    /// New profiles are added with each data file update. Some profiles may be
+    /// removed if we do not see any use of the profile for a long period of 
+    /// time. Premium and Enterprise data contain a lot more profiles and hence 
+    /// provide better detection results, especially for less common devices.
+    /// For more information see: https://51degrees.com/compare-data-options
     /// </para>
     public abstract class Profile : BaseEntity, IComparable<Profile>
     {
@@ -45,7 +67,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         private static readonly Value[] EmptyValues = new Value[0];
 
         /// <summary>
-        /// Unique Id of the profile. Does not change between different data sets.
+        /// Unique Id of the profile. Does not change between different 
+        /// data sets.
         /// </summary>
         public readonly int ProfileId;
 
@@ -109,17 +132,20 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Public Properties
 
         /// <summary>
-        /// Gets the values associated with the property.
+        /// Gets the values associated with the property. Can return null.
         /// </summary>
-        /// <param name="property">The property whose values are required</param>
-        /// <returns>
-        /// Array of the values associated with the property, or null if the property does not exist
-        /// </returns>
+        /// <param name="property">
+        /// The property whose values are required.
+        /// </param>
         /// <para>
         /// The <see cref="Values"/> type is used to return values so that 
         /// helper methods like ToBool can be used to convert the response to 
         /// a boolean.
         /// </para>
+        /// <returns>
+        /// Array of the values associated with the property, or null if the 
+        /// property does not exist.
+        /// </returns>
         public Values this[Property property]
         {
             get
@@ -143,9 +169,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
 
         /// <summary>
-        /// A dictionary relating the index of a property to the
-        /// values returned by the profile. Used to speed up
-        /// subsequent data processing.
+        /// A dictionary relating the index of a property to the values 
+        /// returned by the profile. Used to speed up subsequent data 
+        /// processing.
         /// </summary>
         private IDictionary<int, Values> PropertyIndexToValues
         {
@@ -167,9 +193,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         private IDictionary<int, Values> _propertyIndexToValues;
 
         /// <summary>
-        /// A dictionary relating the name of a property to the
-        /// values returned by the profile. Used to speed up
-        /// subsequent data processing.
+        /// A dictionary relating the name of a property to the values returned 
+        /// by the profile. Used to speed up subsequent data processing.
         /// </summary>
         private IDictionary<string, Values> PropertyNameToValues
         {
@@ -193,9 +218,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Gets the values associated with the property name.
         /// </summary>
-        /// <param name="propertyName">Name of the property whose values are required</param>
+        /// <param name="propertyName">
+        /// Name of the property whose values are required.
+        /// </param>
         /// <returns>
-        /// Array of the values associated with the property, or null if the property does not exist
+        /// Array of the values associated with the property, or null if the 
+        /// property does not exist.
         /// </returns>
         /// <para>
         /// The <see cref="Values"/> type is used to return values so that 
@@ -320,15 +348,18 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of the <see cref="Profile"/>
+        /// Constructs a new instance of the <see cref="Profile"/>.
         /// </summary>
         /// <param name="dataSet">
-        /// The data set whose profile list the profile will be contained within
+        /// The data set whose profile list the profile will be contained 
+        /// within.
         /// </param>
         /// <param name="offset">
-        /// The offset position in the data structure to the profile</param>
+        /// The offset position in the data structure to the profile.
+        /// </param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
         /// </param>
         internal Profile(
             DataSet dataSet,
@@ -368,8 +399,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Gets the values associated with the property for this profile.
         /// </summary>
-        /// <param name="property">Property to be returned.</param>
-        /// <returns>Array of values associated with the property and profile</returns>
+        /// <param name="property">
+        /// Property to be returned.
+        /// </param>
+        /// <returns>
+        /// Array of values associated with the property and profile.
+        /// </returns>
         private Value[] GetPropertyValues(Property property)
         {
             Value[] result;
@@ -438,7 +473,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Gets the signatures related to the profile.
         /// </summary>
-        /// <returns>Array of signatures related to the profile.</returns>
+        /// <returns>
+        /// Array of signatures related to the profile.
+        /// </returns>
         private Signature[] GetSignatures()
         {
             var signatures = new Signature[SignatureIndexes.Length];
@@ -452,7 +489,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Returns an array of properties the profile relates to.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// Array of all properties for this profile.
+        /// </returns>
         private Property[] GetProperties()
         {
             var properties = new List<Property>();
@@ -468,7 +507,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Returns an array of values the profile relates to.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// Array of all values for this profile.
+        /// </returns>
         private Value[] GetValues()
         {
             var values = new Value[ValueIndexes.Length];
@@ -482,8 +523,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Returns the month name as an integer.
         /// </summary>
-        /// <param name="month">Name of the month, i.e. January</param>
-        /// <returns>The integer representation of the month</returns>
+        /// <param name="month">
+        /// Name of the month, i.e. January.
+        /// </param>
+        /// <returns>
+        /// The integer representation of the month
+        /// </returns>
         private static int GetMonthAsInt(string month)
         {
             switch (month)
@@ -509,11 +554,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Public Methods
 
         /// <summary>
-        /// Compares this profile to another using the numeric
-        /// ProfileId field.
+        /// Compares this profile to another using the numeric ProfileId field.
         /// </summary>
-        /// <param name="other">The profile to be compared against</param>
-        /// <returns>Indication of relative value based on ProfileId field</returns>
+        /// <param name="other">
+        /// The profile to be compared against.
+        /// </param>
+        /// <returns>
+        /// Indication of relative value based on ProfileId field.
+        /// </returns>
         public int CompareTo(Profile other)
         {
             return ProfileId.CompareTo(other.ProfileId);
@@ -523,7 +571,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// A string representation of the profiles display values or if none
         /// are available a concatentation of the display properties.
         /// </summary>
-        /// <returns>A string that represents the profile</returns>
         /// <para>
         /// If there are properties with the DisplayOrder properties set to 
         /// values greater than 1 their values are concatenated in ascending
@@ -532,8 +579,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// string version of the ProfileId is returned.
         /// </para>
         /// <para>
-        /// For more information see https://51degrees.com/Support/Documentation/Net
+        /// For more information see 
+        /// https://51degrees.com/Support/Documentation/Net
         /// </para>
+        /// <returns>
+        /// A string that represents the profile.
+        /// </returns>
         public override string ToString()
         {
             if (_stringValue == null)

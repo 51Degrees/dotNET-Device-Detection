@@ -29,7 +29,8 @@ using System.Linq;
 namespace FiftyOne.Foundation.Mobile.Redirection
 {
     /// <summary>
-    /// Class used to convert a HttpRequest into a single long value that is
+    /// Class used to convert a <see cref="HttpRequest"/>
+    /// into a single long value that is
     /// almost unique for the requesting device. Two devices that share the same
     /// external IP address and HTTP headers will calculate to the same long value
     /// so it may not always be unique. The number of handsets that fall into this
@@ -49,7 +50,7 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                                                                           "Accept-Language",
                                                                           "Host",
                                                                           "Via",
-                                                                          "UA", // Another user agent field
+                                                                          "UA", // Another User-Agent field
 
                                                                           // Common x headers
                                                                           "x-forwarded-for",

@@ -19,6 +19,7 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
+using FiftyOne.Foundation.Mobile.Detection.Readers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -32,9 +33,20 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
     /// data readers that are used to fetch data from the source when
     /// the data set is used to retrieve data not already in memory.
     /// </summary>
+    /// <para>
+    /// Created by <see cref="FiftyOne.Foundation.Mobile.Detection.Factories.StreamFactory"/>. 
+    /// Since stream works with file directly a pool of readers is maintained 
+    /// until the dataset is closed. Class provides extra methods to check how 
+    /// many readers were created and how many are currently free to use.
+    /// </para>
     public class DataSet : Entities.DataSet
     {
         #region Fields
+
+        /// <summary>
+        /// The source of readers used by the pool.
+        /// </summary>
+        internal readonly SourceBase Source;
 
         /// <summary>
         /// Pool of readers connected the underlying data file.
@@ -67,33 +79,61 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         #region Constructors
 
         /// <summary>
-        /// /Creates a new stream data set connected to the data
+        /// Creates a new stream <see cref="DataSet"/> connected to the data
         /// file provided.
         /// </summary>
-        /// <param name="fileName">Valid path to the uncompressed data set file</param>
-        /// <param name="lastModified">Date and time the source data was last modified.</param>
+        /// <param name="fileName">
+        /// Valid path to the uncompressed data set file.
+        /// </param>
+        /// <param name="lastModified">
+        /// Date and time the source data was last modified.
+        /// </param>
         /// <param name="mode">
         /// The mode of operation the data set will be using.
         /// </param>
-        /// <param name="isTempFile">True if the file should be deleted when the source is disposed</param>
+        /// <param name="isTempFile">
+        /// True if the file should be deleted when the source is disposed.
+        /// </param>
         internal DataSet(string fileName, DateTime lastModified, Modes mode, bool isTempFile)
             : base(lastModified, mode)
         {
-            Pool = new Pool(new SourceFile(fileName, isTempFile));
+            Source = new SourceFile(fileName, isTempFile);
+            Pool = new Pool(Source);
         }
 
         /// <summary>
         /// Creates a new stream data set connected to the byte array
         /// data source provided.
         /// </summary>
-        /// <param name="data">Byte array containing uncompressed data set</param>
+        /// <param name="data">
+        /// Byte array containing uncompressed data set.
+        /// </param>
         /// <param name="mode">
         /// The mode of operation the data set will be using.
         /// </param>
         internal DataSet(byte[] data, Modes mode)
             : base(DateTime.MinValue, mode)
         {
-            Pool = new Pool(new SourceMemory(data));
+            Source = new SourceMemory(data);
+            Pool = new Pool(Source);
+        }
+
+        #endregion
+
+        #region Destructor
+
+        /// <summary>
+        /// Disposes of the data set closing all readers and streams in 
+        /// the pool. If a temporary data file is used then the file
+        /// is also deleted if it's not being used by other processes.
+        /// </summary>
+        /// <param name="disposing">
+        /// True if the calling method is Dispose, false for the finaliser.
+        /// </param>
+        protected override void Dispose(bool disposing)
+        {
+            Source.Dispose();
+            base.Dispose(disposing);
         }
 
         #endregion
@@ -112,17 +152,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
             ((ICacheList)Profiles).ResetCache();
             ((ICacheList)Values).ResetCache();
             ((ICacheList)RankedSignatureIndexes).ResetCache();
-        }
-
-        /// <summary>
-        /// Disposes of the data set closing all readers and streams in
-        /// the pool. If a temporary data file is used then the file
-        /// is also deleted if it's not being used by other processes.
-        /// </summary>
-        public override void Dispose()
-        {
-            Pool.Dispose();
-            base.Dispose();
         }
 
         #endregion

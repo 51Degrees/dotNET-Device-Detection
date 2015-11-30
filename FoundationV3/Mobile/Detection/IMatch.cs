@@ -36,12 +36,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         /// <summary>
         /// Gets the number of signatures that were checked against the target
-        /// user agent if the Closest Match Method was used.
+        /// User-Agent if the Closest Match Method was used.
         /// </summary>
         int SignaturesCompared { get; }
 
         /// <summary>
-        /// Gets the user agent of the matching device with irrelevant 
+        /// Gets the User-Agent of the matching device with irrelevant 
         /// characters removed.
         /// </summary>
         string UserAgent { get; }
@@ -54,7 +54,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Gets the confidence of the match where 0 is 100% confident, and higher values 
         /// indicate less confidence. The value returned represents the amount of 
-        /// difference between the target user agent and the one returned.
+        /// difference between the target User-Agent and the one returned.
         /// </summary>
         int Difference { get; }
     }

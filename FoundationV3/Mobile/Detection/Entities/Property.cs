@@ -32,27 +32,37 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// values should be used and what they mean.
     /// </summary>
     /// <para>
-    /// Some properties are not mandatory and may not always contain values. For example; information
-    /// concerning features of a television may not be applicable to a mobile phone. The IsMandatory
-    /// property should be checked before assuming a value will be returned.
+    /// Some properties are not mandatory and may not always contain values. 
+    /// For example: information concerning features of a television may not 
+    /// be applicable to a mobile phone. The <see cref="Property.IsMandatory"/> 
+    /// value should be checked before assuming a value will be returned.
     /// </para>
     /// <para>
-    /// Properties can return none, one or many values. The IsList property should be refered to
-    /// to determine the number of values to expect. Properties where IsList is false will only
-    /// return upto one value.
+    /// Properties can return none, one or many values. The 
+    /// <see cref="Property.IsList"/> property should be refered to check if 
+    /// more than one value may be returned. Properties where IsList is false 
+    /// will only return upto one value.
     /// </para>
     /// <para>
-    /// The property also provides other information about the intended use of the property. The 
-    /// Description can be used by UI developers to provide more information about the intended
-    /// use of the property and it's values. The Category property can be used to group together
-    /// related properties in configuration UIs.
+    /// The property also provides additional meta information about itself. 
+    /// The <see cref="Property.Description"/> can be used by UI developers to 
+    /// provide more information about the intended use of the property and 
+    /// it's values. The <see cref="Property.Category"/> can be used to group 
+    /// together related properties in configuration and report user interfaces.
     /// </para>
     /// <para>
-    /// Values are returned in the type <see cref="Values"/> which includes utility methods to 
-    /// easilly extract strongly typed values.
+    /// 51Degrees property dictionary is generated dynamically using the 
+    /// contents of the data file where each property is displayed along with 
+    /// its description and a list of values that the property can have.
+    /// https://51degrees.com/resources/property-dictionary
     /// </para>
     /// <para>
-    /// For more information see https://51degrees.com/Support/Documentation/Net
+    /// Values are returned in the type <see cref="Values"/> which includes 
+    /// utility methods to easilly extract strongly typed values.
+    /// </para>
+    /// <para>
+    /// For more information see 
+    /// https://51degrees.com/Support/Documentation/Net
     /// </para>
     public class Property : BaseEntity,  IComparable<Property>, IEquatable<Property>
     {
@@ -144,8 +154,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         private IList<string> _maps;
 
         /// <summary>
-        /// The name of the property to use when adding to Javascript as a property name.
-        /// Unacceptable characters such as / are removed.
+        /// The name of the property to use when adding to Javascript as a 
+        /// property name. Unacceptable characters such as '/' are removed.
         /// </summary>
         public string JavaScriptName
         {
@@ -211,8 +221,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         internal readonly PropertyValueType _valueType;
 
         /// <summary>
-        /// The default value the property which is also used when a strongly type value
-        /// is not available when converting to strong type like bool or double.
+        /// The default value the property which is also used when a strongly 
+        /// type value is not available when converting to strong type like 
+        /// bool or double.
         /// </summary>
         public Value DefaultValue
         {
@@ -358,16 +369,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of <see cref="Property"/>
+        /// Constructs a new instance of <see cref="Property"/>.
         /// </summary>
         /// <param name="dataSet">
-        /// The data set the property is contained within
+        /// The data set the property is contained within.
         /// </param>
         /// <param name="index">
-        /// The index in the data structure to the property
+        /// The index in the data structure to the property.
         /// </param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
         /// </param>
         internal Property(
             DataSet dataSet,
@@ -425,7 +437,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// at the first value index and moving forward until a new
         /// property is found.
         /// </summary>
-        /// <returns>A values list initialised with the property values</returns>
+        /// <returns>
+        /// A values list initialised with the property values.
+        /// </returns>
         private Values GetValues()
         {
             var values = new Value[LastValueIndex - FirstValueIndex + 1];
@@ -444,8 +458,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// Compares this property to another using the index field if they're
         /// in the same list, otherwise the name field.
         /// </summary>
-        /// <param name="other">The property to be compared against</param>
-        /// <returns>Indication of relative value</returns>
+        /// <param name="other">
+        /// The property to be compared against.
+        /// </param>
+        /// <returns>
+        /// Indication of relative value.
+        /// </returns>
         public int CompareTo(Property other)
         {
             if (DataSet == other.DataSet)
@@ -456,7 +474,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// A string representation of the property.
         /// </summary>
-        /// <returns>The property's name</returns>
+        /// <returns>
+        /// The property's name.
+        /// </returns>
         public override string ToString()
         {
             return Name;
@@ -465,8 +485,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Compares the properties using name value.
         /// </summary>
-        /// <param name="other"></param>
-        /// <returns></returns>
+        /// <param name="other">
+        /// Another property to compare this property to.
+        /// </param>
+        /// <returns>
+        /// True if this property's name equals the name of the other property, 
+        /// False otherwise.
+        /// </returns>
         public bool Equals(Property other)
         {
             return this.Name.Equals(other.Name);
@@ -499,8 +524,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             /// </summary>
             Bool = 3,
             /// <summary>
-            /// The property returns javascript to be executed on the client device.
-            /// The javascript can be used by all versions of the server component.
+            /// The property returns javascript to be executed on the client 
+            /// device. The javascript can be used by all versions of the 
+            /// server component.
             /// </summary>
             JavaScript = 4
         }

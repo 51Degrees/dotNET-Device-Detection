@@ -31,22 +31,45 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
 {
     /// <summary>
     /// Factory class used to create a <see cref="DataSet"/> from a source data
-    /// structure. All the entities are held in the persistent store and only loads into
-    /// memory when required. A cache mechanisim is used to improve efficiency as many
-    /// entities are frequently used in a high volume environment.
-    /// </summary>
+    /// structure. All the entities are held in the persistent store and only
+    /// loads into memory when required. A cache mechanisim is used to improve
+    /// efficiency as many entities are frequently used in a high volume
+    /// environment.
     /// <para>
-    /// The data set will be initialised very quickly as only the header information is read.
-    /// Entities are then created when requested by the detection process and stored in a 
-    /// cache to avoid being recreated if their requested again after a short period of time.
+    /// The data set will be initialised very quickly as only the header
+    /// information is read. Entities are then created when requested by the
+    /// detection process and stored in a cache to avoid being recreated if
+    /// their requested again after a short period of time.
     /// </para>
-    /// <remarks>
-    /// The very small data structures RootNodes, Properties and Components are always
-    /// stored in memory as there is no benefit retrieving them every time they're needed.
-    /// </remarks>
+    /// A dataset can be created in several ways:
+    /// <list>
+    /// <item>Using a data file:
+    /// <code>
+    /// DataSet dataSet = StreamFactory.Create("path_to_file", false);
+    /// </code>
+    /// <para>
+    /// Where the boolean flag indicates if the data file should or should not 
+    /// be deleted when close() is invoked.
+    /// </para>
+    /// </item>
+    /// <item>Using a byte array:
+    /// <code>
+    /// DataSet dataSet = StreamFactory.Create(dataFileAsByteArray);
+    /// </code>
+    /// <para>Where the byte array is the 51Degrees device data file read 
+    /// into a byte array.
+    /// </para>
+    /// </item>
+    /// </list>
     /// <para>
     /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
+    /// </summary>
+    /// <remarks>
+    /// The very small data structures , Properties and Components are always
+    /// stored in memory as there is no benefit retrieving them every time they're 
+    /// needed.
+    /// </remarks>
     public static class StreamFactory
     {
         #region Public Methods
@@ -54,9 +77,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// <summary>
         /// Creates a new <see cref="DataSet"/> from the byte array.
         /// </summary>
-        /// <param name="array">Array of bytes to build the data set from</param>
+        /// <param name="array">Array of bytes to build the data set from
+        /// </param>
         /// <returns>
-        /// A <see cref="DataSet"/> configured to read entities from the array when required
+        /// A <see cref="DataSet"/> configured to read entities from the array 
+        /// when required
         /// </returns>
         public static DataSet Create(byte[] array)
         {
@@ -66,12 +91,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         }
 
         /// <summary>
-        /// Creates a new <see cref="DataSet"/> from the file provided. The last modified
-        /// date of the data set is the last write time of the data file provided.
+        /// Creates a new <see cref="DataSet"/> from the file provided. The
+        /// last modified date of the data set is the last write time of the
+        /// data file provided.
         /// </summary>
-        /// <param name="filePath">Uncompressed file containing the data for the data set</param>
+        /// <param name="filePath">Uncompressed file containing the data for
+        /// the data set</param>
         /// <returns>
-        /// A <see cref="DataSet"/>configured to read entities from the file path when required
+        /// A <see cref="DataSet"/>configured to read entities from the file
+        /// path when required
         /// </returns>
         public static DataSet Create(string filePath)
         {
@@ -79,13 +107,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         }
 
         /// <summary>
-        /// Creates a new <see cref="DataSet"/> from the file provided. The last modified
-        /// date of the data set is the last write time of the data file provided.
+        /// Creates a new <see cref="DataSet"/> from the file provided. The
+        /// last modified date of the data set is the last write time of th
+        /// data file provided.
         /// </summary>
-        /// <param name="filePath">Uncompressed file containing the data for the data set</param>
-        /// <param name="isTempFile">True if the file should be deleted when the source is disposed</param>
+        /// <param name="filePath">Uncompressed file containing the data for
+        /// the data set</param>
+        /// <param name="isTempFile">True if the file should be deleted when
+        /// the source is disposed</param>
         /// <returns>
-        /// A <see cref="DataSet"/>configured to read entities from the file path when required
+        /// A <see cref="DataSet"/>configured to read entities from the file
+        /// path when required
         /// </returns>
         public static DataSet Create(string filePath, bool isTempFile)
         {
@@ -95,10 +127,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// <summary>
         /// Creates a new <see cref="DataSet"/> from the file provided.
         /// </summary>
-        /// <param name="filePath">Uncompressed file containing the data for the data set</param>
-        /// <param name="lastModified">Date and time the source data was last modified.</param>
+        /// <param name="filePath">Uncompressed file containing the data for
+        /// the data set</param>
+        /// <param name="lastModified">Date and time the source data was
+        /// last modified.</param>
         /// <returns>
-        /// A <see cref="DataSet"/>configured to read entities from the file path when required
+        /// A <see cref="DataSet"/>configured to read entities from the file
+        /// path when required
         /// </returns>
         public static DataSet Create(string filePath, DateTime lastModified)
         {
@@ -108,11 +143,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// <summary>
         /// Creates a new <see cref="DataSet"/> from the file provided.
         /// </summary>
-        /// <param name="filePath">Uncompressed file containing the data for the data set</param>
-        /// <param name="lastModified">Date and time the source data was last modified.</param>
-        /// <param name="isTempFile">True if the file should be deleted when the source is disposed</param>
+        /// <param name="filePath">Uncompressed file containing the data for
+        /// the data set</param>
+        /// <param name="lastModified">Date and time the source data was last
+        /// modified.</param>
+        /// <param name="isTempFile">True if the file should be deleted when
+        /// the source is disposed</param>
         /// <returns>
-        /// A <see cref="DataSet"/>configured to read entities from the file path when required
+        /// A <see cref="DataSet"/>configured to read entities from the file
+        /// path when required
         /// </returns>
         public static DataSet Create(string filePath, DateTime lastModified, bool isTempFile)
         {

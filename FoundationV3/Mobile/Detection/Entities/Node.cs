@@ -39,16 +39,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// <para>
     /// The list of <see cref="Signature"/> entities is in ascending order of 
     /// the complete nodes which form the sub strings of the signature.
-    /// Complete nodes are found at detection time for the target user agent
+    /// Complete nodes are found at detection time for the target User-Agent
     /// and then used to search for a corresponding signature. If one does
     /// not exist then Signatures associated with the nodes that were found 
-    /// are evaluated to find one that is closest to the target user agent.
+    /// are evaluated to find one that is closest to the target User-Agent.
     /// </para>
     /// <para>
     /// Root nodes are the first node at a character position. It's children
     /// are based on sequences of characters that if present lead to the 
     /// next node. A complete node will represent a sub string within
-    /// the user agent.
+    /// the User-Agent.
     /// </para>
     /// <para>
     /// For more information see https://51degrees.com/Support/Documentation/Net
@@ -112,19 +112,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// </summary>
         private static readonly byte[] Zero = new byte[0];
 
+        /// <summary>
+        /// Used to find matching numeric nodes.
+        /// </summary>
+        private static readonly SearchLists<NodeNumericIndex, int> _numericChildrenSearch = 
+            new SearchLists<NodeNumericIndex, int>();
+
         #endregion
 
         #region Fields
-
-        /// <summary>
-        /// Number of numeric children associated with the node.
-        /// </summary>
-        protected short _numericChildrenCount;
-
-        /// <summary>
-        /// Number of ranked signatures associated with the node.
-        /// </summary>
-        internal int RankedSignatureCount { get; private set; }
 
         /// <summary>
         /// The next character position to the left of this node
@@ -133,9 +129,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         internal readonly short NextCharacterPosition;
 
         /// <summary>
-        /// A list of all the child node indexes.
+        /// The position in the input stream when this constructor was called.
         /// </summary>
-        internal protected readonly NodeIndex[] Children = null;
+        protected readonly long _nodeStartStreamPosition;
+
+        /// <summary>
+        /// Number of children associated with node.
+        /// </summary>
+        protected readonly short _childrenCount;
 
         /// <summary>
         /// The parent index for this node.
@@ -144,7 +145,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                 
         /// <summary>
         /// The position of the first character the node represents
-        /// in the signature or target user agent.
+        /// in the signature or target User-Agent.
         /// </summary>
         internal readonly short Position;
         
@@ -155,9 +156,38 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// </summary>
         internal readonly int CharacterStringOffset;
 
+        /// <summary>
+        /// Number of numeric children associated with the node.
+        /// </summary>
+        protected readonly short NumericChildrenCount;
+
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// An array of all the child node indexes.
+        /// </summary>
+        internal NodeIndex[] Children
+        {
+            get
+            {
+                return _children;
+            }
+        }
+        protected NodeIndex[] _children;
+
+        /// <summary>
+        /// Number of ranked signatures associated with the node.
+        /// </summary>
+        internal int RankedSignatureCount
+        {
+            get
+            {
+                return _rankedSignatureCount;
+            }
+        }
+        protected int _rankedSignatureCount;
 
         /// <summary>
         /// Returns the root node for this node.
@@ -261,70 +291,36 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// An array of the ranked signature indexes for the node.
         /// </summary>
         internal abstract int[] RankedSignatureIndexes { get; }
-
-        /// <summary>
-        /// Reads the ranked signature count as an integer.
-        /// </summary>
-        /// <remarks>
-        /// V31 uses a 4 byte integer for the count. V32 uses a 2 byte ushort
-        /// for the count. In both data formats no more than <see cref="ushort.MaxValue"/>
-        /// signatures can be associated with a node.
-        /// </remarks>
-        /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
-        /// </param>
-        /// <returns>The count of ranked signatures associated with the node.</returns>
-        protected abstract int ReaderRankedSignatureCount(BinaryReader reader);
-
-        /// <summary>
-        /// Used by the constructor to read the variable length list of child
-        /// node indexes associated with the node.
-        /// </summary>
-        /// <param name="dataSet">
-        /// The data set the node is contained within
-        /// </param>
-        /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
-        /// </param>
-        /// <param name="offset">
-        /// The offset in the data structure to the node
-        /// </param>
-        /// <param name="count">
-        /// The number of node indexes that need to be read.
-        /// </param>
-        /// <returns>An array of child node indexes for the node</returns>
-        protected abstract NodeIndex[] ReadNodeIndexes(DataSet dataSet, BinaryReader reader, int offset, int count);
         
         #endregion
 
         #region Constructors
 
         /// <summary>
-        /// Constructs a new instance of <see cref="Node"/>
+        /// Constructs a new instance of <see cref="Node"/>.
         /// </summary>
         /// <param name="dataSet">
-        /// The data set the node is contained within
+        /// The data set the node is contained within.
         /// </param>
         /// <param name="offset">
-        /// The offset in the data structure to the node
+        /// The offset in the data structure to the node.
         /// </param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
         /// </param>
         internal Node(
             DataSet dataSet,
             int offset,
             BinaryReader reader) : base (dataSet, offset)
         {
-            var position = reader.BaseStream.Position;
+            _nodeStartStreamPosition = reader.BaseStream.Position;
             Position = reader.ReadInt16();
             NextCharacterPosition = reader.ReadInt16();
             _parentOffset = reader.ReadInt32();
             CharacterStringOffset = reader.ReadInt32();
-            var childrenCount = reader.ReadInt16();
-            _numericChildrenCount = reader.ReadInt16();
-            RankedSignatureCount = ReaderRankedSignatureCount(reader);
-            Children = ReadNodeIndexes(dataSet, reader, (int)(offset + reader.BaseStream.Position - position), childrenCount);
+            _childrenCount = reader.ReadInt16();
+            NumericChildrenCount = reader.ReadInt16();
         }
 
         /// <summary>
@@ -335,12 +331,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// The data set the node is contained within
         /// </param>
         /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to start reading
+        /// Reader connected to the source data structure and positioned to 
+        /// start reading.
         /// </param>
         /// <param name="count">
         /// The number of node indexes that need to be read.
         /// </param>
-        /// <returns></returns>
+        /// <returns>
+        /// Variable length list of child indexes that contain numeric values.
+        /// </returns>
         protected NodeNumericIndex[] ReadNodeNumericIndexes(Entities.DataSet dataSet, BinaryReader reader, short count)
         {
             var array = new NodeNumericIndex[count];
@@ -348,8 +347,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                 array[i] = new NodeNumericIndex(dataSet, reader.ReadInt16(), reader.ReadInt32());
             return array;
         }
-     
-
 
         #endregion
         
@@ -386,24 +383,26 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Returns the node position as a number.
         /// </summary>
-        /// <param name="match">Match results including the target user agent</param>
+        /// <param name="state">
+        /// Match results including the target User-Agent.
+        /// </param>
         /// <returns>
         /// -1 if there is no numeric characters, otherwise the characters 
-        /// as an integer
+        /// as an integer.
         /// </returns>
-        internal int GetCurrentPositionAsNumeric(Match match)
+        internal int GetCurrentPositionAsNumeric(MatchState state)
         {
             // Find the left most numeric character from the current position.
             int i = Position;
             while (i >= 0 &&
-                match.TargetUserAgentArray[i] >= (byte)'0' &&
-                match.TargetUserAgentArray[i] <= (byte)'9')
+                state.TargetUserAgentArray[i] >= (byte)'0' &&
+                state.TargetUserAgentArray[i] <= (byte)'9')
                 i--;
 
             // If numeric characters were found then return the number.
             if (i < Position)
                 return GetNumber(
-                    match.TargetUserAgentArray,
+                    state.TargetUserAgentArray,
                     i + 1,
                     Position - i);
             return -1;
@@ -411,35 +410,40 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         
         /// <summary>
         /// Gets a complete node, or if one isn't available exactly the closest
-        /// numeric one to the target user agent at the current position.
+        /// numeric one to the target User-Agent at the current position.
         /// </summary>
-        /// <param name="match">Match results including the target user agent</param>
-        /// <returns></returns>
-        internal Node GetCompleteNumericNode(Match match)
+        /// <param name="state">
+        /// Match results including the target User-Agent.
+        /// </param>
+        /// <returns>
+        /// A complete node, or if one isn't available exactly the closest 
+        /// numeric one.
+        /// </returns>
+        internal Node GetCompleteNumericNode(MatchState state)
         {
             Node node = null;
 
             // Check to see if there's a next node which matches
             // exactly.
-            var nextNode = GetNextNode(match);
+            var nextNode = GetNextNode(state);
             if (nextNode != null)
-                node = nextNode.GetCompleteNumericNode(match);
-                
-            if (node == null && NumericChildren.Length > 0)
+                node = nextNode.GetCompleteNumericNode(state);
+
+            if (node == null && NumericChildrenCount > 0)
             {
                 // No. So try each of the numeric matches in ascending order of
                 // difference.
-                var target = GetCurrentPositionAsNumeric(match);
+                var target = GetCurrentPositionAsNumeric(state);
                 if (target >= 0)
                 {
-                    var enumerator = GetNumericNodeEnumerator(match, target);
+                    var enumerator = GetNumericNodeEnumerator(state, target);
                     while (enumerator.MoveNext())
                     {
-                        node = enumerator.Current.Node.GetCompleteNumericNode(match);
+                        node = enumerator.Current.Node.GetCompleteNumericNode(state);
                         if (node != null)
                         {
                             var difference = Math.Abs(target - enumerator.Current.Value);
-                            match.LowestScore += difference;
+                            state.LowestScore += difference;
                             break;
                         }
                     }
@@ -447,7 +451,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             }
 
             if (node == null && IsComplete)
+            {
                 node = this;
+            }
 
             return node;
         }
@@ -455,26 +461,34 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Returns a complete node for the match object provided.
         /// </summary>
-        /// <param name="match">Match results including the target user agent</param>
-        /// <returns>The next child node, or null if there isn't one</returns>
-        internal Node GetCompleteNode(Match match)
+        /// <param name="state">
+        /// Match results including the target User-Agent.
+        /// </param>
+        /// <returns>
+        /// The next child node, or null if there isn't one.
+        /// </returns>
+        internal Node GetCompleteNode(MatchState state)
         {
             Node node = null;
-            var nextNode = GetNextNode(match);
+            var nextNode = GetNextNode(state);
             if (nextNode != null)
-                node = nextNode.GetCompleteNode(match);
+                node = nextNode.GetCompleteNode(state);
             if (node == null && IsComplete)
                 node = this;
             return node;
         }
 
         /// <summary>
-        /// Provides the next node, if any, from this node for the
-        /// target user agent.
+        /// Provides the next node, if any, from this node for the target 
+        /// User-Agent.
         /// </summary>
-        /// <param name="match">Match results including the target user agent</param>
-        /// <returns>Null if there is no next node, or the node if there is one</returns>
-        private Node GetNextNode(Match match)
+        /// <param name="state">
+        /// Match results including the target User-Agent.
+        /// </param>
+        /// <returns>
+        /// Null if there is no next node, or the node if there is one.
+        /// </returns>
+        private Node GetNextNode(MatchState state)
         {
             var upper = Children.Length - 1;
 
@@ -491,20 +505,28 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
 
                     // Increase the number of strings checked.
                     if (Children[middle].IsString)
-                        match._stringsRead++;
+                    {
+                        state.StringsRead++;
+                    }
 
                     // Increase the number of nodes checked.
-                    match._nodesEvaluated++;
+                    state.NodesEvaluated++;
 
                     var comparisonResult = Children[middle].CompareTo(
-                        match.TargetUserAgentArray,
+                        state.TargetUserAgentArray,
                         startIndex);
                     if (comparisonResult == 0)
+                    {
                         return Children[middle].Node;
+                    }
                     else if (comparisonResult > 0)
+                    {
                         upper = middle - 1;
+                    }
                     else
+                    {
                         lower = middle + 1;
+                    }
                 }
             }
             return null;
@@ -522,8 +544,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// Finds the range of lower and upper values that we
         /// can compare against.
         /// </summary>
-        /// <param name="target">Numeric value of the sub string</param>
-        /// <returns></returns>
+        /// <param name="target">
+        /// Numeric value of the sub string.
+        /// </param>
+        /// <returns>
+        /// The range the target falls between.
+        /// </returns>
         private Range GetRange(int target)
         {
             foreach (var range in Ranges)
@@ -538,10 +564,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// Returns an enumerator for the numeric children of the node 
         /// compared to the target value.
         /// </summary>
-        /// <param name="match">Match results including the target user agent</param>
-        /// <param name="target">Numeric value of the sub string</param>
-        /// <returns></returns>
-        private IEnumerator<NodeNumericIndex> GetNumericNodeEnumerator(Match match, int target)
+        /// <param name="state">
+        /// Match results including the target User-Agent.
+        /// </param>
+        /// <param name="target">
+        /// Numeric value of the sub string.
+        /// </param>
+        /// <returns>
+        /// An enumerator for the numeric children of the node compared to the 
+        /// target value.
+        /// </returns>
+        private IEnumerator<NodeNumericIndex> GetNumericNodeEnumerator(MatchState state, int target)
         {
             if (target >= 0 && target <= short.MaxValue)
             {
@@ -549,9 +582,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                 var range = GetRange(target);
 
                 // Get the index in the ordered list to start at.
-                var startIndex = BinarySearch(NumericChildren, target);
+                var startIndex = _numericChildrenSearch.BinarySearch(NumericChildren, target);
                 if (startIndex < 0)
+                {
                     startIndex = ~startIndex - 1;
+                }
                 int lowIndex = startIndex, highIndex = startIndex + 1;
                 
                 // Determine if the low and high indexes are in range.
@@ -644,11 +679,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// Returns true if any of the nodes in the match have overlapping characters
         /// with this one.
         /// </summary>
-        /// <param name="match"></param>
-        /// <returns></returns>
-        internal bool GetIsOverlap(Match match)
+        /// <param name="state">Match state to compare with this node</param>
+        /// <returns>True if the states nodes overlap with this one, otherwise false.</returns>
+        internal bool GetIsOverlap(MatchState state)
         {
-            return match.Nodes.Any(i => GetIsOverlap(i));
+            return state.Nodes.Any(i => GetIsOverlap(i));
         }
 
         #endregion
@@ -659,7 +694,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// Returns a string of spaces with the characters relating to this
         /// node populated.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// A string representation of this node.
+        /// </returns>
         public override string ToString()
         {
             var values = new byte[DataSet.MaxUserAgentLength];

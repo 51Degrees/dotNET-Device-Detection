@@ -256,15 +256,15 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                 {
                     // Open the sync file for read access ensuring it's disposed 
                     // as soon as possible.
-                    using (FileStream stream = OpenSyncFilePath(FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    FileStream stream = OpenSyncFilePath(FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                    if (stream != null)
                     {
-                        if (stream != null)
+                        // Record the length of the file so that if it changes we can abandon this
+                        // update and rely on a subsequent call to this methd to complete 
+                        // processing.
+                        using ( BinaryReader reader = new BinaryReader(stream))
                         {
-                            // Record the length of the file so that if it changes we can abandon this
-                            // update and rely on a subsequent call to this methd to complete 
-                            // processing.
                             long length = stream.Length;
-                            BinaryReader reader = new BinaryReader(stream);
                             RequestRecord record = new RequestRecord();
                             RequestRecord firstDevice = null;
                             long rows = length/RECORD_LENGTH;
@@ -318,9 +318,6 @@ namespace FiftyOne.Foundation.Mobile.Redirection
                             // Signal to all the method again if the length of the file
                             // has changed during processing.
                             repeatProcess = length != stream.Length;
-
-                            reader.Close();
-
                         }
                     }
                 }
