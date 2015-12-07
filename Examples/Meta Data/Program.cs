@@ -21,38 +21,45 @@
 
 /*
 <tutorial>
-Example of listing properties and possible values from a Dataset<br>
+Example of listing properties and possible values from a Dataset
 The example illustrates:
 <ol>
 <li>Initialize the data set
-<p><code>
+<p><pre class="prettyprint lang-cs">
 DataSet dataSet = StreamFactory.Create(fileName, false);
-</code></p>
+</pre></p>
 <li>Fetch and print the name and description of all 
 properties contained in the data set
-<p><code>
-for ( i = 0; i < dataSet.Properties.Count; i++ )<br>
-{<br>
-    Console.WriteLine( dataSet.Properties[i].Name<br>
-        + " - "<br>
-        + dataSet.Properties[i].Description)<br>
+<p><pre class="prettyprint lang-cs">
+foreach (var property in dataSet.Properties) 
+{
+    Console.WriteLine(property.Name + " - " + 
+        property.Description);
 }
-</code></p>
-<li>fetch and print the possible values and description 
+</pre></p>
+<li>Fetch and print the possible values and description 
 (if available) for a given property
-<p><code>
-for ( j = 0; j < dataSet.Properties[i].Values.Count; j++ )<br>
-{<br>
-    if (dataSet.Properties[i].Values[j].Description != null)<br>
-        Console.WriteLine("   "<br>
-            + dataSet.Properties[i].Values[j].Name<br>
-            + " - "<br>
-            + dataSet.Properties[i].Values[j].Description);<br>
-    else<br>
-        Console.WriteLine("   "<br>
-            + dataSet.Properties[i].Values[j].Name);<br>
+<p><pre class="prettyprint lang-cs">
+foreach (var property in dataSet.Properties) 
+{
+    Console.WriteLine(property.Name + " - " + 
+        property.Description);
+
+    foreach (var value in property.Values)
+    {
+        sb.Append(" - ");
+        sb.Append(value.Name);
+        if (value.Description != null)
+        {
+            sb.Append(" - ");
+            sb.Append(value.Description);
+        }
+        sb.Append("\n");
+        Console.WriteLine(sb.ToString());
+        sb.Clear();
+    }
 }
-</code></p>
+</pre></p>
 </ol>
 This tutorial assumes you are building this from within the
 51Degrees Visual Studio solution. Running the executable produced
@@ -77,34 +84,42 @@ namespace FiftyOne.Example.Illustration.MetaData
         // Snippet Start
         public static void Run(string fileName)
         {
-            int i, j;
-
-            // Initializes the data set.
+            // DataSet is the object used to interact with the data file.
+            // StreamFactory creates Dataset with pool of binary readers to 
+            // perform device lookup using file on disk.
             DataSet dataSet = StreamFactory.Create(fileName, false);
+            StringBuilder sb = new StringBuilder();
 
             Console.WriteLine("Starting Mata Data Example");
 
             // Loops over all properties.
-            for (i = 0; i < dataSet.Properties.Count; i++ )
+            foreach (var property in dataSet.Properties) 
             {
-                // Prints the property name and description.
-                Console.WriteLine("\n" + dataSet.Properties[i].Name + " - " +
-                    dataSet.Properties[i].Description);
+                // Print property name and description.
+                Console.WriteLine(property.Name + " - " + 
+                    property.Description);
 
-                // Prints the possible values of the property
-                // and a description if available.
-                for (j = 0; j < dataSet.Properties[i].Values.Count; j++ )
+                // For each of the values of the current property.
+                foreach (var value in property.Values)
                 {
-                    if (dataSet.Properties[i].Values[j].Description != null)
-                        Console.WriteLine("   "
-                            + dataSet.Properties[i].Values[j].Name
-                            + " - "
-                            + dataSet.Properties[i].Values[j].Description);
-                    else
-                        Console.WriteLine("   "
-                            + dataSet.Properties[i].Values[j].Name);
+                    // Print value name.
+                    sb.Append(" - ");
+                    sb.Append(value.Name);
+                    // If value has a description add it.
+                    if (value.Description != null)
+                    {
+                        sb.Append(" - ");
+                        sb.Append(value.Description);
+                    }
+                    sb.Append("\n");
+                    // Print value and reset string builder.
+                    Console.WriteLine(sb.ToString());
+                    sb.Clear();
                 }
             }
+
+            // Finally close the dataset, releasing resources and file locks.
+            dataSet.Dispose();
         }
         // Snippet End
 

@@ -25,23 +25,23 @@ Match for device id example of using 51Degrees device detection. The example
 shows how to:
 <ol>
 <li>Set the data set for the 51Degrees detector
-<p><code>
-string fileName = args[0];<br>
+<p><pre class="prettyprint lang-cs">
+string fileName = args[0];
 DataSet dataSet = StreamFactory.Create(fileName, false);
-</code></p>
+</pre></p>
 <li>Instantiate the 51Degrees device detection provider
 with these settings
-<p><code>
+<p><pre class="prettyprint lang-cs">
 Provider provider = new Provider(dataSet);
-</code></p>
+</pre></p>
 <li>Produce a match for a single device id
-<p><code>
+<p><pre class="prettyprint lang-cs">
 match = provider.MatchForDeviceId(deviceId);
-</code></p>
+</pre></p>
 <li>Extract the value of the IsMobile property
-<p><code>
+<p><pre class="prettyprint lang-cs">
 IsMobile = match["IsMobile"].ToString();
-</code></p>
+</pre></p>
 </ol>
 This tutorial assumes you are building this from within the
 51Degrees Visual Studio solution. Running the executable produced
@@ -66,28 +66,27 @@ namespace FiftyOne.Example.Illustration.MatchForDeviceId
         // Snippet Start
         public static void Run(string fileName)
         {
+            // DataSet is the object used to interact with the data file.
+            // StreamFactory creates Dataset with pool of binary readers to 
+            // perform device lookup using file on disk.
+            DataSet dataSet = StreamFactory.Create(fileName, false);
+
+            // Provides access to device detection functions.
+            Provider provider = new Provider(dataSet);
+
+            // Used to store and access detection results.
             Match match;
 
             // Device id string of an iPhone mobile device.
             string mobileDeviceId = "12280-48866-24305-18092";
 
-            // Device id string of Firefox Web browser version 41 on dektop.
+            // Device id string of Firefox Web browser version 41 on desktop.
             string desktopDeviceId = "15364-21460-53251-18092";
 
             // Device id string of a MediaHub device.
             string mediaHubDeviceId = "41231-46303-24154-18092";
 
             Console.WriteLine("Starting Match For Device Id Example.");
-
-            /**
-            * Initialises the device detection dataset with the above settings.
-            * This uses the Lite data file For more info
-            * see:
-            * <a href="https://51degrees.com/compare-data-options">compare data options
-            * </a>
-            */
-            DataSet dataSet = StreamFactory.Create(fileName, false);
-            Provider provider = new Provider(dataSet);
 
             //Carries out a match for a mobile device id.
             match = provider.MatchForDeviceId(mobileDeviceId);
@@ -103,6 +102,9 @@ namespace FiftyOne.Example.Illustration.MatchForDeviceId
             match = provider.MatchForDeviceId(mediaHubDeviceId);
             Console.WriteLine("\nMediaHub Device Id: " + mediaHubDeviceId);
             Console.WriteLine("   IsMobile: " + match["IsMobile"]);
+
+            // Finally close the dataset, releasing resources and file locks.
+            dataSet.Dispose();
         }
         // Snippet End
         static void Main(string[] args)

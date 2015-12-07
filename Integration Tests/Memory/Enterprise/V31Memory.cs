@@ -36,7 +36,7 @@ namespace FiftyOne.Tests.Integration.Memory.Enterprise
 
         protected override double FileSizeMultiplier
         {
-            get { return 8.5; }
+            get { return 16; }
         }
 
         [TestMethod(), TestCategory("Memory"), TestCategory("Enterprise")]

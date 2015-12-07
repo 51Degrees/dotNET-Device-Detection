@@ -25,48 +25,49 @@ Offline processing example of using 51Degrees device detection.
 The example shows how to:
 <ol>
 <li>Set the various settings for the 51Degrees detector
-<p><code>
-string fileName = args[0];<br>
-DataSet dataSet = StreamFactory.Create(fileName, false);<br>
+<p><pre class="prettyprint lang-cs">
+string fileName = args[0];
+DataSet dataSet = StreamFactory.Create(fileName, false);
 string[] properties = {"IsMobile","PlatformName","PlatformVersion"};
-</code></p>
+</pre></p>
 <li>Instantiate the 51Degrees device detection provider
 with these settings
-<p><code>
+<p><pre class="prettyprint lang-cs">
 Provider provider = new Provider(dataSet);
-</code></p>
+</pre></p>
 <li>Open an input file with a list of User-Agents, and an output file,
-<p><code>
-StreamReader fin = new StreamReader(inputFile);<br>
+<p><pre class="prettyprint lang-cs">
+StreamReader fin = new StreamReader(inputFile);
 StreamWriter fout = new StreamWriter(outputFile);
-</code></p>
+</pre></p>
 <li>Write a header to the output file with the property names in '|'
 separated CSV format ('|' sepparated because some User-Agents contain
 commas)
-<p><code>
-fout.Write("User-Agent");<br>
-for (i = 0; i < properties.Count(); i++ )<br>
-{<br>
-    fout.Write("|" + properties[i]);<br>
-}<br>
+<p><pre class="prettyprint lang-cs">
+fout.Write("User-Agent");
+for (i = 0; i &lt; properties.Count(); i++ )
+{
+    fout.Write("|" + properties[i]);
+}
 fout.Write("\n");
-</code></p>
+</pre></p>
 <li>For the first 20 User-Agents in the input file, performa match then
 write the User-Agent along with the values for chosen properties to
 the CSV.
-<p><code>
-for (i = 1; i < 20; i++ )<br>
-{<br>
-    userAgent = fin.ReadLine();<br>
-    match = provider.Match(userAgent);<br>
-    fout.Write(userAgent);<br>
-    for (j = 0; j < properties.Count(); j++ )<br>
-    {<br>
-        fout.Write("|" + match[properties[j]]);<br>
-    }<br>
-    fout.Write("\n");<br>
+<p><pre class="prettyprint lang-cs">
+while ((userAgent = fin.ReadLine()) != null &&
+            currentLine &lt; linesToRead)
+{
+    provider.Match(userAgent, match);
+    fout.Write(userAgent);
+    foreach (var property in properties)
+    {
+        fout.Write("|" + match[property]);
+    }
+    fout.Write("\n");
+    currentLine++;
 }
-</code></p>
+</pre></p>
 </ol>
 This tutorial assumes you are building this from within the
 51Degrees Visual Studio solution. Running the executable produced
@@ -93,22 +94,35 @@ namespace FiftyOne.Example.Illustration.OfflineProcessing
         // Snippet Start
         public static void Run(string fileName, string inputFile)
         {
-            int i, j;
-            string outputFile = "OfflineProcessingOutput.csv";
-            string userAgent;
-            Match match;
-            string[] properties = { "IsMobile", "PlatformName", "PlatformVersion" };
-
+            // DataSet is the object used to interact with the data file.
+            // StreamFactory creates Dataset with pool of binary readers to 
+            // perform device lookup using file on disk.
             DataSet dataSet = StreamFactory.Create(fileName, false);
 
-            /**
-            * Initialises the device detection dataset with the above settings.
-            * This uses the Lite data file For more info
-            * see:
-            * <a href="https://51degrees.com/compare-data-options">compare data options
-            * </a>
-            */
+            // Provides access to device detection functions.
             Provider provider = new Provider(dataSet);
+
+            // Used to store and access detection results.
+            // Same match will be reused multiple times to avoid unnecessary 
+            // object creation.
+            Match match = provider.CreateMatch();;
+
+            // Name of the output file results will be saved to.
+            string outputFile = "OfflineProcessingOutput.csv";
+
+            // How many lines of the input CSV file to read.
+            const int linesToRead = 20;
+
+            // Line currently being read.
+            int currentLine = 0;
+
+            // HTTP User-Agent string to match, taken from input the CSV file.
+            string userAgent;
+
+            // 51Degrees properties to append the CSV file with.
+            // For the full list of properties see:
+            // https://51degrees.com/resources/property-dictionary
+            string[] properties = { "IsMobile", "PlatformName", "PlatformVersion" };
 
             // Opens input and output files.
             StreamReader fin = new StreamReader(inputFile);
@@ -118,30 +132,35 @@ namespace FiftyOne.Example.Illustration.OfflineProcessing
 
             // Print CSV headers to output file.
             fout.Write("User-Agent");
-            for (i = 0; i < properties.Count(); i++)
+            for (int i = 0; i < properties.Count(); i++)
             {
                 fout.Write("|" + properties[i]);
             }
             fout.Write("\n");
 
-            // Carries out match for first 20 User-Agents and prints results to
-            // output file.
-            for (i = 1; i < 20; i++)
+            while ((userAgent = fin.ReadLine()) != null &&
+                     currentLine < linesToRead)
             {
-                userAgent = fin.ReadLine();
-                match = provider.Match(userAgent);
+                // Match current User-Agent. Match object reused.
+                provider.Match(userAgent, match);
+                // Write the User-Agent.
                 fout.Write(userAgent);
-                for (j = 0; j < properties.Count(); j++)
+                // Append properties.
+                foreach (var property in properties)
                 {
-                    fout.Write("|" + match[properties[j]]);
+                    fout.Write("|" + match[property]);
                 }
                 fout.Write("\n");
+                currentLine++;
             }
 
             fin.Close();
             fout.Close();
 
             Console.WriteLine("Output Written to " + outputFile);
+
+            // Finally close the dataset, releasing resources and file locks.
+            dataSet.Dispose();
         }
         // Snippet End
 

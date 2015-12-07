@@ -25,23 +25,23 @@ Getting started example of using 51Degrees device detection.
 The example shows how to:
 <ol>
 <li>Set the data set for the 51Degrees detector
-<p><code>
-string fileName = args[0];<br>
+<p><pre class="prettyprint lang-cs">
+string fileName = args[0];
 DataSet dataSet = StreamFactory.Create(fileName, false);
-</code></p>
+</pre></p>
 <li>Instantiate the 51Degrees device detection provider
 with these settings
-<p><code>
+<p><pre class="prettyprint lang-cs">
 Provider provider = new Provider(dataSet);
-</code></p>
+</pre></p>
 <li>Produce a match for a single HTTP User-Agent
-<p><code>
+<p><pre class="prettyprint lang-cs">
 match = provider.Match(userAgent);
-</code></p>
+</pre></p>
 <li>Extract the value of the IsMobile property
-<p><code>
+<p><pre class="prettyprint lang-cs">
 IsMobile = match["IsMobile"].ToString();
-</code></p>
+</pre></p>
 </ol>
 This tutorial assumes you are building this from within the
 51Degrees Visual Studio solution. Running the executable produced
@@ -66,25 +66,26 @@ namespace FiftyOne.Example.Illustration.GettingStarted
         // Snippet Start
         public static void Run(string fileName)
         {
-            Match match;
-            string IsMobile;
-
-            /**
-            * Initialises the device detection dataset with the above settings.
-            * This uses the Lite data file For more info
-            * see:
-            * <a href="https://51degrees.com/compare-data-options">compare data options
-            * </a>
-            */
+            // DataSet is the object used to interact with the data file.
+            // StreamFactory creates Dataset with pool of binary readers to 
+            // perform device lookup using file on disk.
             DataSet dataSet = StreamFactory.Create(fileName, false);
+
+            // Provides access to device detection functions.
             Provider provider = new Provider(dataSet);
+
+            // Used to store and access detection results.
+            Match match;
+
+            // Contains detection result for the IsMobile property.
+            string IsMobile;
 
             // User-Agent string of an iPhone mobile device.
             string mobileUserAgent = ("Mozilla/5.0 (iPhone; CPU iPhone " +
                 "OS 7_1 like Mac OS X) AppleWebKit/537.51.2 (KHTML, like " +
                 "Gecko) 'Version/7.0 Mobile/11D167 Safari/9537.53");
 
-            // User-Agent string of Firefox Web browser version 41 on dektop.
+            // User-Agent string of Firefox Web browser version 41 on desktop.
             string desktopUserAgent = ("Mozilla/5.0 (Windows NT 6.3; " +
                 "WOW64; rv:41.0) Gecko/20100101 Firefox/41.0");
 
@@ -113,6 +114,9 @@ namespace FiftyOne.Example.Illustration.GettingStarted
             match = provider.Match(mediaHubUserAgent);
             IsMobile = match["IsMobile"].ToString();
             Console.WriteLine("   IsMobile: " + IsMobile);
+
+            // Finally close the dataset, releasing resources and file locks.
+            dataSet.Dispose();
         }
         // Snippet End
 
