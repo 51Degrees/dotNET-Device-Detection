@@ -25,38 +25,38 @@ Match metrics example of using 51Degrees device detection.
 The example shows how to:
 <ol>
 <li>Set the data set for the 51Degrees detector
-<p><code>
-string fileName = args[0];<br>
+<p><pre class="prettyprint lang-cs">
+string fileName = args[0];
 DataSet dataSet = StreamFactory.Create(fileName, false);
-</code></p>
+</pre></p>
 <li>Instantiate the 51Degrees device detection provider
 with these settings
-<p><code>
+<p><pre class="prettyprint lang-cs">
 Provider provider = new Provider(dataSet);
-</code></p>
+</pre></p>
 <li>Produce a match for a single HTTP User-Agent
-<p><code>
+<p><pre class="prettyprint lang-cs">
 match = provider.Match(userAgent);
-</code></p>
+</pre></p>
 <li>Obtain device Id: consists of four components separated by a hyphen 
 symbol: Hardware-Platform-Browser-IsCrawler where each Component 
 represents an ID of the corresponding Profile.
-<p><code>
+<p><pre class="prettyprint lang-cs">
 deviceId = match.DeviceId;
-</code></p>
+</pre></p>
 <li>Obtain match method: provides information about the 
 algorithm that was used to perform detection for a particular User-Agent. 
 For more information on what each method means please see: 
 <a href="https://51degrees.com/support/documentation/pattern">
 How device detection works</a>
-<p><code>method = match.Method;</code></p>
+<p><pre class="prettyprint lang-cs">method = match.Method;</pre></p>
 <li>Obtain difference:  used when detection method is not Exact or None. 
 This is an integer value and the larger the value the less confident the 
 detector is in this result.
-<p><code>difference = match.Difference;</code></p>
+<p><pre class="prettyprint lang-cs">difference = match.Difference;</pre></p>
 <li>Obtain signature rank: an integer value that indicates how popular 
 the device is. The lower the rank the more popular the signature.
-<p><code>rank =  match.Signature.Rank;</code></p>
+<p><pre class="prettyprint lang-cs">rank =  match.Signature.Rank;</pre></p>
 </ol>
 This tutorial assumes you are building this from within the
 51Degrees Visual Studio solution. Running the executable produced
@@ -82,16 +82,15 @@ namespace FiftyOne.Example.Illustration.MatchMetrics
         // Snippet Start
         public static void Run(string fileName)
         {
-            /*
-             * Initialises the device detection dataset with the above 
-             * settings. This uses the Lite data file For more info
-             * see:
-             * <a href="https://51degrees.com/compare-data-options">
-             * compare data options
-             * </a>
-             */
+            // DataSet is the object used to interact with the data file.
+            // StreamFactory creates Dataset with pool of binary readers to 
+            // perform device lookup using file on disk.
             DataSet dataSet = StreamFactory.Create(fileName, false);
+
+            // Provides access to device detection functions.
             Provider provider = new Provider(dataSet);
+
+            // Used to store and access detection results.
             Match match;
 
             // User-Agent string of an iPhone mobile device.
@@ -99,7 +98,7 @@ namespace FiftyOne.Example.Illustration.MatchMetrics
                 "OS 7_1 like Mac OS X) AppleWebKit/537.51.2 (KHTML, like " +
                 "Gecko) 'Version/7.0 Mobile/11D167 Safari/9537.53");
 
-            // User-Agent string of Firefox Web browser version 41 on dektop.
+            // User-Agent string of Firefox Web browser version 41 on desktop.
             string desktopUserAgent = ("Mozilla/5.0 (Windows NT 6.3; " +
                 "WOW64; rv:41.0) Gecko/20100101 Firefox/41.0");
 
@@ -125,6 +124,9 @@ namespace FiftyOne.Example.Illustration.MatchMetrics
             Console.WriteLine("*** MediaHub ***");
             match = provider.Match(mediaHubUserAgent);
             OutputMatchMetrics(match);
+
+            // Finally close the dataset, releasing resources and file locks.
+            dataSet.Dispose();
         }
 
         /// <summary>
