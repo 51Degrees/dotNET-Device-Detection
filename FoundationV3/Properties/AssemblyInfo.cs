@@ -31,9 +31,13 @@ using System.Security;
 
 [assembly: Guid("71439680-d7e5-4497-96ff-3acfb9f68a72")]
 
-// Enable the unit test assemly to access internal classes.
-
+// Enable the unit test assemly to access internal classes when
+// the project is being built normally. If the project is being
+// built for NuGet then the unit tests will also need to be 
+// signed in order to support compilation.
+#if !NUGET_BUILD
 [assembly: InternalsVisibleToAttribute("FiftyOne.Tests.Unit")]
+#endif
 
 // Version information for an assembly consists of the following four values:
 //
