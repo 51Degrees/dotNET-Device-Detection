@@ -43,7 +43,7 @@ namespace FiftyOne.Tests.Integration.Performance.Lite
         [TestMethod]
         public void LiteV31File_Performance_BadUserAgentsMulti()
         {
-            base.BadUserAgentsMulti(null, Asserts.AssertCacheMissesBad, 2);
+            base.BadUserAgentsMulti(null, Asserts.AssertCacheMissesBad, 3);
         }
 
         [TestMethod]
@@ -79,13 +79,13 @@ namespace FiftyOne.Tests.Integration.Performance.Lite
         [TestMethod]
         public void LiteV31File_Performance_BadUserAgentsMultiAll()
         {
-            base.BadUserAgentsMulti(_dataSet.Properties, Asserts.AssertCacheMissesBadAll, 2);
+            base.BadUserAgentsMulti(_dataSet.Properties, Asserts.AssertCacheMissesBadAll, 4);
         }
 
         [TestMethod]
         public void LiteV31File_Performance_BadUserAgentsSingleAll()
         {
-            base.BadUserAgentsSingle(_dataSet.Properties, Asserts.AssertCacheMissesBadAll, 4);
+            base.BadUserAgentsSingle(_dataSet.Properties, Asserts.AssertCacheMissesBadAll, 6);
         }
 
         [TestMethod]

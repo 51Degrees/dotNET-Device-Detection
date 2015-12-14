@@ -73,7 +73,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <summary>
         /// An array of the ranked signature indexes for the node.
         /// </summary>
-        internal override int[] RankedSignatureIndexes
+        internal override IList<int> RankedSignatureIndexes
         {
             get 
             {

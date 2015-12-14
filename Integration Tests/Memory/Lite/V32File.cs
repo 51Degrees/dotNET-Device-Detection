@@ -37,37 +37,37 @@ namespace FiftyOne.Tests.Integration.Memory.Lite
         [TestMethod(), TestCategory("Memory"), TestCategory("Lite")]
         public void LiteV32File_Memory_UniqueUserAgentsMulti()
         {
-            base.UserAgentsMulti(UserAgentGenerator.GetUniqueUserAgents(), 25);
+            base.UserAgentsMulti(UserAgentGenerator.GetUniqueUserAgents(), 27);
         }
 
         [TestMethod(), TestCategory("Memory"), TestCategory("Lite")]
         public void LiteV32File_Memory_UniqueUserAgentsSingle()
         {
-            base.UserAgentsSingle(UserAgentGenerator.GetUniqueUserAgents(), 25);
+            base.UserAgentsSingle(UserAgentGenerator.GetUniqueUserAgents(), 27);
         }
 
         [TestMethod(), TestCategory("Memory"), TestCategory("Lite")]
         public void LiteV32File_Memory_RandomUserAgentsMulti()
         {
-            base.UserAgentsMulti(UserAgentGenerator.GetRandomUserAgents(), 25);
+            base.UserAgentsMulti(UserAgentGenerator.GetRandomUserAgents(), 27);
         }
 
         [TestMethod(), TestCategory("Memory"), TestCategory("Lite")]
         public void LiteV32File_Memory_RandomUserAgentsSingle()
         {
-            base.UserAgentsSingle(UserAgentGenerator.GetRandomUserAgents(), 25);
+            base.UserAgentsSingle(UserAgentGenerator.GetRandomUserAgents(), 27);
         }
 
         [TestMethod(), TestCategory("Memory"), TestCategory("Lite")]
         public void LiteV32File_Memory_BadUserAgentsMulti()
         {
-            base.UserAgentsMulti(UserAgentGenerator.GetBadUserAgents(), 50);
+            base.UserAgentsMulti(UserAgentGenerator.GetBadUserAgents(), 40);
         }
 
         [TestMethod(), TestCategory("Memory"), TestCategory("Lite")]
         public void LiteV32File_Memory_BadUserAgentsSingle()
         {
-            base.UserAgentsSingle(UserAgentGenerator.GetBadUserAgents(), 50);
+            base.UserAgentsSingle(UserAgentGenerator.GetBadUserAgents(), 40);
         }
     }
 }

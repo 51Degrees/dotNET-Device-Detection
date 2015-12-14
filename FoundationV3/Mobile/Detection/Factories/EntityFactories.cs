@@ -73,37 +73,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
             throw new NotImplementedException();
         }
     }
-
-    internal class IntegerFactory : BaseEntityFactory<Integer>
-    {
-        /// <summary>
-        /// Creates a new instance of <see cref="Integer"/>
-        /// </summary>
-        /// <param name="dataSet">
-        /// The data set whose data structure includes integer values
-        /// </param>
-        /// <param name="index">
-        /// The index to the start of the Integer within the data structure
-        /// </param>
-        /// <param name="reader">
-        /// Binary reader positioned at the start of the Integer
-        /// </param>
-        /// <returns>A new instance of a Integer</returns>
-        internal override Integer Create(DataSet dataSet, int index, Reader reader)
-        {
-            return new Integer(dataSet, index, reader);
-        }
-
-        /// <summary>
-        /// Returns the length of the <see cref="Integer"/> entity
-        /// </summary>
-        /// <returns>Length in bytes of the RankedSignatureIndex</returns>
-        internal override int GetLength()
-        {
-            return sizeof(Int32);
-        }
-    }
-    
+        
     internal class ProfileOffsetFactory : BaseEntityFactory<ProfileOffset>
     {
         /// <summary>

@@ -151,7 +151,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
             ((ICacheList)Strings).ResetCache();
             ((ICacheList)Profiles).ResetCache();
             ((ICacheList)Values).ResetCache();
-            ((ICacheList)RankedSignatureIndexes).ResetCache();
         }
 
         #endregion

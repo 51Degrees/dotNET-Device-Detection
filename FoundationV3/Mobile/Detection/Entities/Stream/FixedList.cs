@@ -44,7 +44,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
     /// <typeparam name="T">
     /// The type of <see cref="BaseEntity"/> the list will contain.
     /// </typeparam>
-    public class FixedList<T> : BaseList<T>, IFixedList<T> where T : BaseEntity
+    public class FixedList<T> : BaseList<T>, IReadonlyList<T> where T : BaseEntity
     {
         #region Constructor
 

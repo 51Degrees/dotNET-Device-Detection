@@ -44,13 +44,13 @@ namespace FiftyOne.Tests.Integration.Performance.Lite
         [TestMethod]
         public void LiteV32File_Performance_BadUserAgentsMulti()
         {
-            base.BadUserAgentsMulti(null, Asserts.AssertCacheMissesBad, 2);
+            base.BadUserAgentsMulti(null, Asserts.AssertCacheMissesBad, 3);
         }
 
         [TestMethod]
         public void LiteV32File_Performance_BadUserAgentsSingle()
         {
-            base.BadUserAgentsSingle(null, Asserts.AssertCacheMissesBad, 4);
+            base.BadUserAgentsSingle(null, Asserts.AssertCacheMissesBad, 6);
         }
 
         [TestMethod]
