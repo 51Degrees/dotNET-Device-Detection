@@ -128,11 +128,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
         internal const int SignaturesCacheSize = 16000;
 
         /// <summary>
-        /// The number of ranked signatures that it should be possible to cache.
-        /// </summary>
-        internal const int RankedSignaturesCacheSize = 16000;
-
-        /// <summary>
         /// The number of node that it should be possible to cache.
         /// </summary>
         internal const int NodesCacheSize = 30000;

@@ -23,6 +23,7 @@ using System.IO;
 using FiftyOne.Foundation.Mobile.Detection.Factories;
 using FiftyOne.Foundation.Mobile.Detection.Readers;
 using System.Collections.Generic;
+using System;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
 {
@@ -54,7 +55,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
     /// <typeparam name="T">
     /// The type of <see cref="BaseEntity"/> the list will contain
     /// </typeparam>
-    public class MemoryFixedList<T> : MemoryBaseList<T>, IFixedList<T> where T : BaseEntity
+    public class MemoryFixedList<T> : MemoryBaseList<T>, IReadonlyList<T> where T : BaseEntity
     {
         #region Constructor
 
@@ -111,27 +112,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         public T this[int index]
         {
             get { return _array[index]; }
-        }
-
-        /// <summary>
-        /// An enumerable that can return a range of T between index
-        /// and the count provided.
-        /// </summary>
-        /// <param name="index">
-        /// First index of the range required.
-        /// </param>
-        /// <param name="count">
-        /// Number of elements to return.
-        /// </param>
-        /// <returns>
-        /// An enumerator for the list.
-        /// </returns>
-        public IEnumerable<T> GetRange(int index, int count)
-        {
-            for (int key = index; key < index + count; key++)
-            {
-                yield return _array[key];
-            }
         }
 
         /// <summary>

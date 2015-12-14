@@ -36,7 +36,6 @@ namespace FiftyOne.Tests.Integration.Performance
         {
             Assert.IsTrue(dataSet.PercentageSignatureCacheMisses < 0.4, "Signature Cache Misses");
             Assert.IsTrue(dataSet.PercentageStringsCacheMisses < 0.6, "Strings Cache Misses");
-            Assert.IsTrue(dataSet.PercentageRankedSignatureCacheMisses < 0.55, "Ranked Signatures Cache Misses");
             Assert.IsTrue(dataSet.PercentageNodeCacheMisses < 0.3, "Node Cache Misses");
             Assert.IsTrue(dataSet.PercentageValuesCacheMisses < 0.3, "Value Cache Misses");
             Assert.IsTrue(dataSet.PercentageProfilesCacheMisses < 0.3, "Profile Cache Misses");
@@ -46,7 +45,6 @@ namespace FiftyOne.Tests.Integration.Performance
         {
             Assert.IsTrue(dataSet.PercentageSignatureCacheMisses < 0.4, "Signature Cache Misses");
             Assert.IsTrue(dataSet.PercentageStringsCacheMisses < 0.5, "Strings Cache Misses");
-            Assert.IsTrue(dataSet.PercentageRankedSignatureCacheMisses < 0.55, "Ranked Signatures Cache Misses");
             Assert.IsTrue(dataSet.PercentageNodeCacheMisses < 0.3, "Node Cache Misses");
         }
 
@@ -54,7 +52,6 @@ namespace FiftyOne.Tests.Integration.Performance
         {
             Assert.IsTrue(dataSet.PercentageSignatureCacheMisses < 0.4, "Signature Cache Misses");
             Assert.IsTrue(dataSet.PercentageStringsCacheMisses < 0.5, "Strings Cache Misses");
-            Assert.IsTrue(dataSet.PercentageRankedSignatureCacheMisses < 0.5, "Ranked Signatures Cache Misses");
             Assert.IsTrue(dataSet.PercentageNodeCacheMisses < 0.5, "Node Cache Misses");
             Assert.IsTrue(dataSet.PercentageValuesCacheMisses < 0.3, "Value Cache Misses");
             Assert.IsTrue(dataSet.PercentageProfilesCacheMisses < 0.3, "Profile Cache Misses");
@@ -64,7 +61,6 @@ namespace FiftyOne.Tests.Integration.Performance
         {
             Assert.IsTrue(dataSet.PercentageSignatureCacheMisses < 0.4, "Signature Cache Misses");
             Assert.IsTrue(dataSet.PercentageStringsCacheMisses < 0.8, "Strings Cache Misses");
-            Assert.IsTrue(dataSet.PercentageRankedSignatureCacheMisses < 0.5, "Ranked Signatures Cache Misses");
             Assert.IsTrue(dataSet.PercentageNodeCacheMisses < 0.5, "Node Cache Misses");
         }
     }

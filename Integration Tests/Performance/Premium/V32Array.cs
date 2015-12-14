@@ -56,7 +56,7 @@ namespace FiftyOne.Tests.Integration.Performance.Premium
         [TestMethod]
         public void PremiumV32Array_Performance_BadUserAgentsSingle()
         {
-            base.BadUserAgentsSingle(null, Asserts.AssertCacheMissesBad, 4);
+            base.BadUserAgentsSingle(null, Asserts.AssertCacheMissesBad, 5);
         }
 
         [TestMethod]
@@ -86,13 +86,13 @@ namespace FiftyOne.Tests.Integration.Performance.Premium
         [TestMethod]
         public void PremiumV32Array_Performance_BadUserAgentsMultiAll()
         {
-            base.BadUserAgentsMulti(_dataSet.Properties, Asserts.AssertCacheMissesBadAll, 3);
+            base.BadUserAgentsMulti(_dataSet.Properties, Asserts.AssertCacheMissesBadAll, 4);
         }
 
         [TestMethod]
         public void PremiumV32Array_Performance_BadUserAgentsSingleAll()
         {
-            base.BadUserAgentsSingle(_dataSet.Properties, Asserts.AssertCacheMissesBadAll, 4);
+            base.BadUserAgentsSingle(_dataSet.Properties, Asserts.AssertCacheMissesBadAll, 5);
         }
 
         [TestMethod]

@@ -36,7 +36,7 @@ namespace FiftyOne.Tests.Integration.Memory.Lite
 
         protected override double FileSizeMultiplier
         {
-            get { return 12; }
+            get { return 9; }
         }
 
         [TestMethod(), TestCategory("Memory"), TestCategory("Lite")]

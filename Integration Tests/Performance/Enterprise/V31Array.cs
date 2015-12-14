@@ -49,7 +49,7 @@ namespace FiftyOne.Tests.Integration.Performance.Enterprise
         [TestMethod]
         public void EnterpriseV31Array_Performance_BadUserAgentsMulti()
         {
-            base.BadUserAgentsMulti(null, Asserts.AssertCacheMissesGood, 3);
+            base.BadUserAgentsMulti(null, Asserts.AssertCacheMissesGood, 4);
         }
 
         [TestMethod]
@@ -85,7 +85,7 @@ namespace FiftyOne.Tests.Integration.Performance.Enterprise
         [TestMethod]
         public void EnterpriseV31Array_Performance_BadUserAgentsMultiAll()
         {
-            base.BadUserAgentsMulti(_dataSet.Properties, Asserts.AssertCacheMissesBadAll, 3);
+            base.BadUserAgentsMulti(_dataSet.Properties, Asserts.AssertCacheMissesBadAll, 7);
         }
 
         [TestMethod]

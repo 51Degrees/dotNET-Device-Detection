@@ -45,6 +45,7 @@ namespace FiftyOne.Tests.Integration.Memory
 
         protected virtual void UserAgentsSingle(IEnumerable<string> userAgents)
         {
+            Console.WriteLine("Expected Max Memory: {0:0.0} MB", MaxAllowedMemory);
             Utils.DetectLoopSingleThreaded(
                 _provider,
                 userAgents,
@@ -62,6 +63,7 @@ namespace FiftyOne.Tests.Integration.Memory
 
         protected virtual void UserAgentsMulti(IEnumerable<string> userAgents)
         {
+            Console.WriteLine("Expected Max Memory: {0:0.0} MB", MaxAllowedMemory);
             Utils.DetectLoopMultiThreaded(
                 _provider,
                 userAgents,

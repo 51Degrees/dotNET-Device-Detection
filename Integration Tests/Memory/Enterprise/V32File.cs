@@ -61,13 +61,13 @@ namespace FiftyOne.Tests.Integration.Memory.Enterprise
         [TestMethod(), TestCategory("Memory"), TestCategory("Enterprise")]
         public void EnterpriseV32File_Memory_BadUserAgentsMulti()
         {
-            base.UserAgentsMulti(UserAgentGenerator.GetBadUserAgents(), 80);
+            base.UserAgentsMulti(UserAgentGenerator.GetBadUserAgents(), 55);
         }
 
         [TestMethod(), TestCategory("Memory"), TestCategory("Enterprise")]
         public void EnterpriseV32File_Memory_BadUserAgentsSingle()
         {
-            base.UserAgentsSingle(UserAgentGenerator.GetBadUserAgents(), 80);
+            base.UserAgentsSingle(UserAgentGenerator.GetBadUserAgents(), 55);
         }
     }
 }

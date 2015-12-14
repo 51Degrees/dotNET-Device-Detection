@@ -21,6 +21,7 @@
 
 using System.Linq;
 using FiftyOne.Foundation.Mobile.Detection.Readers;
+using System.Collections.Generic;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Entities
 {
@@ -35,14 +36,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// List of the node offsets the signature relates to ordered
         /// by offset of the node.
         /// </summary>
-        internal override int[] NodeOffsets
+        internal override IList<int> NodeOffsets
         {
             get
             {
                 return _nodeOffsets;
             }
         }
-        private readonly int[] _nodeOffsets;
+        private readonly IList<int> _nodeOffsets;
         
         #endregion
 
@@ -114,7 +115,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// </returns>
         internal override int GetSignatureLength()
         {
-            var lastNode = DataSet.Nodes[NodeOffsets[NodeOffsets.Length - 1]];
+            var lastNode = DataSet.Nodes[NodeOffsets[NodeOffsets.Count - 1]];
             return lastNode.Position + lastNode.Length + 1;
         }
 
@@ -129,7 +130,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         {
             for (var rank = 0; rank < DataSet.RankedSignatureIndexes.Count; rank++)
             {
-                if (DataSet.RankedSignatureIndexes[rank].Value == this.Index)
+                if (DataSet.RankedSignatureIndexes[rank] == this.Index)
                 {
                     return rank;
                 }

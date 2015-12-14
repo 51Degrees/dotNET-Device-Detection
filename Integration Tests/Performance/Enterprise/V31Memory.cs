@@ -48,13 +48,13 @@ namespace FiftyOne.Tests.Integration.Performance.Enterprise
         [TestMethod]
         public void EnterpriseV31Memory_Performance_BadUserAgentsMulti()
         {
-            base.BadUserAgentsMulti(null, 1);
+            base.BadUserAgentsMulti(null, 2);
         }
 
         [TestMethod]
         public void EnterpriseV31Memory_Performance_BadUserAgentsSingle()
         {
-            base.BadUserAgentsSingle(null, 3);
+            base.BadUserAgentsSingle(null, 4);
         }
 
         [TestMethod]
@@ -84,13 +84,13 @@ namespace FiftyOne.Tests.Integration.Performance.Enterprise
         [TestMethod]
         public void EnterpriseV31Memory_Performance_BadUserAgentsMultiAll()
         {
-            base.BadUserAgentsMulti(_dataSet.Properties, 1);
+            base.BadUserAgentsMulti(_dataSet.Properties, 2);
         }
 
         [TestMethod]
         public void EnterpriseV31Memory_Performance_BadUserAgentsSingleAll()
         {
-            base.BadUserAgentsSingle(_dataSet.Properties, 3);
+            base.BadUserAgentsSingle(_dataSet.Properties, 4);
         }
 
         [TestMethod]

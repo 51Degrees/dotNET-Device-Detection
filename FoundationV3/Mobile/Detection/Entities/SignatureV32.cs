@@ -21,6 +21,7 @@
 
 using System.Linq;
 using FiftyOne.Foundation.Mobile.Detection.Readers;
+using System.Collections.Generic;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Entities
 {
@@ -72,7 +73,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// List of the node offsets the signature relates to ordered by offset 
         /// of the node.
         /// </summary>
-        internal override int[] NodeOffsets
+        internal override IList<int> NodeOffsets
         {
             get
             {
@@ -82,23 +83,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                     {
                         if (_nodeOffsets == null)
                         {
-                            var range = DataSet.SignatureNodeOffsets.GetRange(FirstNodeOffsetIndex, NodeCount);
-                            var enumerator = range.GetEnumerator();
-                            var nodeOffsets = new int[NodeCount];
-                            var i = 0;
-                            while (enumerator.MoveNext())
-                            {
-                                nodeOffsets[i] = enumerator.Current.Value;
-                                i++;
-                            }
-                            _nodeOffsets = nodeOffsets;
+                            _nodeOffsets = DataSet.SignatureNodeOffsets.GetRange(FirstNodeOffsetIndex, NodeCount);
                         }
                     }
                 }
                 return _nodeOffsets;
             }
         }
-        private int[] _nodeOffsets;
+        private IList<int> _nodeOffsets;
 
         #endregion
 
@@ -141,7 +133,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// </returns>
         internal override int GetSignatureLength()
         {
-            var lastNode = DataSet.Nodes[DataSet.SignatureNodeOffsets[NodeCount + FirstNodeOffsetIndex - 1].Value];
+            var lastNode = DataSet.Nodes[DataSet.SignatureNodeOffsets[NodeCount + FirstNodeOffsetIndex - 1]];
             return lastNode.Position + lastNode.Length + 1;
         }
 

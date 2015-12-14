@@ -85,7 +85,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
             }
         }
 
-        internal override int[] RankedSignatureIndexes
+        internal override IList<int> RankedSignatureIndexes
         {
             get 
             {
@@ -102,27 +102,28 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
                 return _rankedSignatureIndexes; 
             }
         }
-        private int[] _rankedSignatureIndexes;
+        private IList<int> _rankedSignatureIndexes;
         private int _nodeRankedSignatureValue;
                 
-        private int[] GetRankedSignatureIndexesAsArray()
+        private IList<int> GetRankedSignatureIndexesAsArray()
         {
-            var rankedSignatureIndexes = new int[RankedSignatureCount];
-            if (RankedSignatureCount == 1)
+            IList<int> rankedSignatureIndexes = null;
+            if (RankedSignatureCount == 0)
+            {
+                rankedSignatureIndexes = new int[] { };
+            }
+            else if (RankedSignatureCount == 1)
             {
                 // The value of _nodeRankedSignatureIndex is the ranked signature
                 // index when the node only relates to 1 signature.
-                rankedSignatureIndexes[0] = _nodeRankedSignatureValue;
+                rankedSignatureIndexes = new int[] { _nodeRankedSignatureValue };
             }
             else if (RankedSignatureCount > 1)
             {
                 // Where the node relates to multiple signatures the _nodeRankedSignatureIndex
                 // relates to the first ranked signature index in DataSet.NodeRankedSignatureIndexes.
-                for (int i = 0; i < RankedSignatureCount; i++)
-                {
-                    rankedSignatureIndexes[i] = 
-                        DataSet.NodeRankedSignatureIndexes[_nodeRankedSignatureValue + i].Value;
-                }
+                rankedSignatureIndexes = DataSet.NodeRankedSignatureIndexes.GetRange(
+                    _nodeRankedSignatureValue, RankedSignatureCount);
             }
             return rankedSignatureIndexes;
         }

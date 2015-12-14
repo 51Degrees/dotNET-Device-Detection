@@ -205,12 +205,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
                         break;
                     case BinaryConstants.FormatVersions.PatternV32:
                         dataSet._signatures = new FixedCacheList<Signature>(dataSet, reader, new SignatureFactoryV32(dataSet), Constants.SignaturesCacheSize);
-                        dataSet._signatureNodeOffsets = new FixedList<Integer>(dataSet, reader, new IntegerFactory());
-                        dataSet._nodeRankedSignatureIndexes = new FixedList<Integer>(dataSet, reader, new IntegerFactory());
+                        dataSet._signatureNodeOffsets = new IntegerList(dataSet, reader);
+                        dataSet._nodeRankedSignatureIndexes = new IntegerList(dataSet, reader);
                         break;
                 }
-                dataSet._rankedSignatureIndexes = new FixedCacheList<Integer>(
-                    dataSet, reader, new IntegerFactory(), Constants.RankedSignaturesCacheSize);
+                dataSet._rankedSignatureIndexes = new IntegerList(dataSet, reader);
                 switch (dataSet.VersionEnum)
                 {
                     case BinaryConstants.FormatVersions.PatternV31:
