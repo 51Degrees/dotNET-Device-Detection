@@ -52,11 +52,12 @@ namespace FiftyOne.Tests.Integration.API
         public void CreateDataSet()
         {
             Utils.CheckFileExists(DataFile);
-            _dataSet = StreamFactory.Create(DataFile, false);
+            _dataSet = StreamFactory.Create(File.ReadAllBytes(DataFile));
             _provider = new Provider(_dataSet);
         }
 
         [TestMethod]
+        [TestCategory("API")]
         public void API_ReadAllSignaturesMissingProperty()
         {
             Parallel.ForEach(_dataSet.Signatures, signature =>
@@ -68,6 +69,7 @@ namespace FiftyOne.Tests.Integration.API
         }
 
         [TestMethod]
+        [TestCategory("API")]
         public void API_ReadAllProfilesMissingProperty()
         {
             Parallel.ForEach(_dataSet.Components.SelectMany(i => i.Profiles), profile =>
@@ -79,6 +81,7 @@ namespace FiftyOne.Tests.Integration.API
         }
 
         [TestMethod]
+        [TestCategory("API")]
         public void API_ReadAllSignatures()
         {
             int hashcode = 0;
@@ -98,6 +101,7 @@ namespace FiftyOne.Tests.Integration.API
         }
 
         [TestMethod]
+        [TestCategory("API")]
         public void API_ReadAllProfiles()
         {
             int hashcode = 0;
@@ -116,19 +120,85 @@ namespace FiftyOne.Tests.Integration.API
             Console.WriteLine("Signatures Hashcode '{0}'", hashcode);
         }
 
+        private readonly static string[] UNKNOWN_USER_AGENTS = new string[] {
+            "!abc",
+            "!123"
+        };
+
         [TestMethod]
+        [TestCategory("API")]
+        public void API_UnknownUserAgent()
+        {
+            foreach (var userAgent in UNKNOWN_USER_AGENTS)
+            {
+                var match = _provider.Match(userAgent);
+                FetchAllProperties(match);
+                Assert.IsTrue(match.Method == MatchMethods.None);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("API")]
+        public void API_ShortBadUserAgent()
+        {
+            string userAgent = null;
+            var checkSum = 0;
+            var chars = Enumerable.Range(
+                _provider.DataSet.LowestCharacter, 
+                _provider.DataSet.HighestCharacter).Select(i => 
+                    (char)i).ToArray();
+            var random = new Random(0);
+            var match = _provider.CreateMatch();
+            try
+            {
+                for (int i = 0; i <= 100000; i++)
+                {
+                    int numberOfCharacters = random.Next(chars.Length);
+                    userAgent = new String(
+                        Enumerable.Repeat(chars, numberOfCharacters).Select(s =>
+                        s[random.Next(chars.Length)]).ToArray());
+                    _provider.Match(userAgent, match);
+                    foreach (var property in match.DataSet.Properties)
+                    {
+                        checkSum += match[property.Name].ToString().GetHashCode();
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                Assert.Fail("User-Agent '{0}' caused '{1}'",
+                    userAgent,
+                    ex.Message);
+            }
+            Console.WriteLine("Checksum: {0}", checkSum);
+        }
+
+        [TestMethod]
+        [TestCategory("API")]
+        public void API_SingleCharacterUserAgents()
+        {
+            for (var c = 0; c < 256; c++)
+            {
+                FetchAllProperties(_provider.Match(c.ToString()));
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("API")]
         public void API_NullUserAgent()
         {
             FetchAllProperties(_provider.Match((string)null));
         }
 
         [TestMethod]
+        [TestCategory("API")]
         public void API_EmptyUserAgent()
         {
             FetchAllProperties(_provider.Match(String.Empty));
         }
 
         [TestMethod]
+        [TestCategory("API")]
         public void API_LongUserAgent()
         {
             var userAgent = String.Join(" ", UserAgentGenerator.GetEnumerable(10, 10));
@@ -136,12 +206,14 @@ namespace FiftyOne.Tests.Integration.API
         }
 
         [TestMethod]
+        [TestCategory("API")]
         public void API_NullHeaders()
         {
             FetchAllProperties(_provider.Match((NameValueCollection)null));
         }
 
         [TestMethod]
+        [TestCategory("API")]
         public void API_EmptyHeaders()
         {
             var headers = new NameValueCollection();
@@ -149,6 +221,7 @@ namespace FiftyOne.Tests.Integration.API
         }
 
         [TestMethod]
+        [TestCategory("API")]
         public void API_AllHeaders()
         {
             var headers = new NameValueCollection();
@@ -160,6 +233,7 @@ namespace FiftyOne.Tests.Integration.API
         }
 
         [TestMethod]
+        [TestCategory("API")]
         public void API_AllHeadersNull()
         {
             var headers = new NameValueCollection();
@@ -171,6 +245,7 @@ namespace FiftyOne.Tests.Integration.API
         }
 
         [TestMethod]
+        [TestCategory("API")]
         public void API_DuplicateHeaders()
         {
             var headers = new NameValueCollection();
@@ -185,6 +260,7 @@ namespace FiftyOne.Tests.Integration.API
         }
 
         [TestMethod]
+        [TestCategory("API")]
         public void API_DuplicateHeadersNull()
         {
             var headers = new NameValueCollection();
@@ -199,7 +275,8 @@ namespace FiftyOne.Tests.Integration.API
         }
 
         [TestMethod]
-        public void FetchProfiles() 
+        [TestCategory("API")]
+        public void API_FetchProfiles() 
         {
             int lastProfileId = GetHighestProfileId();
             for (int i = 0; i <= lastProfileId; i++) {
@@ -211,7 +288,8 @@ namespace FiftyOne.Tests.Integration.API
             }
         }
 
-        [TestMethod(), TestCategory("API")]
+        [TestMethod()]
+        [TestCategory("API")]
         public void FetchValidDeviceIds()
         {
             var random = new Random();
@@ -252,6 +330,13 @@ namespace FiftyOne.Tests.Integration.API
         private void FetchAllProperties(Match match)
         {
             var checkSum = 0;
+            foreach(var profile in match.Profiles)
+            {
+                Console.WriteLine("Component: {0} has profile Id {1}",
+                    profile.Component.ComponentId,
+                    profile.ProfileId);
+                checkSum += profile.ProfileId;
+            }
             foreach(var property in match.DataSet.Properties)
             {
                 Console.WriteLine("Property: {0} with value {1}",
