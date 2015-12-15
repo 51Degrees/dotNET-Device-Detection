@@ -1,0 +1,173 @@
+﻿@section featured {
+    <section class="featured">
+        <div class="content-wrapper">
+            <hgroup class="title">
+                <h1>@ViewBag.Title</h1>
+            </hgroup>
+
+        </div>
+    </section>
+}
+
+<!-- Prints out table of data set properties. -->
+<table>
+    <tbody>
+        <tr>
+            @{
+                int ColCount;
+                if (ViewBag.Device.IsMobile)
+                {
+                    ColCount = 2;
+                }
+                else
+                {
+                    ColCount = 3;
+                }
+            }
+            <th colspan="@ColCount" style="text-align:center;">
+            Data Set Information
+            </th>
+        </tr>
+        <tr>
+            <td>Name</td>
+            <td>@ViewBag.Match.DataSet.Name</td>
+            @{
+                if (!ViewBag.Device.IsMobile)
+                {
+                    <td rowspan="6" style="padding-left: 2em">
+                    <input type="button" value="Compare Data Options"
+                        title="Compare Premium and Enterprise Data Options"
+                        onclick="location.href =
+                        'https://51degrees.com/compare-data-options'" />
+                    </td>
+                }
+            }
+        </tr>
+        <tr>
+            <td>Format</td>
+            <td>@ViewBag.Match.DataSet.Format</td>
+        </tr>
+        <tr>
+            <td>Published Date</td>
+            <td>@ViewBag.Match.DataSet.Published</td>
+        </tr>
+        <tr>
+            <td>Next Update Date</td>
+            <td>@ViewBag.Match.DataSet.NextUpdate</td>
+        </tr>
+        <tr>
+            <td>Signature Count</td>
+            <td>@ViewBag.Match.DataSet.Signatures.Count</td>
+        </tr>
+        <tr>
+            <td>Device Combinations</td>
+            <td>@ViewBag.Match.DataSet.DeviceCombinations</td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- Prints table of relevant HTTP headers. -->
+<table>
+    <tbody>
+        <tr>
+            <th colspan="2" style="text-align:center;">Http Headers</th>
+        </tr>
+        @{
+            foreach (string headername
+                in @ViewBag.Match.DataSet.HttpHeaders)
+            {
+                <tr>
+                    <td>@headername</td>
+                    @if (ViewBag.RequestHeaders[@headername] != null)
+                    {
+                        <td>@ViewBag.RequestHeaders[@headername]</td>
+                    }
+                    else
+                    {
+                        <td>Header Not Set</td>
+                    }
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<!-- Prints table of match metrics for the match. -->
+<table>
+    <tbody>
+        <tr>
+            <th colspan="3" style="text-align:center;">Match Metrics</th>
+            @{
+                if (!ViewBag.Device.IsMobile)
+                {
+                    <td rowspan="5" style="padding-left:2em;">
+                    <input type="button" value="About Metrics"
+                           title="How Pattern Device Detection Works"
+                           onclick="location.href =
+                    'https://51degrees.com/support/documentation/pattern'" />
+                    </td>
+                }
+            }
+        </tr>
+        <tr>
+            <td>Id</td>
+            <td colspan="2">@ViewBag.Match.DeviceId</td>
+        </tr>
+        <tr>
+            <td>Method</td>
+            <td colspan="2">@ViewBag.Match.Method</td>
+        </tr>
+        <tr>
+            <td>Difference</td>
+            <td colspan="2">@ViewBag.Match.Difference</td>
+        </tr>
+        <tr>
+            <td>Rank</td>
+            <td colspan="2">@ViewBag.Match.Signature.Rank</td>
+        </tr>
+
+        <!-- Prints table of properties for the matched device. -->
+        <tr>
+            <th colspan="3" style="text-align:center;">Device Properties</th>
+            @{
+                if (!ViewBag.Device.IsMobile)
+                {
+                    int RowCount = @ViewBag.Device.GetType()
+                        .GetProperties().Length + 2;
+                    <td rowspan="@RowCount" style="padding-left:2em;">
+                        <input type="button" value="All Properties"
+                            title="Review All Properties"
+                            onclick="location.href =
+                            'https://51degrees.com/resources'
+                            +'/property-dictionary'" />
+                    </td>
+                }
+            }
+        </tr>
+        <tr>
+            <th>Property</th>
+            <th>Model Value</th>
+            <th>Match Value</th>
+        </tr>
+        @{
+            string PropertyLink = "";
+            foreach (var property in @ViewBag.Device.GetType().GetProperties())
+            {
+                PropertyLink = "<a href=\"https://51degrees.com"
+                    + "/resources/property-dictionary#"
+                    + property.Name
+                    + "\" title=\"View "
+                    + property.Name
+                    + " Property\">"
+                    + property.Name
+                    + "</a>";
+                <tr>
+                    <td>@Html.Raw(@PropertyLink)</td>
+                    <td>@Html.Raw(@property.GetValue(ViewBag.Device))</td>
+                    <td>@Html.Raw(ViewBag.Match[@property.Name])</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+

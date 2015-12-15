@@ -1,0 +1,42 @@
+﻿<hgroup class="title">
+    <h1>@ViewBag.Title.</h1>
+</hgroup>
+
+<!-- Brief About page describing what this site does. -->
+<article>
+    <p>
+        This example uses the 51Degrees .NET API within an ASP.NET MVC
+        context. It Gets a match for the device accessing the page and
+        print details about the device. These details are broken down
+        into three distinct sections:
+    </p>
+    <ol>
+        <li>Data Set Information;</li>
+        <li>Match Metrics;</li>
+        <li>Device Properties.</li>
+    </ol>
+    <p>
+        The <b>Data Set Information</b> section is independant of the
+        match, it lists the meta data from the device data set that has
+        been initialised.
+    </p>
+    <p>
+        The <b>Match Metrics</b> section displays information about the
+        match which indicate how accurate it is.
+    </p>
+    <p>
+        The <b>Device Properties</b> section displays requesting device values
+        using both an MVC model and direct access to 51Degrees match results.
+        To learn about available properties, see
+        <a href="https://51degrees.com/compare-data-options">
+        compare data options</a>.
+    </p>
+</article>
+
+<aside>
+    <h3>Pages</h3>
+    <ul>
+        <li>@Html.ActionLink("Home", "Index", "Home")</li>
+        <li>@Html.ActionLink("About", "About", "Home")</li>
+    </ul>
+</aside>
