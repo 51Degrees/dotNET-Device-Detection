@@ -265,7 +265,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Array of node offsets associated with the signature.
         /// </summary>
-        internal abstract int[] NodeOffsets { get; }
+        internal abstract IList<int> NodeOffsets { get; }
 
         /// <summary>
         /// An array of nodes associated with the signature.
@@ -290,27 +290,21 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         private Node[] _nodes;
 
         /// <summary>
-        /// An array of all the values irrespective of the profile associated
-        /// with the signature.
+        /// An enumeration of values associated with the signature.
         /// </summary>
-        internal Value[] Values
+        internal IEnumerable<Value> Values
         {
             get
             {
-                if (_values == null)
+                foreach(var profile in Profiles)
                 {
-                    lock (this)
+                    foreach(var value in profile.Values)
                     {
-                        if (_values == null)
-                        {
-                            _values = GetValues();
-                        }
+                        yield return value;
                     }
                 }
-                return _values;
             }
         }
-        private Value[] _values;
         
         #endregion
 
@@ -355,7 +349,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <returns>
         /// An array of the offsets as integers read from the reader.
         /// </returns>
-	    internal static int[] ReadOffsets(DataSet dataSet, Reader reader, int length) 
+        internal static int[] ReadOffsets(DataSet dataSet, Reader reader, int length) 
         {
             reader.List.Clear();
 		    for (int i = 0; i < length; i++) {
@@ -401,33 +395,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
 
         /// <summary>
-        /// Returns an array of values associated with the signature.
-        /// </summary>
-        /// <returns></returns>
-        private Value[] GetValues()
-        {
-            // Get the number of values in against the signature.
-            var valuesCount = Profiles.Sum(i => i.ValueIndexes.Length);
-
-            // Add the values to the array for each of the profiles.
-            var values = new Value[valuesCount];
-            var index = 0;
-            var profileIndex = 0;
-            while (index < valuesCount)
-            {
-                var profile = Profiles[profileIndex];
-                for (int v = 0; v < profile.Values.Length; v++)
-                {
-                    values[index] = profile.Values[v];
-                    index++;
-                }
-                profileIndex++;
-            }
-
-            return values;
-        }
-
-        /// <summary>
         /// Returns an array of profiles associated with the signature.
         /// </summary>
         /// <returns>Array of profiles for the signature</returns>
@@ -457,8 +424,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <returns></returns>
         internal Node[] GetNodes()
         {
-            var nodes = new Node[NodeOffsets.Length];
-            for (int i = 0; i < NodeOffsets.Length; i++)
+            var nodes = new Node[NodeOffsets.Count];
+            for (int i = 0; i < NodeOffsets.Count; i++)
             {
                 nodes[i] = DataSet.Nodes[NodeOffsets[i]];
             }
@@ -476,8 +443,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                 _nodes = GetNodes();
             if (_profiles == null)
                 _profiles = GetProfiles();
-            if (_values == null)
-                _values = GetValues();
             if (_deviceId == null)
                 _deviceId = GetDeviceId();
             if (_length == 0)
@@ -491,7 +456,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <returns></returns>
         internal bool StartsWith(List<Node> Nodes)
         {
-            for (int i = 0; i < Nodes.Count && i < NodeOffsets.Length; i++)
+            for (int i = 0; i < Nodes.Count && i < NodeOffsets.Count; i++)
                 if (Nodes[i].Index != NodeOffsets[i])
                     return false;
             return true;
@@ -505,7 +470,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         internal int CompareTo(IList<Node> nodes)
         {
             var length = Math.Min(
-                NodeOffsets.Length,
+                NodeOffsets.Count,
                 nodes.Count);
 
             for (int i = 0; i < length; i++)
@@ -515,9 +480,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                     return difference;
             }
 
-            if (NodeOffsets.Length < nodes.Count)
+            if (NodeOffsets.Count < nodes.Count)
                 return -1;
-            if (NodeOffsets.Length > nodes.Count)
+            if (NodeOffsets.Count > nodes.Count)
                 return 1;
 
             return 0;
@@ -540,8 +505,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         public int CompareTo(Signature other)
         {
             var length = Math.Min(
-                NodeOffsets.Length,
-                other.NodeOffsets.Length);
+                NodeOffsets.Count,
+                other.NodeOffsets.Count);
 
             for (int i = 0; i < length; i++)
             {
@@ -550,9 +515,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                     return difference;
             }
 
-            if (NodeOffsets.Length < other.NodeOffsets.Length)
+            if (NodeOffsets.Count < other.NodeOffsets.Count)
                 return -1;
-            if (NodeOffsets.Length > other.NodeOffsets.Length)
+            if (NodeOffsets.Count > other.NodeOffsets.Count)
                 return 1;
 
             return 0;

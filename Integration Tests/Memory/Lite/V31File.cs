@@ -61,13 +61,13 @@ namespace FiftyOne.Tests.Integration.Memory.Lite
         [TestMethod(), TestCategory("Memory"), TestCategory("Lite")]
         public void LiteV31File_Memory_BadUserAgentsMulti()
         {
-            base.UserAgentsMulti(UserAgentGenerator.GetBadUserAgents(), 50);
+            base.UserAgentsMulti(UserAgentGenerator.GetBadUserAgents(), 40);
         }
 
         [TestMethod(), TestCategory("Memory"), TestCategory("Lite")]
         public void LiteV31File_Memory_BadUserAgentsSingle()
         {
-            base.UserAgentsSingle(UserAgentGenerator.GetBadUserAgents(), 50);
+            base.UserAgentsSingle(UserAgentGenerator.GetBadUserAgents(), 40);
         }
     }
 }

@@ -358,8 +358,6 @@ namespace FiftyOne.Tests.Integration
                 dataSet.PercentageNodeCacheMisses);
             Console.WriteLine("Profiles cache misses '{0:P2}'",
                 dataSet.PercentageProfilesCacheMisses);
-            Console.WriteLine("Ranked Signatures cache misses '{0:P2}'",
-                dataSet.PercentageRankedSignatureCacheMisses);
             Console.WriteLine("Signatures cache misses '{0:P2}'",
                 dataSet.PercentageSignatureCacheMisses);
             Console.WriteLine("Strings cache misses '{0:P2}'",

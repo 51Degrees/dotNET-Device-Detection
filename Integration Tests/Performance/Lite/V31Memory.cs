@@ -90,7 +90,7 @@ namespace FiftyOne.Tests.Integration.Performance.Lite
         [TestMethod]
         public void LiteV31Memory_Performance_BadUserAgentsSingleAll()
         {
-            base.BadUserAgentsSingle(_dataSet.Properties, 1);
+            base.BadUserAgentsSingle(_dataSet.Properties, 2);
         }
 
         [TestMethod]

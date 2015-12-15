@@ -1,0 +1,2 @@
+# Ignore 51Degrees.dat files - these are now copied from /data at start up
+51Degrees.dat

@@ -23,6 +23,7 @@ using System;
 using FiftyOne.Foundation.Mobile.Detection.Entities.Memory;
 using System.Linq;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Entities
 {
@@ -233,6 +234,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <remarks>
         /// A value is only returned when operating in Stream mode.
         /// </remarks>
+        [Obsolete("Ranked signatures are no longer cached")]
         public double PercentageRankedSignatureCacheMisses
         {
             get
@@ -322,12 +324,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <remarks>
         /// A value is only returned when operating in Stream mode.
         /// </remarks>
-        [Obsolete("Cache no longer requires switching")]
+        [Obsolete("Ranked signatures are no longer cached")]
         public long RankedSignatureCacheSwitches
         {
             get
             {
-                return Switches(RankedSignatureIndexes);
+                return 0;
             }
         }
         
@@ -739,11 +741,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// Used by the node ranked signature indexes lists to identify
         /// the corresponding signature.
         /// </summary>
-        internal IFixedList<Integer> RankedSignatureIndexes
+        internal ISimpleList RankedSignatureIndexes
         {
             get { return _rankedSignatureIndexes; }
         }
-        internal IFixedList<Integer> _rankedSignatureIndexes;
+        internal ISimpleList _rankedSignatureIndexes;
 
         /// <summary>
         /// List of profile offsets the data set contains.
@@ -757,20 +759,20 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// List of integers that represent ranked signature indexes.
         /// </summary>
-        internal IFixedList<Integer> NodeRankedSignatureIndexes
+        internal ISimpleList NodeRankedSignatureIndexes
         {
             get { return _nodeRankedSignatureIndexes; }
         }
-        internal IFixedList<Integer> _nodeRankedSignatureIndexes;
+        internal ISimpleList _nodeRankedSignatureIndexes;
 
         /// <summary>
         /// List of integers that represent signature node offsets.
         /// </summary>
-        internal IFixedList<Integer> SignatureNodeOffsets
+        internal ISimpleList SignatureNodeOffsets
         {
             get { return _signatureNodeOffsets; }
         }
-        internal IFixedList<Integer> _signatureNodeOffsets;
+        internal ISimpleList _signatureNodeOffsets;
 
         #endregion
 
@@ -880,18 +882,26 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
 
             // Initialise any objects that can be pre referenced to speed up
             // initial matching.
-            foreach (var entity in Components)
+            Parallel.ForEach(Components, entity => 
+            {
                 entity.Init();
-            foreach (var entity in Properties)
+            });
+            Parallel.ForEach(Properties, entity =>
+            {
                 entity.Init();
-            foreach (var entity in Values)
+            });
+            Parallel.ForEach(Values, entity =>
+            {
                 entity.Init();
-            foreach (var entity in Profiles)
+            });
+            Parallel.ForEach(Nodes, entity =>
+            {
                 entity.Init();
-            foreach (var entity in Nodes)
+            });
+            Parallel.ForEach(Signatures, entity =>
+            {
                 entity.Init();
-            foreach (var entity in Signatures)
-                entity.Init();
+            });
             
             // We no longer need the strings data structure as all dependent
             // data has been taken from it.
@@ -986,18 +996,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             if (Strings != null)
             {
                 Strings.Dispose();
-            }
-            if (RankedSignatureIndexes != null)
-            {
-                RankedSignatureIndexes.Dispose();
-            }
-            if (NodeRankedSignatureIndexes != null)
-            {
-                NodeRankedSignatureIndexes.Dispose();
-            }
-            if (SignatureNodeOffsets != null)
-            {
-                SignatureNodeOffsets.Dispose();
             }
             _disposed = true;
             GC.SuppressFinalize(this);

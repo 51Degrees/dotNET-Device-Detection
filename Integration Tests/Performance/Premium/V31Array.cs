@@ -84,13 +84,13 @@ namespace FiftyOne.Tests.Integration.Performance.Premium
         [TestMethod]
         public void PremiumV31Array_Performance_BadUserAgentsMultiAll()
         {
-            base.BadUserAgentsMulti(_dataSet.Properties, Asserts.AssertCacheMissesBadAll, 3);
+            base.BadUserAgentsMulti(_dataSet.Properties, Asserts.AssertCacheMissesBadAll, 4);
         }
 
         [TestMethod]
         public void PremiumV31Array_Performance_BadUserAgentsSingleAll()
         {
-            base.BadUserAgentsSingle(_dataSet.Properties, Asserts.AssertCacheMissesBadAll, 4);
+            base.BadUserAgentsSingle(_dataSet.Properties, Asserts.AssertCacheMissesBadAll, 5);
         }
 
         [TestMethod]

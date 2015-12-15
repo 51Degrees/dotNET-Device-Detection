@@ -74,7 +74,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <summary>
         /// A list of all the signature indexes that relate to this node.
         /// </summary>
-        internal override int[] RankedSignatureIndexes
+        internal override IList<int> RankedSignatureIndexes
         {
             get
             {
@@ -91,7 +91,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
                 return _rankedSignatureIndexes;
             }
         }
-        private int[] _rankedSignatureIndexes;
+        private IList<int> _rankedSignatureIndexes;
         
         /// <summary>
         /// Gets the ranked signature indexes array for the node.
@@ -100,55 +100,49 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// An array of length _rankedSignatureCount filled with ranked 
         /// signature indexes.
         /// </returns>
-        private int[] GetRankedSignatureIndexesAsArray()
+        private IList<int> GetRankedSignatureIndexesAsArray()
         {
-            int[] rankedSignatureIndexes;
+            IList<int> rankedSignatureIndexes;
             if (RankedSignatureCount == 0)
             {
-                rankedSignatureIndexes = new int[0];
+                rankedSignatureIndexes = new int[] {};
             }
             else
             {
-                var reader = _pool.GetReader();
-                try
+                var rankedSignatureValue = GetRankedSignatureIndexValue();
+                if (RankedSignatureCount == 1)
                 {
-                    // Position the reader after the numeric children.
-                    reader.BaseStream.Position = 
-                        _position + ((sizeof(short) + sizeof(int)) * NumericChildrenCount);
-                    
-                    // Read the index.
-                    var index = reader.ReadInt32();
-
-                    // Set the size of the array to return.
-                    rankedSignatureIndexes = new int[RankedSignatureCount];
-
-                    if (RankedSignatureCount == 1)
-                    {
-                        // If the count is one then the value is the ranked signature index.
-                        rankedSignatureIndexes[0] = index;    
-                    }
-                    else
-                    {
-                        // If the count is greater than one then the value is 
-                        // the index of the first ranked signature index in the 
-                        // merged list.
-                        var range = 
-                            DataSet.NodeRankedSignatureIndexes.GetRange(index, RankedSignatureCount);
-                        var enumerator = range.GetEnumerator();
-                        var i = 0;
-                        while (enumerator.MoveNext())
-                        {
-                            rankedSignatureIndexes[i] = enumerator.Current.Value;
-                            i++;
-                        }
-                    }
+                    // If the count is one then the value is the ranked signature index.
+                    rankedSignatureIndexes = new int[] { rankedSignatureValue };
                 }
-                finally
+                else
                 {
-                    _pool.Release(reader);
+                    // If the count is greater than one then the value is 
+                    // the index of the first ranked signature index in the 
+                    // merged list.
+                    rankedSignatureIndexes = DataSet.NodeRankedSignatureIndexes.GetRange(
+                        rankedSignatureValue, RankedSignatureCount);
                 }
             }
             return rankedSignatureIndexes;
+        }
+
+        private int GetRankedSignatureIndexValue()
+        {
+            var reader = _pool.GetReader();
+            try
+            {
+                // Position the reader after the numeric children.
+                reader.BaseStream.Position =
+                    _position + ((sizeof(short) + sizeof(int)) * NumericChildrenCount);
+
+                // Read the index.
+                return reader.ReadInt32();
+            }
+            finally
+            {
+                _pool.Release(reader);
+            }
         }
 
         #endregion

@@ -55,7 +55,7 @@ namespace FiftyOne.Tests.Integration.Performance.Premium
         [TestMethod]
         public void PremiumV32Memory_Performance_BadUserAgentsSingle()
         {
-            base.BadUserAgentsSingle(null, 2);
+            base.BadUserAgentsSingle(null, 3);
         }
 
         [TestMethod]

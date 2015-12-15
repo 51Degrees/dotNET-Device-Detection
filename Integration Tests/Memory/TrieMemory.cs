@@ -56,7 +56,7 @@ namespace FiftyOne.Tests.Integration.Memory
 
         protected override int MaxAllowedMemory
         {
-            get { return (int)(new FileInfo(DataFile).Length * 1.6); }
+            get { return (int)((new FileInfo(DataFile).Length * 1.6) / Utils.MemoryMonitor.MEGABYTE); }
         }
     }
 }
