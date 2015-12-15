@@ -103,7 +103,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
             /// </summary>
             private class OrderedList
             {
-                internal readonly int[] Items;
+                private static readonly SearchLists<int, int> _search = new
+                    SearchLists<int, int>();
+
+                internal readonly IList<int> Items;
                 private int _nextStartIndex = 0;
                 private int _currentIndex = -1;
 
@@ -113,7 +116,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 /// <param name="items">
                 /// Array of integers to incldue in the list
                 /// </param>
-                internal OrderedList(int[] items)
+                internal OrderedList(IList<int> items)
                 {
                     Items = items;
                 }
@@ -129,11 +132,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 /// </returns>
                 internal bool Contains(int value)
                 {
-                    var index = Array.BinarySearch<int>(
-                        Items,
-                        _nextStartIndex,
-                        Items.Length - _nextStartIndex,
-                        value);
+                    var index = _search.BinarySearch(Items, value);
                     if (index < 0)
                     {
                         _nextStartIndex = ~index;
@@ -153,7 +152,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 internal bool MoveNext()
                 {
                     _currentIndex++;
-                    return _currentIndex < Items.Length;
+                    return _currentIndex < Items.Count;
                 }
 
                 internal void Reset()
@@ -174,7 +173,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             internal MostFrequentFilter(MatchState state)
             {
                 Init(state.Nodes.OrderBy(i => 
-                    i.RankedSignatureIndexes.Length).Select(i =>
+                    i.RankedSignatureIndexes.Count).Select(i =>
                         new OrderedList(i.RankedSignatureIndexes)).ToArray(),
                     state.DataSet.MaxSignatures);
             }
@@ -319,7 +318,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 var lastNodeCharacter = state.Nodes.Last().Root.Position;
                 foreach (var rankedSignatureIndex in rankedSignatureIndexes.Take(state.DataSet.MaxSignatures))
                 {
-                    var signatureIndex = state.DataSet.RankedSignatureIndexes[rankedSignatureIndex].Value;
+                    var signatureIndex = state.DataSet.RankedSignatureIndexes[rankedSignatureIndex];
                     var signature = state.DataSet.Signatures[signatureIndex];
                     EvaluateSignature(state, signature, lastNodeCharacter);
                 }
@@ -376,7 +375,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 int matchNodeIndex = 0;
                 int signatureNodeIndex = 0;
 
-                while (signatureNodeIndex < signature.NodeOffsets.Length &&
+                while (signatureNodeIndex < signature.NodeOffsets.Count &&
                        runningScore < state.LowestScore)
                 {
                     var matchNodeOffset = matchNodeIndex >= state.Nodes.Count ?

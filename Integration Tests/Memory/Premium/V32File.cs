@@ -61,13 +61,13 @@ namespace FiftyOne.Tests.Integration.Memory.Premium
         [TestMethod(), TestCategory("Memory"), TestCategory("Premium")]
         public void PremiumV32File_Memory_BadUserAgentsMulti()
         {
-            base.UserAgentsMulti(UserAgentGenerator.GetBadUserAgents(), 70);
+            base.UserAgentsMulti(UserAgentGenerator.GetBadUserAgents(), 50);
         }
 
         [TestMethod(), TestCategory("Memory"), TestCategory("Premium")]
         public void PremiumV32File_Memory_BadUserAgentsSingle()
         {
-            base.UserAgentsSingle(UserAgentGenerator.GetBadUserAgents(), 70);
+            base.UserAgentsSingle(UserAgentGenerator.GetBadUserAgents(), 50);
         }
     }
 }

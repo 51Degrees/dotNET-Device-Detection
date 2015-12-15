@@ -290,7 +290,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// An array of the ranked signature indexes for the node.
         /// </summary>
-        internal abstract int[] RankedSignatureIndexes { get; }
+        internal abstract IList<int> RankedSignatureIndexes { get; }
         
         #endregion
 

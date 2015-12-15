@@ -195,8 +195,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
             var values = new MemoryFixedList<Value>(dataSet, reader, new ValueFactory());
             var profiles = new MemoryVariableList<Entities.Profile>(dataSet, reader, new ProfileMemoryFactory());
             MemoryFixedList<Signature> signatures = null;
-            MemoryFixedList<Integer> signatureNodeOffsets = null;
-            MemoryFixedList<Integer> nodeRankedSignatureIndexes = null;
+            MemoryIntegerList signatureNodeOffsets = null;
+            MemoryIntegerList nodeRankedSignatureIndexes = null;
             switch(dataSet.VersionEnum)
             {
                 case BinaryConstants.FormatVersions.PatternV31:
@@ -204,12 +204,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
                     break;
                 case BinaryConstants.FormatVersions.PatternV32:
                     signatures = new MemoryFixedList<Signature>(dataSet, reader, new SignatureFactoryV32(dataSet));
-                    signatureNodeOffsets = new MemoryFixedList<Integer>(dataSet, reader, new IntegerFactory());
-                    nodeRankedSignatureIndexes = new MemoryFixedList<Integer>(dataSet, reader, new IntegerFactory());
+                    signatureNodeOffsets = new MemoryIntegerList(reader);
+                    nodeRankedSignatureIndexes = new MemoryIntegerList(reader);
                     break;
             }
-            var rankedSignatureIndexes = new MemoryFixedList<Integer>(
-                dataSet, reader, new IntegerFactory());
+            var rankedSignatureIndexes = new MemoryIntegerList(reader);
             MemoryVariableList<Entities.Node> nodes = null;
             switch (dataSet.VersionEnum)
             {
