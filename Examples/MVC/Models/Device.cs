@@ -3,7 +3,22 @@ using System.Collections.Generic;
 using FiftyOne.Foundation.Mobile.Detection;
 using System.Linq;
 using System.Web;
-
+/*
+<tutorial>
+The first stage of using 51Degrees device detection in MVC is creating
+a model. This Device model can access the Match object in two ways:
+<h3>Accessing the Match object directly</h3>
+<p>
+This is the most efficient method as it returns the requested property
+directly from the Match object
+</p>
+<h3>Reflecting the Match object properties</h3>
+<p>
+This uses reflection to set all the properties of the Device object, so with a large number of properties
+will be a less efficient method.
+</p>
+</tutorial> 
+*/
 namespace MVC.Models
 {
     public class Device
