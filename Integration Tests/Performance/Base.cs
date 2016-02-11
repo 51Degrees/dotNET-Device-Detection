@@ -26,6 +26,7 @@ using FiftyOne.Foundation.Mobile.Detection.Entities;
 using FiftyOne.Foundation.Mobile.Detection.Factories;
 using FiftyOne.Foundation.Mobile.Detection;
 using System.Collections.Generic;
+using FiftyOne.Foundation.Mobile.Detection.Entities.Stream;
 
 namespace FiftyOne.Tests.Integration.Performance
 {
@@ -35,7 +36,7 @@ namespace FiftyOne.Tests.Integration.Performance
         /// <summary>
         /// The data set to be used for the tests.
         /// </summary>
-        protected DataSet _dataSet;
+        protected FiftyOne.Foundation.Mobile.Detection.Entities.DataSet _dataSet;
 
         /// <summary>
         /// Name of the data file to use for the tests.
@@ -97,6 +98,48 @@ namespace FiftyOne.Tests.Integration.Performance
                     results.AverageTime.TotalMilliseconds,
                     guidanceTime));
             return results;
+        }
+
+        protected virtual void FindProfiles(double guidanceTime)
+        {
+            Console.WriteLine("Expected Time: {0:0.000} ms", guidanceTime);
+            var startTime = DateTime.UtcNow;
+            var checkSum = 0;
+            var count = 0;
+            foreach (var property in Constants.FIND_PROFILES_PROPERTIES.Select(i =>
+                _dataSet.Properties[i]).Where(i => i != null))
+            {
+                var values = property.Values.Select(i => i.Name).ToArray();
+                _dataSet.ResetCache();
+                foreach (var valueName in values)
+                {
+                    var profiles = _dataSet.FindProfiles(property.Name, valueName);
+                    count++;
+                    foreach (var profile in profiles)
+                    {
+                        checkSum += profile.Index;
+                    }
+                }
+                if (_dataSet.Values is ICacheList)
+                {
+                    Assert.IsTrue(((ICacheList)_dataSet.Values).CacheMisses == values.Length,
+                        String.Format(
+                            "Find profile expands the value cache and as such the misses should equal " +
+                            "the number of values. {0} misses occurred for {1} values.",
+                            ((ICacheList)_dataSet.Values).CacheMisses,
+                            values.Length));
+                }
+            }
+            var averageTime = (double)(DateTime.UtcNow - startTime).TotalMilliseconds / (double)count;
+            Console.WriteLine("Checksum: {0}", checkSum);
+            Console.WriteLine("Average time: {0:0.000} ms", averageTime);
+            if (averageTime > guidanceTime)
+            {
+                Assert.IsTrue(averageTime < guidanceTime,
+                    String.Format("Average time of '{0:0.000}' ms exceeded guidance time of '{1:0.000}' ms",
+                        averageTime,
+                        guidanceTime));
+            }
         }
 
         [TestCleanup]

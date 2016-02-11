@@ -28,7 +28,7 @@ namespace FiftyOne.Tests.Integration.API.Premium
     {
         protected override string DataFile
         {
-            get { return Utils.GetDataFile(Constants.LITE_PATTERN_V31); }
+            get { return Utils.GetDataFile(Constants.PREMIUM_PATTERN_V31); }
         }
     }
 }

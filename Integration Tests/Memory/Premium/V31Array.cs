@@ -74,5 +74,11 @@ namespace FiftyOne.Tests.Integration.Memory.Premium
         {
             base.UserAgentsSingle(UserAgentGenerator.GetBadUserAgents(), ExpectedMemoryUsage);
         }
+
+        [TestMethod(), TestCategory("Memory"), TestCategory("Array"), TestCategory("Premium")]
+        public void PremiumV31Array_Memory_FindProfiles()
+        {
+            base.FindProfiles(ExpectedMemoryUsage);
+        }
     }
 }

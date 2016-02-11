@@ -35,7 +35,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// <para>
     /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
-    public abstract class BaseEntity : IComparable<BaseEntity>, IComparable<int>
+    public abstract class BaseEntity : IComparable<BaseEntity>, IComparable<int>, IEquatable<int>
     {
         #region Constants
 
@@ -150,6 +150,26 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         public int CompareTo(BaseEntity other)
         {
             return CompareTo(other.Index);
+        }
+        
+        /// <summary>
+        /// Evaluates the index of the entity to the value provided for equality.
+        /// </summary>
+        /// <param name="other">Value to evaluate for equality</param>
+        /// <returns>True if the other value equals the index, otherwise false</returns>
+        public bool Equals(int other)
+        {
+            return Index.Equals(other);
+        }
+
+        /// <summary>
+        /// Returns the index as the hash code for the entity. This can only be considered
+        /// when using entities from the same data set.
+        /// </summary>
+        /// <returns></returns>
+        public override int GetHashCode()
+        {
+            return Index;
         }
 
         #endregion

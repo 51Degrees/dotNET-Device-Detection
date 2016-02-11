@@ -29,7 +29,7 @@ using System.Threading;
 namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 {
     /// <summary>
-    /// A readonly list of fixed length entity types held on persistent storage 
+    /// A read only list of fixed length entity types held on persistent storage 
     /// rather than in memory.
     /// </summary>
     /// <para>
@@ -68,7 +68,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// reduce memory consumption associated with creating new instances of 
         /// entities already in use.
         /// </summary>
-        internal readonly Cache<T> _cache;
+        private readonly Cache<T> _cache;
 
         #endregion
 
@@ -89,6 +89,31 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         long ICacheList.Switches
         {
             get { return 0; }
+        }
+
+        /// <summary>
+        /// Gets or sets the size of the cache.
+        /// </summary>
+        int ICacheList.CacheSize
+        {
+            get { return _cache.CacheSize; }
+            set { _cache.CacheSize = value; }
+        }
+
+        /// <summary>
+        /// Returns the number of misses.
+        /// </summary>
+        long ICacheList.CacheMisses
+        {
+            get { return _cache.Misses; }
+        }
+
+        /// <summary>
+        /// Returns the number of requests.
+        /// </summary>
+        long ICacheList.CacheRequests
+        {
+            get { return _cache.Requests; }
         }
 
         #endregion

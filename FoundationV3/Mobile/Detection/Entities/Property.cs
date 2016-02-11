@@ -24,6 +24,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Text;
+using FiftyOne.Foundation.Mobile.Detection.Entities.Stream;
+using System.Diagnostics;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Entities
 {
@@ -39,9 +41,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// </para>
     /// <para>
     /// Properties can return none, one or many values. The 
-    /// <see cref="Property.IsList"/> property should be refered to check if 
+    /// <see cref="Property.IsList"/> property should be referred to check if 
     /// more than one value may be returned. Properties where IsList is false 
-    /// will only return upto one value.
+    /// will only return up to one value.
     /// </para>
     /// <para>
     /// The property also provides additional meta information about itself. 
@@ -58,7 +60,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// </para>
     /// <para>
     /// Values are returned in the type <see cref="Values"/> which includes 
-    /// utility methods to easilly extract strongly typed values.
+    /// utility methods to easily extract strongly typed values.
     /// </para>
     /// <para>
     /// For more information see 
@@ -66,6 +68,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// </para>
     public class Property : BaseEntity,  IComparable<Property>, IEquatable<Property>
     {
+        #region Constants
+
+        /// <summary>
+        /// Empty array of profiles for instances where no profiles were 
+        /// returned. 
+        /// </summary>
+        protected static readonly Entities.Profile[] EmptyProfiles = new Profile[0];
+
+        #endregion
+
         #region Fields
 
         /// <summary>
@@ -438,21 +450,148 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// property is found.
         /// </summary>
         /// <returns>
-        /// A values list initialised with the property values.
+        /// A values instance configured with the value indexes associated with
+        /// the property.
         /// </returns>
         private Values GetValues()
         {
-            var values = new Value[LastValueIndex - FirstValueIndex + 1];
+            var valueIndexes = new int[LastValueIndex - FirstValueIndex + 1];
             for (int i = FirstValueIndex, v = 0; i <= LastValueIndex; i++, v++)
             {
-                values[v] = DataSet.Values[i];
+                valueIndexes[v] = i;
             }
-            return new Values(this, values);
+            return new Values(this, valueIndexes);
         }
+
+        /// <summary>
+        /// Ensures that the values are initialised to improve performance the
+        /// next time that the property is accessed for the purposes of finding
+        /// profiles associated with values.
+        /// </summary>
+        /// <remarks>
+        /// Uses the internal fields of the Value class to set an array of 
+        /// profile indexes and also the array of profiles. Once these are
+        /// set they will not need to be calculated again.
+        /// </remarks>
+        private void InitValues()
+        {
+            if (InitialisedValues == false)
+            {
+                lock (this)
+                {
+                    if (InitialisedValues == false)
+                    {
+                        // If the Values list is cached increase the size
+                        // of the cache to improve performance for this
+                        // feature by storing all related values in the cache.
+                        // Having all the possible values cached will improve 
+                        // performance for subsequent requests. if the data 
+                        // set isn't cached then there will only be one instance
+                        // of each profile and value in memory so the step isn't
+                        // needed as the direct reference will be used.
+                        if (DataSet.Values is ICacheList)
+                        {
+                            ((ICacheList)DataSet.Values).CacheSize += Values.Count;
+                        }
+
+                        // Build a dictionary to store the growing list of 
+                        // profiles associated with each value.
+                        var tempValues = new Dictionary<int, List<Profile>>();
+                        foreach (var value in Values)
+                        {
+                            tempValues.Add(value.Index, new List<Profile>());
+                        }
+
+                        // Loop through the profiles associated with the 
+                        // component adding then to the dictionary keyed
+                        // on value where the property associated with 
+                        // the value matches.
+                        foreach (Profile profile in Component.Profiles)
+                        {
+                            foreach (var value in profile[this])
+                            {
+                                tempValues[value.Index].Add(profile);
+                            }
+                        }
+
+                        // Finally set the values profile indexes and the profiles
+                        // for each of the values.
+                        foreach (var valueProfiles in tempValues)
+                        {
+                            // Get the value from the index.
+                            var value = DataSet.Values[valueProfiles.Key];
+
+                            // Only set the relationship between the value and profiles
+                            // where the data set indicates this is desired. It makes
+                            // sense to do this in memory mode as there will only ever
+                            // be one instance of each profile. However in stream mode
+                            // where caching is used there could be multiple instances 
+                            // and this is undesirable from a memory management 
+                            // perspective.
+                            if (DataSet.FindProfilesInitialiseValueProfiles)
+                            {
+                                value._profiles = valueProfiles.Value.ToArray();
+                                value._profileIndexes = value._profiles.Select(i => i.Index).ToArray();
+                            }
+                            else
+                            {
+                                value._profileIndexes = valueProfiles.Value.Select(i => i.Index).ToArray();
+                            }
+                        }
+
+                        // Set the flag to avoid repeating this method for the
+                        // property.
+                        InitialisedValues = true;
+                    }
+                }
+            }
+        }
+
+        // Marked as internal so that the state can be monitored in
+        // integration tests.
+        internal bool InitialisedValues { get; private set; }
 
         #endregion
 
         #region Public Methods
+
+
+        /// <summary>
+        /// Gets the profiles associated with the value name where the 
+        /// value's profiles intersects with the filterProfiles if provided.
+        /// </summary>
+        /// <param name="valueName">
+        /// Name of the value associated with the property
+        /// </param>
+        /// <param name="filterProfiles">
+        /// Array of profiles ordered in ascending Index order. Null if 
+        /// no filter is required.
+        /// </param>
+        /// <returns>Array of profiles ordered in ascending Index order.</returns>
+        public Entities.Profile[] FindProfiles(string valueName, Entities.Profile[] filterProfiles = null)
+        {
+            InitValues();
+            var result = Property.EmptyProfiles;
+            var value = Values[valueName];
+            if (value != null)
+            {
+                if (filterProfiles == null)
+                {
+                    // Return the profiles associated with the value.
+                    result = value.Profiles;
+                }
+                else
+                {
+                    // Return the intersection between the value profiles
+                    // and the filter profiles. The index of the profiles are
+                    // used to avoid getting each one associated with the property
+                    // if it's not contained in the filter profiles.
+                    result = value.ProfileIndexes.Intersect(filterProfiles.Select(i =>
+                        i.Index)).Select(i => DataSet.Profiles[i]).ToArray();
+                }
+            }
+            return result;
+        }
 
         /// <summary>
         /// Compares this property to another using the index field if they're

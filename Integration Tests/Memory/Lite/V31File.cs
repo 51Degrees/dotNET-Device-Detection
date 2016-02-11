@@ -34,40 +34,46 @@ namespace FiftyOne.Tests.Integration.Memory.Lite
             get { return Utils.GetDataFile(Constants.LITE_PATTERN_V31); }
         }
 
-        [TestMethod(), TestCategory("Memory"), TestCategory("Lite")]
+        [TestMethod(), TestCategory("Memory"), TestCategory("File"), TestCategory("Lite")]
         public void LiteV31File_Memory_UniqueUserAgentsMulti()
         {
             base.UserAgentsMulti(UserAgentGenerator.GetUniqueUserAgents(), 25);
         }
 
-        [TestMethod(), TestCategory("Memory"), TestCategory("Lite")]
+        [TestMethod(), TestCategory("Memory"), TestCategory("File"), TestCategory("Lite")]
         public void LiteV31File_Memory_UniqueUserAgentsSingle()
         {
             base.UserAgentsSingle(UserAgentGenerator.GetUniqueUserAgents(), 25);
         }
 
-        [TestMethod(), TestCategory("Memory"), TestCategory("Lite")]
+        [TestMethod(), TestCategory("Memory"), TestCategory("File"), TestCategory("Lite")]
         public void LiteV31File_Memory_RandomUserAgentsMulti()
         {
             base.UserAgentsMulti(UserAgentGenerator.GetRandomUserAgents(), 25);
         }
 
-        [TestMethod(), TestCategory("Memory"), TestCategory("Lite")]
+        [TestMethod(), TestCategory("Memory"), TestCategory("File"), TestCategory("Lite")]
         public void LiteV31File_Memory_RandomUserAgentsSingle()
         {
             base.UserAgentsSingle(UserAgentGenerator.GetRandomUserAgents(), 25);
         }
 
-        [TestMethod(), TestCategory("Memory"), TestCategory("Lite")]
+        [TestMethod(), TestCategory("Memory"), TestCategory("File"), TestCategory("Lite")]
         public void LiteV31File_Memory_BadUserAgentsMulti()
         {
             base.UserAgentsMulti(UserAgentGenerator.GetBadUserAgents(), 40);
         }
 
-        [TestMethod(), TestCategory("Memory"), TestCategory("Lite")]
+        [TestMethod(), TestCategory("Memory"), TestCategory("File"), TestCategory("Lite")]
         public void LiteV31File_Memory_BadUserAgentsSingle()
         {
             base.UserAgentsSingle(UserAgentGenerator.GetBadUserAgents(), 40);
+        }
+
+        [TestMethod(), TestCategory("Memory"), TestCategory("File"), TestCategory("Lite")]
+        public void LiteV31File_Memory_FindProfiles()
+        {
+            base.FindProfiles(11);
         }
     }
 }

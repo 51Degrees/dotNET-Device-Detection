@@ -32,8 +32,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
     /// <summary>
     /// <para>
     /// Lists can be stored as a set of related objects entirely within memory, 
-    /// or as the relevent objects loaded as required from a file or other 
-    /// permanent stor.
+    /// or as the relevant objects loaded as required from a file or other 
+    /// permanent store.
     /// </para>
     /// </summary>
     /// <para>
@@ -82,6 +82,31 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         long ICacheList.Switches
         {
             get { return 0; }
+        }
+
+        /// <summary>
+        /// Gets or sets the size of the cache.
+        /// </summary>
+        int ICacheList.CacheSize
+        {
+            get { return _cache.CacheSize; }
+            set { _cache.CacheSize = value; }
+        }
+
+        /// <summary>
+        /// Returns the number of misses.
+        /// </summary>
+        long ICacheList.CacheMisses
+        {
+            get { return _cache.Misses; }
+        }
+
+        /// <summary>
+        /// Returns the number of requests.
+        /// </summary>
+        long ICacheList.CacheRequests
+        {
+            get { return _cache.Requests; }
         }
 
         #endregion

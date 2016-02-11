@@ -28,7 +28,7 @@ using FiftyOne.Foundation.Mobile.Detection.Readers;
 namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 {
     /// <summary>
-    /// A readonly list of variable length entity types held on persistent 
+    /// A read only list of variable length entity types held on persistent 
     /// storage rather than in memory.
     /// </summary>
     /// <para>

@@ -62,5 +62,19 @@ namespace FiftyOne.Tests.Integration
             "Java-Device-Detection/data",
             "Device-Detection/data"
         };
+
+        /// <summary>
+        /// A representative set of test properties for the find profiles
+        /// properties. All the values associated with the properties will
+        /// be returned in order.
+        /// </summary>
+        internal static readonly string[] FIND_PROFILES_PROPERTIES = new string[]
+        {
+            "IsMobile",
+            "HardwareModel",
+            "HardwareName",
+            "CcppAccept",
+            "DeviceType"
+        };
     }
 }

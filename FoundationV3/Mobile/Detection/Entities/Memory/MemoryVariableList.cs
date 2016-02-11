@@ -86,7 +86,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
 
             protected override int CompareTo(T item, int offset)
             {
-                return item.Index.CompareTo(offset);
+                return item.CompareTo(offset);
             }
         }
 
@@ -138,11 +138,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         internal override void Read(Reader reader)
         {
             var offset = 0;
+            var startPos = (int)reader.BaseStream.Position;
             for (int index = 0; index < Header.Count; index++)
             {
-                T entity = (T)EntityFactory.Create(_dataSet, offset, reader);
-                _array[index] = entity;
-                offset += EntityFactory.GetLength(entity);
+                _array[index] = EntityFactory.Create(_dataSet, offset, reader);
+                offset = (int)reader.BaseStream.Position - startPos;
             }
             _search = new SearchVariableList(_array);
         }
