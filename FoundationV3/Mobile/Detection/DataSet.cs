@@ -803,7 +803,18 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Internal Properties
 
         /// <summary>
-        /// An instance of the signature sarch.
+        /// Advises FindProfiles methods that the profiles associated with 
+        /// a value should be referenced explicitly.
+        /// </summary>
+        /// <remarks>
+        /// Used to increase performance of memory based datasets when
+        /// returning true. Returning false will not persist data in 
+        /// memory when used in stream operation.
+        /// </remarks>
+        internal virtual bool FindProfilesInitialiseValueProfiles { get { return true; } }
+
+        /// <summary>
+        /// An instance of the signature search.
         /// </summary>
         internal DataSet.SearchSignatureByNodes SignatureSearch
         {
@@ -848,6 +859,29 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
         private SearchProfileOffsetByProfileId _profileOffsetSearch;
 
+
+        /// <summary>
+        /// Used to find values based on name.
+        /// </summary>
+        internal SearchReadonlyList<Value, string> ValuesNameSearch
+        {
+            get
+            {
+                if (_valuesNameSearch == null)
+                {
+                    lock (this)
+                    {
+                        if (_valuesNameSearch == null)
+                        {
+                            _valuesNameSearch = new SearchReadonlyList<Value, string>(Values);
+                        }
+                    }
+                }
+                return _valuesNameSearch;
+            }
+        }
+        private SearchReadonlyList<Value, string> _valuesNameSearch = null;
+            
         #endregion
 
         #region Constructors
@@ -1018,6 +1052,51 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
 
         /// <summary>
+        /// Gets the profiles associated with the property name and value
+        /// which intersects with the filterProfiles if provided.
+        /// </summary>
+        /// <param name="propertyName">Name of the property</param>
+        /// <param name="valueName">
+        /// Name of the value associated with the property
+        /// </param>
+        /// <param name="filterProfiles">
+        /// Array of profiles ordered in ascending Index order. Null if 
+        /// no filter is required.
+        /// </param>
+        /// <returns>Array of profiles ordered in ascending Index order.</returns>
+        public Profile[] FindProfiles(string propertyName, string valueName, Profile[] filterProfiles = null)
+        {
+            var property = Properties[propertyName];
+            if (property == null)
+            {
+                throw new ArgumentException(String.Format(
+                    "Property '{0}' does not exist in the '{1}' data set. " +
+                    "Upgrade to a different data set which includes the property.",
+                    propertyName,
+                    this.Name));
+            }
+            return property.FindProfiles(valueName, filterProfiles);
+        }
+
+        /// <summary>
+        /// Gets the profiles associated with the property name and value
+        /// which intersects with the filterProfiles if provided.
+        /// </summary>
+        /// <param name="property">Instance of the property required</param>
+        /// <param name="valueName">
+        /// Name of the value associated with the property
+        /// </param>
+        /// <param name="filterProfiles">
+        /// Array of profiles ordered in ascending Index order. Null if 
+        /// no filter is required.
+        /// </param>
+        /// <returns>Array of profiles ordered in ascending Index order.</returns>
+        public Profile[] FindProfiles(Property property, string valueName, Profile[] filterProfiles = null)
+        {
+            return property.FindProfiles(valueName, filterProfiles);
+        }
+
+        /// <summary>
         /// Returns the <see cref="Component"/> associated with the name provided.
         /// </summary>
         /// <param name="componentName">Name of the component required</param>
@@ -1046,6 +1125,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             // Do nothing in this implementation.
         }
         
-        #endregion
+        #endregion        
     }
 }

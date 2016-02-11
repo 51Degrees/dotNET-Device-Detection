@@ -95,7 +95,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// The number of items the cache lists should have capacity for.
         /// </summary>
-        private readonly int _cacheSize;
+        internal int CacheSize;
 
         /// <summary>
         /// The number of requests made to the cache.
@@ -165,11 +165,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     lock (_writeLock)
                     {
                         // If the node has already been added to the dictionary
-                        // then get it, otherise add the one just fetched.
+                        // then get it, otherwise add the one just fetched.
                         node = _dictionary.GetOrAdd(key, newNode);
                     
                         // If the node got from the dictionary is the new one
-                        // just feteched then it needs to be added to the linked
+                        // just fetched then it needs to be added to the linked
                         // list.
                         if (node == newNode)
                         {
@@ -205,19 +205,19 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Constructor
 
         /// <summary>
-        /// Constucts a new instance of the cache.
+        /// Constructs a new instance of the cache.
         /// </summary>
         /// <param name="cacheSize">The number of items to store in the cache</param>
         internal Cache(int cacheSize) 
         {
-            _cacheSize = cacheSize;
+            CacheSize = cacheSize;
             _dictionary = new ConcurrentDictionary<K, LinkedListNode<KeyValuePair<K, V>>>(
                 Environment.ProcessorCount, cacheSize);
             _linkedList = new LinkedList<KeyValuePair<K, V>>();
         }
         
         /// <summary>
-        /// Constucts a new instance of the cache.
+        /// Constructs a new instance of the cache.
         /// </summary>
         /// <param name="cacheSize">The number of items to store in the cache</param>
         /// <param name="loader">Loader used to fetch items not in the cache</param>
@@ -266,20 +266,20 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         private void RemoveLeastRecent()
         {
-            if (_linkedList.Count > _cacheSize)
+            if (_linkedList.Count > CacheSize)
             {
                 LinkedListNode<KeyValuePair<K, V>> lastNode;
                 _dictionary.TryRemove(_linkedList.Last.Value.Key, out lastNode);
                 _linkedList.Remove(lastNode);
 
-                Debug.Assert(_linkedList.Count == _cacheSize, String.Format(
+                Debug.Assert(_linkedList.Count == CacheSize, String.Format(
                     "The linked list has '{0}' elements but should contain '{1}'.",
                     _linkedList.Count,
-                    _cacheSize));
-                Debug.Assert(_dictionary.Count == _cacheSize, String.Format(
+                    CacheSize));
+                Debug.Assert(_dictionary.Count == CacheSize, String.Format(
                     "The dictionary has '{0}' elements but should contain '{1}'.",
                     _dictionary.Count,
-                    _cacheSize));
+                    CacheSize));
             }
         }
 

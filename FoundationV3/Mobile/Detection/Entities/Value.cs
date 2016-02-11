@@ -46,15 +46,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// For more information see 
     /// https://51degrees.com/Support/Documentation/Net
     /// </para>
-    public class Value : BaseEntity, IComparable<Value>, IComparable<string>
+    public class Value : BaseEntity, 
+        IComparable<Value>, IComparable<string>, IEquatable<Value>, IEquatable<string>
     {
         #region Static Fields
 
         /// <summary>
         /// Used to find profiles with values that include this one.
         /// </summary>
-        private static readonly SearchLists<Value, int> _valuesIndexSearch = 
-            new SearchLists<Value, int>();
+        private static readonly SearchLists<int, int> _valuesIndexSearch = 
+            new SearchLists<int, int>();
 
         #endregion
 
@@ -125,27 +126,45 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// Array containing the profiles the value is associated with.
         /// </summary>
         /// <remarks>
-        /// If time taken to determine the profiles associated with a value can
-        /// take a long time as the entire list of profiles needs to be read.
+        /// May take longer to return from Stream data sets as the class in 
+        /// normal operation will not store a direct reference to the profiles.
+        /// Direct reference to the profiles are set from the ensureValueProfilesSet method
+        /// of <see cref="Property"/> when used with FindProfiles.
         /// </remarks>
         public Profile[] Profiles
         {
             get
             {
-                if (_profiles == null)
+                return _profiles == null ?
+                    ProfileIndexes.Select(i => DataSet.Profiles[i]).ToArray() :
+                    _profiles;
+            }
+        }
+        internal Profile[] _profiles = null;
+
+        /// <summary>
+        /// Returns the indexes of the profiles associated with the value.
+        /// Used to prevent storing a reference to the profile when operating
+        /// in stream mode with a cache.
+        /// </summary>
+        internal int[] ProfileIndexes
+        {
+            get
+            {
+                if (_profileIndexes == null)
                 {
                     lock (this)
                     {
-                        if (_profiles == null)
+                        if (_profileIndexes == null)
                         {
-                            _profiles = GetProfiles();
+                            _profileIndexes = GetProfileIndexes();
                         }
                     }
                 }
-                return _profiles;
+                return _profileIndexes;
             }
         }
-        private Profile[] _profiles;
+        internal int[] _profileIndexes;
 
         /// <summary>
         /// The property the value relates to.
@@ -204,7 +223,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         private readonly int _descriptionOffset;
 
         /// <summary>
-        /// A url to more information about the value.
+        /// A URL to more information about the value.
         /// </summary>
         public Uri Url
         {
@@ -281,15 +300,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
 
         /// <summary>
-        /// Gets all the profiles associated with the value.
+        /// Gets all the profile indexes associated with the value.
         /// </summary>
         /// <returns>
-        /// Returns the profiles from the component that relate to this value.
+        /// Returns the profile indexes from the component that relate to this value.
         /// </returns>
-        private Profile[] GetProfiles()
+        private int[] GetProfileIndexes()
         {
             return Component.Profiles.Where(i =>
-                _valuesIndexSearch.BinarySearch(i.Values, Index) >= 0).ToArray();
+                _valuesIndexSearch.BinarySearch(i.ValueIndexes, Index) >= 0).Select(i => 
+                    i.Index).ToArray();
         }
 
         /// <summary>
@@ -318,15 +338,32 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Compares the name of this value to the one provided.
         /// </summary>
-        /// <param name="name">
+        /// <param name="other">
         /// String containing a name of another value to compare to this value.
         /// </param>
         /// <returns>
         /// Indication of relative value based on name.
         /// </returns>
-        public int CompareTo(string name)
+        public int CompareTo(string other)
         {
-            return Name.CompareTo(name);
+            var length = Math.Min(Name.Length, other.Length);
+            for (int i = 0; i < length; i++)
+            {
+                var difference = Name[i].CompareTo(other[i]);
+                if (difference != 0)
+                {
+                    return difference;
+                }
+            }
+            if (Name.Length < other.Length)
+            {
+                return -1;
+            }
+            if (Name.Length > other.Length)
+            {
+                return 1;
+            }
+            return 0;
         }
 
         /// <summary>
@@ -341,9 +378,31 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// </returns>
         public int CompareTo(Value other)
         {
-            if (DataSet == other.DataSet)
-                return Index.CompareTo(other.Index);
-            return CompareTo(other.Name);
+            return DataSet == other.DataSet ? 
+                Index.CompareTo(other.Index) :
+                CompareTo(other.Name);
+        }
+
+        /// <summary>
+        /// Compares this value instance to the other instance.
+        /// </summary>
+        /// <param name="other">Instance to compare</param>
+        /// <returns>True if the instance is equal, otherwise false</returns>
+        public bool Equals(Value other)
+        {
+            return DataSet == other.DataSet ? 
+                Index.Equals(other.Index) :
+                Name.Equals(other.Name);
+        }
+
+        /// <summary>
+        /// Compares this value instance to the string.
+        /// </summary>
+        /// <param name="other">String to compare</param>
+        /// <returns>True if the string is equal, otherwise false</returns>
+        public bool Equals(string other)
+        {
+            return Name.Equals(other);
         }
 
         /// <summary>

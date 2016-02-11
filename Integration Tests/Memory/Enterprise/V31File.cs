@@ -34,40 +34,46 @@ namespace FiftyOne.Tests.Integration.Memory.Enterprise
             get { return Utils.GetDataFile(Constants.ENTERPRISE_PATTERN_V31); }
         }
 
-        [TestMethod(), TestCategory("Memory"), TestCategory("Enterprise")]
+        [TestMethod(), TestCategory("Memory"), TestCategory("File"), TestCategory("Enterprise")]
         public void EnterpriseV31File_Memory_UniqueUserAgentsMulti()
         {
             base.UserAgentsMulti(UserAgentGenerator.GetUniqueUserAgents(), 30);
         }
 
-        [TestMethod(), TestCategory("Memory"), TestCategory("Enterprise")]
+        [TestMethod(), TestCategory("Memory"), TestCategory("File"), TestCategory("Enterprise")]
         public void EnterpriseV31File_Memory_UniqueUserAgentsSingle()
         {
             base.UserAgentsSingle(UserAgentGenerator.GetUniqueUserAgents(), 30);
         }
 
-        [TestMethod(), TestCategory("Memory"), TestCategory("Enterprise")]
+        [TestMethod(), TestCategory("Memory"), TestCategory("File"), TestCategory("Enterprise")]
         public void EnterpriseV31File_Memory_RandomUserAgentsMulti()
         {
             base.UserAgentsMulti(UserAgentGenerator.GetRandomUserAgents(), 30);
         }
 
-        [TestMethod(), TestCategory("Memory"), TestCategory("Enterprise")]
+        [TestMethod(), TestCategory("Memory"), TestCategory("File"), TestCategory("Enterprise")]
         public void EnterpriseV31File_Memory_RandomUserAgentsSingle()
         {
             base.UserAgentsSingle(UserAgentGenerator.GetRandomUserAgents(), 30);
         }
 
-        [TestMethod(), TestCategory("Memory"), TestCategory("Enterprise")]
+        [TestMethod(), TestCategory("Memory"), TestCategory("File"), TestCategory("Enterprise")]
         public void EnterpriseV31File_Memory_BadUserAgentsMulti()
         {
             base.UserAgentsMulti(UserAgentGenerator.GetBadUserAgents(), 55);
         }
 
-        [TestMethod(), TestCategory("Memory"), TestCategory("Enterprise")]
+        [TestMethod(), TestCategory("Memory"), TestCategory("File"), TestCategory("Enterprise")]
         public void EnterpriseV31File_Memory_BadUserAgentsSingle()
         {
             base.UserAgentsSingle(UserAgentGenerator.GetBadUserAgents(), 55);
+        }
+
+        [TestMethod(), TestCategory("Memory"), TestCategory("File"), TestCategory("Enterprise")]
+        public void EnterpriseV31File_Memory_FindProfiles()
+        {
+            base.FindProfiles(50);
         }
     }
 }
