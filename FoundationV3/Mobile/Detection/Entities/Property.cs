@@ -473,7 +473,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// profile indexes and also the array of profiles. Once these are
         /// set they will not need to be calculated again.
         /// </remarks>
-        private void InitValues()
+        private void ensureValueProfilesSet()
         {
             if (InitialisedValues == false)
             {
@@ -570,7 +570,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <returns>Array of profiles ordered in ascending Index order.</returns>
         public Entities.Profile[] FindProfiles(string valueName, Entities.Profile[] filterProfiles = null)
         {
-            InitValues();
+            ensureValueProfilesSet();
             var result = Property.EmptyProfiles;
             var value = Values[valueName];
             if (value != null)

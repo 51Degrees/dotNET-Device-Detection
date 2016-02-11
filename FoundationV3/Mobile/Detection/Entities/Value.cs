@@ -128,7 +128,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <remarks>
         /// May take longer to return from Stream data sets as the class in 
         /// normal operation will not store a direct reference to the profiles.
-        /// Direct reference to the profiles are set from the InitValues method
+        /// Direct reference to the profiles are set from the ensureValueProfilesSet method
         /// of <see cref="Property"/> when used with FindProfiles.
         /// </remarks>
         public Profile[] Profiles
