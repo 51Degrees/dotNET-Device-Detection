@@ -57,14 +57,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// provide better detection results, especially for less common devices.
     /// For more information see: https://51degrees.com/compare-data-options
     /// </para>
-    public abstract class Profile : BaseEntity, IComparable<Profile>
+    public abstract class Profile : BaseEntity, IComparable<Profile>, IEquatable<Profile>
     {
         #region Fields
 
         /// <summary>
         /// Returned when the property has no values in the provide.
         /// </summary>
-        private static readonly Value[] EmptyValues = new Value[0];
+        private static readonly int[] EmptyValues = new int[0];
 
         /// <summary>
         /// Unique Id of the profile. Does not change between different 
@@ -159,7 +159,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                         {
                             values = new Entities.Values(
                                 property,
-                                GetPropertyValues(property));
+                                GetPropertyValueIndexes(property));
                             PropertyIndexToValues.Add(property.Index, values);
                         }
                     }
@@ -397,23 +397,23 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
                 
         /// <summary>
-        /// Gets the values associated with the property for this profile.
+        /// Gets the value indexes associated with the property for this 
+        /// profile.
         /// </summary>
-        /// <param name="property">
-        /// Property to be returned.
-        /// </param>
+        /// <param name="property">Property to be returned.</param>
         /// <returns>
-        /// Array of values associated with the property and profile.
+        /// Array of value indexes associated with the property AND profile.
         /// </returns>
-        private Value[] GetPropertyValues(Property property)
+        internal int[] GetPropertyValueIndexes(Property property)
         {
-            Value[] result;
+            int[] result;
 
             // Work out the start and end index in the values associated
             // with the profile that relate to this property.
             var start = Array.BinarySearch<int>(
                 ValueIndexes, 
                 property.FirstValueIndex);
+
             // If the start is negative then the first value doesn't exist.
             // Take the complement and use this as the first index. 
             if (start < 0)
@@ -426,6 +426,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                 start,
                 ValueIndexes.Length - start, 
                 property.LastValueIndex);
+
             // If the end is negative then the last value doesn't exist. Take
             // the complement and use this as the last index. However if this 
             // value doesn't relate to the property then it's the first value
@@ -456,14 +457,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                 Debug.Assert(DataSet.Values[ValueIndexes[start]].Property.Index == property.Index);
                 Debug.Assert(DataSet.Values[ValueIndexes[end]].Property.Index == property.Index);
 
-                // Create the array and populate it with the values for the profile
-                // and property.
-                result = new Value[end - start + 1];
+                // Create the array and populate it with the value indexes for 
+                // the profile AND property.
+                result = new int[end - start + 1];
                 for (int i = start, v = 0; i <= end; i++, v++)
                 {
-                    var value = DataSet.Values[ValueIndexes[i]];
-                    Debug.Assert(value.Property.Index == property.Index);
-                    result[v] = value;
+                    // Perform a gross error check to ensure the property 
+                    // relates to the value index being returned.
+                    Debug.Assert(DataSet.Values[ValueIndexes[i]].Property.Index == property.Index);
+                    result[v] = ValueIndexes[i];
                 }
             }
 
@@ -552,6 +554,19 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #endregion
 
         #region Public Methods
+
+        /// <summary>
+        /// Compares this instance of a profile to another instance 
+        /// for equality using the profile Id value.
+        /// </summary>
+        /// <param name="other">
+        /// The profile to be compared against.
+        /// </param>
+        /// <returns>True if they equal, otherwise false</returns>
+        public bool Equals(Profile other)
+        {
+            return ProfileId.Equals(other.ProfileId);
+        }
 
         /// <summary>
         /// Compares this profile to another using the numeric ProfileId field.

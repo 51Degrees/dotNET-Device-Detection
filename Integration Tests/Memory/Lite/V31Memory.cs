@@ -39,40 +39,46 @@ namespace FiftyOne.Tests.Integration.Memory.Lite
             get { return 7; }
         }
 
-        [TestMethod(), TestCategory("Memory"), TestCategory("Lite")]
+        [TestMethod(), TestCategory("Memory"), TestCategory("Memory"), TestCategory("Lite")]
         public void LiteV31Memory_Memory_UniqueUserAgentsMulti()
         {
             base.UserAgentsMulti(UserAgentGenerator.GetUniqueUserAgents(), ExpectedMemoryUsage);
         }
 
-        [TestMethod(), TestCategory("Memory"), TestCategory("Lite")]
+        [TestMethod(), TestCategory("Memory"), TestCategory("Memory"), TestCategory("Lite")]
         public void LiteV31Memory_Memory_UniqueUserAgentsSingle()
         {
             base.UserAgentsSingle(UserAgentGenerator.GetUniqueUserAgents(), ExpectedMemoryUsage);
         }
 
-        [TestMethod(), TestCategory("Memory"), TestCategory("Lite")]
+        [TestMethod(), TestCategory("Memory"), TestCategory("Memory"), TestCategory("Lite")]
         public void LiteV31Memory_Memory_RandomUserAgentsMulti()
         {
             base.UserAgentsMulti(UserAgentGenerator.GetRandomUserAgents(), ExpectedMemoryUsage);
         }
 
-        [TestMethod(), TestCategory("Memory"), TestCategory("Lite")]
+        [TestMethod(), TestCategory("Memory"), TestCategory("Memory"), TestCategory("Lite")]
         public void LiteV31Memory_Memory_RandomUserAgentsSingle()
         {
             base.UserAgentsSingle(UserAgentGenerator.GetRandomUserAgents(), ExpectedMemoryUsage);
         }
 
-        [TestMethod(), TestCategory("Memory"), TestCategory("Lite")]
+        [TestMethod(), TestCategory("Memory"), TestCategory("Memory"), TestCategory("Lite")]
         public void LiteV31Memory_Memory_BadUserAgentsMulti()
         {
             base.UserAgentsMulti(UserAgentGenerator.GetBadUserAgents(), ExpectedMemoryUsage);
         }
 
-        [TestMethod(), TestCategory("Memory"), TestCategory("Lite")]
+        [TestMethod(), TestCategory("Memory"), TestCategory("Memory"), TestCategory("Lite")]
         public void LiteV31Memory_Memory_BadUserAgentsSingle()
         {
             base.UserAgentsSingle(UserAgentGenerator.GetBadUserAgents(), ExpectedMemoryUsage);
+        }
+
+        [TestMethod(), TestCategory("Memory"), TestCategory("Memory"), TestCategory("Lite")]
+        public void LiteV31Memory_Memory_FindProfiles()
+        {
+            base.FindProfiles(ExpectedMemoryUsage);
         }
     }
 }

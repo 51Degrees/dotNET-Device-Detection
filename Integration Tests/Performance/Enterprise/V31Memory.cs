@@ -40,81 +40,101 @@ namespace FiftyOne.Tests.Integration.Performance.Enterprise
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Memory"), TestCategory("Enterprise")]
         public void EnterpriseV31Memory_Performance_InitializeTime()
         {
             base.InitializeTime();
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Memory"), TestCategory("Enterprise")]
         public void EnterpriseV31Memory_Performance_BadUserAgentsMulti()
         {
             base.BadUserAgentsMulti(null, 2);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Memory"), TestCategory("Enterprise")]
         public void EnterpriseV31Memory_Performance_BadUserAgentsSingle()
         {
-            base.BadUserAgentsSingle(null, 4);
+            base.BadUserAgentsSingle(null, 5);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Memory"), TestCategory("Enterprise")]
         public void EnterpriseV31Memory_Performance_UniqueUserAgentsMulti()
         {
             base.UniqueUserAgentsMulti(null, 1);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Memory"), TestCategory("Enterprise")]
         public void EnterpriseV31Memory_Performance_UniqueUserAgentsSingle()
         {
             base.UniqueUserAgentsSingle(null, 1);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Memory"), TestCategory("Enterprise")]
         public void EnterpriseV31Memory_Performance_RandomUserAgentsMulti()
         {
             base.RandomUserAgentsMulti(null, 1);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Memory"), TestCategory("Enterprise")]
         public void EnterpriseV31Memory_Performance_RandomUserAgentsSingle()
         {
             base.RandomUserAgentsSingle(null, 1);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Memory"), TestCategory("Enterprise")]
         public void EnterpriseV31Memory_Performance_BadUserAgentsMultiAll()
         {
             base.BadUserAgentsMulti(_dataSet.Properties, 2);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Memory"), TestCategory("Enterprise")]
         public void EnterpriseV31Memory_Performance_BadUserAgentsSingleAll()
         {
-            base.BadUserAgentsSingle(_dataSet.Properties, 4);
+            base.BadUserAgentsSingle(_dataSet.Properties, 5);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Memory"), TestCategory("Enterprise")]
         public void EnterpriseV31Memory_Performance_UniqueUserAgentsMultiAll()
         {
             base.UniqueUserAgentsMulti(_dataSet.Properties, 1);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Memory"), TestCategory("Enterprise")]
         public void EnterpriseV31Memory_Performance_UniqueUserAgentsSingleAll()
         {
             base.UniqueUserAgentsSingle(_dataSet.Properties, 1);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Memory"), TestCategory("Enterprise")]
         public void EnterpriseV31Memory_Performance_RandomUserAgentsMultiAll()
         {
             base.RandomUserAgentsMulti(_dataSet.Properties, 1);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Memory"), TestCategory("Enterprise")]
         public void EnterpriseV31Memory_Performance_RandomUserAgentsSingleAll()
         {
             base.RandomUserAgentsSingle(_dataSet.Properties, 1);
+        }
+
+        [TestMethod]
+        [TestCategory("Performance"), TestCategory("Memory"), TestCategory("Enterprise")]
+        public void EnterpriseV31Memory_Performance_FindProfiles()
+        {
+            base.FindProfiles(0.1);
         }
     }
 }

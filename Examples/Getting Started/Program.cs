@@ -68,55 +68,59 @@ namespace FiftyOne.Example.Illustration.GettingStarted
         {
             // DataSet is the object used to interact with the data file.
             // StreamFactory creates Dataset with pool of binary readers to 
-            // perform device lookup using file on disk.
-            DataSet dataSet = StreamFactory.Create(fileName, false);
+            // perform device lookup using file on disk. The type if 
+            // disposable and is therefore contained in using block to 
+            // ensure file handles and resources are freed.
+            using (DataSet dataSet = StreamFactory.Create(fileName, false))
+            {
+                // Provides access to device detection functions.
+                Provider provider = new Provider(dataSet);
 
-            // Provides access to device detection functions.
-            Provider provider = new Provider(dataSet);
+                // Used to store and access detection results.
+                Match match;
 
-            // Used to store and access detection results.
-            Match match;
+                // Contains detection result for the IsMobile property.
+                string IsMobile;
 
-            // Contains detection result for the IsMobile property.
-            string IsMobile;
+                // User-Agent string of an iPhone mobile device.
+                string mobileUserAgent = ("Mozilla/5.0 (iPhone; CPU iPhone " +
+                    "OS 7_1 like Mac OS X) AppleWebKit/537.51.2 (KHTML, like " +
+                    "Gecko) 'Version/7.0 Mobile/11D167 Safari/9537.53");
 
-            // User-Agent string of an iPhone mobile device.
-            string mobileUserAgent = ("Mozilla/5.0 (iPhone; CPU iPhone " +
-                "OS 7_1 like Mac OS X) AppleWebKit/537.51.2 (KHTML, like " +
-                "Gecko) 'Version/7.0 Mobile/11D167 Safari/9537.53");
+                // User-Agent string of Firefox Web browser version 41 on desktop.
+                string desktopUserAgent = ("Mozilla/5.0 (Windows NT 6.3; " +
+                    "WOW64; rv:41.0) Gecko/20100101 Firefox/41.0");
 
-            // User-Agent string of Firefox Web browser version 41 on desktop.
-            string desktopUserAgent = ("Mozilla/5.0 (Windows NT 6.3; " +
-                "WOW64; rv:41.0) Gecko/20100101 Firefox/41.0");
+                // User-Agent string of a MediaHub device.
+                string mediaHubUserAgent = ("Mozilla/5.0 (Linux; Android " +
+                    "4.4.2; X7 Quad Core Build/KOT49H) AppleWebKit/537.36 " +
+                    "(KHTML, like Gecko) Version/4.0 Chrome/30.0.0.0 " +
+                    "Safari/537.36");
 
-            // User-Agent string of a MediaHub device.
-            string mediaHubUserAgent = ("Mozilla/5.0 (Linux; Android " +
-                "4.4.2; X7 Quad Core Build/KOT49H) AppleWebKit/537.36 " +
-                "(KHTML, like Gecko) Version/4.0 Chrome/30.0.0.0 " +
-                "Safari/537.36");
+                Console.WriteLine("Staring Getting Started Example.");
 
-            Console.WriteLine("Staring Getting Started Example.");
+                // Carries out a match for a mobile User-Agent.
+                Console.WriteLine("\nMobile User-Agent: " + mobileUserAgent);
+                match = provider.Match(mobileUserAgent);
+                IsMobile = match["IsMobile"].ToString();
+                Console.WriteLine("   IsMobile: " + IsMobile);
 
-            // Carries out a match for a mobile User-Agent.
-            Console.WriteLine("\nMobile User-Agent: " + mobileUserAgent);
-            match = provider.Match(mobileUserAgent);
-            IsMobile = match["IsMobile"].ToString();
-            Console.WriteLine("   IsMobile: " + IsMobile);
+                // Carries out a match for a desktop User-Agent.
+                Console.WriteLine("\nDesktop User-Agent: " + desktopUserAgent);
+                match = provider.Match(desktopUserAgent);
+                IsMobile = match["IsMobile"].ToString();
+                Console.WriteLine("   IsMobile: " + IsMobile);
 
-            // Carries out a match for a desktop User-Agent.
-            Console.WriteLine("\nDesktop User-Agent: " + desktopUserAgent);
-            match = provider.Match(desktopUserAgent);
-            IsMobile = match["IsMobile"].ToString();
-            Console.WriteLine("   IsMobile: " + IsMobile);
+                // Carries out a match for a MediaHub User-Agent.
+                Console.WriteLine("\nMediaHub User-Agent: " + mediaHubUserAgent);
+                match = provider.Match(mediaHubUserAgent);
+                IsMobile = match["IsMobile"].ToString();
+                Console.WriteLine("   IsMobile: " + IsMobile);
 
-            // Carries out a match for a MediaHub User-Agent.
-            Console.WriteLine("\nMediaHub User-Agent: " + mediaHubUserAgent);
-            match = provider.Match(mediaHubUserAgent);
-            IsMobile = match["IsMobile"].ToString();
-            Console.WriteLine("   IsMobile: " + IsMobile);
-
-            // Finally close the dataset, releasing resources and file locks.
-            dataSet.Dispose();
+                // Returns the number of profiles that are Mobile.
+                Console.WriteLine("\nNumber of mobile profiles: {0}", 
+                    dataSet.FindProfiles("IsMobile", "True").Length);
+            }
         }
         // Snippet End
 
