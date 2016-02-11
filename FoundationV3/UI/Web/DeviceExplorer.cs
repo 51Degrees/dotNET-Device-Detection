@@ -404,6 +404,103 @@ namespace FiftyOne.Foundation.UI.Web
 
         #endregion
 
+        #region Private Properties
+
+        private static object _lock = new object();
+
+        /// <summary>
+        /// Date and time the data set used to populate the private properties
+        /// was published.
+        /// </summary>
+        private static DateTime _dataSetPublishedDate = DateTime.MinValue;
+                
+        /// <summary>
+        /// List of vendors held in the class instance to support rapid data
+        /// retrieval when the cache is being used.
+        /// </summary>
+        private static Dictionary<string, Value> Vendors
+        {
+            get
+            {
+                if (_vendors == null ||
+                    WebProvider.ActiveProvider.DataSet.Published != _dataSetPublishedDate)
+                {
+                    lock (_lock)
+                    {
+                        if (_vendors == null ||
+                            WebProvider.ActiveProvider.DataSet.Published != _dataSetPublishedDate)
+                        {
+                            var vendor = WebProvider.ActiveProvider.DataSet.Properties["HardwareVendor"];
+                            if (vendor != null)
+                            {
+                                _vendors = vendor.Values.ToDictionary(i => i.Name, i => i, StringComparer.InvariantCulture);
+                            }
+                            else
+                            {
+                                _vendors = new Dictionary<string, Value>();
+                            }
+                            _dataSetPublishedDate = WebProvider.ActiveProvider.DataSet.Published;
+                        }
+                    }
+                }
+                return _vendors;
+            }
+        }
+        private static Dictionary<string, Value> _vendors;
+
+        /// <summary>
+        /// Returns the vendors grouped by the first letter.
+        /// </summary>
+        private static Dictionary<char, List<Value>> VendorsGrouped
+        {
+            get
+            {
+                if (_vendorsGrouped == null ||
+                    WebProvider.ActiveProvider.DataSet.Published != _dataSetPublishedDate)
+                {
+                    lock (_lock)
+                    {
+                        if (_vendorsGrouped == null ||
+                            WebProvider.ActiveProvider.DataSet.Published != _dataSetPublishedDate)
+                        {
+                            if (Vendors.Count == 0)
+                            {
+                                _vendorsGrouped = new Dictionary<char, List<Value>>();
+                            }
+                            else
+                            {
+                                var vendorsGrouped = Vendors.GroupBy(k =>
+                                    StartCharacter(k.Key), v => v.Value).ToDictionary(g =>
+                                        g.Key, g => g.ToList());
+                                var tempValues = new Dictionary<Value, List<int>>();
+                                foreach (var value in Vendors)
+                                {
+                                    tempValues.Add(value.Value, new List<int>());
+                                }
+                                foreach (Profile profile in WebProvider.ActiveProvider.DataSet.Hardware.Profiles)
+                                {
+                                    foreach (var value in profile["HardwareVendor"])
+                                    {
+                                        tempValues[value].Add(profile.Index);
+                                    }
+                                }
+                                foreach (var value in tempValues)
+                                {
+                                    value.Key._profileIndexes = value.Value.ToArray();
+                                }
+                                _vendorsGrouped = vendorsGrouped;
+                            }
+                            _dataSetPublishedDate = WebProvider.ActiveProvider.DataSet.Published;
+                        }
+                    }
+                }
+                return _vendorsGrouped;
+            }
+        }
+        private static Dictionary<char, List<Value>> _vendorsGrouped;
+
+        #endregion
+
         #region Events
 
         /// <summary>
@@ -482,8 +579,7 @@ namespace FiftyOne.Foundation.UI.Web
             int profileId;
             if (int.TryParse(deviceId, out profileId))
             {
-                var profile = DataSet.Hardware.Profiles.FirstOrDefault(i =>
-                    i.ProfileId == profileId);
+                var profile = DataSet.FindProfile(profileId);
                 if (profile != null)
                 {
                     BuildModelDetail(writer, profile);
@@ -709,32 +805,22 @@ namespace FiftyOne.Foundation.UI.Web
 
         private void BuildModelForVendor(XmlWriter writer, string vendorName, string modelName)
         {
-            var vendorProperty = DataSet.Hardware.Properties.FirstOrDefault(i =>
-                i.Name == "HardwareVendor");
-            var modelProperty = DataSet.Hardware.Properties.FirstOrDefault(i =>
-                i.Name == "HardwareModel");
+            var vendorProperty = DataSet.Properties["HardwareVendor"];
+            var modelProperty = DataSet.Properties["HardwareModel"];
             if (vendorProperty != null &&
                 modelProperty != null)
             {
-                var vendorValue = vendorProperty.Values.FirstOrDefault(i =>
-                    i.Name == vendorName);
-                var modelValue = modelProperty.Values.FirstOrDefault(i =>
-                    i.Name == modelName);
-                if (vendorValue != null &&
-                    modelValue != null)
+                var profiles = vendorProperty.FindProfiles(vendorName, modelProperty.FindProfiles(modelName));
+                foreach(var profile in profiles)
                 {
-                    var profiles = vendorValue.Profiles.Intersect(modelValue.Profiles);
-                    foreach(var profile in profiles)
-                    {
-                        DeviceID = profile.ProfileId.ToString();
-                        BuildBackButton(writer, String.Format("Back to {0}", vendorName), new NameValueCollection {
-                            { "vendor", vendorName }
-                        }, String.Format("All {0} Models", vendorName));
-                        BuildModelDetail(writer, profile);
-                        BuildBackButton(writer, String.Format("Back to {0}", vendorName), new NameValueCollection {
-                            { "vendor", vendorName }
-                        }, String.Format("All {0} Models", vendorName));
-                    }
+                    DeviceID = profile.ProfileId.ToString();
+                    BuildBackButton(writer, String.Format("Back to {0}", vendorName), new NameValueCollection {
+                        { "vendor", vendorName }
+                    }, String.Format("All {0} Models", vendorName));
+                    BuildModelDetail(writer, profile);
+                    BuildBackButton(writer, String.Format("Back to {0}", vendorName), new NameValueCollection {
+                        { "vendor", vendorName }
+                    }, String.Format("All {0} Models", vendorName));
                 }
             }
         }
@@ -930,22 +1016,14 @@ namespace FiftyOne.Foundation.UI.Web
 
         private void BuildModelsForVendor(XmlWriter writer, string vendorName)
         {
-            var vendors = DataSet.Properties["HardwareVendor"];
-            var model = DataSet.Properties["HardwareModel"];
-            if (vendors != null &&
-                model != null)
+            if (Vendors.Count > 0)
             {
-                var vendor = vendors.Values[vendorName];
-                if (vendor != null)
+                Value vendor;
+                if (Vendors.TryGetValue(vendorName, out vendor))
                 {
-                    // Get the profiles that relate to the vendor.
-                    var profiles = vendor.Profiles.Where(i =>
-                        i.Component.ComponentId == vendors.Component.ComponentId).Distinct().OrderBy(i =>
-                            i[model].ToString()).ToArray();
-
                     BuildInstructions(writer, DeviceExplorerModelsHtml);
                     BuildBackButton(writer, "All Vendors", null, "List all Vendors");
-                    BuildModels(writer, "vendor", vendorName, profiles, String.Format("Vendor '{0}'", vendorName));
+                    BuildModels(writer, "vendor", vendorName, vendor.Profiles, String.Format("Vendor '{0}'", vendorName));
                     BuildBackButton(writer, "All Vendors", null, "List all Vendors");
                 }
             }
@@ -1092,7 +1170,7 @@ namespace FiftyOne.Foundation.UI.Web
             }));
         }
 
-        private char StartCharacter(string value)
+        private static char StartCharacter(string value)
         {
             var c = value.ToUpperInvariant()[0];
             if (c >= 'A' && c <= 'Z')
@@ -1104,19 +1182,8 @@ namespace FiftyOne.Foundation.UI.Web
 
         private void BuildVendors(XmlWriter writer)
         {
-            var vendors = DataSet.Properties["HardwareVendor"];
-            if (vendors != null)
+            if (VendorsGrouped.Count > 0)
             {
-                // Group the vendors by the first letter.
-                var vendorsGrouped = vendors.Values.GroupBy(k => 
-                    StartCharacter(k.Name)).ToDictionary(g => 
-                        g.Key, g => g.ToList());
-
-                // Get the number of hardware profiles for each vendor.
-                var vendorCounts = DataSet.Hardware.Profiles.GroupBy(k =>
-                    k[vendors].ToString()).ToDictionary(g =>
-                        g.Key, g => g.Count());
-                
                 BuildInstructions(writer, DeviceExplorerVendorsHtml);
 
                 BuildSearch(writer);
@@ -1124,7 +1191,7 @@ namespace FiftyOne.Foundation.UI.Web
                 writer.WriteStartElement("div");
                 writer.WriteAttributeString("class", VendorLettersCssClass);
                 writer.WriteStartElement("ul");
-                foreach(var g in vendorsGrouped)
+                foreach (var g in VendorsGrouped)
                 {
                     BuildVendorNavigation(writer, true, g.Key);
                 }
@@ -1133,9 +1200,9 @@ namespace FiftyOne.Foundation.UI.Web
                 writer.WriteStartElement("div");
                 writer.WriteAttributeString("class", VendorsCssClass);
                 writer.WriteStartElement("ul");
-                foreach (var g in vendorsGrouped)
+                foreach (var g in VendorsGrouped)
                 {
-                    BuildVendors(writer, g.Value, vendorCounts, g.Key);
+                    BuildVendors(writer, g.Value, g.Key);
                 }
                 writer.WriteEndElement();
                 writer.WriteEndElement();
@@ -1169,7 +1236,7 @@ namespace FiftyOne.Foundation.UI.Web
             writer.WriteRaw(html);
         }
 
-        private void BuildVendors(XmlWriter writer, IEnumerable<Value> vendors, Dictionary<string, int> profiles, char c)
+        private void BuildVendors(XmlWriter writer, IEnumerable<Value> vendors, char c)
         {
             writer.WriteStartElement("li");
             writer.WriteAttributeString("style", "display: none;");
@@ -1182,12 +1249,9 @@ namespace FiftyOne.Foundation.UI.Web
                 writer.WriteAttributeString("href", MakeQueryString("Vendor", vendor.Name));
                 writer.WriteString(vendor.Name);
                 writer.WriteEndElement();
-                if (profiles.ContainsKey(vendor.Name))
-                {
-                    writer.WriteStartElement("span");
-                    writer.WriteString(String.Format("({0})", profiles[vendor.Name]));
-                    writer.WriteEndElement();
-                }
+                writer.WriteStartElement("span");
+                writer.WriteString(String.Format("({0})", vendor.ProfileIndexes.Length));
+                writer.WriteEndElement();
                 writer.WriteEndElement();
             }
             writer.WriteEndElement();

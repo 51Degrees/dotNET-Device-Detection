@@ -846,13 +846,42 @@ namespace FiftyOne.Foundation.UI.Web
         {
             List<string> list = new List<string>();
 
-            // keys beginning with an _ will not be added to links, unless it was in the parameter
-            foreach (string index in parameters.Keys)
-                if (index.StartsWith("_") == false || index == key)
-                    list.Add(String.Format("{0}={1}", index, HttpUtility.UrlEncode(parameters[index])));
+            // keys beginning with an _ will not be added to links, unless it was in the parameter.
+            if (parameters != null)
+            {
+                foreach (string index in parameters.Keys)
+                {
+                    if (index != null &&
+                        (index.StartsWith("_") == false || index.Equals(key)))
+                    {
+                        if (parameters[index] != null)
+                        {
+                            list.Add(String.Format("{0}={1}", index, HttpUtility.UrlEncode(parameters[index])));
+                        }
+                        else
+                        {
+                            list.Add(index);
+                        }
+                    }
+                }
+            }
 
             if (CreateUrl != null)
-                return CreateUrl(list);
+            {
+                try
+                {
+                    // This is an external method. Trap for exceptions and
+                    // use default behavior if there is a failure.
+                    return CreateUrl(list);
+                }
+                catch(Exception ex)
+                {
+                    EventLog.Debug(ex);
+                    EventLog.Warn("Exception calling CreateUrl method '{0}' with list '{1}'.",
+                        CreateUrl.ToString(),
+                        String.Join(", ", list));
+                }
+            }
 
             return String.Format("{0}?{1}",
                 absoluteUrl,

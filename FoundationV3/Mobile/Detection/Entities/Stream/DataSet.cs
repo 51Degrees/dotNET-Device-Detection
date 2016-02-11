@@ -55,7 +55,23 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 
         #endregion 
 
-        #region Properties
+        #region Internal Properties
+
+        /// <summary>
+        /// Advises FindProfiles methods that the profiles associated with 
+        /// a value should be referenced explicitly.
+        /// </summary>
+        internal override bool FindProfilesInitialiseValueProfiles
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        #endregion
+
+        #region Public Properties
 
         /// <summary>
         /// The number of readers that have been created in the pool

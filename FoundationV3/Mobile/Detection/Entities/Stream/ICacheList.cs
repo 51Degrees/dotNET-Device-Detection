@@ -30,9 +30,24 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
     internal interface ICacheList
     {
         /// <summary>
+        /// Gets or sets the size of the cache.
+        /// </summary>
+        int CacheSize { get; set; }
+
+        /// <summary>
         /// Returns the percentage of cache misses.
         /// </summary>
         double PercentageMisses { get; }
+
+        /// <summary>
+        /// Returns the number of misses.
+        /// </summary>
+        long CacheMisses { get; }
+
+        /// <summary>
+        /// Returns the number of requests.
+        /// </summary>
+        long CacheRequests { get; }
 
         /// <summary>
         /// The number of times the lists have been switched.

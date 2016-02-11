@@ -40,79 +40,91 @@ namespace FiftyOne.Tests.Integration.Performance.Lite
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Lite")]
         public void LiteV31Array_Performance_InitializeTime() 
         {
             base.InitializeTime(); 
         }
-
-
+        
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Lite")]
         public void LiteV31Array_Performance_BadUserAgentsMulti()
         {
             base.BadUserAgentsMulti(null, Asserts.AssertCacheMissesBad, 2);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Lite")]
         public void LiteV31Array_Performance_BadUserAgentsSingle()
         {
             base.BadUserAgentsSingle(null, Asserts.AssertCacheMissesBad, 4);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Lite")]
         public void LiteV31Array_Performance_UniqueUserAgentsMulti()
         {
             base.UniqueUserAgentsMulti(null, Asserts.AssertCacheMissesGood, 1);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Lite")]
         public void LiteV31Array_Performance_UniqueUserAgentsSingle()
         {
             base.UniqueUserAgentsSingle(null, Asserts.AssertCacheMissesGood, 1);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Lite")]
         public void LiteV31Array_Performance_RandomUserAgentsMulti()
         {
             base.RandomUserAgentsMulti(null, Asserts.AssertCacheMissesGood, 1);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Lite")]
         public void LiteV31Array_Performance_RandomUserAgentsSingle()
         {
             base.RandomUserAgentsSingle(null, Asserts.AssertCacheMissesGood, 1);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Lite")]
         public void LiteV31Array_Performance_BadUserAgentsMultiAll()
         {
             base.BadUserAgentsMulti(_dataSet.Properties, Asserts.AssertCacheMissesBadAll, 2);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Lite")]
         public void LiteV31Array_Performance_BadUserAgentsSingleAll()
         {
             base.BadUserAgentsSingle(_dataSet.Properties, Asserts.AssertCacheMissesBadAll, 3);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Lite")]
         public void LiteV31Array_Performance_UniqueUserAgentsMultiAll()
         {
             base.UniqueUserAgentsMulti(_dataSet.Properties, Asserts.AssertCacheMissesGoodAll, 1);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Lite")]
         public void LiteV31Array_Performance_UniqueUserAgentsSingleAll()
         {
             base.UniqueUserAgentsSingle(_dataSet.Properties, Asserts.AssertCacheMissesGoodAll, 1);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Lite")]
         public void LiteV31Array_Performance_RandomUserAgentsMultiAll()
         {
             base.RandomUserAgentsMulti(_dataSet.Properties, Asserts.AssertCacheMissesGoodAll, 1);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Lite")]
         public void LiteV31Array_Performance_RandomUserAgentsSingleAll()
         {
             base.RandomUserAgentsSingle(_dataSet.Properties, Asserts.AssertCacheMissesGoodAll, 1);

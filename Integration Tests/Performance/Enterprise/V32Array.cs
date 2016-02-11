@@ -45,78 +45,96 @@ namespace FiftyOne.Tests.Integration.Performance.Enterprise
         {
             base.InitializeTime(); 
         }
-
-
+        
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Enterprise")]
         public void EnterpriseV32Array_Performance_BadUserAgentsMulti()
         {
             base.BadUserAgentsMulti(null, Asserts.AssertCacheMissesBad, 4);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Enterprise")]
         public void EnterpriseV32Array_Performance_BadUserAgentsSingle()
         {
-            base.BadUserAgentsSingle(null, Asserts.AssertCacheMissesBad, 6);
+            base.BadUserAgentsSingle(null, Asserts.AssertCacheMissesBad, 7);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Enterprise")]
         public void EnterpriseV32Array_Performance_UniqueUserAgentsMulti()
         {
             base.UniqueUserAgentsMulti(null, Asserts.AssertCacheMissesGood, 1);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Enterprise")]
         public void EnterpriseV32Array_Performance_UniqueUserAgentsSingle()
         {
             base.UniqueUserAgentsSingle(null, Asserts.AssertCacheMissesGood, 1);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Enterprise")]
         public void EnterpriseV32Array_Performance_RandomUserAgentsMulti()
         {
             base.RandomUserAgentsMulti(null, Asserts.AssertCacheMissesGood, 1);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Enterprise")]
         public void EnterpriseV32Array_Performance_RandomUserAgentsSingle()
         {
             base.RandomUserAgentsSingle(null, Asserts.AssertCacheMissesGood, 1);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Enterprise")]
         public void EnterpriseV32Array_Performance_BadUserAgentsMultiAll()
         {
-            base.BadUserAgentsMulti(_dataSet.Properties, Asserts.AssertCacheMissesBadAll, 4);
+            base.BadUserAgentsMulti(_dataSet.Properties, Asserts.AssertCacheMissesBadAll, 5);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Enterprise")]
         public void EnterpriseV32Array_Performance_BadUserAgentsSingleAll()
         {
-            base.BadUserAgentsSingle(_dataSet.Properties, Asserts.AssertCacheMissesBadAll, 7);
+            base.BadUserAgentsSingle(_dataSet.Properties, Asserts.AssertCacheMissesBadAll, 8);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Enterprise")]
         public void EnterpriseV32Array_Performance_UniqueUserAgentsMultiAll()
         {
             base.UniqueUserAgentsMulti(_dataSet.Properties, Asserts.AssertCacheMissesGoodAll, 1);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Enterprise")]
         public void EnterpriseV32Array_Performance_UniqueUserAgentsSingleAll()
         {
             base.UniqueUserAgentsSingle(_dataSet.Properties, Asserts.AssertCacheMissesGoodAll, 1);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Enterprise")]
         public void EnterpriseV32Array_Performance_RandomUserAgentsMultiAll()
         {
             base.RandomUserAgentsMulti(_dataSet.Properties, Asserts.AssertCacheMissesGoodAll, 1);
         }
 
         [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Enterprise")]
         public void EnterpriseV32Array_Performance_RandomUserAgentsSingleAll()
         {
             base.RandomUserAgentsSingle(_dataSet.Properties, Asserts.AssertCacheMissesGoodAll, 1);
+        }
+
+        [TestMethod]
+        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Enterprise")]
+        public void EnterpriseV32Array_Performance_FindProfiles()
+        {
+            base.FindProfiles(0.1);
         }
     }
 }
