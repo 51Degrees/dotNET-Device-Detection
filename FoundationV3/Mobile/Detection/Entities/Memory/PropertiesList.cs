@@ -32,7 +32,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
     /// A list of properties in memory as a fixed list. Contains an accessor
     /// which can be used to retrieve entries by property name.
     /// </summary>
-    public class PropertiesList : MemoryFixedList<Property>
+    public class PropertiesList : MemoryFixedList<Property, DataSet>
     {
         #region Constructors
 
@@ -49,7 +49,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         /// <param name="entityFactory">
         /// Used to create new instances of the entity.
         /// </param>
-        internal PropertiesList(DataSet dataSet, Reader reader, BaseEntityFactory<Property> entityFactory)
+        internal PropertiesList(DataSet dataSet, Reader reader, BaseEntityFactory<Property, DataSet> entityFactory)
             : base(dataSet, reader, entityFactory)
         {
         }

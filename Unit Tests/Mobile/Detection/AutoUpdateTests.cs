@@ -6,6 +6,7 @@ using FiftyOne.Foundation.Mobile.Detection.Entities;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Net;
 
 namespace FiftyOne.Tests.Unit.Mobile.Detection
 {
@@ -61,6 +62,47 @@ namespace FiftyOne.Tests.Unit.Mobile.Detection
                 TestDataFile.Delete();
             }
             ValidateDownload(Update());
+        }
+
+        [TestMethod(), TestCategory("API"), TestCategory("Premium"), TestCategory("Update")]
+        public void TestDownloadNotModified()
+        {
+            // Get the latest data file.
+            if (TestDataFile.Exists)
+            {
+                TestDataFile.Delete();
+            }
+            ValidateDownload(Update());
+
+            // Use the full auto update methods to download and check for the
+            // same status code. This includes the check for the number of 
+            // properties and publish date.
+            var result = Update();
+            if (result != AutoUpdate.AutoUpdateStatus.AUTO_UPDATE_NOT_NEEDED)
+            {
+                Assert.Fail(
+                    "Data file not modified failed with status '{0}'.",
+                    result.ToString());
+            }
+
+            // Try downloading directly checking for the status code
+            // 304 in the response.
+            var licenceKeys = GetLicenceKeys();
+            var client = new AutoUpdate.AutoUpdateWebClient();
+            client.IfModifiedSince = TestDataFile.LastWriteTimeUtc;
+            try
+            {
+                client.DownloadFile(
+                    AutoUpdate.FullUrl(GetLicenceKeys()),
+                    TestDataFile.FullName);
+                Assert.Fail("Download should throw exception as not modified.");
+            }
+            catch (WebException ex)
+            {
+                Assert.IsTrue(
+                    ((HttpWebResponse)ex.Response).StatusCode == HttpStatusCode.NotModified,
+                    "Status code should be 304.");
+            }
         }
 
         [TestMethod(), TestCategory("API"), TestCategory("Premium"), TestCategory("Update")]

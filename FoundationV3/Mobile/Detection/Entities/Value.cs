@@ -46,7 +46,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// For more information see 
     /// https://51degrees.com/Support/Documentation/Net
     /// </para>
-    public class Value : BaseEntity, 
+    public class Value : BaseEntity<DataSet>,
         IComparable<Value>, IComparable<string>, IEquatable<Value>, IEquatable<string>
     {
         #region Static Fields
@@ -148,7 +148,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// in stream mode with a cache.
         /// </summary>
         internal int[] ProfileIndexes
-        {
+                {
             get
             {
                 if (_profileIndexes == null)
@@ -274,6 +274,30 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             _urlOffset = reader.ReadInt32();
         }
 
+        /// <summary>
+        /// Constructs a new instance of <see cref="Value"/>.
+        /// </summary>
+        /// <param name="dataSet">
+        /// The data set the value is contained within.
+        /// </param>
+        /// <param name="property">
+        /// The property the dynamic value will relate to.
+        /// </param>
+        /// <param name="value">
+        /// The string name of the dynamic value.
+        /// </param>
+        internal Value (
+            DataSet dataSet,
+            Property property,
+            string value) : base(dataSet, -1)
+        {
+            _propertyIndex = property.Index;
+            _name = value;
+            _nameOffset = -1;
+            _descriptionOffset = -1;
+            _urlOffset = -1;
+        }
+
         #endregion
         
         #region Internal Methods
@@ -360,7 +384,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                 return -1;
             }
             if (Name.Length > other.Length)
-            {
+        {
                 return 1;
             }
             return 0;

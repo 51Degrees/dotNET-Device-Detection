@@ -36,6 +36,7 @@ using System.Globalization;
 using System.Security;
 using System.Text.RegularExpressions;
 using FiftyOne.Foundation.Licence;
+using System.Net.Security;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
@@ -146,6 +147,26 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 {
                     dataSet.Dispose();
                 }
+            }
+        }
+
+        /// <summary>
+        /// The default implementation of WebClient prevents the 
+        /// If-Modified-Since HTTP header from being set. This implementation
+        /// overcomes this shortcoming.
+        /// </summary>
+        internal class AutoUpdateWebClient : WebClient
+        {
+            internal DateTime? IfModifiedSince { get; set; }
+            protected override WebRequest GetWebRequest(Uri address)
+            {
+                var request = (HttpWebRequest)base.GetWebRequest(address);
+                if (IfModifiedSince != null)
+                {
+                    request.IfModifiedSince = this.IfModifiedSince.Value;
+                }
+                request.Timeout = (int)Constants.AutoUpdateTimeOut.TotalMilliseconds;
+                return request;
             }
         }
 
@@ -345,7 +366,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #endregion
 
         #region Private Methods
-
+        
         /// <summary>
         /// Downloads and updates the premium data file.
         /// </summary>
@@ -379,7 +400,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
                 // Download the device data, decompress, check validity and
                 // finally replace the existing data file if all okay.
-                var client = new WebClient();
+                var client = new AutoUpdateWebClient();
                 result = DownloadFile(
                     binaryFile,
                     compressedTempFile,
@@ -453,18 +474,16 @@ namespace FiftyOne.Foundation.Mobile.Detection
         private static AutoUpdateStatus DownloadFile(
                 FileInfo binaryFile,
                 FileInfo compressedTempFile,
-                WebClient client,
+                AutoUpdateWebClient client,
                 Uri fullUrl)
         {
             AutoUpdateStatus result = AutoUpdateStatus.AUTO_UPDATE_IN_PROGRESS;
 
-            // Set the last modified header if available from the current
+            // Set the If-Modified-Since header if available from the current
             // binary data file.
             if (binaryFile.Exists)
             {
-                client.Headers.Add(
-                    HttpRequestHeader.LastModified,
-                    binaryFile.LastWriteTimeUtc.ToString("R"));
+                client.IfModifiedSince = binaryFile.LastWriteTimeUtc;
             }
 
             // If the response is okay then download the file to the temporary
@@ -481,23 +500,30 @@ namespace FiftyOne.Foundation.Mobile.Detection
             catch (WebException ex)
             {
                 //Server response was not 200. Data download can not commence.
-                switch (((HttpWebResponse)ex.Response).StatusCode)
+                if (ex.Response != null)
                 {
-                    // Note: needed because TooManyRequests is not available in
-                    // earlier versions of the HttpStatusCode enum.
-                    case ((HttpStatusCode)429):
-                        result = AutoUpdateStatus.
-                            AUTO_UPDATE_ERR_429_TOO_MANY_ATTEMPTS;
-                        break;
-                    case HttpStatusCode.NotModified:
-                        result = AutoUpdateStatus.AUTO_UPDATE_NOT_NEEDED;
-                        break;
-                    case HttpStatusCode.Forbidden:
-                        result = AutoUpdateStatus.AUTO_UPDATE_ERR_403_FORBIDDEN;
-                        break;
-                    default:
-                        result = AutoUpdateStatus.AUTO_UPDATE_HTTPS_ERR;
-                        break;
+                    switch (((HttpWebResponse)ex.Response).StatusCode)
+                    {
+                        // Note: needed because TooManyRequests is not available in
+                        // earlier versions of the HttpStatusCode enum.
+                        case ((HttpStatusCode)429):
+                            result = AutoUpdateStatus.
+                                AUTO_UPDATE_ERR_429_TOO_MANY_ATTEMPTS;
+                            break;
+                        case HttpStatusCode.NotModified:
+                            result = AutoUpdateStatus.AUTO_UPDATE_NOT_NEEDED;
+                            break;
+                        case HttpStatusCode.Forbidden:
+                            result = AutoUpdateStatus.AUTO_UPDATE_ERR_403_FORBIDDEN;
+                            break;
+                        default:
+                            result = AutoUpdateStatus.AUTO_UPDATE_HTTPS_ERR;
+                            break;
+                    }
+                }
+                else
+                {
+                    result = AutoUpdateStatus.AUTO_UPDATE_HTTPS_ERR;
                 }
             }
 
@@ -775,7 +801,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="licenseKeys">Array of licence key strings.</param>
         /// <returns>The URL for the data download.</returns>
-        private static Uri FullUrl(IList<string> licenseKeys)
+        internal static Uri FullUrl(IList<string> licenseKeys)
         {
             string[] parameters = {
                 "LicenseKeys=" + String.Join("|", licenseKeys),

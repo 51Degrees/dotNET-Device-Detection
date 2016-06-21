@@ -23,6 +23,7 @@ using System.IO;
 using FiftyOne.Foundation.Mobile.Detection.Factories;
 using FiftyOne.Foundation.Mobile.Detection.Readers;
 using System.Collections.Generic;
+using System;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
 {
@@ -54,9 +55,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
     /// Should not be referenced directly.
     /// </remarks>
     /// <typeparam name="T">
-    /// The type of <see cref="BaseEntity"/> the list will contain.
+    /// The type of item the list will contain.
     /// </typeparam>
-    public class MemoryVariableList<T> : MemoryBaseList<T>, IReadonlyList<T> where T : BaseEntity
+    /// <typeparam name="D">
+    /// The type of the shared data set the item is contained within.
+    /// </typeparam>
+    public class MemoryVariableList<T, D> : MemoryBaseList<T, D>, IReadonlyList<T> 
+        where T : IComparable<int>
     {
         #region Classes
 
@@ -104,7 +109,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of <see cref="MemoryVariableList{T}"/>.
+        /// Constructs a new instance of <see cref="MemoryVariableList{T,D}"/>.
         /// </summary>
         /// <param name="dataSet">
         /// The <see cref="DataSet"/> being created.
@@ -117,9 +122,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         /// Used to create new instances of the entity.
         /// </param>
         internal MemoryVariableList(
-            DataSet dataSet, 
+            D dataSet, 
             Reader reader,
-            BaseEntityFactory<T> entityFactory)
+            BaseEntityFactory<T, D> entityFactory)
             : base(dataSet, reader, entityFactory)
         {
         }
@@ -173,7 +178,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
                 var index = _search.BinarySearch(offset);
                 if (index >= 0)
                     return _array[index];
-                return null;
+                return default(T);
             }
         }
         

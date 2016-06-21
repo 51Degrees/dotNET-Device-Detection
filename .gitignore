@@ -194,3 +194,7 @@ Log.txt
 App_Data/Cache/
 million.csv
 *.snk
+
+# 51Degrees working files.
+data/*ip*.csv.gz.bin
+data/*ip*.csv.gz

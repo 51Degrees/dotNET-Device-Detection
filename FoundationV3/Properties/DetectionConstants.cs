@@ -21,6 +21,8 @@
 
 using System;
 using System.Collections.Generic;
+using FiftyOne.Foundation.Mobile.Detection.Entities;
+using FiftyOne.Foundation.Mobile.Detection.Feature;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
@@ -32,9 +34,20 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Public Constants
 
         /// <summary>
+        /// The prefix to apply to the cookie name when used in the client.
+        /// </summary>
+        public const string PropertyValueOverrideCookiePrefix = "51D_";
+
+        /// <summary>
+        /// Used to indicate if property value override is enabled.
+        /// </summary>
+        public const string PropertyValueOverrideFlag = "51D_PVO";
+
+        /// <summary>
         /// The dafult name of the profile override cookie.
         /// </summary>
-        public const string ProfileOverrideCookieName = "51D_ProfileIds";
+        public const string ProfileOverrideCookieName = 
+            PropertyValueOverrideCookiePrefix + "ProfileIds";
 
         /// <summary>
         /// The default path to use for the binary data file.
@@ -104,6 +117,24 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         #region Internal Constants
 
+        /// <summary>
+        /// The name of the category 
+        /// <see cref="Property.PropertyValueType.JavaScript"/> properties
+        /// which should be used for <see cref="PropertyValueOverride"/> 
+        /// methods must be assigned.
+        /// </summary>
+        internal const string PropertyValueOverrideCategory = "Property Value Override";
+
+        
+
+        /// <summary>
+        /// Used to split up a cookie string.
+        /// </summary>
+        internal static readonly char[] CookieSplitter = new char[] { ';' };
+
+        /// <summary>
+        /// Name of the cookie used by MVC to override browser details.
+        /// </summary>
         internal const string MvcBrowserOverrideCookie = ".ASPXBrowserOverride";
 
         /// <summary>
@@ -184,6 +215,15 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         internal static readonly TimeSpan AutoUpdateSleep =
             new TimeSpan(0, 6, 0, 0);
+
+        /// <summary>
+        /// Length of time to wait before timing out when downloading new
+        /// device data files. Set to a high value as sometimes when a new 
+        /// file is released the distributor can recieve a lot of requests
+        /// in a short period of time.
+        /// </summary>
+        internal static readonly TimeSpan AutoUpdateTimeOut =
+            new TimeSpan(0, 2, 0, 0);
 
         /// <summary>
         /// The length of time to wait before setting the local data file

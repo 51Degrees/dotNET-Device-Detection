@@ -51,6 +51,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// </summary>
         private readonly int[] _valueIndexes;
 
+        /// <summary>
+        /// An array of values to expose.
+        /// </summary>
+        private readonly IList<Value> _values;
+
         #endregion
 
         #region Properties
@@ -67,6 +72,19 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             }
         }
 
+        /// <summary>
+        /// True if the value does not relate to a static one contained
+        /// in the data set and was created from an HTTP cookie set via
+        /// JavaScript or in some other manner. 
+        /// </summary>
+        public bool IsDynamic
+        {
+            get
+            {
+                return _values != null;
+            }
+        }
+
         #endregion
 
         #region Constructor
@@ -78,12 +96,29 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// Property the values list relates to.
         /// </param>
         /// <param name="valueIndexes">
-        /// An array of values to use with the list.
+        /// An array of value indexes to use with the list.
         /// </param>
         internal Values(Property property, int[] valueIndexes)
         {
             _property = property;
             _valueIndexes = valueIndexes;
+            _values = null;
+        }
+
+        /// <summary>
+        /// Constructs a new instance of the values list.
+        /// </summary>
+        /// <param name="property">
+        /// Property the values list relates to.
+        /// </param>
+        /// <param name="values">
+        /// An array of values to use with the list.
+        /// </param>
+        internal Values(Property property, IList<Value> values)
+        {
+            _property = property;
+            _values = values;
+            _valueIndexes = null;
         }
 
         #endregion
@@ -99,9 +134,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         {
             get
             {
-                var index = _property.DataSet.ValuesNameSearch.BinarySearch(
-                    _valueIndexes, valueName);
+                if (_valueIndexes != null)
+                {
+                    var index = _property.DataSet.ValuesNameSearch.BinarySearch(
+                        _valueIndexes, valueName);
                 return index >= 0 ? this[index] : null;
+            }
+                else
+                {
+                    return _values.FirstOrDefault(i => valueName.Equals(i.Name));
+                }
             }
         }
 
@@ -189,12 +231,19 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <returns>The index of value if found in the list; otherwise, -1.</returns>
         public int IndexOf(Value item)
         {
-            for (var index = 0; index < _valueIndexes.Length; index++)
+            if (_valueIndexes != null)
+            {
+                for (var index = 0; index < _valueIndexes.Length; index++)
             {
                 if (_valueIndexes[index].Equals(item))
                 {
                     return index;
                 }
+                }
+            }
+            else if (_values != null)
+            {
+                return _values.IndexOf(item);
             }
             return -1;
         }
@@ -228,7 +277,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         {
             get
             {
-                return _property.DataSet.Values[_valueIndexes[index]];
+                return _valueIndexes != null ?
+                    _property.DataSet.Values[_valueIndexes[index]] :
+                    _values[index];
             }
             set
             {
@@ -260,7 +311,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <returns>true if the value is found in the values list; otherwise, false.</returns>
         public bool Contains(Value item)
         {
-            return item != null && _valueIndexes.Contains(item.Index);
+            if (item != null)
+            {
+                if (_valueIndexes != null)
+                {
+                    return _valueIndexes.Contains(item.Index);
+                }
+                return _values.Contains(item);
+        }
+            return false;
         }
 
         /// <summary>
@@ -270,10 +329,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <param name="arrayIndex">The zero-based index in array at which copying begins.</param>
         public void CopyTo(Value[] array, int arrayIndex)
         {
-            for (int i = arrayIndex; i < _valueIndexes.Length; i++)
+            if (_valueIndexes != null)
             {
-                array[i] = this[i];
+                for (int i = arrayIndex; i < _valueIndexes.Length; i++)
+                {
+                    array[i] = this[i];
+                }
             }
+            else
+            {
+                _values.CopyTo(array, arrayIndex);
+        }
         }
 
         /// <summary>
@@ -281,7 +347,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// </summary>
         public int Count
         {
-            get { return _valueIndexes.Length; }
+            get 
+            {
+                return _valueIndexes != null ? 
+                    _valueIndexes.Length : 
+                    _values.Count;
+            }
         }
 
         /// <summary>
@@ -308,7 +379,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <returns>An IEnumerator&lt;<see cref="Value"/>&gt; object that can be used to iterate through the collection.</returns>
         public IEnumerator<Value> GetEnumerator()
         {
-            return _valueIndexes.Select(i => _property.DataSet.Values[i]).GetEnumerator();
+            if (_valueIndexes != null)
+            {
+                return _valueIndexes.Select(i => _property.DataSet.Values[i]).GetEnumerator();
+            }
+            return _values.GetEnumerator();
         }
 
         /// <summary>
@@ -317,7 +392,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <returns>An IEnumerator&lt;<see cref="Value"/>&gt; object that can be used to iterate through the collection.</returns>
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            return _valueIndexes.GetEnumerator();
+            return GetEnumerator();
         }
 
         #endregion

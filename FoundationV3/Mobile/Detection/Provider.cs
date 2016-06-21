@@ -467,6 +467,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </returns>
         public Match Match(NameValueCollection headers, Match match)
         {
+            match.Reset();
             if (headers == null || headers.Count == 0)
             {
                 // Empty headers all default match result.
@@ -507,6 +508,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     match.State.Signature = null;
                     match.State.TargetUserAgent = null;
                 }
+
+                // If the Cookie header is present then record this as it maybe
+                // needed when a Property Value Override property is requested.
+                match._cookie = headers["Cookie"];
             }
             return match;
         }

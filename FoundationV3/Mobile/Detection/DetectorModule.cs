@@ -133,6 +133,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
             // Configure the profile override component.
             Feature.ProfileOverride.Init(application.Application);
 
+            // Configure the property value override component.
+            Feature.PropertyValueOverride.Init(application.Application);
+
             // Register for an event to capture javascript requests
             // for static resources and record bandwidth information.
             application.BeginRequest += OnBeginRequestJavascript;
@@ -327,11 +330,18 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 AppendJavascript(sb, Feature.Bandwidth.GetJavascript(context));
             }
 
-            // Add the profile override javascript if available for this device.
+            // Add the profile override javascript if available for this request.
             var profileOverrideJavascript = Feature.ProfileOverride.GetJavascript(context);
             if (String.IsNullOrEmpty(profileOverrideJavascript) == false)
             {
-                AppendJavascript(sb, Feature.ProfileOverride.GetJavascript(context));
+                AppendJavascript(sb, profileOverrideJavascript);
+            }
+
+            // Add property value override javascript if available for this request.
+            var propertyValueJavaScript = Feature.PropertyValueOverride.GetJavascript(context);
+            if (String.IsNullOrEmpty(propertyValueJavaScript) == false)
+            {
+                AppendJavascript(sb, propertyValueJavaScript);
             }
         }
 

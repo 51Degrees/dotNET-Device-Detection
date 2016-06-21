@@ -162,12 +162,16 @@
     <Compile Include="Mobile\Detection\Entities\Stream\CacheList.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\DataSet.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\EntityFactories.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\IStreamDataSet.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\Node.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\NodeV32.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\NodeV31.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\Profile.cs" />
+    <Compile Include="Mobile\Detection\Entities\Utf8String.cs" />
+    <Compile Include="Mobile\Detection\Entities\Utils.cs" />
     <Compile Include="Mobile\Detection\Factories\EntityFactories.cs" />
     <Compile Include="Mobile\Detection\Factories\CommonFactory.cs" />
+    <Compile Include="Mobile\Detection\Feature\PropertyValueOverride.cs" />
     <Compile Include="Mobile\Detection\ISimpleList.cs" />
     <Compile Include="Mobile\Detection\IReadonlyList.cs" />
     <Compile Include="Mobile\Detection\Factories\MemoryFactory.cs" />

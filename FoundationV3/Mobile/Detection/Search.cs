@@ -27,6 +27,13 @@ using System.Text;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
+    /// <summary>
+    /// Generic search class used to perform a binary search where the
+    /// type of itmes in the list and the key are of different types.
+    /// </summary>
+    /// <typeparam name="T">The type of items in the list</typeparam>
+    /// <typeparam name="K">The type of the key field in the list</typeparam>
+    /// <typeparam name="L">The type of the list</typeparam>
     internal abstract class SearchBase<T, K, L>
     {
         /// <summary>
@@ -155,7 +162,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// types when performing a search that will in practice only need to 
     /// retrieve a small subset improving memory efficiency.
     /// </summary>
-    internal class SearchReadonlyList<T, K> : SearchBase<T, K, IList<int>> where T : BaseEntity, IComparable<K>
+    internal class SearchReadonlyList<T, K> : SearchBase<T, K, IList<int>> where T : IComparable<K>
     {
         /// <summary>
         /// The list of complex values to use with the index. This may be a 

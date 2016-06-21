@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using FiftyOne.Foundation.Mobile.Detection.Entities;
@@ -52,7 +53,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// </summary>
     public class Match : IMatch
     {
-        #region Private Fields
+        #region Internal Fields
 
         /// <summary>
         /// The result of a completed match.
@@ -68,6 +69,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Instance of the provider used to create the match.
         /// </summary>
         internal readonly Provider Provider;
+
+        /// <summary>
+        /// Reference to the cookie header used to populate this 
+        /// match. Used to get the values for properties which
+        /// support property override.
+        /// </summary>
+        internal string _cookie;
 
         #endregion
 
@@ -323,12 +331,84 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         #endregion
 
+        #region Private Properties
+
+        /// <summary>
+        /// A dictionary of property names that have alterantive values based 
+        /// on cookie header data if provided when the Match was populated. 
+        /// Used when JavaScript is available to provide alternative values
+        /// based on a client side JavaScript code.
+        /// </summary>
+        /// <remarks>
+        /// Ideally the implementation would reuse standard .NET cookie 
+        /// handling. However as the public interface can only accept a 
+        /// <see cref="NameValueCollection"/> containing all the HTTP headers
+        /// if is not possible to use this functionality at this time. As such
+        /// there is some duplication in this implementation and .NET.
+        /// </remarks>
+        /// <remarks>
+        /// The presence of _cookie should be checked before accessing this
+        /// method.
+        /// </remarks>
+        private Dictionary<string, string> PropertyValueOverrideCookies
+        {
+            get
+            {
+                if (_propertyValueOverrideCookies == null)
+                {
+                    lock (this)
+                    {
+                        if (_propertyValueOverrideCookies == null)
+                        {
+                            var propertyValueOverrideCookies = 
+                                new Dictionary<string, string>();
+                            try
+                            {
+                                var pairs = _cookie.Split(Constants.CookieSplitter,
+                                    StringSplitOptions.RemoveEmptyEntries);
+                                foreach (var pair in pairs.Select(i =>
+                                    i.Trim()).Where(i =>
+                                    i.StartsWith(Constants.PropertyValueOverrideCookiePrefix)))
+                                {
+                                    var equalsIndex = pair.IndexOf('=');
+                                    if (equalsIndex > Constants.PropertyValueOverrideCookiePrefix.Length)
+                                    {
+                                        var key = pair.Substring(
+                                            Constants.PropertyValueOverrideCookiePrefix.Length,
+                                            equalsIndex - Constants.PropertyValueOverrideCookiePrefix.Length);
+                                        var value = pair.Substring(equalsIndex + 1);
+                                        propertyValueOverrideCookies.Add(key, value);
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                // There is no opportunity to throw an exception as the 
+                                // method is core and is not essential to processing. 
+                                // Record the exception in the log file.
+                                EventLog.Warn(ex);
+                                EventLog.Warn("Exception processing cookie '{0}'.", _cookie);
+                            }
+                            _propertyValueOverrideCookies = propertyValueOverrideCookies;
+                        }
+                    }
+                }
+                return _propertyValueOverrideCookies;
+            }
+        }
+        private Dictionary<string, string> _propertyValueOverrideCookies = null;
+
+        #endregion
+
         #region Public Accessors
 
         /// <summary>
         /// Gets the values associated with the property name using the profiles
         /// found by the match. If matched profiles don't contain a value then
         /// the default profiles for each of the components are also checked.
+        /// If a value is provided via the property value override functionality
+        /// then this will be returned in place of the static value from the 
+        /// dataset.
         /// </summary>
         /// <param name="property">The property whose values are required</param>
         /// <returns>Array of the values associated with the property, or null if the property does not exist</returns>
@@ -339,19 +419,38 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 Values value = null;
                 if (property != null)
                 {
-                    // Get the property value from the profile returned
-                    // from the match.
-                    Profile profile = Profiles.FirstOrDefault(i =>
-                        property.Component.Equals(i.Component));
-                    if (profile != null)
+                    // Does the property support Property Value Override, and 
+                    // is there a value in the cookies dictionary?
+                    string cookieValue;
+                    if (_cookie != null &&
+                        PropertyValueOverrideCookies.TryGetValue(
+                            property.Name, 
+                            out cookieValue))
                     {
-                        value = profile[property];
+                        // Create a dynamic values instance for this value which does
+                        // not reference a static value index in the dataset.
+                        value = new Values(
+                            property,
+                            new Value[] { 
+                                new Value(DataSet, property, cookieValue)
+                            });
                     }
-
-                    // If the value has not been found use the default profile.
-                    if (value == null)
+                    else
                     {
-                        value = property.Component.DefaultProfile[property];
+                        // Get the property value from the profile returned
+                        // from the match.
+                        Profile profile = Profiles.FirstOrDefault(i =>
+                            property.Component.Equals(i.Component));
+                        if (profile != null)
+                        {
+                            value = profile[property];
+                        }
+
+                        // If the value has not been found use the default profile.
+                        if (value == null)
+                        {
+                            value = property.Component.DefaultProfile[property];
+                        }
                     }
                 }
                 return value;
@@ -414,6 +513,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
         {
             State.Reset();
             _overriddenProfiles = null;
+            _cookie = null;
+            _propertyValueOverrideCookies = null;
         }
 
         /// <summary>

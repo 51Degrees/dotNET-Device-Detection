@@ -180,31 +180,32 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
             {
                 reader.BaseStream.Position = 0;
                 CommonFactory.LoadHeader(dataSet, reader);
-                dataSet.Strings = new VariableList<AsciiString>(dataSet, reader, new AsciiStringFactory(), Constants.StringsCacheSize);
-                MemoryFixedList<Component> components = null;
+                dataSet.Strings = new VariableList<AsciiString<Entities.DataSet>, DataSet>(
+                    dataSet, reader, new StreamAsciiStringFactory(), Constants.StringsCacheSize);
+                MemoryFixedList<Component, Entities.DataSet> components = null;
                 switch (dataSet.VersionEnum)
                 {
                     case BinaryConstants.FormatVersions.PatternV31:
-                        components = new MemoryFixedList<Component>(dataSet, reader, new ComponentFactoryV31());
+                        components = new MemoryFixedList<Component, Entities.DataSet>(dataSet, reader, new ComponentFactoryV31());
                         break;
                     case BinaryConstants.FormatVersions.PatternV32:
-                        components = new MemoryFixedList<Component>(dataSet, reader, new ComponentFactoryV32());
+                        components = new MemoryFixedList<Component, Entities.DataSet>(dataSet, reader, new ComponentFactoryV32());
                         break;
                 }
                 dataSet._components = components;
-                var maps = new MemoryFixedList<Map>(dataSet, reader, new MapFactory());
+                var maps = new MemoryFixedList<Map, Entities.DataSet>(dataSet, reader, new MapFactory());
                 dataSet._maps = maps;
                 var properties = new PropertiesList(dataSet, reader, new PropertyFactory());
                 dataSet._properties = properties;
-                dataSet._values = new FixedCacheList<Value>(dataSet, reader, new ValueFactory(), Constants.ValuesCacheSize);
-                dataSet.Profiles = new VariableList<Entities.Profile>(dataSet, reader, new ProfileStreamFactory(dataSet.Pool), Constants.ProfilesCacheSize);
+                dataSet._values = new FixedCacheList<Value, DataSet>(dataSet, reader, new ValueFactory<DataSet>(), Constants.ValuesCacheSize);
+                dataSet.Profiles = new VariableList<Entities.Profile, DataSet>(dataSet, reader, new ProfileStreamFactory(dataSet.Pool), Constants.ProfilesCacheSize);
                 switch (dataSet.VersionEnum)
                 {
                     case BinaryConstants.FormatVersions.PatternV31:
-                        dataSet._signatures = new FixedCacheList<Signature>(dataSet, reader, new SignatureFactoryV31(dataSet), Constants.SignaturesCacheSize);
+                        dataSet._signatures = new FixedCacheList<Signature, DataSet>(dataSet, reader, new SignatureFactoryV31<DataSet>(dataSet), Constants.SignaturesCacheSize);
                         break;
                     case BinaryConstants.FormatVersions.PatternV32:
-                        dataSet._signatures = new FixedCacheList<Signature>(dataSet, reader, new SignatureFactoryV32(dataSet), Constants.SignaturesCacheSize);
+                        dataSet._signatures = new FixedCacheList<Signature, DataSet>(dataSet, reader, new SignatureFactoryV32<DataSet>(dataSet), Constants.SignaturesCacheSize);
                         dataSet._signatureNodeOffsets = new IntegerList(dataSet, reader);
                         dataSet._nodeRankedSignatureIndexes = new IntegerList(dataSet, reader);
                         break;
@@ -213,15 +214,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
                 switch (dataSet.VersionEnum)
                 {
                     case BinaryConstants.FormatVersions.PatternV31:
-                        dataSet.Nodes = new VariableList<Entities.Node>(dataSet, reader, new NodeStreamFactoryV31(dataSet.Pool), Constants.NodesCacheSize);
+                        dataSet.Nodes = new VariableList<Entities.Node, DataSet>(dataSet, reader, new NodeStreamFactoryV31(dataSet.Pool), Constants.NodesCacheSize);
                         break;
                     case BinaryConstants.FormatVersions.PatternV32:
-                        dataSet.Nodes = new VariableList<Entities.Node>(dataSet, reader, new NodeStreamFactoryV32(dataSet.Pool), Constants.NodesCacheSize);
+                        dataSet.Nodes = new VariableList<Entities.Node, DataSet>(dataSet, reader, new NodeStreamFactoryV32(dataSet.Pool), Constants.NodesCacheSize);
                         break;
                 }
-                var rootNodes = new MemoryFixedList<Entities.Node>(dataSet, reader, new RootNodeFactory());
+                var rootNodes = new MemoryFixedList<Entities.Node, Entities.DataSet>(dataSet, reader, new RootNodeFactory());
                 dataSet.RootNodes = rootNodes;
-                var profileOffsets = new MemoryFixedList<ProfileOffset>(dataSet, reader, new ProfileOffsetFactory());
+                var profileOffsets = new MemoryFixedList<ProfileOffset, Entities.DataSet>(dataSet, reader, new ProfileOffsetFactory());
                 dataSet._profileOffsets = profileOffsets;
 
                 // Read into memory all the small lists which are frequently accessed.

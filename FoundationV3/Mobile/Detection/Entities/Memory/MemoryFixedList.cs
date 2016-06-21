@@ -53,14 +53,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
     /// Should not be referenced directly.
     /// </remarks>
     /// <typeparam name="T">
-    /// The type of <see cref="BaseEntity"/> the list will contain
+    /// The type of item the list will contain.
     /// </typeparam>
-    public class MemoryFixedList<T> : MemoryBaseList<T>, IReadonlyList<T> where T : BaseEntity
+    /// <typeparam name="D">
+    /// The type of the shared data set the item is contained within.
+    /// </typeparam>
+    public class MemoryFixedList<T, D> : MemoryBaseList<T, D>, IReadonlyList<T>
     {
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of <see cref="MemoryFixedList{T}"/>.
+        /// Constructs a new instance of <see cref="MemoryFixedList{T,D}"/>.
         /// </summary>
         /// <param name="dataSet">
         /// The <see cref="DataSet"/> being created.
@@ -72,7 +75,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         /// <param name="entityFactory">
         /// Used to create new instances of the entity.
         /// </param>
-        internal MemoryFixedList(DataSet dataSet, Reader reader, BaseEntityFactory<T> entityFactory)
+        internal MemoryFixedList(D dataSet, Reader reader, BaseEntityFactory<T, D> entityFactory)
             : base(dataSet, reader, entityFactory)
         {
         }
