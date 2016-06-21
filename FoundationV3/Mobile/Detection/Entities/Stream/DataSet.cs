@@ -39,7 +39,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
     /// until the dataset is closed. Class provides extra methods to check how 
     /// many readers were created and how many are currently free to use.
     /// </para>
-    public class DataSet : Entities.DataSet
+    public class DataSet : Entities.DataSet, IStreamDataSet
     {
         #region Fields
 
@@ -51,7 +51,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <summary>
         /// Pool of readers connected the underlying data file.
         /// </summary>
-        internal readonly Pool Pool;
+        public Pool Pool { get; internal set; }
 
         #endregion 
 

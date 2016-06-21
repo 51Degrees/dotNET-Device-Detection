@@ -694,20 +694,20 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// A list of all the components the data set contains.
         /// </summary>
-        public MemoryFixedList<Component> Components
+        public MemoryFixedList<Component, DataSet> Components
         {
             get { return _components; }
         }
-        internal MemoryFixedList<Component> _components;
+        internal MemoryFixedList<Component, DataSet> _components;
 
         /// <summary>
         /// A list of all the maps the data set contains.
         /// </summary>
-        public MemoryFixedList<Map> Maps
+        public MemoryFixedList<Map, DataSet> Maps
         {
             get { return _maps; }
         }
-        internal MemoryFixedList<Map> _maps;
+        internal MemoryFixedList<Map, DataSet> _maps;
 
         /// <summary>
         /// A list of all properties the data set contains.
@@ -796,7 +796,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// A list of ASCII byte arrays for strings used by the dataset.
         /// </summary>
-        internal IReadonlyList<AsciiString> Strings;
+        internal IReadonlyList<AsciiString<DataSet>> Strings;
 
         #endregion
 
@@ -881,7 +881,70 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             }
         }
         private SearchReadonlyList<Value, string> _valuesNameSearch = null;
-            
+        
+        /// <summary>
+        /// An array of the properties that are of type JavaScript.
+        /// </summary>
+        internal Property[] JavaScriptProperties
+        {
+            get
+            {
+                if (_javaScriptProperties == null)
+                {
+                    lock(this)
+                    {
+                        if (_javaScriptProperties == null)
+                        {
+                            _javaScriptProperties = Properties.Where(i =>
+                                i._valueType == 
+                                Property.PropertyValueType.JavaScript).ToArray();
+                        }
+                    }
+                }
+                return _javaScriptProperties;
+            }
+        }
+        private Property[] _javaScriptProperties = null;
+
+        /// <summary>
+        /// Find all the properties that are of type JavaScript and are marked
+        /// with the property value override category. 
+        /// </summary>
+        internal Property[] PropertyValueOverrideProperties
+        {
+            get
+            {
+                if (_propertyValueOverrideProperties == null)
+                {
+                    lock (this)
+                    {
+                        if (_propertyValueOverrideProperties == null)
+                        {
+                            _propertyValueOverrideProperties =
+                                JavaScriptProperties.Where(i =>
+                                    i.Category.Equals(
+                                    Constants.PropertyValueOverrideCategory)
+                                ).ToArray();
+                        }
+                    }
+                }
+                return _propertyValueOverrideProperties;
+            }
+        }
+        private Property[] _propertyValueOverrideProperties;
+
+        /// <summary>
+        /// Find all the properties that are of type JavaScript and are marked
+        /// with the property value override category. 
+        /// </summary>
+        /// <returns>Array of JavaScript properties for this feature.</returns>
+        private static Property[] GetJavaScriptProperties()
+        {
+            return WebProvider.ActiveProvider.DataSet.JavaScriptProperties.
+                Where(i => i.Category.Equals(
+                    Constants.PropertyValueOverrideCategory)).ToArray();
+        }
+
         #endregion
 
         #region Constructors
@@ -1125,6 +1188,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             // Do nothing in this implementation.
         }
         
-        #endregion        
+        #endregion
     }
 }

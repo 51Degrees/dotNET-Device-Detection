@@ -24,7 +24,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// <summary>
     /// Base class used by all node indexes containing common functionality.
     /// </summary>
-    internal abstract class NodeIndexBase : BaseEntity
+    internal abstract class NodeIndexBase : BaseEntity<DataSet>
     {
         #region Fields
 
@@ -54,7 +54,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                 if (_node != null)
                     return _node;
 
-                if (DataSet.Nodes is Memory.MemoryBaseList<Node>)
+                if (DataSet.Nodes is Memory.MemoryBaseList<Node, DataSet>)
                 {
                     if (_node == null)
                     {

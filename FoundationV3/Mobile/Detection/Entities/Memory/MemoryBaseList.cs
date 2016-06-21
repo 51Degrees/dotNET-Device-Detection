@@ -42,7 +42,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
     /// <remarks>
     /// Delegate methods are used to create new instances of items to add to 
     /// the list in order to avoid creating many inherited list classes for 
-    /// each <see cref="BaseEntity"/> type.
+    /// each item type.
     /// </remarks>
     /// <remarks>
     /// The data is held in the private readonly variable _listArray.
@@ -51,9 +51,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
     /// Should not be referenced directly.
     /// </remarks>
     /// <typeparam name="T">
-    /// The type of <see cref="BaseEntity"/> the list will contain
+    /// The type of item the list will contain.
     /// </typeparam>
-    public abstract class MemoryBaseList<T> : IEnumerable<T>
+    /// <typeparam name="D">
+    /// The type of the shared data set the item is contained within.
+    /// </typeparam>
+    public abstract class MemoryBaseList<T, D> : IEnumerable<T>
     {
         #region Fields
 
@@ -65,12 +68,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         /// <summary>
         /// Method used to create a new instance of an item in the list.
         /// </summary>
-        internal readonly BaseEntityFactory<T> EntityFactory;
+        internal readonly BaseEntityFactory<T, D> EntityFactory;
 
         /// <summary>
         /// The dataset which contains the list.
         /// </summary>
-        protected internal readonly DataSet _dataSet;
+        protected internal readonly D _dataSet;
 
         /// <summary>
         /// Array of items contained in the list.
@@ -106,7 +109,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of <see cref="MemoryBaseList{T}"/>. 
+        /// Constructs a new instance of <see cref="MemoryBaseList{T,D}"/>. 
         /// The Read method needs to be called following construction to read 
         /// all the entities which form the list before the list can be used.
         /// </summary>
@@ -119,7 +122,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         /// <param name="entityFactory">
         /// Used to create new instances of the entity.
         /// </param>
-        internal MemoryBaseList(DataSet dataSet, Reader reader, BaseEntityFactory<T> entityFactory)
+        internal MemoryBaseList(D dataSet, Reader reader, BaseEntityFactory<T, D> entityFactory)
         {
             Header = new Header(reader);
             _array = new T[Header.Count];

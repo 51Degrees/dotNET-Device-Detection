@@ -57,7 +57,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// provide better detection results, especially for less common devices.
     /// For more information see: https://51degrees.com/compare-data-options
     /// </para>
-    public abstract class Profile : BaseEntity, IComparable<Profile>, IEquatable<Profile>
+    public abstract class Profile : BaseEntity<DataSet>, IComparable<Profile>, IEquatable<Profile>
     {
         #region Fields
 
