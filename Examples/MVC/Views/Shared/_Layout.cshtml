@@ -8,6 +8,13 @@
         <title>@ViewBag.Title</title>
         <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
         <meta name="viewport" content="width=device-width" />
+        @{
+            // The following line includes 51Degrees dynamically generated
+            // JavaScript which would be used for image optimization,
+            // performance monitoring and property / profile overrides such
+            // as improved iPhone/iPad granularity.
+        }
+        <script src="/51Degrees.core.js"></script>
         @Styles.Render("~/Content/css")
         @Scripts.Render("~/bundles/modernizr")
     </head>
