@@ -49,9 +49,9 @@ Data files which are updated weekly and daily, automatically, and with more prop
 
 ## Recent Changes
 
-### Version 3.2.9 Highlights
+### Version 3.2.11 Highlights
 
-New Lite Data File released for June.
+New Lite Data File released for August.
 
 ### Major Changes in Version 3.2
 
