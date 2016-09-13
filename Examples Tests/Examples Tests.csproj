@@ -58,6 +58,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AllProfiles.cs" />
     <Compile Include="MatchForDeviceId.cs" />
     <Compile Include="MatchMetrics.cs" />
     <Compile Include="MetaData.cs" />
@@ -68,6 +69,10 @@
     <Compile Include="StronglyTyped.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Examples\All Profiles\All Profiles.csproj">
+      <Project>{ea6a83fe-d698-4e4d-821e-1b5bcc22d501}</Project>
+      <Name>All Profiles</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Examples\Getting Started\Getting Started.csproj">
       <Project>{091cbba9-94c4-486b-b630-6533e787a489}</Project>
       <Name>Getting Started</Name>
