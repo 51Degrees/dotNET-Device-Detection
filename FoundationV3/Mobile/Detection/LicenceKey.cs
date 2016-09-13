@@ -69,20 +69,23 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
                 // See if we can get licence keys from the 51Degrees preferred licence
                 // key file.
-                foreach (string fileName in Directory.GetFiles(
-                    HostingEnvironment.ApplicationPhysicalPath + "bin", Constants.LicenceKeyFileName))
-                {
-                    AddKeysFromFile(list, fileName);
-                }
-
-                // If there are no licence keys found so far then now try the bin 
-                // folder for any license key files.
-                if (list.Count == 0)
+                if (Directory.Exists(HostingEnvironment.ApplicationPhysicalPath + "bin"))
                 {
                     foreach (string fileName in Directory.GetFiles(
-                        HostingEnvironment.ApplicationPhysicalPath + "bin", "*.lic"))
+                        HostingEnvironment.ApplicationPhysicalPath + "bin", Constants.LicenceKeyFileName))
                     {
                         AddKeysFromFile(list, fileName);
+                    }
+
+                    // If there are no licence keys found so far then now try the bin 
+                    // folder for any license key files.
+                    if (list.Count == 0)
+                    {
+                        foreach (string fileName in Directory.GetFiles(
+                            HostingEnvironment.ApplicationPhysicalPath + "bin", "*.lic"))
+                        {
+                            AddKeysFromFile(list, fileName);
+                        }
                     }
                 }
 
