@@ -371,9 +371,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Checks for a new version of the data file if licence keys are available.
         /// </summary>
-        public static void Download()
+        /// <returns>
+        /// Update status indicating whether or not the update was successful.
+        /// </returns>
+        public static LicenceKeyResults Download()
         {
-            AutoUpdate.Download(LicenceKey.Keys);
+            return AutoUpdate.Download(LicenceKey.Keys);
         }
 
         /// <summary>
