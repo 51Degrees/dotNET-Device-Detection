@@ -125,7 +125,7 @@ namespace FiftyOne.Tests.Unit.Mobile.Detection
         /// </summary>
         protected void SetLiteDataFile() {
             String templateFile = AppDomain.CurrentDomain.BaseDirectory
-                    + "\\..\\..\\..\\data\\51Degrees-LiteV3.2.dat";
+                    + "\\..\\..\\..\\..\\data\\51Degrees-LiteV3.2.dat";
             // Delete existing file in case it's already of the latest version.
             if (TestDataFile.Exists) 
             {
