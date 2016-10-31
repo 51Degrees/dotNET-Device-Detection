@@ -19,10 +19,9 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
-using System.IO;
 using FiftyOne.Foundation.Mobile.Detection.Factories;
 using FiftyOne.Foundation.Mobile.Detection.Readers;
-using System.Collections.Generic;
+using System;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
 {
@@ -50,13 +49,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
     /// <remarks>
     /// The class supports source stream that do not support seeking.
     /// </remarks>
-    /// <remarks>
-    /// Should not be referenced directly.
-    /// </remarks>
+    /// <remarks>Not intended to be used directly by 3rd parties.</remarks>
     /// <typeparam name="T">
-    /// The type of <see cref="BaseEntity"/> the list will contain.
+    /// The type of item the list will contain.
     /// </typeparam>
-    public class MemoryVariableList<T> : MemoryBaseList<T>, IReadonlyList<T> where T : BaseEntity
+    /// <typeparam name="D">
+    /// The type of the shared data set the item is contained within.
+    /// </typeparam>
+    public class MemoryVariableList<T, D> : MemoryBaseList<T, D>, IReadonlyList<T> 
+        where T : IComparable<int>
     {
         #region Classes
 
@@ -104,7 +105,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of <see cref="MemoryVariableList{T}"/>.
+        /// Constructs a new instance of <see cref="MemoryVariableList{T,D}"/>.
         /// </summary>
         /// <param name="dataSet">
         /// The <see cref="DataSet"/> being created.
@@ -116,10 +117,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         /// <param name="entityFactory">
         /// Used to create new instances of the entity.
         /// </param>
-        internal MemoryVariableList(
-            DataSet dataSet, 
+        public MemoryVariableList(
+            D dataSet, 
             Reader reader,
-            BaseEntityFactory<T> entityFactory)
+            BaseEntityFactory<T, D> entityFactory)
             : base(dataSet, reader, entityFactory)
         {
         }
@@ -135,7 +136,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         /// Reader connected to the source data structure and positioned to 
         /// start reading.
         /// </param>
-        internal override void Read(Reader reader)
+        public override void Read(Reader reader)
         {
             var offset = 0;
             var startPos = (int)reader.BaseStream.Position;
@@ -173,7 +174,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
                 var index = _search.BinarySearch(offset);
                 if (index >= 0)
                     return _array[index];
-                return null;
+                return default(T);
             }
         }
         

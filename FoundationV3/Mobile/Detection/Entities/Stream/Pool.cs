@@ -33,14 +33,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
     /// recycled across threads and requests.
     /// </summary>
     /// <para>
-    /// Used by the <see cref="BaseList{T}"/> to provide multiple readers for 
+    /// Used by the <see cref="BaseList{T,D}"/> to provide multiple readers for 
     /// the list.
     /// </para>
     /// <remarks>
     /// The <see cref="DataSet"/> must be disposed of to ensure the readers
     /// in the pool are closed.
     /// </remarks>
-    internal class Pool
+    /// <remarks>Not intended to be used directly by 3rd parties.</remarks>
+    public class Pool
     {
         #region Fields
         
@@ -87,7 +88,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <param name="source">
         /// The data source for the list.
         /// </param>
-        internal Pool(SourceBase source)
+        public Pool(SourceBase source)
         {
             Source = source;
         }
@@ -104,7 +105,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <returns>
         /// Reader open and ready to read from the temp file.
         /// </returns>
-        internal Reader GetReader()
+        public Reader GetReader()
         {
             lock(_readers)
             {
@@ -124,7 +125,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <param name="reader">
         /// Reader open and ready to read from the temp file.
         /// </param>
-        internal void Release(Reader reader)
+        public void Release(Reader reader)
         {
             lock (_readers)
             {

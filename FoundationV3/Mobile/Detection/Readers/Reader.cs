@@ -19,9 +19,7 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Readers
@@ -31,7 +29,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Readers
     /// to reduce the number of objects created for garbage collection 
     /// to handle.
     /// </summary>
-    internal class Reader : System.IO.BinaryReader
+    /// <remarks>Not intended to be used directly by 3rd parties.</remarks>
+    public class Reader : System.IO.BinaryReader
     {
         /// <summary>
         /// A list of integers used to create arrays when the number of elements
@@ -43,6 +42,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Readers
         /// Constructs a new instance of reader from the stream.
         /// </summary>
         /// <param name="stream"></param>
-        internal Reader(Stream stream) : base(stream) { }
+        public Reader(Stream stream) : base(stream) { }
     }
 }

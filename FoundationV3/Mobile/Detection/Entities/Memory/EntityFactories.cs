@@ -24,11 +24,33 @@ using FiftyOne.Foundation.Mobile.Detection.Readers;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
 {
+    internal class MemoryAsciiStringFactory : BaseEntityFactory<AsciiString<DataSet>, DataSet>
+    {
+        /// <summary>
+        /// Creates a new instance of <see cref="AsciiString{T}"/>
+        /// </summary>
+        /// <param name="dataSet">
+        /// The data set whose strings list the string is contained within
+        /// </param>
+        /// <param name="offset">
+        /// The offset to the start of the string within the string data
+        /// structure
+        /// </param>
+        /// <param name="reader">
+        /// Binary reader positioned at the start of the AsciiString
+        /// </param>
+        /// <returns>A new instance of an <see cref="AsciiString{T}"/></returns>
+        public override AsciiString<DataSet> Create(DataSet dataSet, int offset, Reader reader)
+        {
+            return new AsciiString<DataSet>(dataSet, offset, reader);
+        }
+    }
+
     /// <summary>
     /// Factory class used to create the new instances of Node V3.1 object.
     /// Difference is in the length of the Node entity.
     /// </summary>
-    internal class NodeMemoryFactoryV31 : NodeFactory
+    internal class NodeMemoryFactoryV31 : NodeFactory<DataSet>
     {
         protected override Entities.Node Construct(DataSet dataSet, int offset, Reader reader)
         {
@@ -44,7 +66,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         /// <returns>
         /// The number of bytes used to store the node.
         /// </returns>
-        internal override int GetLength(Entities.Node entity)
+        public override int GetLength(Entities.Node entity)
         {
             return BaseLength + 
                 sizeof(int) + // Length of the ranked signatures count number
@@ -58,7 +80,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
     /// Factory class used to create the new instances of Node V3.2 object.
     /// Difference is in the length of the Node entity.
     /// </summary>
-    internal class NodeMemoryFactoryV32 : NodeFactory
+    internal class NodeMemoryFactoryV32 : NodeFactory<DataSet>
     {
         protected override Entities.Node Construct(DataSet dataSet, int offset, Reader reader)
         {
@@ -74,7 +96,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         /// <returns>
         /// The number of bytes used to store the node.
         /// </returns>
-        internal override int GetLength(Entities.Node entity)
+        public override int GetLength(Entities.Node entity)
         {
             return BaseLength +
                 sizeof(ushort) + // Length of the ranked signatures count number
@@ -89,7 +111,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
     /// <summary>
     /// Creates Profile entities for use with memory data set.
     /// </summary>
-    internal class ProfileMemoryFactory : ProfileFactory
+    internal class ProfileMemoryFactory : ProfileFactory<DataSet>
     {
         protected override Entities.Profile Construct(DataSet dataSet, int offset, Reader reader)
         {

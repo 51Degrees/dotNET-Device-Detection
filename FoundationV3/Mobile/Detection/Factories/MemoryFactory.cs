@@ -179,48 +179,48 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         {
             CommonFactory.LoadHeader(dataSet, reader);
 
-            var strings = new MemoryVariableList<AsciiString>(dataSet, reader, new AsciiStringFactory());
-            MemoryFixedList<Component> components = null;
+            var strings = new MemoryVariableList<AsciiString<DataSet>, DataSet>(dataSet, reader, new MemoryAsciiStringFactory());
+            MemoryFixedList<Component, DataSet> components = null;
             switch(dataSet.VersionEnum)
             {
                 case BinaryConstants.FormatVersions.PatternV31:
-                    components = new MemoryFixedList<Component>(dataSet, reader, new ComponentFactoryV31());
+                    components = new MemoryFixedList<Component, DataSet>(dataSet, reader, new ComponentFactoryV31());
                     break;
                 case BinaryConstants.FormatVersions.PatternV32:
-                    components = new MemoryFixedList<Component>(dataSet, reader, new ComponentFactoryV32());
+                    components = new MemoryFixedList<Component, DataSet>(dataSet, reader, new ComponentFactoryV32());
                     break;
             }
-            var maps = new MemoryFixedList<Map>(dataSet, reader, new MapFactory());
+            var maps = new MemoryFixedList<Map, DataSet>(dataSet, reader, new MapFactory());
             var properties = new PropertiesList(dataSet, reader, new PropertyFactory());
-            var values = new MemoryFixedList<Value>(dataSet, reader, new ValueFactory());
-            var profiles = new MemoryVariableList<Entities.Profile>(dataSet, reader, new ProfileMemoryFactory());
-            MemoryFixedList<Signature> signatures = null;
+            var values = new MemoryFixedList<Value, DataSet>(dataSet, reader, new ValueFactory<DataSet>());
+            var profiles = new MemoryVariableList<Entities.Profile, DataSet>(dataSet, reader, new ProfileMemoryFactory());
+            MemoryFixedList<Signature, DataSet> signatures = null;
             MemoryIntegerList signatureNodeOffsets = null;
             MemoryIntegerList nodeRankedSignatureIndexes = null;
             switch(dataSet.VersionEnum)
             {
                 case BinaryConstants.FormatVersions.PatternV31:
-                    signatures = new MemoryFixedList<Signature>(dataSet, reader, new SignatureFactoryV31(dataSet));
+                    signatures = new MemoryFixedList<Signature, DataSet>(dataSet, reader, new SignatureFactoryV31<DataSet>(dataSet));
                     break;
                 case BinaryConstants.FormatVersions.PatternV32:
-                    signatures = new MemoryFixedList<Signature>(dataSet, reader, new SignatureFactoryV32(dataSet));
+                    signatures = new MemoryFixedList<Signature, DataSet>(dataSet, reader, new SignatureFactoryV32<DataSet>(dataSet));
                     signatureNodeOffsets = new MemoryIntegerList(reader);
                     nodeRankedSignatureIndexes = new MemoryIntegerList(reader);
                     break;
             }
             var rankedSignatureIndexes = new MemoryIntegerList(reader);
-            MemoryVariableList<Entities.Node> nodes = null;
+            MemoryVariableList<Entities.Node, DataSet> nodes = null;
             switch (dataSet.VersionEnum)
             {
                 case BinaryConstants.FormatVersions.PatternV31:
-                    nodes = new MemoryVariableList<Entities.Node>(dataSet, reader, new NodeMemoryFactoryV31());
+                    nodes = new MemoryVariableList<Entities.Node, DataSet>(dataSet, reader, new NodeMemoryFactoryV31());
                     break;
                 case BinaryConstants.FormatVersions.PatternV32:
-                    nodes = new MemoryVariableList<Entities.Node>(dataSet, reader, new NodeMemoryFactoryV32());
+                    nodes = new MemoryVariableList<Entities.Node, DataSet>(dataSet, reader, new NodeMemoryFactoryV32());
                     break;
             }
-            var rootNodes = new MemoryFixedList<Entities.Node>(dataSet, reader, new RootNodeFactory());
-            var profileOffsets = new MemoryFixedList<ProfileOffset>(dataSet, reader, new ProfileOffsetFactory());
+            var rootNodes = new MemoryFixedList<Entities.Node, DataSet>(dataSet, reader, new RootNodeFactory());
+            var profileOffsets = new MemoryFixedList<ProfileOffset, DataSet>(dataSet, reader, new ProfileOffsetFactory());
 
             dataSet.Strings = strings;
             dataSet._components = components;

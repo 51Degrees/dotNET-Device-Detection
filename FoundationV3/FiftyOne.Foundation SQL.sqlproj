@@ -165,6 +165,8 @@
     <Compile Include="Mobile\Detection\ISimpleList.cs" />
     <Compile Include="Mobile\Detection\Search.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\IntegerList.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\IStreamDataSet.cs" />
+    <Compile Include="Mobile\Detection\Entities\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Mobile\Detection\Dataset\" />
