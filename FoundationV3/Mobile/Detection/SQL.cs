@@ -24,7 +24,6 @@ using System.Data.SqlTypes;
 using Microsoft.SqlServer.Server;
 using System.IO;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using FiftyOne.Foundation.Mobile.Detection.Entities;
@@ -40,12 +39,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #region Constants
 
         /// <summary>
-        /// The number of seconds to wait before stall items are removed from
-        /// the cache.
-        /// </summary>
-        private const int DEFAULT_CACHE_EXPIRY_SECONDS = 60;
-
-        /// <summary>
         /// Characters used to seperate the profile Ids in the device id.
         /// </summary>
         private static readonly string[] ProfileSeperator = new string[] {
@@ -54,6 +47,81 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #endregion
 
         #region Classes
+
+        /// <summary>
+        /// Loads byte array results into the cache.
+        /// </summary>
+        class ByteArrayIdCacheLoad : ICacheLoader<byte[], InternalResult>
+        {
+            public InternalResult Fetch(byte[] id)
+            {
+                return GetMatch(IterateProfileIds(id));
+            }
+        }
+
+        /// <summary>
+        /// Loads missed string Id result into the cache.
+        /// </summary>
+        class StringIdCacheLoader : ICacheLoader<string, InternalResult>
+        {
+            public InternalResult Fetch(string id)
+            {
+                return GetMatch(IterateProfileIds(id));
+            }
+        }
+
+        /// <summary>
+        /// Loads a missed User-Agent result into the cache.
+        /// </summary>
+        class UserAgentCacheLoader : ICacheLoader<string, InternalResult>
+        {
+            public InternalResult Fetch(string userAgent)
+            {
+                // The result wasn't in the cache so find it from the 51Degrees provider.
+                var match = _provider.Match(userAgent);
+
+                // Construct the results for the values and the profile Ids.
+                var result = new InternalResult(
+                    new SortedList<string, string>(_numberOfProperties),
+                    match.ProfileIds.OrderBy(i =>
+                        i.Key).SelectMany(i =>
+                            BitConverter.GetBytes(i.Value)).ToArray());
+
+                // Load the values into the results.
+                foreach (var property in _requiredProperties.SelectMany(i =>
+                    i.Value))
+                {
+                    var values = match[property];
+                    if (values != null)
+                    {
+                        result.Values.Add(property.Name, values.ToString());
+                    }
+                }
+
+                // Load the dynamic values into the results.
+                foreach (var dynamicProperty in _dynamicProperties)
+                {
+                    // Add special properties for the detection.
+                    switch (dynamicProperty)
+                    {
+                        case DynamicProperties.Id:
+                            result.Values.Add("Id", String.Join(
+                                Constants.ProfileSeperator,
+                                match.ProfileIds.OrderBy(i =>
+                                    i.Key).Select(i => i.Value.ToString())));
+                            break;
+                        case DynamicProperties.Difference:
+                            result.Values.Add("Difference", match.Difference.ToString());
+                            break;
+                        case DynamicProperties.Method:
+                            result.Values.Add("Method", match.Method.ToString());
+                            break;
+                    }
+                }
+
+                return result;
+            }
+        }
 
         /// <summary>
         /// Used by the Id cache for the id byte array key field.
@@ -159,12 +227,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// List of comonent Ids, and their respective property Ids.
         /// </summary>
-        private static readonly SortedList<Component, List<Property>> _requiredProperties = new SortedList<Component,List<Property>>();
+        private static readonly SortedList<Component, List<Property>> _requiredProperties =
+            new SortedList<Component,List<Property>>();
 
         /// <summary>
         /// A list of the dynamic properties required.
         /// </summary>
-        private static readonly List<DynamicProperties> _dynamicProperties = new List<DynamicProperties>();
+        private static readonly List<DynamicProperties> _dynamicProperties = 
+            new List<DynamicProperties>();
 
         /// <summary>
         /// The total number of properties to be returned.
@@ -172,14 +242,19 @@ namespace FiftyOne.Foundation.Mobile.Detection
         private static int _numberOfProperties = 0;
 
         /// <summary>
-        /// The user agent cache.
+        /// Cache for User-Agent string keys to results.
         /// </summary>
         private static Cache<string, InternalResult> _cacheUserAgent;
 
         /// <summary>
-        /// The device id cache.
+        /// Cache for Device ID string keys to results.
         /// </summary>
-        private static Cache<byte[], InternalResult> _cacheId;
+        private static Cache<string, InternalResult> _cacheIdString;
+
+        /// <summary>
+        /// Cache for byte array device ID keys to results.
+        /// </summary>
+        private static Cache<byte[], InternalResult> _cacheIdArray;
 
         #endregion
 
@@ -278,22 +353,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>A results object for the device id</returns>
         private static InternalResult GetMatchById(string id)
         {
-            InternalResult result;
-            if (_cacheUserAgent._itemsActive.TryGetValue(id, out result) == false)
-            {
-                result = GetMatch(IterateProfileIds(id));
-
-                // Add the results to the cache.
-                _cacheUserAgent._itemsActive[id] = result;
-
-                Interlocked.Increment(ref _cacheUserAgent.Misses);
-            }
-
-            // Ensure the result is added to the background cache.
-            //_cacheUserAgent.SetBackground(id, result);
-            _cacheUserAgent.AddRecent(id, result);
-
-            return result;
+            return _cacheIdString[id];
         }
 
         /// <summary>
@@ -306,22 +366,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>A results object for the device id</returns>
         private static InternalResult GetMatchById(byte[] id)
         {
-            InternalResult result;
-            if (_cacheId._itemsActive.TryGetValue(id, out result) == false)
-            {
-                result = GetMatch(IterateProfileIds(id));
-
-                // Add the results to the cache.
-                _cacheId._itemsActive[id] = result;
-
-                Interlocked.Increment(ref _cacheId.Misses);
-            }
-
-            // Ensure the result is added to the background cache.
-            //_cacheId.SetBackground(id, result);
-            _cacheId.AddRecent(id, result);
-
-            return result;
+            return _cacheIdArray[id];
         }
 
         /// <summary>
@@ -332,60 +377,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <returns>A results object for the user agent</returns>
         private static InternalResult GetMatchByUserAgent(string userAgent)
         {
-            InternalResult result;
-            if (_cacheUserAgent._itemsActive.TryGetValue(userAgent, out result) == false)
-            {
-                // The result wasn't in the cache so find it from the 51Degrees provider.
-                var match = _provider.Match(userAgent);
-
-                // Construct the results for the values and the profile Ids.
-                result = new InternalResult(
-                    new SortedList<string, string>(_numberOfProperties),
-                    match.ProfileIds.OrderBy(i =>
-                        i.Key).SelectMany(i =>
-                            BitConverter.GetBytes(i.Value)).ToArray());
-
-                // Load the values into the results.
-                foreach (var property in _requiredProperties.SelectMany(i =>
-                    i.Value))
-                {
-                    var values = match[property];
-                    if (values != null)
-                    {
-                        result.Values.Add(property.Name, values.ToString());
-                    }
-                }
-
-                // Load the dynamic values into the results.
-                foreach(var dynamicProperty in _dynamicProperties)
-                {
-                    // Add special properties for the detection.
-                    switch (dynamicProperty)
-                    {
-                        case DynamicProperties.Id:
-                            result.Values.Add("Id", String.Join(
-                                Constants.ProfileSeperator,
-                                match.ProfileIds.OrderBy(i =>
-                                    i.Key).Select(i => i.Value.ToString())));
-                            break;
-                        case DynamicProperties.Difference:
-                            result.Values.Add("Difference", match.Difference.ToString());
-                            break;
-                        case DynamicProperties.Method:
-                            result.Values.Add("Method", match.Method.ToString());
-                            break;
-                    }
-                }
-
-                // Add the results to the cache.
-                _cacheUserAgent._itemsActive[userAgent] = result;
-            }
-
-            // Ensure the result is added to the background cache.
-            //_cacheUserAgent.SetBackground(userAgent, result);
-            _cacheUserAgent.AddRecent(userAgent, result);
-
-            return result;
+            return _cacheUserAgent[userAgent];
         }
 
         /// <summary>
@@ -443,20 +435,24 @@ namespace FiftyOne.Foundation.Mobile.Detection
             catch(Exception ex)
             {
                 throw new MobileException(String.Format(
-                    "Could not create data set from file '{0}'. Check the file is uncompressed and in the correct format.",
+                    "Could not create data set from file '{0}'. " +
+                    "Check the file is uncompressed and in the correct format.",
                     filename.Value), ex);
             }
 
             if (_provider != null)
             {
-                // Clear the caches to flush out old results.
-                /*
-                var serviceInternal = expirySeconds.IsNull ?
-                            DEFAULT_CACHE_EXPIRY_SECONDS : expirySeconds.Value;
-                 * */
+                // Configure the caches.
                 int cacheSize = 1000;
-                _cacheUserAgent = new Cache<string, InternalResult>(cacheSize);
-                _cacheId = new Cache<byte[], InternalResult>(cacheSize);
+                _cacheUserAgent = new Cache<string, InternalResult>(
+                    cacheSize, 
+                    new UserAgentCacheLoader());
+                _cacheIdString = new Cache<string, InternalResult>(
+                    cacheSize,
+                    new StringIdCacheLoader());
+                _cacheIdArray = new Cache<byte[], InternalResult>(
+                    cacheSize,
+                    new ByteArrayIdCacheLoad());
 
                 // Set the properties that the functions should be returning.
                 _numberOfProperties = 0;
@@ -497,7 +493,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                                 _numberOfProperties++;
                                 break;
                             default:
-                                var property = _provider.DataSet.GetProperty(propertyName);
+                                var property = _provider.DataSet.Properties[propertyName];
                                 if (property != null)
                                 {
                                     if (_requiredProperties.ContainsKey(property.Component) == false)

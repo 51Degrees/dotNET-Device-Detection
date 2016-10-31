@@ -7,7 +7,8 @@
     <TargetDatabaseSet>True</TargetDatabaseSet>
     <PermissionSet>UNSAFE</PermissionSet>
     <SignAssembly>False</SignAssembly>
-    <AssemblyOriginatorKeyFile></AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -59,8 +60,7 @@
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
-    <DefineConstants>
-    </DefineConstants>
+    <DefineConstants>SQL_BUILD</DefineConstants>
     <WarningLevel>4</WarningLevel>
     <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
     <DefineDebug>true</DefineDebug>
@@ -71,10 +71,8 @@
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
-    <DefineConstants>
-    </DefineConstants>
+    <DefineConstants>SQL_BUILD</DefineConstants>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
     <DefineDebug>false</DefineDebug>
     <DefineTrace>true</DefineTrace>
@@ -107,7 +105,6 @@
     <Compile Include="Mobile\Detection\Entities\Stream\NodeV32.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\NodeV31.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\Profile.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\Source.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\ICacheList.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\FixedCacheList.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\BaseList.cs" />
@@ -120,9 +117,6 @@
     <Compile Include="Mobile\Detection\Entities\NodeNumericIndex.cs" />
     <Compile Include="Mobile\Detection\Entities\ComponentV31.cs" />
     <Compile Include="Mobile\Detection\Entities\ComponentV32.cs" />
-    <Compile Include="Mobile\Detection\Entities\IntegerEntity.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Mobile\Detection\Entities\Node.cs" />
     <Compile Include="Mobile\Detection\Entities\NodeIndex.cs" />
     <Compile Include="Mobile\Detection\Entities\Profile.cs" />
@@ -140,7 +134,6 @@
     <Compile Include="Mobile\Detection\Factories\MemoryFactory.cs" />
     <Compile Include="Mobile\Detection\Factories\TrieFactory.cs" />
     <Compile Include="Mobile\Detection\Factories\StreamFactory.cs" />
-    <Compile Include="Mobile\Detection\IFixedList.cs" />
     <Compile Include="Mobile\Detection\IReadonlyList.cs" />
     <Compile Include="Mobile\Detection\TrieProviderV3.cs" />
     <Compile Include="Mobile\Detection\TrieProvider.cs" />
@@ -166,6 +159,12 @@
     <Compile Include="Properties\Constants.cs" />
     <Compile Include="Properties\DetectionConstants.cs" />
     <Compile Include="Mobile\Detection\Provider.cs" />
+    <Compile Include="Mobile\Detection\Entities\Memory\MemoryIntegerList.cs" />
+    <Compile Include="Mobile\Detection\Entities\NodeIndexBase.cs" />
+    <Compile Include="Mobile\Detection\Readers\Source.cs" />
+    <Compile Include="Mobile\Detection\ISimpleList.cs" />
+    <Compile Include="Mobile\Detection\Search.cs" />
+    <Compile Include="Mobile\Detection\Entities\Stream\IntegerList.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Mobile\Detection\Dataset\" />
@@ -180,6 +179,32 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <PropertyGroup>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+    <DefineConstants>SQL_BUILD</DefineConstants>
+    <WarningLevel>4</WarningLevel>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <DebugSymbols>false</DebugSymbols>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+    <DefineConstants />
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

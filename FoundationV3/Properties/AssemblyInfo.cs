@@ -32,10 +32,10 @@ using System.Security;
 [assembly: Guid("71439680-d7e5-4497-96ff-3acfb9f68a72")]
 
 // Enable the test assemblies to access internal classes when
-// the project is being built normally. If the project is being
-// built for NuGet then the unit tests will also need to be 
+// the project is being built normally. If the project not is being
+// built for NuGet and SQL then the unit tests will also need to be 
 // signed in order to support compilation.
-#if !NUGET_BUILD
+#if !NUGET_BUILD && !SQL_BUILD
 [assembly: InternalsVisibleToAttribute("FiftyOne.Tests.Unit")]
 [assembly: InternalsVisibleToAttribute("FiftyOne.Tests.Integration")]
 #endif
