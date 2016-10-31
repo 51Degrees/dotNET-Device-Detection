@@ -509,8 +509,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 var newTargetIndex = targetIndex + 1;
                 while (newNodeIndex < node.Length &&
                     newTargetIndex < target.Length &&
-                    BaseEntity.GetIsNumeric(target[newTargetIndex]) &&
-                    BaseEntity.GetIsNumeric(node[newNodeIndex]))
+                    Utils.GetIsNumeric(target[newTargetIndex]) &&
+                    Utils.GetIsNumeric(node[newNodeIndex]))
                 {
                     newNodeIndex++;
                     newTargetIndex++;
@@ -522,8 +522,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 var characters = 0;
                 while (
                     nodeIndex >= 0 &&
-                    BaseEntity.GetIsNumeric(target[targetIndex]) &&
-                    BaseEntity.GetIsNumeric(node[nodeIndex]))
+                    Utils.GetIsNumeric(target[targetIndex]) &&
+                    Utils.GetIsNumeric(node[nodeIndex]))
                 {
                     nodeIndex--;
                     targetIndex--;
@@ -535,8 +535,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 if (characters > 1)
                 {
                     return Math.Abs(
-                        BaseEntity.GetNumber(target, targetIndex + 1, characters) -
-                        BaseEntity.GetNumber(node, nodeIndex + 1, characters));
+                        Utils.GetNumber(target, targetIndex + 1, characters) -
+                        Utils.GetNumber(node, nodeIndex + 1, characters));
                 }
 
                 return 0;

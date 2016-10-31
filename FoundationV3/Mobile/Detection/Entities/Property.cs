@@ -66,7 +66,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// For more information see 
     /// https://51degrees.com/Support/Documentation/Net
     /// </para>
-    public class Property : BaseEntity,  IComparable<Property>, IEquatable<Property>
+    public class Property : BaseEntity<DataSet>,  IComparable<Property>, IEquatable<Property>
     {
         #region Constants
 

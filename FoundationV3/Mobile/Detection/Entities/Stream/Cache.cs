@@ -27,13 +27,13 @@ using System.Collections.Concurrent;
 namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 {
     /// <summary>
-    /// Cache class used by <see cref="FixedCacheList{T}"/> and 
-    /// <see cref="CacheList{T}"/> to cache frequently accessed items.
+    /// Cache class used by <see cref="FixedCacheList{T,D}"/> and 
+    /// <see cref="CacheList{T,D}"/> to cache frequently accessed items.
     /// </summary>
     /// <typeparam name="T">
-    /// The type of <see cref="BaseEntity"/> the cache will contain.
+    /// The type of item the cache will contain.
     /// </typeparam>
-    internal class Cache<T> : Cache<int, T> where T : BaseEntity 
+    internal class Cache<T> : Cache<int, T>
     {
         /// <summary>
         /// Constructs a new instance of <see cref="Cache{T}"/> for

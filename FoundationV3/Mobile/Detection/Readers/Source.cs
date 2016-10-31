@@ -33,7 +33,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Readers
     /// Must be disposed to ensure that the readers are closed and any resources
     /// free for other uses.
     /// </remarks>
-    internal abstract class SourceBase : IDisposable
+    /// <remarks>Not intended to be used directly by 3rd parties.</remarks>
+    public abstract class SourceBase : IDisposable
     {
         #region Fields
 
@@ -50,7 +51,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Readers
         /// Creates a new stream from the data source.
         /// </summary>
         /// <returns>A freshly opened stream to the data source</returns>
-        internal abstract System.IO.Stream CreateStream();
+        protected abstract System.IO.Stream CreateStream();
 
         #endregion
 
@@ -91,7 +92,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Readers
     /// <summary>
     /// Base class for file sources.
     /// </summary>
-    internal abstract class SourceFileBase : SourceBase
+    /// <remarks>Not intended to be used directly by 3rd parties.</remarks>
+    public abstract class SourceFileBase : SourceBase
     {
         #region Fields
 
@@ -115,7 +117,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Readers
         /// </summary>
         /// <param name="fileName">File source of the data</param>
         /// <param name="isTempFile">True if the file should be deleted when the source is disposed</param>
-        internal SourceFileBase(string fileName, bool isTempFile)
+        protected SourceFileBase(string fileName, bool isTempFile)
         {
             _fileInfo = new FileInfo(fileName);
             _isTempFile = isTempFile;
@@ -152,7 +154,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Readers
     /// Encapsulates either a file containing the uncompressed
     /// data structures used by the data set.
     /// </summary>
-    internal class SourceFile : SourceFileBase
+    /// <remarks>Not intended to be used directly by 3rd parties.</remarks>
+    public class SourceFile : SourceFileBase
     {
         #region Constructors
 
@@ -161,7 +164,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Readers
         /// </summary>
         /// <param name="fileName">File source of the data</param>
         /// <param name="isTempFile">True if the file should be deleted when the source is disposed</param>
-        internal SourceFile(string fileName, bool isTempFile)
+        public SourceFile(string fileName, bool isTempFile)
             : base(fileName, isTempFile)
         {
         }
@@ -174,7 +177,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Readers
         /// Creates a new stream from the data source.
         /// </summary>
         /// <returns>A freshly opened stream to the data source</returns>
-        internal override System.IO.Stream CreateStream()
+        protected override System.IO.Stream CreateStream()
         {
             return _fileInfo.OpenRead();
         }
@@ -196,7 +199,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Readers
     /// Encapsulates a byte array containing the uncompressed
     /// data structures used by the data set.
     /// </summary>
-    internal class SourceMemory : SourceBase
+    /// <remarks>Not intended to be used directly by 3rd parties.</remarks>
+    public class SourceMemory : SourceBase
     {
         #region Fields
 
@@ -213,7 +217,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Readers
         /// Creates the source from the byte array provided.
         /// </summary>
         /// <param name="buffer">Byte array source of the data</param>
-        internal SourceMemory(byte[] buffer)
+        public SourceMemory(byte[] buffer)
         {
             _buffer = buffer;
         }
@@ -226,7 +230,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Readers
         /// Creates a new stream from the data source.
         /// </summary>
         /// <returns>A freshly opened stream to the data source</returns>
-        internal override System.IO.Stream CreateStream()
+        protected override System.IO.Stream CreateStream()
         {
             return new MemoryStream(_buffer);
         }

@@ -28,7 +28,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// ASCII format strings are the only ones used in the data set. Many
     /// native string formats use Unicode format using 2 bytes for every 
     /// character. This is inefficient when only ASCII values are being 
-    /// stored. The <see cref="AsciiString"/> class wraps a byte array of 
+    /// stored. The <see cref="AsciiString{T}"/> class wraps a byte array of 
     /// ASCII characters and exposes them as a native string type when 
     /// required.
     /// </summary>
@@ -41,21 +41,24 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// <para>
     /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
-    internal class AsciiString : BaseEntity
+    /// <typeparam name="T">
+    /// The type of the shared data set the AsciiString relates to.
+    /// </typeparam>
+    internal class AsciiString<T> : BaseEntity<T>
     {
         #region Fields
 
         /// <summary>
         /// The value of the string in ASCII bytes.
         /// </summary>
-        internal readonly byte[] Value;
+        public readonly byte[] Value;
 
         #endregion
         
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of <see cref="AsciiString"/>.
+        /// Constructs a new instance of <see cref="AsciiString{T}"/>.
         /// </summary>
         /// <param name="dataSet">
         /// The data set whose strings list the string is contained within.
@@ -67,7 +70,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <param name="reader">
         /// Binary reader positioned at the start of the AsciiString.
         /// </param>
-        internal AsciiString(DataSet dataSet, int offset, BinaryReader reader)
+        internal AsciiString(T dataSet, int offset, BinaryReader reader)
             : base(dataSet, offset)
         {
             // Read the length of the array minus 1 to remove the 

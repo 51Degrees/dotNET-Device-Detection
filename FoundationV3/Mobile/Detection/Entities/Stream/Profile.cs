@@ -107,7 +107,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
                                 reader.BaseStream.Position = 
                                     _position;
                                 _valueIndexes = 
-                                    BaseEntity.ReadIntegerArray(reader, _valueIndexesCount);
+                                    Utils.ReadIntegerArray(reader, _valueIndexesCount);
                             }
                             finally
                             {
@@ -140,7 +140,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
                                 reader.BaseStream.Position = 
                                     _position + (_valueIndexesCount * sizeof(int));
                                 _signatureIndexes = 
-                                    BaseEntity.ReadIntegerArray(reader, _signatureIndexesCount);
+                                    Utils.ReadIntegerArray(reader, _signatureIndexesCount);
                             }
                             finally
                             {

@@ -33,25 +33,19 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// used by multiple entities.
     /// </para>
     /// <para>
-    /// For more information see https://51degrees.com/Support/Documentation/Net
+    /// For more information see
+    /// https://51degrees.com/Support/Documentation/Net
     /// </para>
-    public abstract class BaseEntity : IComparable<BaseEntity>, IComparable<int>, IEquatable<int>
+    /// <remarks>Not intended to be used directly by 3rd parties.</remarks>
+    public abstract class BaseEntity<T> : 
+        IComparable<BaseEntity<T>>, IComparable<int>, IEquatable<int>
     {
-        #region Constants
-
-        /// <summary>
-        /// List if powers used to determine numeric differences.
-        /// </summary>
-        private static readonly int[] Powers = new[] { 1, 10, 100, 1000, 10000 };
-
-        #endregion
-
         #region Properties
 
         /// <summary>
         /// The data set the entity relates to.
         /// </summary>
-        public readonly DataSet DataSet;
+        public readonly T DataSet;
 
         /// <summary>
         /// The unique index of the item in the collection of items, or
@@ -61,45 +55,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
 
         #endregion
 
-        #region Delegates
-
-        /// <summary>
-        /// Used to create a new instance of an entity.
-        /// </summary>
-        /// <param name="dataSet">
-        /// The <see cref="DataSet"/> being created or added to.
-        /// </param>
-        /// <param name="indexOrOffset">
-        /// The unique index of offset of the entity in the list
-        /// </param>
-        /// <param name="reader">
-        /// Reader connected to the source data structure and positioned to 
-        /// start reading.
-        /// </param>
-        /// <returns>A new instance of the entity</returns>
-        /// <para>
-        /// The delegate is used to enable inheriting classes to control how 
-        /// lists containing entities of their type are created. When generic 
-        /// types support parameterised constructors the need for this 
-        /// delegate will be removed.
-        /// </para>
-        internal delegate BaseEntity Create(DataSet dataSet, int indexOrOffset, BinaryReader reader);
-
-        /// <summary>
-        /// Used to return the length in bytes of an entity when stored in the 
-        /// underlying data structure.
-        /// </summary>
-        /// <param name="entity">Entity whose length is required</param>
-        /// <returns>The length in bytes of the entity</returns>
-        internal delegate int GetLength(BaseEntity entity);
-
-        #endregion
-
         #region Constructor
 
         /// <summary>
         /// Constructs the base item for the data set and index provided.
         /// </summary>
+        /// <remarks>Not intended to be used directly by 3rd parties.</remarks>
         /// <param name="dataSet">
         /// The <see cref="DataSet"/> being created
         /// </param>
@@ -107,7 +68,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// The unique index of the item in the collection of items, or
         /// the unique offset to the item in the source data structure.
         /// </param>
-        internal BaseEntity(DataSet dataSet, int indexOrOffset)
+        protected BaseEntity(T dataSet, int indexOrOffset)
         {
             DataSet = dataSet;
             Index = indexOrOffset;
@@ -147,7 +108,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <returns>
         /// The position of one entity over the other.
         /// </returns>
-        public int CompareTo(BaseEntity other)
+        public int CompareTo(BaseEntity<T> other)
         {
             return CompareTo(other.Index);
         }
@@ -170,73 +131,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         public override int GetHashCode()
         {
             return Index;
-        }
-
-        #endregion
-
-        #region Static Methods
-
-        /// <summary>
-        /// An enumerable that can be used to read through the entries.
-        /// </summary>
-        /// <param name="reader">Reader set to the position at the start of the list</param>
-        /// <param name="count">The number of integers to read to form the array</param>
-        /// <returns>Iterator to read each integer entry.</returns>
-        protected static IEnumerable<int> GetIntegerEnumerator(BinaryReader reader, int count)
-        {
-            for (int i = 0; i < count; i++)
-            {
-                yield return reader.ReadInt32();
-            }
-        }
-
-        /// <summary>
-        /// Reads an integer array where the first integer is the number of 
-        /// following integers.
-        /// </summary>
-        /// <param name="reader">Reader set to the position at the start of the list</param>
-        /// <param name="count">The number of integers to read to form the array</param>
-        /// <returns>An array of integers</returns>
-        protected static int[] ReadIntegerArray(BinaryReader reader, int count)
-        {
-            var array = new int[count];
-            for (int i = 0; i < array.Length; i++)
-                array[i] = reader.ReadInt32();
-            return array;
-        }
-
-        /// <summary>
-        /// Returns an integer representation of the characters between start and end.
-        /// Assumes that all the characters are numeric characters.
-        /// </summary>
-        /// <param name="array">
-        /// Array of characters with numeric characters present between start and end
-        /// </param>
-        /// <param name="start">
-        /// The first character to use to convert to a number
-        /// </param>
-        /// <param name="length">
-        /// The number of characters to use in the conversion
-        /// </param>
-        /// <returns></returns>
-        internal static int GetNumber(byte[] array, int start, int length)
-        {
-            int value = 0;
-            for (int i = start + length - 1, p = 0; i >= start && p < Powers.Length; i--, p++)
-            {
-                value += Powers[p] * ((byte)array[i] - (byte)'0');
-            }
-            return value;
-        }
-
-        /// <summary>
-        /// Determines if the value is an ASCII numeric value.
-        /// </summary>
-        /// <param name="value">Byte value to be checked</param>
-        /// <returns>True if the value is an ASCII numeric character</returns>
-        internal static bool GetIsNumeric(byte value)
-        {
-            return (value >= (byte)'0' && value <= (byte)'9');
         }
 
         #endregion

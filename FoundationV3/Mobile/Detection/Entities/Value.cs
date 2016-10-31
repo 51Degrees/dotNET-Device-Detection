@@ -46,7 +46,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// For more information see 
     /// https://51degrees.com/Support/Documentation/Net
     /// </para>
-    public class Value : BaseEntity, 
+    public class Value : BaseEntity<DataSet>, 
         IComparable<Value>, IComparable<string>, IEquatable<Value>, IEquatable<string>
     {
         #region Static Fields

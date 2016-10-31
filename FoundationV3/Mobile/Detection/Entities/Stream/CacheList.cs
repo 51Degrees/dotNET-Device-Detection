@@ -44,15 +44,19 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
     /// <remarks>
     /// Delegate methods are used to create new instances of items to add to 
     /// the list in order to avoid creating many inherited list classes for 
-    /// each <see cref="BaseEntity"/> type.
+    /// each item type.
     /// </remarks>
     /// <remarks>
     /// Should not be referenced directly.
     /// </remarks>
     /// <typeparam name="T">
-    /// The type of <see cref="BaseEntity"/> the list will contain.
+    /// The type of items the list will contain.
     /// </typeparam>
-    public abstract class CacheList<T> : BaseList<T>, IDisposable, ICacheList, ICacheLoader<int, T> where T : BaseEntity
+    /// <typeparam name="D">
+    /// The type of the shared data set the item is contained within.
+    /// </typeparam>    
+    public abstract class CacheList<T, D> : BaseList<T, D>, IDisposable, ICacheList, ICacheLoader<int, T>
+        where D : IStreamDataSet
     {
         #region Fields
 
@@ -114,7 +118,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         #region Constructor
         
         /// <summary>
-        /// Constructs a new instance of <see cref="BaseList{T}"/> ready to 
+        /// Constructs a new instance of <see cref="BaseList{T,D}"/> ready to 
         /// read entities from the source.
         /// </summary>
         /// <param name="dataSet">
@@ -130,9 +134,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// Number of items in list to have capacity to cache.
         /// </param>
         internal CacheList(
-            DataSet dataSet, 
+            D dataSet, 
             Reader reader,
-            BaseEntityFactory<T> entityFactory,
+            BaseEntityFactory<T, D> entityFactory,
             int cacheSize) : base (dataSet, reader, entityFactory)
         {
             _cache = new Cache<T>(cacheSize, this);
