@@ -29,8 +29,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// A list which only provides those features needed to read items from
     /// the list.
     /// </summary>
-    /// <typeparam name="T">The type of <see cref="BaseEntity"/> the list will contain</typeparam>
-    public interface IReadonlyList<T> : IDisposable, IEnumerable<T> where T : BaseEntity
+    /// <typeparam name="T">The type of item the list will contain</typeparam>
+    public interface IReadonlyList<T> : IDisposable, IEnumerable<T>
     {
         /// <summary>
         /// Accessor for the list.

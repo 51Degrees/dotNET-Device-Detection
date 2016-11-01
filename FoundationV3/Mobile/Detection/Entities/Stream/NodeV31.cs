@@ -89,7 +89,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
                                 reader.BaseStream.Position = 
                                     _position + ((sizeof(short) + sizeof(int)) * NumericChildrenCount);
                                 _rankedSignatureIndexes = 
-                                    ReadIntegerArray(reader, RankedSignatureCount);
+                                    Utils.ReadIntegerArray(reader, RankedSignatureCount);
                             }
                             finally
                             {

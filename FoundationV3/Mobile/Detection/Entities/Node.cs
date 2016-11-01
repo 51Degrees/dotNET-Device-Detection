@@ -53,7 +53,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// <para>
     /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
-    internal abstract class Node : BaseEntity, IComparable<Node>
+    internal abstract class Node : BaseEntity<DataSet>, IComparable<Node>
     {
         #region Classes
 
@@ -401,7 +401,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
 
             // If numeric characters were found then return the number.
             if (i < Position)
-                return GetNumber(
+                return Utils.GetNumber(
                     state.TargetUserAgentArray,
                     i + 1,
                     Position - i);
@@ -535,7 +535,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         private bool IsNumeric(byte[] array, int startIndex, int length)
         {
             for (int i = startIndex; i < startIndex + length; i++)
-                if (GetIsNumeric(array[i]) == false)
+                if (Utils.GetIsNumeric(array[i]) == false)
                     return false;
             return true;
         }

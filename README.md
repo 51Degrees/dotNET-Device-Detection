@@ -49,9 +49,9 @@ Data files which are updated weekly and daily, automatically, and with more prop
 
 ## Recent Changes
 
-### Version 3.2.12 Highlights
+### Version 3.2.11 Highlights
 
-New Lite Data File released for September.
+New Lite Data File released for August.
 
 ### Major Changes in Version 3.2
 
@@ -67,10 +67,16 @@ New Lite Data File released for September.
 * Version 3.2 data file formats are supported in parallel with version 3.1 data files.
 * 51Degrees unit tests are now part of the open source distribution.
 
-### Changes from 3.2.11
+### Changes from 3.2.5
 
 Summary of API changes:
 
-* When the WebProvider is being used outside a web environment to make use of the update feature, it is useful to see the return code of the data file download. The codes are detailed in the LicenceKeyResults enumeration. Updating manually in this way may mean that the Download method is called when there is no bin directory (where the API searches for a licence key file). For this reason a check has been added to the Keys method in LicenceKeys which checks for the existance of the bin directory before searching it for a licence key file.
-* Added all profiles example, and removed unnecessary configurations.
-* Updated the Lite data files for September data.
+* Provider supports retrieving match results using device ids generated from previous matches.
+* The classes to update device data files are now public and can be used to update device data files from non web environments.
+* Licence keys are now verified against the 51Degrees public signature before being used to retrieve updates.
+* The cache has been upgraded to use a least recently used (LRU) design. This removes the need to service the cache in a background thread, and results in a more predictable performance under load. 
+* Duplicate code has been consolidated with a focus on improving documentation and implementing recommendations from code analysis and peer reviews. Testing coverage has been included with initial unit tests for new features.
+* Consistent examples have been added in parallel with APIs in other languages. The examples are designed to highlight specific use cases for the API. They relate to example specific documentation on the 51Degrees web site under Support -> Documentation -> .NET. 
+* The override to indicate if cookies are supported now defaults to True when the value is unknown. This prevents 3rd party components such as forms authentication from failing where an assumption that cookies are always supported has been made but not verified against the server side browser capabilities.
+* The demo web site project no longer includes the 51Degrees.dat file in the project. It is instead copied from the repositories data folder when the project is built.
+* The signed assembly is now compiled with "Optimise Code" option enabled.

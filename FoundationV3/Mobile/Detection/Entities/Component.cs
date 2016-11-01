@@ -39,7 +39,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// <para>
     /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
-    public abstract class Component : BaseEntity, IComparable<Component>, IEquatable<Component>
+    public abstract class Component : BaseEntity<DataSet>, IComparable<Component>, IEquatable<Component>
     {
         #region Fields
 

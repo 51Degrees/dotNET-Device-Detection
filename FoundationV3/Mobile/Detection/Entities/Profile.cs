@@ -57,7 +57,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// provide better detection results, especially for less common devices.
     /// For more information see: https://51degrees.com/compare-data-options
     /// </para>
-    public abstract class Profile : BaseEntity, IComparable<Profile>, IEquatable<Profile>
+    public abstract class Profile : BaseEntity<DataSet>, IComparable<Profile>, IEquatable<Profile>
     {
         #region Fields
 
@@ -151,17 +151,21 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             get
             {
                 Values values = null;
-                if (PropertyIndexToValues.TryGetValue(property.Index, out values) == false)
+
+                // A read / write upgradable guard could be used in the future
+                // should the performance of GetPropertyValueIndexes prove too 
+                // slow in the future. The use of a lock on the dictionary
+                // ensures that this implementation is thread safe.
+                lock (PropertyIndexToValues)
                 {
-                    lock(this)
+                    if (PropertyIndexToValues.TryGetValue(
+                        property.Index, 
+                        out values) == false)
                     {
-                        if (PropertyIndexToValues.TryGetValue(property.Index, out values) == false)
-                        {
-                            values = new Entities.Values(
-                                property,
-                                GetPropertyValueIndexes(property));
-                            PropertyIndexToValues.Add(property.Index, values);
-                        }
+                        values = new Entities.Values(
+                            property,
+                            GetPropertyValueIndexes(property));
+                        PropertyIndexToValues.Add(property.Index, values);
                     }
                 }
                 return values;
@@ -183,7 +187,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                     {
                         if (_propertyIndexToValues == null)
                         {
-                            _propertyIndexToValues = new Dictionary<int, Values>();
+                            _propertyIndexToValues = 
+                                new Dictionary<int, Values>();
                         }
                     }
                 }
@@ -193,7 +198,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         private IDictionary<int, Values> _propertyIndexToValues;
 
         /// <summary>
-        /// A dictionary relating the name of a property to the values returned 
+        /// A dictionary relating the name of a property to the values returned
         /// by the profile. Used to speed up subsequent data processing.
         /// </summary>
         private IDictionary<string, Values> PropertyNameToValues
@@ -206,7 +211,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                     {
                         if (_propertyNameToValues == null)
                         {
-                            _propertyNameToValues = new Dictionary<string, Values>();
+                            _propertyNameToValues = 
+                                new Dictionary<string, Values>();
                         }
                     }
                 }
@@ -227,7 +233,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// </returns>
         /// <para>
         /// The <see cref="Values"/> type is used to return values so that 
-        /// helper methods like ToBool can be used to convert the response to 
+        /// helper methods like ToBool can be used to convert the response to
         /// a boolean.
         /// </para>
         public Values this[string propertyName]
@@ -235,19 +241,21 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             get
             {
                 Values values = null;
-                if (PropertyNameToValues.TryGetValue(propertyName, out values) == false)
+
+                // A read / write upgradable guard could be used in the future
+                // should the performance of this[property] prove too slow in 
+                // the future. The use of a lock on the dictionary ensures that 
+                // this implementation is thread safe.
+                lock (PropertyNameToValues)
                 {
-                    lock (this)
+                    if (PropertyNameToValues.TryGetValue(propertyName, out values) == false)
                     {
-                        if (PropertyNameToValues.TryGetValue(propertyName, out values) == false)
+                        var property = DataSet.Properties[propertyName];
+                        if (property != null)
                         {
-                            var property = DataSet.Properties[propertyName];
-                            if (property != null)
-                            {
-                                values = this[property];
-                            }
-                            PropertyNameToValues.Add(propertyName, values);
+                            values = this[property];
                         }
+                        PropertyNameToValues.Add(propertyName, values);
                     }
                 }
                 return values;

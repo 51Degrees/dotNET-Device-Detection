@@ -47,7 +47,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// For more information about signature see 
     /// https://51degrees.com/Support/Documentation/Net
     /// </para>
-    public abstract class Signature : BaseEntity, IComparable<Signature>
+    public abstract class Signature : BaseEntity<DataSet>, IComparable<Signature>
     {
         #region Fields
 

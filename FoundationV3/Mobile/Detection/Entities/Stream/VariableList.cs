@@ -19,9 +19,7 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
-using System;
 using System.Collections.Generic;
-using System.IO;
 using FiftyOne.Foundation.Mobile.Detection.Factories;
 using FiftyOne.Foundation.Mobile.Detection.Readers;
 
@@ -54,18 +52,20 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
     /// Data sources which don't support seeking can not be used. Specifically 
     /// compressed data structures can not be used with these lists.
     /// </remarks>
-    /// <remarks>
-    /// Should not be referenced directly.
-    /// </remarks>
+    /// <remarks>Not intended to be used directly by 3rd parties.</remarks>
     /// <typeparam name="T">
-    /// The type of <see cref="BaseEntity"/> the list will contain.
+    /// The type of item the list will contain.
     /// </typeparam>
-    public class VariableList<T> : CacheList<T>, IReadonlyList<T> where T : BaseEntity
+    /// <typeparam name="D">
+    /// The type of the shared data set the item is contained within.
+    /// </typeparam>
+    public class VariableList<T, D> : CacheList<T, D>, IReadonlyList<T>
+        where D : IStreamDataSet
     {
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of <see cref="VariableList{T}"/>.
+        /// Constructs a new instance of <see cref="VariableList{T, D}"/>.
         /// </summary>
         /// <param name="dataSet">
         /// The <see cref="DataSet"/> being created.
@@ -80,10 +80,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <param name="cacheSize">
         /// Number of items in list to have capacity to cache.
         /// </param>
-        internal VariableList(
-            DataSet dataSet, 
+        public VariableList(
+            D dataSet, 
             Reader reader,
-            BaseEntityFactory<T> entityFactory,
+            BaseEntityFactory<T, D> entityFactory,
             int cacheSize)
             : base(dataSet, reader, entityFactory, cacheSize)
         {

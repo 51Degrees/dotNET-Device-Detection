@@ -694,20 +694,20 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// A list of all the components the data set contains.
         /// </summary>
-        public MemoryFixedList<Component> Components
+        public MemoryFixedList<Component, DataSet> Components
         {
             get { return _components; }
         }
-        internal MemoryFixedList<Component> _components;
+        internal MemoryFixedList<Component, DataSet> _components;
 
         /// <summary>
         /// A list of all the maps the data set contains.
         /// </summary>
-        public MemoryFixedList<Map> Maps
+        public MemoryFixedList<Map, DataSet> Maps
         {
             get { return _maps; }
         }
-        internal MemoryFixedList<Map> _maps;
+        internal MemoryFixedList<Map, DataSet> _maps;
 
         /// <summary>
         /// A list of all properties the data set contains.
@@ -796,7 +796,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// A list of ASCII byte arrays for strings used by the dataset.
         /// </summary>
-        internal IReadonlyList<AsciiString> Strings;
+        internal IReadonlyList<AsciiString<DataSet>> Strings;
 
         #endregion
 

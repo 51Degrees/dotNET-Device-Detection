@@ -19,37 +19,42 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
-using FiftyOne.Foundation.Mobile.Detection.Entities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
-    internal abstract class SearchBase<T, K, L>
+    /// <summary>
+    /// Generic search class used to perform a binary search where the
+    /// type of items in the list and the key are different types.
+    /// </summary>
+    /// <remarks>Not intended to be used directly by 3rd parties.</remarks>
+    /// <typeparam name="T">The type of items in the list</typeparam>
+    /// <typeparam name="K">The type of the key field in the list</typeparam>
+    /// <typeparam name="L">The type of the list</typeparam>
+    public abstract class SearchBase<T, K, L>
     {
         /// <summary>
-        /// Returns the number of elements in the list.
+        /// Returns the number of items in the list provided.
         /// </summary>
-        /// <param name="list"></param>
-        /// <returns></returns>
+        /// <param name="list">List to be counted.</param>
+        /// <returns>Number of items in the list.</returns>
         protected abstract int GetCount(L list);
 
         /// <summary>
-        /// Returns the value from the list at the index provided.
+        /// Returns the item at the index provided.
         /// </summary>
-        /// <param name="list"></param>
-        /// <param name="index"></param>
-        /// <returns></returns>
+        /// <param name="list">List to get item from.</param>
+        /// <param name="index">Index of the element to return.</param>
+        /// <returns>The value at the index provided.</returns>
         protected abstract T GetValue(L list, int index);
 
         /// <summary>
         /// Compares the item to the key.
         /// </summary>
-        /// <param name="item"></param>
-        /// <param name="key"></param>
-        /// <returns></returns>
+        /// <param name="item">Item to be compared.</param>
+        /// <param name="key">Key to be compared to the item.</param>
+        /// <returns>Difference between the item and the key.</returns>
         protected abstract int CompareTo(T item, K key);
 
         /// <summary>
@@ -91,7 +96,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="list">The list order by keys to be searched</param>
         /// <param name="key">The key to be found</param>
-        /// <param name="iterations">Number of iterations needed to find the key.</param>
+        /// <param name="iterations">
+        /// Number of iterations needed to find the key.
+        /// </param>
         /// <returns>
         /// Index of the item which matches the key, or the ones complement 
         /// of the index to add the value at.
@@ -124,24 +131,56 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
     }
 
-    internal class SearchLists<T, K> : SearchBase<T, K, IList<T>> where T : IComparable<K>
+    /// <summary>
+    /// Used to search lists of order items using a key that this not the same
+    /// types as the items in the list.
+    /// </summary>
+    /// <typeparam name="T">The type of items in the list</typeparam>
+    /// <typeparam name="K">The type of the key field in the list</typeparam>
+    public class SearchLists<T, K> : 
+        SearchBase<T, K, IList<T>> where T : IComparable<K>
     {
+        /// <summary>
+        /// Returns the number of items in the list provided.
+        /// </summary>
+        /// <param name="list">List to be counted.</param>
+        /// <returns>Number of items in the list.</returns>
         protected override int GetCount(IList<T> list)
         {
             return list.Count;
         }
 
+        /// <summary>
+        /// Returns the item at the index provided.
+        /// </summary>
+        /// <param name="list">List to get item from.</param>
+        /// <param name="index">Index of the element to return.</param>
+        /// <returns>The value at the index provided.</returns>
         protected override T GetValue(IList<T> list, int index)
         {
             return list[index];
         }
 
+        /// <summary>
+        /// Compares the item to the key.
+        /// </summary>
+        /// <param name="item">Item to be compared.</param>
+        /// <param name="key">Key to be compared to the item.</param>
+        /// <returns>Difference between the item and the key.</returns>
         protected override int CompareTo(T item, K key)
         {
             return item.CompareTo(key);
         }
 
-        internal int BinarySearch(IList<T> list, K key)
+        /// <summary>
+        /// Searches the list provided for the key.
+        /// </summary>
+        /// <param name="list">List to search.</param>
+        /// <param name="key">Key to find.</param>
+        /// <returns>
+        /// Index of the item in the list, or the twos complement.
+        /// </returns>
+        public int BinarySearch(IList<T> list, K key)
         {
             return base.BinarySearchBase(list, key);
         }
@@ -155,7 +194,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// types when performing a search that will in practice only need to 
     /// retrieve a small subset improving memory efficiency.
     /// </summary>
-    internal class SearchReadonlyList<T, K> : SearchBase<T, K, IList<int>> where T : BaseEntity, IComparable<K>
+    internal class SearchReadonlyList<T, K> : 
+        SearchBase<T, K, IList<int>> where T : IComparable<K>
     {
         /// <summary>
         /// The list of complex values to use with the index. This may be a 
