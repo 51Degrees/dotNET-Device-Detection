@@ -55,8 +55,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         {
             var valueIndexesCount = reader.ReadInt32();
             var signatureIndexesCount = reader.ReadInt32();
-            _valueIndexes = BaseEntity.ReadIntegerArray(reader, valueIndexesCount);
-            _signatureIndexes = BaseEntity.ReadIntegerArray(reader, signatureIndexesCount);
+            _valueIndexes = Utils.ReadIntegerArray(reader, valueIndexesCount);
+            _signatureIndexes = Utils.ReadIntegerArray(reader, signatureIndexesCount);
         }
 
         #endregion

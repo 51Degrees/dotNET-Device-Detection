@@ -186,11 +186,14 @@ UpgradeLog*.htm
 
 # Microsoft Fakes
 Log.txt
+
+# 51Degrees
 *.lic
 *Enterprise*.dat
 *Premium*.dat
 *Enterprise*.trie
 *Premium*.trie
-App_Data/Cache/
+**/App_Data/Cache
 million.csv
 *.snk
+

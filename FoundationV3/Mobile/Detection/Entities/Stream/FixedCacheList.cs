@@ -53,13 +53,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
     /// Data sources which don't support seeking can not be used. Specifically 
     /// compressed data structures can not be used with these lists.
     /// </remarks>
-    /// <remarks>
-    /// Should not be referenced directly.
-    /// </remarks>
+    /// <remarks>Not intended to be used directly by 3rd parties.</remarks>
     /// <typeparam name="T">
-    /// The type of <see cref="BaseEntity"/> the list will contain.
+    /// The type of items the list will contain.
     /// </typeparam>
-    public class FixedCacheList<T> : FixedList<T>, ICacheList, ICacheLoader<int, T> where T : BaseEntity
+    /// <typeparam name="D">
+    /// The type of the shared data set the item is contained within.
+    /// </typeparam>
+    public class FixedCacheList<T, D> : FixedList<T, D>, ICacheList, ICacheLoader<int, T>
+        where D : IStreamDataSet
     {
         #region Fields
 
@@ -121,7 +123,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of <see cref="FixedCacheList{T}"/>.
+        /// Constructs a new instance of <see cref="FixedCacheList{T,D}"/>.
         /// </summary>
         /// <param name="dataSet">
         /// The <see cref="DataSet"/> being created.
@@ -136,10 +138,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <param name="cacheSize">
         /// Number of items in list to have capacity to cache.
         /// </param>
-        internal FixedCacheList(
-            DataSet dataSet, 
+        public FixedCacheList(
+            D dataSet, 
             Reader reader, 
-            BaseEntityFactory<T> entityFactory,
+            BaseEntityFactory<T, D> entityFactory,
             int cacheSize)
             : base(dataSet, reader, entityFactory)
         {

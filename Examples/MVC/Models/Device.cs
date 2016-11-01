@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using FiftyOne.Foundation.Mobile.Detection;
+﻿using FiftyOne.Foundation.Mobile.Detection;
 using System.Linq;
-using System.Web;
 /*
 <tutorial>
 The first stage of using 51Degrees device detection in MVC is creating

@@ -64,7 +64,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
             _numericChildren = 
                 ReadNodeNumericIndexes(dataSet, reader, NumericChildrenCount);
             _rankedSignatureIndexes = 
-                BaseEntity.ReadIntegerArray(reader, RankedSignatureCount);
+                Utils.ReadIntegerArray(reader, RankedSignatureCount);
         }
 
         #endregion  

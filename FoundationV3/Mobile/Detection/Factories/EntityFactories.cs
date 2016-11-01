@@ -26,11 +26,23 @@ using FiftyOne.Foundation.Mobile.Detection.Readers;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Factories
 {
-    internal abstract class BaseEntityFactory<T>
+    /// <summary>
+    /// Used to create new entities. Required because .NET does not support
+    /// generic with constructors which take parameters.
+    /// </summary>
+    /// <typeparam name="T">
+    /// Type of the entity that the factory creates.
+    /// </typeparam>
+    /// <typeparam name="D">
+    /// Type of the data set the entity is associated with.
+    /// </typeparam>
+    /// <remarks>Not intended to be used directly by 3rd parties.</remarks>
+    public abstract class BaseEntityFactory<T, D>
     {
         /// <summary>
-        /// Creates a new instance of <see cref="BaseEntity"/>
+        /// Creates a new instance of <see cref="BaseEntityFactory{T,D}"/>
         /// </summary>
+        /// <remarks>Not intended to be used directly by 3rd parties.</remarks>
         /// <param name="dataSet">
         /// The data set whose entity list the index or offset is contained
         /// within
@@ -43,7 +55,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// Binary reader positioned at the start of the entity
         /// </param>
         /// <returns>A new instance of the entity</returns>
-        internal abstract T Create(DataSet dataSet, int index, Reader reader);
+        public abstract T Create(D dataSet, int index, Reader reader);
 
         /// <summary>
         /// Returns the length of the entity as stored in the data structure.
@@ -52,9 +64,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// The method is implement on entities which are part of variable
         /// length lists.
         /// </remarks>
+        /// <remarks>Not intended to be used directly by 3rd parties.</remarks>
         /// <param name="entity">The Entity the length is required for</param>
         /// <returns>The length of the entity in bytes</returns>
-        internal virtual int GetLength(T entity)
+        public virtual int GetLength(T entity)
         {
             throw new NotImplementedException();
         }
@@ -67,14 +80,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// The method is implement on entities which are part of fixed 
         /// length lists.
         /// </remarks>
+        /// <remarks>Not intended to be used directly by 3rd parties.</remarks>
         /// <returns>The length of the entity type in bytes</returns>
-        internal virtual int GetLength()
+        public virtual int GetLength()
         {
             throw new NotImplementedException();
         }
     }
         
-    internal class ProfileOffsetFactory : BaseEntityFactory<ProfileOffset>
+    internal class ProfileOffsetFactory : BaseEntityFactory<ProfileOffset, DataSet>
     {
         /// <summary>
         /// Creates a new instance of <see cref="ProfileOffset"/>
@@ -90,7 +104,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// Binary reader positioned at the start of the profile offset
         /// </param>
         /// <returns>A new instance of an profile offset</returns>
-        internal override ProfileOffset Create(DataSet dataSet, int index, Reader reader)
+        public override ProfileOffset Create(DataSet dataSet, int index, Reader reader)
         {
             return new ProfileOffset(dataSet, index, reader);
         }
@@ -99,44 +113,25 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// Returns the length of the <see cref="ProfileOffset"/> entity
         /// </summary>
         /// <returns>Length in bytes of the ProfileOffset</returns>
-        internal override int GetLength()
+        public override int GetLength()
         {
             return sizeof(Int32) * 2;
         }
     }
 
-    internal class AsciiStringFactory : BaseEntityFactory<AsciiString>
+    internal abstract class BaseAsciiStringFactory<D> : BaseEntityFactory<AsciiString<Entities.DataSet>, D>
     {
         /// <summary>
-        /// Creates a new instance of <see cref="AsciiString"/>
-        /// </summary>
-        /// <param name="dataSet">
-        /// The data set whose strings list the string is contained within
-        /// </param>
-        /// <param name="offset">
-        /// The offset to the start of the string within the string data
-        /// structure
-        /// </param>
-        /// <param name="reader">
-        /// Binary reader positioned at the start of the AsciiString
-        /// </param>
-        /// <returns>A new instance of an <see cref="AsciiString"/></returns>
-        internal override AsciiString Create(DataSet dataSet, int offset, Reader reader)
-        {
-            return new AsciiString(dataSet, offset, reader);
-        }
-
-        /// <summary>
         /// Returns the length of the
-        /// <see cref="AsciiString"/> entity including
+        /// <see cref="AsciiString{T}"/> entity including
         /// the null terminator and length indicator.
         /// </summary>
         /// <param name="entity">Entity of type
-        /// <see cref="AsciiString"/></param>
+        /// <see cref="AsciiString{T}"/></param>
         /// <returns>Length in bytes of the AsciiString</returns>
-        internal override int GetLength(AsciiString entity)
+        public override int GetLength(AsciiString<Entities.DataSet> entity)
         {
-            return entity.Value.Length + 3; ;
+            return entity.Value.Length + 3;
         }
     }
 
@@ -155,7 +150,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// start reading
         /// </param>
         /// <returns>A new instance of an <see cref="ComponentV31"/></returns>
-        internal override Component Create(DataSet dataSet, int index, Reader reader)
+        public override Component Create(DataSet dataSet, int index, Reader reader)
         {
             return new ComponentV31(dataSet, index, reader);
         }
@@ -177,25 +172,25 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// </param>
         /// <returns>A new instance of an
         /// <see cref="ComponentFactoryV32"/></returns>
-        internal override Component Create(DataSet dataSet, int index, Reader reader)
+        public override Component Create(DataSet dataSet, int index, Reader reader)
         {
             return new ComponentV32(dataSet, index, reader);
         }
     }
 
-    internal abstract class ComponentFactory : BaseEntityFactory<Component>
+    internal abstract class ComponentFactory : BaseEntityFactory<Component, DataSet>
     {
         /// <summary>
         /// Returns the length of the <see cref="Component"/> entity
         /// </summary>
         /// <returns>Length in bytes of a Component</returns>
-        internal override int GetLength()
+        public override int GetLength()
         {
             return sizeof(int) * 2 + sizeof(byte);
         }
     }
 
-    internal class MapFactory : BaseEntityFactory<Map>
+    internal class MapFactory : BaseEntityFactory<Map, DataSet>
     {
         /// <summary>
         /// Creates a new instance of <see cref="Map"/>
@@ -209,7 +204,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// start reading
         /// </param>
         /// <returns>A new instance of an <see cref="Map"/></returns>
-        internal override Map Create(DataSet dataSet, int index, Reader reader)
+        public override Map Create(DataSet dataSet, int index, Reader reader)
         {
             return new Map(dataSet, index, reader);
         }
@@ -218,7 +213,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// Returns the length of the <see cref="Map"/> entity
         /// </summary>
         /// <returns>Length in bytes of a Map</returns>
-        internal override int GetLength()
+        public override int GetLength()
         {
             return sizeof(int);
         }
@@ -331,7 +326,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         #endregion
     }
 
-    internal abstract class NodeFactory : BaseEntityFactory<Node>
+    internal abstract class NodeFactory<D> : BaseEntityFactory<Node, D>
     {
         #region Constants
 
@@ -348,7 +343,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
 
         #endregion
 
-        protected abstract Node Construct(DataSet dataSet, int offset, Reader reader);
+        protected abstract Node Construct(D dataSet, int offset, Reader reader);
 
         /// <summary>
         /// Creates a new instance of <see cref="Node"/>
@@ -364,13 +359,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// Binary reader positioned at the start of the Node
         /// </param>
         /// <returns>A new instance of a <see cref="Node"/></returns>
-        internal override Node Create(DataSet dataSet, int offset, Reader reader)
+        public override Node Create(D dataSet, int offset, Reader reader)
         {
             return Construct(dataSet, offset, reader);
         }
     }
 
-    internal class RootNodeFactory : BaseEntityFactory<Node>
+    internal class RootNodeFactory : BaseEntityFactory<Node, DataSet>
     {
         /// <summary>
         /// An instance of <see cref="Node"/> based on the offset read
@@ -387,7 +382,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// </param>
         /// <returns>An instance of <see cref="Node"/> which is a root node
         /// </returns>
-        internal override Node Create(DataSet dataSet, int index, Reader reader)
+        public override Node Create(DataSet dataSet, int index, Reader reader)
         {
             return dataSet.Nodes[reader.ReadInt32()];
         }
@@ -396,13 +391,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// Returns the length of the root node offset
         /// </summary>
         /// <returns>Length in bytes of a root node offset</returns>
-        internal override int GetLength()
+        public override int GetLength()
         {
             return sizeof(int);
         }
     }
 
-    internal abstract class ProfileFactory : BaseEntityFactory<Profile>
+    internal abstract class ProfileFactory<D> : BaseEntityFactory<Profile, D>
+        where D : DataSet
     {
         #region Constants
 
@@ -413,7 +409,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
 
         #endregion
 
-        protected abstract Profile Construct(DataSet dataSet, int offset, Reader reader);
+        protected abstract Profile Construct(D dataSet, int offset, Reader reader);
 
         /// <summary>
         /// Creates a new instance of <see cref="Profile"/>
@@ -429,7 +425,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// Binary reader positioned at the start of the Profile
         /// </param>
         /// <returns>A new instance of an <see cref="Profile"/></returns>
-        internal override Profile Create(DataSet dataSet, int offset, Reader reader)
+        public override Profile Create(D dataSet, int offset, Reader reader)
         {
             return Construct(dataSet, offset, reader);
         }
@@ -439,7 +435,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// </summary>
         /// <param name="entity">Entity of type <see cref="Profile"/></param>
         /// <returns>Length in bytes of the Profile</returns>
-        internal override int GetLength(Profile entity)
+        public override int GetLength(Profile entity)
         {
             return MinLength +
                 (entity.ValueIndexes.Length * sizeof(int)) +
@@ -447,7 +443,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         }
     }
 
-    internal class PropertyFactory : BaseEntityFactory<Property>
+    internal class PropertyFactory : BaseEntityFactory<Property, DataSet>
     {
         #region Constants
 
@@ -490,18 +486,19 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// Binary reader positioned at the start of the Property
         /// </param>
         /// <returns>A new instance of a <see cref="Property"/></returns>
-        internal override Property Create(DataSet dataSet, int offset, Reader reader)
+        public override Property Create(DataSet dataSet, int offset, Reader reader)
         {
             return new Property(dataSet, offset, reader);
         }
 
-        internal override int GetLength()
+        public override int GetLength()
         {
             return RecordLength;
         }
     }
 
-    internal class ValueFactory : BaseEntityFactory<Value>
+    internal class ValueFactory<D> : BaseEntityFactory<Value, D>
+        where D: DataSet
     {
         #region Constants
 
@@ -532,12 +529,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// Binary reader positioned at the start of the Value
         /// </param>
         /// <returns>A new instance of a <see cref="Value"/></returns>
-        internal override Value Create(DataSet dataSet, int offset, Reader reader)
+        public override Value Create(D dataSet, int offset, Reader reader)
         {
             return new Value(dataSet, offset, reader);
         }
 
-        internal override int GetLength()
+        public override int GetLength()
         {
             return RecordLength;
         }
@@ -545,7 +542,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         #endregion
     }
 
-    internal class SignatureFactoryV31 : BaseEntityFactory<Signature>
+    internal class SignatureFactoryV31<D> : BaseEntityFactory<Signature, D>
+        where D : DataSet
     {
         #region Fields
 
@@ -556,10 +554,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of <see cref="SignatureFactoryV31"/>
+        /// Constructs a new instance of <see cref="SignatureFactoryV31{T}"/>
         /// </summary>
         /// <param name="dataSet">The data set the factory will create signatures for</param>
-        internal SignatureFactoryV31(DataSet dataSet)
+        internal SignatureFactoryV31(D dataSet)
         {
             _recordLength =
                 (dataSet.SignatureProfilesCount * sizeof(int)) +
@@ -583,7 +581,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// Binary reader positioned at the start of the signature
         /// </param>
         /// <returns>A new instance of a <see cref="Signature"/></returns>
-        internal override Signature Create(DataSet dataSet, int index, Reader reader)
+        public override Signature Create(D dataSet, int index, Reader reader)
         {
             return new SignatureV31(dataSet, index, reader);
         }
@@ -592,7 +590,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// The length of the signature.
         /// </summary>
         /// <returns>Length of the signature in bytes</returns>
-        internal override int GetLength()
+        public override int GetLength()
         {
             return _recordLength;
         }
@@ -600,7 +598,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         #endregion
     }
 
-    internal class SignatureFactoryV32 : BaseEntityFactory<Signature>
+    internal class SignatureFactoryV32<D> : BaseEntityFactory<Signature, D>
+        where D : DataSet
     {
         #region Constants
 
@@ -624,9 +623,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of <see cref="SignatureFactoryV32"/>
+        /// Constructs a new instance of <see cref="SignatureFactoryV32{T}"/>.
         /// </summary>
-        internal SignatureFactoryV32(DataSet dataSet)
+        internal SignatureFactoryV32(D dataSet)
         {
             _recordLength =
                 (dataSet.SignatureProfilesCount * sizeof(int)) +
@@ -650,7 +649,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// Binary reader positioned at the start of the signature
         /// </param>
         /// <returns>A new instance of a <see cref="Signature"/></returns>
-        internal override Signature Create(DataSet dataSet, int index, Reader reader)
+        public override Signature Create(D dataSet, int index, Reader reader)
         {
             return new SignatureV32(dataSet, index, reader);
         }
@@ -659,7 +658,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         /// The length of the signature.
         /// </summary>
         /// <returns>Length of the signature in bytes</returns>
-        internal override int GetLength()
+        public override int GetLength()
         {
             return _recordLength;
         }
