@@ -235,7 +235,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// The URL usage sharing information should be sent to.
         /// </summary>
-        internal const string NewDevicesUrl = "http://devices.51degrees.mobi/new.ashx";
+        internal const string NewDevicesUrl = "https://devices.51degrees.com/new.ashx";
         
         /// <summary>
         /// The detail that should be provided relating to new devices.
