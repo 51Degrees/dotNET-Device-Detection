@@ -72,6 +72,22 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// </summary>
         public readonly int ProfileId;
 
+        /// <summary>
+        /// A dictionary relating the index of a property to the values 
+        /// returned by the profile. Used to speed up subsequent data 
+        /// processing.
+        /// </summary>
+        private readonly ConcurrentDictionary<int, Values>
+            PropertyIndexToValues = new ConcurrentDictionary<int, Entities.Values>();
+
+        /// <summary>
+        /// A dictionary relating the name of a property to the values returned
+        /// by the profile. Used to speed up subsequent data processing.
+        /// </summary>
+        private readonly ConcurrentDictionary<string, Values>
+            PropertyNameToValues = new ConcurrentDictionary<string, Entities.Values>();
+
+
         #endregion
 
         #region Internal Properties
@@ -150,76 +166,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         {
             get
             {
-                Values values = null;
-
-                // A read / write upgradable guard could be used in the future
-                // should the performance of GetPropertyValueIndexes prove too 
-                // slow in the future. The use of a lock on the dictionary
-                // ensures that this implementation is thread safe.
-                lock (PropertyIndexToValues)
-                {
-                    if (PropertyIndexToValues.TryGetValue(
-                        property.Index, 
-                        out values) == false)
+                Values values =
+                    PropertyIndexToValues.GetOrAdd(property.Index, i =>
                     {
-                        values = new Entities.Values(
+                        return new Entities.Values(
                             property,
                             GetPropertyValueIndexes(property));
-                        PropertyIndexToValues.Add(property.Index, values);
-                    }
-                }
+                    });
+
                 return values;
             }
         }
-
-        /// <summary>
-        /// A dictionary relating the index of a property to the values 
-        /// returned by the profile. Used to speed up subsequent data 
-        /// processing.
-        /// </summary>
-        private IDictionary<int, Values> PropertyIndexToValues
-        {
-            get
-            {
-                if (_propertyIndexToValues == null)
-                {
-                    lock(this)
-                    {
-                        if (_propertyIndexToValues == null)
-                        {
-                            _propertyIndexToValues = 
-                                new Dictionary<int, Values>();
-                        }
-                    }
-                }
-                return _propertyIndexToValues;
-            }
-        }
-        private IDictionary<int, Values> _propertyIndexToValues;
-
-        /// <summary>
-        /// A dictionary relating the name of a property to the values returned
-        /// by the profile. Used to speed up subsequent data processing.
-        /// </summary>
-        private IDictionary<string, Values> PropertyNameToValues
-        {
-            get
-            {
-                if (_propertyNameToValues == null)
-                {
-                    lock (this)
-                    {
-                        if (_propertyNameToValues == null)
-                        {
-                            _propertyNameToValues = 
-                                new Dictionary<string, Values>();
-                        }
-                    }
-                }
-                return _propertyNameToValues;
-            }
-        }
-        private IDictionary<string, Values> _propertyNameToValues;
 
         /// <summary>
         /// Gets the values associated with the property name.
@@ -240,24 +197,18 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         {
             get
             {
-                Values values = null;
-
-                // A read / write upgradable guard could be used in the future
-                // should the performance of this[property] prove too slow in 
-                // the future. The use of a lock on the dictionary ensures that 
-                // this implementation is thread safe.
-                lock (PropertyNameToValues)
-                {
-                    if (PropertyNameToValues.TryGetValue(propertyName, out values) == false)
-                    {
-                        var property = DataSet.Properties[propertyName];
-                        if (property != null)
+                Values values =               
+                    PropertyNameToValues.GetOrAdd(propertyName, i =>
                         {
-                            values = this[property];
+                            Values _values = null;
+                            var property = DataSet.Properties[propertyName];
+                            if (property != null)
+                            {
+                                _values = this[property];
+                            }
+                            return _values;
                         }
-                        PropertyNameToValues.Add(propertyName, values);
-                    }
-                }
+                    );
                 return values;
             }
         }
