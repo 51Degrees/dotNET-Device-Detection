@@ -348,6 +348,15 @@ namespace FiftyOne.Foundation.Mobile.Detection
                         // the timeout.
                         HandleTimeout();
                     }
+                    else if (ex.Message.Contains("SSL/TLS"))
+                    {
+                        // A secure connection could not be established.
+                        EventLog.Debug(
+                            String.Format(
+                                "Stopping usage sharing as a secure connection to remote '{0}' could " +
+                                "not be established and threw error '{1}'",
+                                _newDevicesUrl, ex.InnerException.Message));
+                    }
                     else
                     {
                         // Another unhandled error occured so just disable the feature.
