@@ -126,7 +126,7 @@ namespace FiftyOne.Example.Illustration.GettingStarted
 
         static void Main(string[] args)
         {
-            string fileName = args.Length > 0 ? args[0] : "../../../../../data/51Degrees-LiteV3.2.dat";
+            string fileName = args.Length > 0 ? args[0] : "../../../../data/51Degrees-LiteV3.2.dat";
             Run(fileName);
 
             // Waits for a character to be pressed.
