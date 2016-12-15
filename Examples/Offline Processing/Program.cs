@@ -166,8 +166,8 @@ namespace FiftyOne.Example.Illustration.OfflineProcessing
 
         static void Main(string[] args)
         {
-            string fileName = args.Length > 0 ? args[0] : "../../../../../data/51Degrees-LiteV3.2.dat";
-            string userAgents = args.Length > 1 ? args[1] : "../../../../../data/20000 User Agents.csv";
+            string fileName = args.Length > 0 ? args[0] : "../../../../data/51Degrees-LiteV3.2.dat";
+            string userAgents = args.Length > 1 ? args[1] : "../../../../data/20000 User Agents.csv";
             Run(fileName, userAgents);
 
             // Waits for a character to be pressed.
