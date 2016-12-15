@@ -49,9 +49,11 @@ Data files which are updated weekly and daily, automatically, and with more prop
 
 ## Recent Changes
 
-### Version 3.2.11 Highlights
+### Version 3.2.14 Highlights
 
-New Lite Data File released for August.
+New Lite Data File released for December.
+Usage data is now shared securely over HTTPS
+getValues now uses a concurrent dictionary to improve performance.
 
 ### Major Changes in Version 3.2
 
