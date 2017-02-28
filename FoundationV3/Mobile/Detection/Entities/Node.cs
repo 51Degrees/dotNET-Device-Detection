@@ -53,7 +53,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// <para>
     /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
-    internal abstract class Node : BaseEntity<DataSet>, IComparable<Node>
+    internal abstract class Node : DeviceDetectionBaseEntity, IComparable<Node>
     {
         #region Classes
 
@@ -310,7 +310,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// start reading.
         /// </param>
         internal Node(
-            DataSet dataSet,
+            IDataSet dataSet,
             int offset,
             BinaryReader reader) : base (dataSet, offset)
         {
@@ -658,8 +658,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         internal void AddCharacters(byte[] values)
         {
             var characters = Characters == null ? GetCharacters() : Characters;
-            for (int i = 0; i < Length; i++)
-                values[Position + i + 1] = characters[i];
+            // caharacters array will be null if this is an incomplete node.
+            if (characters != null)
+            {
+                for (int i = 0; i < Length; i++)
+                    values[Position + i + 1] = characters[i];
+            }
         }
 
         /// <summary>

@@ -6,7 +6,7 @@
  * This Source Code Form is the subject of the following patent 
  * applications, owned by 51Degrees Mobile Experts Limited of 5 Charlotte
  * Close, Caversham, Reading, Berkshire, United Kingdom RG4 7BY: 
- * European Patent Application No. 13192291.6; and
+ * European Patent Application No. 13192291.6; and 
  * United States Patent Application Nos. 14/085,223 and 14/085,301.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
@@ -19,45 +19,30 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
-using System;
-namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
+namespace FiftyOne.Foundation.Mobile.Detection.Entities
 {
     /// <summary>
-    /// Lists that use a cache can return information about the cache
-    /// misses for performance analysis. They implement this interface
-    /// to provide this data to the <see cref="DataSet"/>.
+    /// This class provides quality of life improvements for entity classes in
+    /// the FiftyOne.Foundation.Mobile.Detection.Entities namespace.
+    /// For example, returning a <see cref="Entities.DataSet"/> rather than an 
+    /// <see cref="IDataSet"/> 
     /// </summary>
-    internal interface ICacheList
+    public class DeviceDetectionBaseEntity : BaseEntity
     {
         /// <summary>
-        /// Gets or sets the size of the cache.
+        /// Constructor
         /// </summary>
-        int CacheSize { get; set; }
+        /// <param name="dataSet"></param>
+        /// <param name="indexOrOffset"></param>
+        public DeviceDetectionBaseEntity(IDataSet dataSet, int indexOrOffset) 
+            : base(dataSet, indexOrOffset) { }
 
         /// <summary>
-        /// Returns the percentage of cache misses.
+        /// Get the dataset that this entity belongs to
         /// </summary>
-        double PercentageMisses { get; }
-
-        /// <summary>
-        /// Returns the number of misses.
-        /// </summary>
-        long CacheMisses { get; }
-
-        /// <summary>
-        /// Returns the number of requests.
-        /// </summary>
-        long CacheRequests { get; }
-
-        /// <summary>
-        /// The number of times the lists have been switched.
-        /// </summary>
-        [Obsolete("Cache no longer requires switching")]
-        long Switches { get; }
-
-        /// <summary>
-        /// Resets the cache used by the list.
-        /// </summary>
-        void ResetCache();
+        public new DataSet DataSet
+        {
+            get { return base.DataSet as DataSet; }
+        }
     }
 }

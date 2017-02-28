@@ -472,6 +472,37 @@ namespace FiftyOne.Tests.Integration
             }
         }
 
+        public static bool CompareDataSets(DataSet dataset1, DataSet dataset2)
+        {
+            bool result = true;
+
+            result = result && CompareLists(dataset1.Values, dataset2.Values);
+            result = result && CompareLists(dataset1.Profiles, dataset2.Profiles);
+            result = result && CompareLists(dataset1.Signatures, dataset2.Signatures);
+            result = result && CompareLists(dataset1.Strings, dataset2.Strings);
+            result = result && CompareLists(dataset1.Nodes, dataset2.Nodes);
+
+            return result;
+        }
+
+        public static bool CompareLists<T>(IReadonlyList<T> list1, IReadonlyList<T> list2)
+        {
+            bool result = true;
+
+            var enumerator1 = list1.GetEnumerator();
+            var enumerator2 = list2.GetEnumerator();
+
+            while(enumerator1.MoveNext() && result)
+            {
+                enumerator2.MoveNext();
+                result = enumerator1.Current.ToString()
+                    .Equals(enumerator2.Current.ToString());
+            }
+
+            return result;
+        }
+
+
         #endregion
     }
 }

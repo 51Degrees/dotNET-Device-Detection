@@ -46,7 +46,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// For more information see 
     /// https://51degrees.com/Support/Documentation/Net
     /// </para>
-    public class Value : BaseEntity<DataSet>, 
+    public class Value : DeviceDetectionBaseEntity,
         IComparable<Value>, IComparable<string>, IEquatable<Value>, IEquatable<string>
     {
         #region Static Fields
@@ -264,7 +264,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// start reading.
         /// </param>
         internal Value(
-            DataSet dataSet,
+            IDataSet dataSet,
             int index,
             BinaryReader reader) : base(dataSet, index)
         {

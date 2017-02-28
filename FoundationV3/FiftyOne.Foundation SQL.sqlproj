@@ -89,6 +89,20 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Mobile\Detection\Caching\ILoadingCache.cs" />
+    <Compile Include="Mobile\Detection\Caching\ILoadingCacheBuilder.cs" />
+    <Compile Include="Mobile\Detection\Caching\IValueLoader.cs" />
+    <Compile Include="Mobile\Detection\Caching\LruCache.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mobile\Detection\Caching\CacheMap.cs" />
+    <Compile Include="Mobile\Detection\Caching\ICache.cs" />
+    <Compile Include="Mobile\Detection\Caching\CacheOptions.cs" />
+    <Compile Include="Mobile\Detection\Caching\ICacheOptions.cs" />
+    <Compile Include="Mobile\Detection\Caching\IPutCache.cs" />
+    <Compile Include="Mobile\Detection\Caching\ICacheBuilder.cs" />
+    <Compile Include="Mobile\Detection\Caching\ICacheSet.cs" />
+    <Compile Include="Mobile\Detection\Caching\LruCacheBuilder.cs" />
     <Compile Include="Mobile\Detection\Entities\Memory\EntityFactories.cs" />
     <Compile Include="Mobile\Detection\Entities\Memory\NodeV32.cs" />
     <Compile Include="Mobile\Detection\Entities\Memory\NodeV31.cs" />
@@ -97,20 +111,13 @@
     <Compile Include="Mobile\Detection\Entities\Memory\PropertiesList.cs" />
     <Compile Include="Mobile\Detection\Entities\Memory\MemoryBaseList.cs" />
     <Compile Include="Mobile\Detection\Entities\Memory\MemoryFixedList.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\FixedList.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\CacheList.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\DataSet.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\EntityFactories.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\Node.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\NodeV32.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\NodeV31.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\Profile.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\ICacheList.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\FixedCacheList.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\BaseList.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\Cache.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\Pool.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\VariableList.cs" />
     <Compile Include="Mobile\Detection\Entities\SignatureV32.cs" />
     <Compile Include="Mobile\Detection\Entities\SignatureV31.cs" />
     <Compile Include="Mobile\Detection\Entities\Map.cs" />
@@ -138,10 +145,9 @@
     <Compile Include="Mobile\Detection\TrieProviderV3.cs" />
     <Compile Include="Mobile\Detection\TrieProvider.cs" />
     <Compile Include="Mobile\Detection\Controller.cs" />
-    <Compile Include="Mobile\Detection\Cache.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Mobile\Detection\IMatch.cs" />
+    <Compile Include="Mobile\Detection\DataSetBuilder.cs" />
+    <Compile Include="Mobile\Detection\IndirectDataSet.cs" />
     <Compile Include="Mobile\Detection\LicenceKeyActivationResults.cs" />
     <Compile Include="Mobile\Detection\Entities\Headers\Header.cs" />
     <Compile Include="Mobile\Detection\Match.cs" />
@@ -167,18 +173,24 @@
     <Compile Include="Mobile\Detection\Entities\Stream\IntegerList.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\IStreamDataSet.cs" />
     <Compile Include="Mobile\Detection\Entities\Utils.cs" />
+    <Compile Include="Mobile\Detection\Entities\DeviceDetectionBaseEntity.cs" />
+    <Compile Include="Mobile\Detection\IDataSet.cs" />
+    <Compile Include="Mobile\Detection\StreamList.cs" />
+    <Compile Include="Mobile\Detection\Factories\EntityLoaderFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Mobile\Detection\Dataset\" />
     <Folder Include="Mobile\" />
     <Folder Include="Mobile\Detection\" />
     <Folder Include="Mobile\Detection\Entities\" />
+    <Folder Include="Mobile\Detection\Entities\Caching" />
     <Folder Include="Mobile\Detection\Entities\Headers\" />
     <Folder Include="Mobile\Detection\Entities\Memory\" />
     <Folder Include="Mobile\Detection\Entities\Stream\" />
     <Folder Include="Mobile\Detection\Factories\" />
     <Folder Include="Mobile\Detection\Readers\" />
     <Folder Include="Properties\" />
+    <Folder Include="Mobile\Detection\Caching\" />
   </ItemGroup>
   <PropertyGroup>
   </PropertyGroup>

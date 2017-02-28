@@ -123,31 +123,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
         internal const int UserAgentCacheSize = 1000;
 
         /// <summary>
-        /// The number of signatures that it should be possible to cache.
-        /// </summary>
-        internal const int SignaturesCacheSize = 16000;
-
-        /// <summary>
-        /// The number of node that it should be possible to cache.
-        /// </summary>
-        internal const int NodesCacheSize = 30000;
-        
-        /// <summary>
-        /// The number of values that it should be possible to cache.
-        /// </summary>
-        internal const int ValuesCacheSize = 3000;
-        
-        /// <summary>
-        /// The number of profiles that it should be possible to cache.
-        /// </summary>
-        internal const int ProfilesCacheSize = 600;
-
-        /// <summary>
-        /// The number of strings that it should be possible to cache.
-        /// </summary>
-        internal const int StringsCacheSize = 8000;
-
-        /// <summary>
         /// If premium data is being used with Foundation the licence key
         /// can be provided in the following constant or in a file with the
         /// extension .lic in the bin folder.

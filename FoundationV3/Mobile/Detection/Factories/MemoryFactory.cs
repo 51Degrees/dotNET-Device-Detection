@@ -179,7 +179,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         {
             CommonFactory.LoadHeader(dataSet, reader);
 
-            var strings = new MemoryVariableList<AsciiString<DataSet>, DataSet>(dataSet, reader, new MemoryAsciiStringFactory());
+            var strings = new MemoryVariableList<AsciiString, DataSet>(dataSet, reader, new MemoryAsciiStringFactory());
             MemoryFixedList<Component, DataSet> components = null;
             switch(dataSet.VersionEnum)
             {

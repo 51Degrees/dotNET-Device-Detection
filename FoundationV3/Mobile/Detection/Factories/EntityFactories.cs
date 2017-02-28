@@ -87,7 +87,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
             throw new NotImplementedException();
         }
     }
-        
+
     internal class ProfileOffsetFactory : BaseEntityFactory<ProfileOffset, DataSet>
     {
         /// <summary>
@@ -119,17 +119,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         }
     }
 
-    internal abstract class BaseAsciiStringFactory<D> : BaseEntityFactory<AsciiString<Entities.DataSet>, D>
+    internal abstract class BaseAsciiStringFactory<D> : BaseEntityFactory<AsciiString, D>
     {
         /// <summary>
         /// Returns the length of the
-        /// <see cref="AsciiString{T}"/> entity including
+        /// <see cref="AsciiString"/> entity including
         /// the null terminator and length indicator.
         /// </summary>
         /// <param name="entity">Entity of type
-        /// <see cref="AsciiString{T}"/></param>
+        /// <see cref="AsciiString"/></param>
         /// <returns>Length in bytes of the AsciiString</returns>
-        public override int GetLength(AsciiString<Entities.DataSet> entity)
+        public override int GetLength(AsciiString entity)
         {
             return entity.Value.Length + 3;
         }
@@ -218,7 +218,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
             return sizeof(int);
         }
     }
-    
+
     internal static class NodeFactoryShared
     {
         #region Constants
@@ -365,6 +365,50 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
         }
     }
 
+    internal abstract class NodeFactoryV31<D> : NodeFactory<D>
+    {
+        /// <summary>
+        /// Returns the length of the <see cref="Node"/> entity provided.
+        /// </summary>
+        /// <param name="entity">
+        /// An entity of type Node who length is required.
+        /// </param>
+        /// <returns>
+        /// The number of bytes used to store the node.
+        /// </returns>
+        public override int GetLength(Entities.Node entity)
+        {
+            return BaseLength +
+                sizeof(int) + // Length of the ranked signatures count number
+                (entity.Children.Length * NodeFactoryShared.NodeIndexLengthV31) +
+                (entity.NumericChildren.Length * NodeNumericIndexLength) +
+                (entity.RankedSignatureCount * sizeof(int));
+        }
+    }
+
+    internal abstract class NodeFactoryV32<D> : NodeFactory<D>
+    {
+        /// <summary>
+        /// Returns the length of the <see cref="Node"/> entity provided.
+        /// </summary>
+        /// <param name="entity">
+        /// An entity of type Node who length is required.
+        /// </param>
+        /// <returns>
+        /// The number of bytes used to store the node.
+        /// </returns>
+        public override int GetLength(Entities.Node entity)
+        {
+            return BaseLength +
+                sizeof(ushort) + // Length of the ranked signatures count number
+                (entity.Children.Length * NodeFactoryShared.NodeIndexLengthV32) +
+                (entity.NumericChildren.Length * NodeNumericIndexLength) +
+                // If the ranked signature count is zero then nothing follows. If it's
+                // great than 0 then the next 4 bytes are the index of the first signature.
+                (entity.RankedSignatureCount == 0 ? 0 : sizeof(int));
+        }
+    }
+
     internal class RootNodeFactory : BaseEntityFactory<Node, DataSet>
     {
         /// <summary>
@@ -398,7 +442,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
     }
 
     internal abstract class ProfileFactory<D> : BaseEntityFactory<Profile, D>
-        where D : DataSet
+        where D : IDataSet
     {
         #region Constants
 
@@ -498,7 +542,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
     }
 
     internal class ValueFactory<D> : BaseEntityFactory<Value, D>
-        where D: DataSet
+        where D: IDataSet
     {
         #region Constants
 
@@ -543,7 +587,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
     }
 
     internal class SignatureFactoryV31<D> : BaseEntityFactory<Signature, D>
-        where D : DataSet
+        where D : IDeviceDetectionDataSet
     {
         #region Fields
 
@@ -599,7 +643,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Factories
     }
 
     internal class SignatureFactoryV32<D> : BaseEntityFactory<Signature, D>
-        where D : DataSet
+        where D : IDeviceDetectionDataSet
     {
         #region Constants
 

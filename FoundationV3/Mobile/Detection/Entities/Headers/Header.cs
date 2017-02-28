@@ -28,7 +28,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Headers
     /// the basic properties needed to access lists irrespective of the 
     /// storage implementation.
     /// </summary>
-    internal class Header
+    public class Header
     {
         #region Fields
 
@@ -57,7 +57,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Headers
         /// <param name="reader">
         /// Reader connected to the source data structure and positioned to start reading
         /// </param>
-        internal Header(BinaryReader reader)
+        public Header(BinaryReader reader)
         {
             StartPosition = reader.ReadInt32();
             Length = reader.ReadInt32();

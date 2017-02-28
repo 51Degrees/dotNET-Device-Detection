@@ -28,7 +28,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// UTF8 format strings are the only ones used in the data set. Many
     /// native string formats use Unicode format using 2 bytes for every 
     /// character. This is inefficient when most characters don't need
-    /// 2 bytes. The <see cref="Utf8String{T}"/> class wraps a byte array of 
+    /// 2 bytes. The <see cref="Utf8String"/> class wraps a byte array of 
     /// UTF8 characters and exposes them as a native string type when 
     /// required.
     /// </summary>
@@ -36,11 +36,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// For more information see 
     /// https://51degrees.com/Support/Documentation/Net
     /// </para>
-    /// <typeparam name="T">
-    /// The type of the shared data set the Utf8String relates to.
-    /// </typeparam>
     /// <remarks>Not intended to be used directly by 3rd parties.</remarks>
-    public class Utf8String<T> : BaseEntity<T>
+    public class Utf8String : DeviceDetectionBaseEntity
     {
         #region Fields
 
@@ -54,7 +51,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         #region Constructor
 
         /// <summary>
-        /// Constructs a new instance of <see cref="Utf8String{T}"/>.
+        /// Constructs a new instance of <see cref="Utf8String"/>.
         /// </summary>
         /// <remarks>Not intended to be used directly by 3rd parties.</remarks>
         /// <param name="dataSet">
@@ -67,7 +64,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <param name="reader">
         /// Binary reader positioned at the start of the AsciiString.
         /// </param>
-        public Utf8String(T dataSet, int offset, BinaryReader reader)
+        public Utf8String(IDataSet dataSet, int offset, BinaryReader reader)
             : base(dataSet, offset)
         {
             // Read the length of the array minus 1 to remove the 

@@ -38,7 +38,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <summary>
         /// The dataset which contains the list.
         /// </summary>
-        protected internal readonly DataSet _dataSet;
+        protected internal readonly IndirectDataSet _dataSet;
         
         #endregion
 
@@ -55,7 +55,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// Reader used to initialise the header only.
         /// </param>
         internal IntegerList(
-            DataSet dataSet,
+            IndirectDataSet dataSet,
             Reader reader)
         {
             _header = new Header(reader);

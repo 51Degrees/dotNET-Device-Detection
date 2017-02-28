@@ -18,13 +18,8 @@
  * This Source Code Form is “Incompatible With Secondary Licenses”, as
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
-
-using FiftyOne.Foundation.Mobile.Detection.Readers;
+ 
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 {
@@ -39,22 +34,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
     /// until the dataset is closed. Class provides extra methods to check how 
     /// many readers were created and how many are currently free to use.
     /// </para>
-    public class DataSet : Entities.DataSet, IStreamDataSet
+    public class DataSet : IndirectDataSet, IStreamDataSet
     {
-        #region Fields
-
-        /// <summary>
-        /// The source of readers used by the pool.
-        /// </summary>
-        internal readonly SourceBase Source;
-
-        /// <summary>
-        /// Pool of readers connected the underlying data file.
-        /// </summary>
-        public Pool Pool { get; internal set; }
-
-        #endregion 
-
         #region Internal Properties
 
         /// <summary>
@@ -67,27 +48,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
             {
                 return false;
             }
-        }
-
-        #endregion
-
-        #region Public Properties
-
-        /// <summary>
-        /// The number of readers that have been created in the pool
-        /// that connects the data set to the data source.
-        /// </summary>
-        public int ReadersCreated
-        {
-            get { return Pool.ReadersCreated; }
-        }
-
-        /// <summary>
-        /// The number of readers in the queue ready to be used.
-        /// </summary>
-        public int ReadersQueued
-        {
-            get { return Pool.ReadersQueued; }
         }
 
         #endregion
@@ -111,11 +71,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// True if the file should be deleted when the source is disposed.
         /// </param>
         internal DataSet(string fileName, DateTime lastModified, Modes mode, bool isTempFile)
-            : base(lastModified, mode)
-        {
-            Source = new SourceFile(fileName, isTempFile);
-            Pool = new Pool(Source);
-        }
+            : base(fileName, lastModified, mode, isTempFile)
+        { }
 
         /// <summary>
         /// Creates a new stream data set connected to the byte array
@@ -128,11 +85,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// The mode of operation the data set will be using.
         /// </param>
         internal DataSet(byte[] data, Modes mode)
-            : base(DateTime.MinValue, mode)
-        {
-            Source = new SourceMemory(data);
-            Pool = new Pool(Source);
-        }
+            : base(data, mode)
+        { }
 
         #endregion
 
@@ -153,22 +107,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         }
 
         #endregion
-
-        #region Methods
-
-        /// <summary>
-        /// Resets the cache for the data set.
-        /// </summary>
-        public override void ResetCache()
-        {
-            base.ResetCache();
-            ((ICacheList)Signatures).ResetCache();
-            ((ICacheList)Nodes).ResetCache();
-            ((ICacheList)Strings).ResetCache();
-            ((ICacheList)Profiles).ResetCache();
-            ((ICacheList)Values).ResetCache();
-        }
-
-        #endregion
+        
     }
 }

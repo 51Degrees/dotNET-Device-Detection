@@ -124,12 +124,5 @@ namespace FiftyOne.Tests.Integration.Performance.Premium
         {
             base.RandomUserAgentsSingle(_dataSet.Properties, Asserts.AssertCacheMissesGoodAll, 1);
         }
-
-        [TestMethod]
-        [TestCategory("Performance"), TestCategory("File"), TestCategory("Premium")]
-        public void PremiumV31File_Performance_FindProfiles()
-        {
-            base.FindProfiles(0.2);
-        }
     }
 }

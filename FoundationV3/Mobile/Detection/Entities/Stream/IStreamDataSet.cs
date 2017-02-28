@@ -26,7 +26,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
     /// This interface defines how the pool is exposed across different stream
     /// data set implementation.
     /// </summary>
-    public interface IStreamDataSet
+    public interface IStreamDataSet : IDataSet
     {
         /// <summary>
         /// Pool of readers associated with the data set.

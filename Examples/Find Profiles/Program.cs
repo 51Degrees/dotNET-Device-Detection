@@ -24,10 +24,15 @@
 Find profiles example of using 51Degrees device detection. 
 The example shows how to:
 <ol>
-<li>Set the data set for the 51Degrees detector
+<li>Configure the 51Degrees data set to give optimal performance 
+when calling FindProfiles.
 <p><pre class="prettyprint lang-cs">
 string fileName = args[0];
-DataSet dataSet = StreamFactory.Create(fileName, false);
+DataSet dataSet = DataSetBuilder.File()
+                .ConfigureDefaultCaches()
+                .SetCacheSize(CacheType.ValuesCache, 200000)
+                .SetTempFile(false)
+                .Build(fileName)
 </pre></p>
 <li>Retrive all the profiles for a specified property value pair.
 <p><pre class="prettyprint lang-cs">
@@ -49,6 +54,7 @@ using System.Threading.Tasks;
 using FiftyOne.Foundation.Mobile.Detection;
 using FiftyOne.Foundation.Mobile.Detection.Entities;
 using FiftyOne.Foundation.Mobile.Detection.Factories;
+using FiftyOne.Foundation.Mobile.Detection.Caching;
 
 namespace FiftyOne.Example.Illustration.FindProfiles
 {
@@ -58,11 +64,22 @@ namespace FiftyOne.Example.Illustration.FindProfiles
         public static void Run(string fileName)
         {
             // DataSet is the object used to interact with the data file.
-            // StreamFactory creates Dataset with pool of binary readers to 
-            // perform device lookup using file on disk. The type if 
+            // DataSetBuilder creates Dataset with pool of binary readers to 
+            // perform device lookup using file on disk. The type is 
             // disposable and is therefore contained in using block to 
             // ensure file handles and resources are freed.
-            using (DataSet dataSet = StreamFactory.Create(fileName, false))
+            using (DataSet dataSet = DataSetBuilder.File()
+                .ConfigureDefaultCaches()
+                // Set the cache size for the Values cache to 200,000
+                // This is done because FindProfiles performs significantly
+                // faster when all Value objects can be held in memory.
+                // The number of Value objects varies by data file type:
+                // Lite < 5000
+                // Premium < 180,000
+                // Enterprise < 200,000
+                .SetCacheSize(CacheType.ValuesCache, 200000)
+                .SetTempFile(false)
+                .Build(fileName))
             {
                 Console.WriteLine("Staring Find Profiles Example.");
 

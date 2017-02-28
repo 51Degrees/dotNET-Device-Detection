@@ -31,9 +31,9 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// Data set used for device detection created by the reader classes.
     /// </summary>
     /// <para>
-    /// The <see cref="Factories.MemoryFactory"/> and <see cref="Factories.StreamFactory"/> factories
-    /// should be used to create detector data sets. They can not be constructed
-    /// directly from external code.
+    /// See <see cref="DataSetBuilder"/> for a convenient way to instantiate this class.
+    /// Alteratively, the <see cref="Factories.MemoryFactory"/> and 
+    /// <see cref="Factories.StreamFactory"/> factories can be used instead.
     /// </para>
     /// <para>
     /// All information about the detector data set is exposed in this class including
@@ -47,7 +47,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// <para>
     /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
-    public class DataSet : IDisposable
+    public class DataSet : IDeviceDetectionDataSet, IDisposable
     {
         #region Classes
 
@@ -163,7 +163,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         {
             get
             {
-                return PercentageMisses(Signatures);
+                double result = 0;
+                IndirectDataSet ids = this as IndirectDataSet;
+                if (ids != null)
+                {
+                    result = ids.CacheMap.SignatureCache.PercentageMisses;
+                }
+
+                return result;
             }
         }
 
@@ -178,7 +185,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         {
             get
             {
-                return PercentageMisses(Nodes);
+                double result = 0;
+                IndirectDataSet ids = this as IndirectDataSet;
+                if (ids != null)
+                {
+                    result = ids.CacheMap.NodeCache.PercentageMisses;
+                }
+
+                return result;
             }
         }
 
@@ -193,7 +207,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         {
             get
             {
-                return PercentageMisses(Strings);
+                double result = 0;
+                IndirectDataSet ids = this as IndirectDataSet;
+                if (ids != null)
+                {
+                    result = ids.CacheMap.StringCache.PercentageMisses;
+                }
+
+                return result;
             }
         }
 
@@ -208,7 +229,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         {
             get
             {
-                return PercentageMisses(Profiles);
+                double result = 0;
+                IndirectDataSet ids = this as IndirectDataSet;
+                if (ids != null)
+                {
+                    result = ids.CacheMap.ProfileCache.PercentageMisses;
+                }
+
+                return result;
             }
         }
 
@@ -223,7 +251,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         {
             get
             {
-                return PercentageMisses(Values);
+                double result = 0;
+                IndirectDataSet ids = this as IndirectDataSet;
+                if (ids != null)
+                {
+                    result = ids.CacheMap.ValueCache.PercentageMisses;
+                }
+
+                return result;
             }
         }
 
@@ -442,12 +477,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// The number of profiles each signature can contain.
         /// </summary>
-        internal int SignatureProfilesCount { get; set; }
+        public int SignatureProfilesCount { get; internal set; }
 
         /// <summary>
         /// The number of nodes each signature can contain.
         /// </summary>
-        internal int SignatureNodesCount { get; set; }
+        public int SignatureNodesCount { get; internal set; }
 
         /// <summary>
         /// The maximum number of values that can be returned by a profile
@@ -796,7 +831,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// A list of ASCII byte arrays for strings used by the dataset.
         /// </summary>
-        internal IReadonlyList<AsciiString<DataSet>> Strings;
+        internal IReadonlyList<AsciiString> Strings;
 
         #endregion
 
@@ -943,38 +978,26 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
 
         /// <summary>
-        /// Returns the percentage of requests that weren't serviced by the cache.
+        /// This method is no longer supported. See <see cref="IndirectDataSet.CacheMap"/> 
+        /// for details of caches and thier performance stats.
         /// </summary>
         /// <param name="list"></param>
-        /// <returns></returns>
+        /// <returns>zero</returns>
+        [Obsolete("See IndirectDataSet.CacheMap for caches and details of thier performance stats", true)]
         private static double PercentageMisses(object list)
         {
-            if (list is Stream.ICacheList)
-            {
-                return ((Stream.ICacheList)list).PercentageMisses;
-            }
-            else
-            {
-                return 0;
-            }
+            return 0;
         }
 
         /// <summary>
         /// Returns the number of times the cache lists were switched.
         /// </summary>
         /// <param name="list"></param>
-        /// <returns></returns>
+        /// <returns>zero</returns>
         [Obsolete("Cache no longer requires switching")]
         private static long Switches(object list)
         {
-            if (list is Stream.ICacheList)
-            {
-                return ((Stream.ICacheList)list).Switches;
-            }
-            else
-            {
-                return 0;
-            }
+            return 0;
         }
 
         #endregion
@@ -1054,6 +1077,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Gets the profiles associated with the property name and value
         /// which intersects with the filterProfiles if provided.
+        /// For best performance of this method, ensure the 
+        /// <see cref="CacheType.ValuesCache"/> is configured to be as large 
+        /// as possible.
+        /// The total number of Values objects depends on the data file:
+        /// Enterprise: approx. 200,000
+        /// Premium: approx. 180,000
+        /// Lite: approx. 3,000
         /// </summary>
         /// <param name="propertyName">Name of the property</param>
         /// <param name="valueName">
@@ -1081,6 +1111,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Gets the profiles associated with the property name and value
         /// which intersects with the filterProfiles if provided.
+        /// For best performance of this method, ensure the 
+        /// <see cref="CacheType.ValuesCache"/> is configured to be as large 
+        /// as possible.
+        /// The total number of Values objects depends on the data file:
+        /// Enterprise: approx. 200,000
+        /// Premium: approx. 180,000
+        /// Lite: approx. 3,000
         /// </summary>
         /// <param name="property">Instance of the property required</param>
         /// <param name="valueName">

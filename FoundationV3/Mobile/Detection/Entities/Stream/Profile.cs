@@ -73,7 +73,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// start reading.
         /// </param>
         internal Profile(
-            DataSet dataSet,
+            IStreamDataSet dataSet,
             int offset,
             BinaryReader reader)
             : base(dataSet, offset, reader)

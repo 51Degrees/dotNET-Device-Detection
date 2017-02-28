@@ -140,16 +140,28 @@
     <Compile Include="Mobile\Detection\AutoUpdate.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Mobile\Detection\Cache.cs">
+    <Compile Include="Mobile\Detection\Caching\ILoadingCache.cs" />
+    <Compile Include="Mobile\Detection\Caching\ILoadingCacheBuilder.cs" />
+    <Compile Include="Mobile\Detection\Caching\IValueLoader.cs" />
+    <Compile Include="Mobile\Detection\Caching\LruCache.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Mobile\Detection\Caching\CacheMap.cs" />
+    <Compile Include="Mobile\Detection\Caching\ICache.cs" />
+    <Compile Include="Mobile\Detection\Caching\CacheOptions.cs" />
+    <Compile Include="Mobile\Detection\Caching\ICacheOptions.cs" />
+    <Compile Include="Mobile\Detection\Caching\IPutCache.cs" />
+    <Compile Include="Mobile\Detection\Caching\ICacheBuilder.cs" />
+    <Compile Include="Mobile\Detection\Caching\ICacheSet.cs" />
+    <Compile Include="Mobile\Detection\Caching\LruCacheBuilder.cs" />
+    <Compile Include="Mobile\Detection\DataSetBuilder.cs" />
+    <Compile Include="Mobile\Detection\Entities\DeviceDetectionBaseEntity.cs" />
     <Compile Include="Mobile\Detection\Entities\Utf8String.cs" />
     <Compile Include="Mobile\Detection\Entities\ComponentV31.cs" />
     <Compile Include="Mobile\Detection\Entities\ComponentV32.cs" />
     <Compile Include="Mobile\Detection\Entities\Memory\MemoryIntegerList.cs" />
     <Compile Include="Mobile\Detection\Entities\NodeIndexBase.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\IntegerList.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\FixedList.cs" />
     <Compile Include="Mobile\Detection\Entities\Memory\EntityFactories.cs" />
     <Compile Include="Mobile\Detection\Entities\Memory\NodeV32.cs" />
     <Compile Include="Mobile\Detection\Entities\Memory\NodeV31.cs" />
@@ -160,7 +172,6 @@
     <Compile Include="Mobile\Detection\Entities\SignatureV31.cs" />
     <Compile Include="Mobile\Detection\Entities\Map.cs" />
     <Compile Include="Mobile\Detection\Entities\NodeNumericIndex.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\CacheList.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\DataSet.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\EntityFactories.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\IStreamDataSet.cs" />
@@ -171,6 +182,9 @@
     <Compile Include="Mobile\Detection\Entities\Utils.cs" />
     <Compile Include="Mobile\Detection\Factories\EntityFactories.cs" />
     <Compile Include="Mobile\Detection\Factories\CommonFactory.cs" />
+    <Compile Include="Mobile\Detection\Factories\EntityLoaderFactory.cs" />
+    <Compile Include="Mobile\Detection\IDataSet.cs" />
+    <Compile Include="Mobile\Detection\IndirectDataSet.cs" />
     <Compile Include="Mobile\Detection\ISimpleList.cs" />
     <Compile Include="Mobile\Detection\IReadonlyList.cs" />
     <Compile Include="Mobile\Detection\Factories\MemoryFactory.cs" />
@@ -180,17 +194,14 @@
     <Compile Include="Mobile\Detection\Search.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Mobile\Detection\StreamList.cs" />
     <Compile Include="Mobile\Detection\TrieProviderV3.cs" />
     <Compile Include="Mobile\Detection\TrieProvider.cs" />
     <Compile Include="Mobile\Detection\Entities\ProfileOffset.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\ICacheList.cs" />
     <Compile Include="Mobile\Detection\Factories\StreamFactory.cs" />
     <Compile Include="Mobile\Detection\Entities\Memory\MemoryFixedList.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\FixedCacheList.cs" />
     <Compile Include="Mobile\Detection\Entities\Headers\Header.cs" />
     <Compile Include="Mobile\Detection\Entities\Memory\MemoryBaseList.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\BaseList.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\Cache.cs" />
     <Compile Include="Mobile\Detection\Entities\Stream\Pool.cs" />
     <Compile Include="Mobile\Detection\Controller.cs" />
     <Compile Include="Mobile\Detection\Feature\Bandwidth.cs" />
@@ -212,7 +223,6 @@
     <Compile Include="Mobile\Detection\Entities\Value.cs" />
     <Compile Include="Mobile\Detection\Entities\Values.cs" />
     <Compile Include="Mobile\Detection\Entities\Memory\MemoryVariableList.cs" />
-    <Compile Include="Mobile\Detection\Entities\Stream\VariableList.cs" />
     <Compile Include="Mobile\Detection\Readers\Reader.cs" />
     <Compile Include="Mobile\Detection\TrieProviderV32.cs">
       <SubType>Code</SubType>

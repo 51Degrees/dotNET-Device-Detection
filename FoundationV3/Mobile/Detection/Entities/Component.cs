@@ -39,7 +39,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// <para>
     /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
-    public abstract class Component : BaseEntity<DataSet>, IComparable<Component>, IEquatable<Component>
+    public abstract class Component : DeviceDetectionBaseEntity, IComparable<Component>, IEquatable<Component>
     {
         #region Fields
 
@@ -158,7 +158,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// Constructs a new instance of see <see cref="Component"/>.
         /// </summary>
         /// <param name="dataSet">
-        /// The <see cref="DataSet"/> being created.
+        /// The <see cref="IDataSet"/> being created.
         /// </param>
         /// <param name="index">
         /// Index of the component within the list.
@@ -168,7 +168,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// start reading.
         /// </param>
         internal Component(
-            DataSet dataSet,
+           IDataSet dataSet,
             int index,
             BinaryReader reader)
             : base(dataSet, index)

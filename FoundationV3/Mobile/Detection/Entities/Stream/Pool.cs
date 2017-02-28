@@ -32,10 +32,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
     /// concurrently this class provides a mechanisim for readers to be 
     /// recycled across threads and requests.
     /// </summary>
-    /// <para>
-    /// Used by the <see cref="BaseList{T,D}"/> to provide multiple readers for 
-    /// the list.
-    /// </para>
     /// <remarks>
     /// The <see cref="DataSet"/> must be disposed of to ensure the readers
     /// in the pool are closed.

@@ -66,7 +66,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// For more information see 
     /// https://51degrees.com/Support/Documentation/Net
     /// </para>
-    public class Property : BaseEntity<DataSet>,  IComparable<Property>, IEquatable<Property>
+    public class Property : DeviceDetectionBaseEntity,  IComparable<Property>, IEquatable<Property>
     {
         #region Constants
 
@@ -481,19 +481,6 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                 {
                     if (InitialisedValues == false)
                     {
-                        // If the Values list is cached increase the size
-                        // of the cache to improve performance for this
-                        // feature by storing all related values in the cache.
-                        // Having all the possible values cached will improve 
-                        // performance for subsequent requests. if the data 
-                        // set isn't cached then there will only be one instance
-                        // of each profile and value in memory so the step isn't
-                        // needed as the direct reference will be used.
-                        if (DataSet.Values is ICacheList)
-                        {
-                            ((ICacheList)DataSet.Values).CacheSize += Values.Count;
-                        }
-
                         // Build a dictionary to store the growing list of 
                         // profiles associated with each value.
                         var tempValues = new Dictionary<int, List<Profile>>();
@@ -559,6 +546,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Gets the profiles associated with the value name where the 
         /// value's profiles intersects with the filterProfiles if provided.
+        /// For best performance of this method, ensure the 
+        /// <see cref="CacheType.ValuesCache"/> is configured to be as large 
+        /// as possible.
+        /// The total number of Values objects depends on the data file:
+        /// Enterprise: approx. 200,000
+        /// Premium: approx. 180,000
+        /// Lite: approx. 3,000
         /// </summary>
         /// <param name="valueName">
         /// Name of the value associated with the property
