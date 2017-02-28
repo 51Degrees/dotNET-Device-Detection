@@ -54,6 +54,7 @@ Data files which are updated weekly and daily, automatically, and with more prop
 New Lite Data File released for December.
 Usage data is now shared securely over HTTPS
 getValues now uses a concurrent dictionary to improve performance.
+
 ### Version 3.2.11 Highlights
 
 New Lite Data File released for August.
