@@ -69,11 +69,5 @@ namespace FiftyOne.Tests.Integration.Memory.Premium
         {
             base.UserAgentsSingle(UserAgentGenerator.GetBadUserAgents(), 50);
         }
-
-        [TestMethod(), TestCategory("Memory"), TestCategory("File"), TestCategory("Premium")]
-        public void PremiumV31File_Memory_FindProfiles()
-        {
-            base.FindProfiles(40);
-        }
     }
 }

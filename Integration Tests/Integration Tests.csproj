@@ -79,6 +79,13 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="APIFindProfiles\Base.cs" />
+    <Compile Include="APIFindProfiles\Enterprise\V31API.cs" />
+    <Compile Include="APIFindProfiles\Enterprise\V32API.cs" />
+    <Compile Include="APIFindProfiles\Lite\V31API.cs" />
+    <Compile Include="APIFindProfiles\Lite\V32API.cs" />
+    <Compile Include="APIFindProfiles\Premium\V31API.cs" />
+    <Compile Include="APIFindProfiles\Premium\V32API.cs" />
     <Compile Include="API\Lite\V32APITrie.cs" />
     <Compile Include="API\Lite\V30APITrie.cs" />
     <Compile Include="API\TrieBase.cs" />
@@ -116,6 +123,28 @@
     <Compile Include="HttpHeaders\Enterprise\V32Array.cs" />
     <Compile Include="HttpHeaders\Premium\V31Array.cs" />
     <Compile Include="HttpHeaders\Premium\V32Array.cs" />
+    <Compile Include="MemoryFindProfiles\Array.cs" />
+    <Compile Include="MemoryFindProfiles\Base.cs" />
+    <Compile Include="MemoryFindProfiles\Enterprise\V31Array.cs" />
+    <Compile Include="MemoryFindProfiles\Enterprise\V31File.cs" />
+    <Compile Include="MemoryFindProfiles\Enterprise\V31Memory.cs" />
+    <Compile Include="MemoryFindProfiles\Enterprise\V32Array.cs" />
+    <Compile Include="MemoryFindProfiles\Enterprise\V32File.cs" />
+    <Compile Include="MemoryFindProfiles\Enterprise\V32Memory.cs" />
+    <Compile Include="MemoryFindProfiles\FileTest.cs" />
+    <Compile Include="MemoryFindProfiles\Lite\V31Array.cs" />
+    <Compile Include="MemoryFindProfiles\Lite\V31File.cs" />
+    <Compile Include="MemoryFindProfiles\Lite\V31Memory.cs" />
+    <Compile Include="MemoryFindProfiles\Lite\V32Array.cs" />
+    <Compile Include="MemoryFindProfiles\Lite\V32File.cs" />
+    <Compile Include="MemoryFindProfiles\Lite\V32Memory.cs" />
+    <Compile Include="MemoryFindProfiles\Memory.cs" />
+    <Compile Include="MemoryFindProfiles\Premium\V31Array.cs" />
+    <Compile Include="MemoryFindProfiles\Premium\V31File.cs" />
+    <Compile Include="MemoryFindProfiles\Premium\V31Memory.cs" />
+    <Compile Include="MemoryFindProfiles\Premium\V32Array.cs" />
+    <Compile Include="MemoryFindProfiles\Premium\V32File.cs" />
+    <Compile Include="MemoryFindProfiles\Premium\V32Memory.cs" />
     <Compile Include="Memory\Enterprise\V30TrieFile.cs" />
     <Compile Include="Memory\Enterprise\V32TrieFile.cs" />
     <Compile Include="Memory\Lite\V32TrieFile.cs" />
