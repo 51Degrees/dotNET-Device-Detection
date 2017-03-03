@@ -280,12 +280,31 @@ namespace FiftyOne.Tests.Integration.API
         [TestCategory("API")]
         public void API_FetchProfiles() 
         {
-            int lastProfileId = GetHighestProfileId();
-            for (int i = 0; i <= lastProfileId; i++) {
-                Profile profile = _dataSet.FindProfile(i);
-                if (profile != null) {
-                    Assert.IsTrue(profile.ProfileId == i);
-                    FetchAllProperties(profile);
+            string tempFile = Path.GetTempFileName();
+            try
+            {
+                using (FileStream tempStream = File.OpenWrite(tempFile))
+                {
+                    using (StreamWriter writer = new StreamWriter(tempStream))
+                    {
+                        int lastProfileId = GetHighestProfileId();
+                        for (int i = 0; i <= lastProfileId; i++)
+                        {
+                            Profile profile = _dataSet.FindProfile(i);
+                            if (profile != null)
+                            {
+                                Assert.IsTrue(profile.ProfileId == i);
+                                FetchAllProperties(profile, writer);
+                            }
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                if (File.Exists(tempFile))
+                {
+                    File.Delete(tempFile);
                 }
             }
         }
@@ -363,17 +382,19 @@ namespace FiftyOne.Tests.Integration.API
             return lastProfileId;
         }
 
-        private void FetchAllProperties(Profile profile)
+        private void FetchAllProperties(Profile profile, StreamWriter writer)
         {
             var checkSum = 0;
+            StringBuilder temp = new StringBuilder();
             foreach (Property property in profile.Properties)
             {
-                Console.WriteLine("Property: {0} with value {1}",
+                temp.AppendLine(string.Format("Property: {0} with value {1}",
                     property.Name,
-                    profile[property]);
+                    profile[property]));
                 checkSum += profile[property.Name].ToString().GetHashCode();
             }
-            Console.WriteLine("Checksum: {0}", checkSum);
+            writer.WriteLine(temp.ToString());
+            writer.WriteLine("Checksum: {0}", checkSum);
         }
     }
 }
