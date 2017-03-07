@@ -794,7 +794,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
 
         /// <summary>
         /// Evaluates this node against another for equality using the
-        /// <see cref="BaseEntity{T}.Index"/> field of the nodes.
+        /// <see cref="BaseEntity.Index"/> field of the nodes.
         /// </summary>
         /// <param name="other">The other node to evaluate</param>
         /// <returns>True if equal, otherwise false</returns>
