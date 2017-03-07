@@ -97,6 +97,10 @@
       <Project>{dba7559b-ef3c-496d-bdc7-9ef76a5d3eb9}</Project>
       <Name>Strongly Typed</Name>
     </ProjectReference>
+    <ProjectReference Include="..\FoundationV3\FiftyOne.Foundation 4.csproj">
+      <Project>{9D658044-FB65-4939-8449-A3A1DEBBB31A}</Project>
+      <Name>FiftyOne.Foundation 4</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Integration Tests\Integration Tests.csproj">
       <Project>{1211a461-73ca-4d7e-86a7-983540f12539}</Project>
       <Name>Integration Tests</Name>

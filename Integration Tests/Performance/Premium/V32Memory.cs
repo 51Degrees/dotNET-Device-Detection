@@ -129,12 +129,5 @@ namespace FiftyOne.Tests.Integration.Performance.Premium
         {
             base.RandomUserAgentsSingle(_dataSet.Properties, 1);
         }
-
-        [TestMethod]
-        [TestCategory("Performance"), TestCategory("Memory"), TestCategory("Premium")]
-        public void PremiumV32Memory_Performance_FindProfiles()
-        {
-            base.FindProfiles(0.1);
-        }
     }
 }

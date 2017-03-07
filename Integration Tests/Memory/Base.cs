@@ -86,36 +86,6 @@ namespace FiftyOne.Tests.Integration.Memory
             }
         }
 
-        protected virtual void FindProfiles(double maxAllowedMemory)
-        {
-            Console.WriteLine("Expected Max Memory: {0:0.0} MB", maxAllowedMemory);
-            var checkSum = 0;
-            foreach (var property in Constants.FIND_PROFILES_PROPERTIES.Select(i => 
-                _dataSet.Properties[i]).Where(i => i != null))
-            {
-                _memory.CaptureSample();
-                foreach (var value in property.Values)
-                {
-                    var profiles = _dataSet.FindProfiles(property.Name, value.Name);
-                    foreach(var profile in profiles)
-                    {
-                        checkSum += profile.Index;
-                    }
-                    
-                }
-                _memory.CaptureSample();
-            }
-            Console.WriteLine("Checksum: {0}", checkSum);
-            Console.WriteLine("Average Memory Used: {0:0.0} MB", _memory.AverageMemoryUsed);
-            if (_memory.AverageMemoryUsed > maxAllowedMemory)
-            {
-                Assert.Inconclusive(String.Format(
-                    "Average memory use was '{0:0.0}MB' but max allowed '{1:0.0}MB'",
-                    _memory.AverageMemoryUsed,
-                    maxAllowedMemory));
-            }
-        }
-
         [TestCleanup]
         public void CleanUp()
         {

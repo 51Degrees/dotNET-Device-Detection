@@ -280,12 +280,31 @@ namespace FiftyOne.Tests.Integration.API
         [TestCategory("API")]
         public void API_FetchProfiles() 
         {
-            int lastProfileId = GetHighestProfileId();
-            for (int i = 0; i <= lastProfileId; i++) {
-                Profile profile = _dataSet.FindProfile(i);
-                if (profile != null) {
-                    Assert.IsTrue(profile.ProfileId == i);
-                    FetchAllProperties(profile);
+            string tempFile = Path.GetTempFileName();
+            try
+            {
+                using (FileStream tempStream = File.OpenWrite(tempFile))
+                {
+                    using (StreamWriter writer = new StreamWriter(tempStream))
+                    {
+                        int lastProfileId = GetHighestProfileId();
+                        for (int i = 0; i <= lastProfileId; i++)
+                        {
+                            Profile profile = _dataSet.FindProfile(i);
+                            if (profile != null)
+                            {
+                                Assert.IsTrue(profile.ProfileId == i);
+                                FetchAllProperties(profile, writer);
+                            }
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                if (File.Exists(tempFile))
+                {
+                    File.Delete(tempFile);
                 }
             }
         }
@@ -313,108 +332,6 @@ namespace FiftyOne.Tests.Integration.API
             }
         }
 
-        [TestMethod]
-        [TestCategory("API"), TestCategory("FindProfiles")]
-        public void FetchValidFindProfiles()
-        {
-            foreach (var property in _dataSet.Properties)
-            {
-                foreach(var value in property.Values)
-                {
-                    var profiles = property.FindProfiles(value.Name);
-                    Assert.IsTrue(profiles.Length > 0, String.Format(
-                        "Value '{0}' for property '{1}' return no profiles.",
-                        property, value));
-                }
-            }
-        }
-
-        [TestMethod]
-        [TestCategory("API"), TestCategory("FindProfiles")]
-        public void FetchValidFindProfilesCheckInitialised()
-        {
-            var random = new Random();
-            foreach (var property in _dataSet.Properties)
-            {
-                foreach (var value in property.Values.Skip(random.Next(property.Values.Count - 1)).Take(1))
-                {
-                    Assert.IsFalse(property.InitialisedValues, String.Format(
-                        "Property '{0}' should not have initialised values " +
-                        "before first request", property));
-                    var profiles = property.FindProfiles(value.Name);
-                    Assert.IsTrue(profiles.Length > 0, String.Format(
-                        "Value '{0}' for property '{1}' return no profiles.",
-                        property, value));
-                }
-                foreach (var value in property.Values)
-                {
-                    Assert.IsTrue(value._profileIndexes != null &&
-                                  value._profileIndexes.Length > 0,
-                        String.Format(
-                            "Value '{0}' must have profile indexes initialised " +
-                            "for property '{1}'.",
-                            value.Name,
-                            property.Name));
-                }
-            }
-        }
-
-        [TestMethod]
-        [TestCategory("API"), TestCategory("FindProfiles")]
-        public void FetchValidFindProfilesWithEmptyFilter()
-        {
-            var emptyProfileFilter = new Profile[0];
-            foreach (var property in _dataSet.Properties)
-            {
-                foreach (var value in property.Values)
-                {
-                    var profiles = property.FindProfiles(value.Name, emptyProfileFilter);
-                    Assert.IsTrue(profiles.Length == 0, String.Format(
-                        "Value '{0}' for property '{1}' with an empty filter must return no profiles.",
-                        property, value));
-                }
-            }
-        }
-
-        [TestMethod]
-        [TestCategory("API"), TestCategory("FindProfiles")]
-        public void FetchValidFindProfilesWithFullFilter()
-        {
-            foreach (var property in _dataSet.Properties)
-            {
-                foreach (var value in property.Values)
-                {
-                    var profiles = property.FindProfiles(value.Name, value.Profiles);
-                    Assert.IsTrue(profiles.SequenceEqual(value.Profiles), 
-                        String.Format(
-                            "Value '{0}' for property '{1}' returned mismatched results.",
-                            value, property));
-                }
-            }
-        }
-
-        [TestMethod]
-        [TestCategory("API"), TestCategory("FindProfiles")]
-        public void FetchInValidFindProfiles()
-        {
-            var invalidValue = "XYZ";
-            foreach (var property in _dataSet.Properties)
-            {
-                var profiles = property.FindProfiles(invalidValue);
-                Assert.IsTrue(profiles.Length == 0, String.Format(
-                    "Invalid value '{0}' for property '{1}' should not return profiles.",
-                    property, invalidValue));
-            }
-        }
-
-        [TestMethod]
-        [TestCategory("API"), TestCategory("FindProfiles")]
-        [ExpectedException(typeof(ArgumentException), "A property that does not exist was allowed.")]
-        public void FetchInvalidPropertyFindProfiles()
-        {
-            var profiles = _dataSet.FindProfiles("__BAD_PROPERTY__", "__BAD_VALUE__");
-        }
-    
         [TestCleanup]
         public void Dispose()
         {
@@ -465,17 +382,19 @@ namespace FiftyOne.Tests.Integration.API
             return lastProfileId;
         }
 
-        private void FetchAllProperties(Profile profile)
+        private void FetchAllProperties(Profile profile, StreamWriter writer)
         {
             var checkSum = 0;
+            StringBuilder temp = new StringBuilder();
             foreach (Property property in profile.Properties)
             {
-                Console.WriteLine("Property: {0} with value {1}",
+                temp.AppendLine(string.Format("Property: {0} with value {1}",
                     property.Name,
-                    profile[property]);
+                    profile[property]));
                 checkSum += profile[property.Name].ToString().GetHashCode();
             }
-            Console.WriteLine("Checksum: {0}", checkSum);
+            writer.WriteLine(temp.ToString());
+            writer.WriteLine("Checksum: {0}", checkSum);
         }
     }
 }

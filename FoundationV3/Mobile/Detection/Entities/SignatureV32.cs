@@ -110,7 +110,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// start reading.
         /// </param>
         internal SignatureV32(
-            DataSet dataSet,
+            IDeviceDetectionDataSet dataSet,
             int index,
             Reader reader)
             : base(dataSet, index, reader)

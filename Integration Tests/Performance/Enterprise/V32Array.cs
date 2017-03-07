@@ -129,12 +129,5 @@ namespace FiftyOne.Tests.Integration.Performance.Enterprise
         {
             base.RandomUserAgentsSingle(_dataSet.Properties, Asserts.AssertCacheMissesGoodAll, 1);
         }
-
-        [TestMethod]
-        [TestCategory("Performance"), TestCategory("Array"), TestCategory("Enterprise")]
-        public void EnterpriseV32Array_Performance_FindProfiles()
-        {
-            base.FindProfiles(0.1);
-        }
     }
 }

@@ -24,10 +24,10 @@ using FiftyOne.Foundation.Mobile.Detection.Readers;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
 {
-    internal class MemoryAsciiStringFactory : BaseEntityFactory<AsciiString<DataSet>, DataSet>
+    internal class MemoryAsciiStringFactory : BaseAsciiStringFactory<DataSet>
     {
         /// <summary>
-        /// Creates a new instance of <see cref="AsciiString{T}"/>
+        /// Creates a new instance of <see cref="AsciiString"/>
         /// </summary>
         /// <param name="dataSet">
         /// The data set whose strings list the string is contained within
@@ -39,10 +39,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         /// <param name="reader">
         /// Binary reader positioned at the start of the AsciiString
         /// </param>
-        /// <returns>A new instance of an <see cref="AsciiString{T}"/></returns>
-        public override AsciiString<DataSet> Create(DataSet dataSet, int offset, Reader reader)
+        /// <returns>A new instance of an <see cref="AsciiString"/></returns>
+        public override AsciiString Create(DataSet dataSet, int offset, Reader reader)
         {
-            return new AsciiString<DataSet>(dataSet, offset, reader);
+            return new AsciiString(dataSet, offset, reader);
         }
     }
 
@@ -50,29 +50,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
     /// Factory class used to create the new instances of Node V3.1 object.
     /// Difference is in the length of the Node entity.
     /// </summary>
-    internal class NodeMemoryFactoryV31 : NodeFactory<DataSet>
+    internal class NodeMemoryFactoryV31 : NodeFactoryV31<DataSet>
     {
         protected override Entities.Node Construct(DataSet dataSet, int offset, Reader reader)
         {
             return new NodeV31(dataSet, offset, reader);
-        }
-
-        /// <summary>
-        /// Returns the length of the <see cref="NodeV31"/> entity provided.
-        /// </summary>
-        /// <param name="entity">
-        /// An entity of type Node who length is required.
-        /// </param>
-        /// <returns>
-        /// The number of bytes used to store the node.
-        /// </returns>
-        public override int GetLength(Entities.Node entity)
-        {
-            return BaseLength + 
-                sizeof(int) + // Length of the ranked signatures count number
-                (entity.Children.Length * NodeFactoryShared.NodeIndexLengthV31) +
-                (entity.NumericChildren.Length * NodeNumericIndexLength) +
-                (entity.RankedSignatureCount * sizeof(int));
         }
     }
 
@@ -80,31 +62,11 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
     /// Factory class used to create the new instances of Node V3.2 object.
     /// Difference is in the length of the Node entity.
     /// </summary>
-    internal class NodeMemoryFactoryV32 : NodeFactory<DataSet>
+    internal class NodeMemoryFactoryV32 : NodeFactoryV32<DataSet>
     {
         protected override Entities.Node Construct(DataSet dataSet, int offset, Reader reader)
         {
             return new NodeV32(dataSet, offset, reader);
-        }
-
-        /// <summary>
-        /// Returns the length of the <see cref="NodeV32"/> entity provided.
-        /// </summary>
-        /// <param name="entity">
-        /// An entity of type Node who length is required.
-        /// </param>
-        /// <returns>
-        /// The number of bytes used to store the node.
-        /// </returns>
-        public override int GetLength(Entities.Node entity)
-        {
-            return BaseLength +
-                sizeof(ushort) + // Length of the ranked signatures count number
-                (entity.Children.Length * NodeFactoryShared.NodeIndexLengthV32) +
-                (entity.NumericChildren.Length * NodeNumericIndexLength) +
-                // If the ranked signature count is zero then nothing follows. If it's
-                // great than 0 then the next 4 bytes are the index of the first signature.
-                (entity.RankedSignatureCount == 0 ? 0 : sizeof(int));
         }
     }
 

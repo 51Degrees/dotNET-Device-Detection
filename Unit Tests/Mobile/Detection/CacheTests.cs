@@ -26,6 +26,7 @@ using FiftyOne.Foundation.Mobile.Detection;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using FiftyOne.Foundation.Mobile.Detection.Caching;
 
 namespace FiftyOne.Tests.Unit.Mobile.Detection
 {
@@ -37,7 +38,7 @@ namespace FiftyOne.Tests.Unit.Mobile.Detection
         /// </summary>
         /// <typeparam name="K">Key type</typeparam>
         /// <typeparam name="V">Value type</typeparam>
-        public class CacheLoader<K, V> : ICacheLoader<K,V>
+        public class CacheLoader<K, V> : IValueLoader<K,V>
         {
             /// <summary>
             /// Source of data to be used by the loader.
@@ -59,7 +60,7 @@ namespace FiftyOne.Tests.Unit.Mobile.Detection
                 _source = source;
             }
 
-            public V Fetch(K key)
+            public V Load(K key)
             {
                 Interlocked.Increment(ref _fetches);
                 return _source[key];
@@ -73,7 +74,7 @@ namespace FiftyOne.Tests.Unit.Mobile.Detection
         {
             var source = GetRandomStringKeys(1);
             var loader = new CacheLoader<string, string>(source);
-            var cache = new Cache<string, string>(source.Count, loader);
+            var cache = new LruCache<string, string>(source.Count, loader);
             Console.WriteLine(cache[null]);
         }
 
@@ -83,7 +84,7 @@ namespace FiftyOne.Tests.Unit.Mobile.Detection
         {
             var source = GetNumericKeys(1);
             var loader = new CacheLoader<int, string>(source);
-            var cache = new Cache<int, string>(source.Count, loader);
+            var cache = new LruCache<int, string>(source.Count, loader);
             Assert.IsTrue(cache[0] == source[0]);
             Assert.IsTrue(cache.Misses == 1);
         }
@@ -94,7 +95,7 @@ namespace FiftyOne.Tests.Unit.Mobile.Detection
         {
             var source = GetNumericKeys(1);
             var loader = new CacheLoader<int, string>(source);
-            var cache = new Cache<int, string>(source.Count, loader);
+            var cache = new LruCache<int, string>(source.Count, loader);
             try { Assert.IsNull(cache[1]); }
             catch(KeyNotFoundException)
             {
@@ -123,7 +124,7 @@ namespace FiftyOne.Tests.Unit.Mobile.Detection
         {
             var source = GetRandomStringKeys(1000000);
             var loader = new CacheLoader<string, string>(source);
-            var cache = new Cache<string, string>(source.Count, loader);
+            var cache = new LruCache<string, string>(source.Count, loader);
             var fill = ProcessSource(source, cache);
             var retrieve = ProcessSource(source, cache);
             Console.WriteLine(
@@ -147,7 +148,7 @@ namespace FiftyOne.Tests.Unit.Mobile.Detection
         /// <param name="source"></param>
         /// <param name="cache"></param>
         /// <returns></returns>
-        private static TimeSpan ProcessSource(IDictionary<string, string> source, Cache<string, string> cache)
+        private static TimeSpan ProcessSource(IDictionary<string, string> source, LruCache<string, string> cache)
         {
             var start = DateTime.UtcNow;
             Parallel.ForEach(source, item =>
@@ -167,7 +168,7 @@ namespace FiftyOne.Tests.Unit.Mobile.Detection
         private static void ValidateCache<K,V>(IDictionary<K, V> source) where V : IEquatable<V>
         {
             var loader = new CacheLoader<K, V>(source);
-            var cache = new Cache<K, V>(source.Count / 2, loader);
+            var cache = new LruCache<K, V>(source.Count / 2, loader);
 
             // Fill the cache with half of the values.
             foreach (var item in source.Take(source.Count / 2))

@@ -21,18 +21,13 @@
 
 using System.Collections.Generic;
 using FiftyOne.Foundation.Mobile.Detection.Entities;
-using System.Diagnostics;
 using System.Collections.Specialized;
 using System.Linq;
-using System.IO;
-using System.Reflection;
-using FiftyOne.Foundation.Mobile.Detection.Readers;
-using System.IO.Compression;
-using FiftyOne.Foundation.Mobile.Detection.Factories;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using FiftyOne.Foundation.Mobile.Detection.Caching;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
@@ -88,7 +83,6 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// Provider used to perform a detection based on a User-Agent string. 
     /// </para>
     /// </summary>
-    
     public class Provider : IDisposable
     {
         #region Static Fields
@@ -96,7 +90,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Used to split device Id strings into their integer parts.
         /// </summary>
-        private static readonly Regex _deviceIdRegex = new Regex(@"\d+", RegexOptions.Compiled);
+        private static readonly Regex _deviceIdRegex = new Regex(
+            @"\d+", RegexOptions.Compiled);
 
         #endregion
 
@@ -118,7 +113,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// A cache for User-Agents.
         /// </summary>
-        private readonly Cache<string, MatchResult> _userAgentCache = null;
+        private readonly ILoadingCache<string, MatchResult> _userAgentCache = null;
 
         /// <summary>
         /// The number of detections performed using the method.
@@ -144,9 +139,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Constructs a new provider using the data set.
         /// </summary>
         /// <param name="dataSet">Data set to use for device detection</param>
-        public Provider(DataSet dataSet) : this (dataSet, false, 0)
-        {
-        }
+        public Provider(DataSet dataSet) : this(dataSet, false, 0)
+        { }
 
         /// <summary>
         /// Constructs a new provider using the data set.
@@ -155,8 +149,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="cacheSize">Size of the cache used with the provider</param>
         public Provider(DataSet dataSet, int cacheSize)
             : this(dataSet, false, cacheSize)
-        {
-        }
+        { }
 
         /// <summary>
         /// Constructs a new provided using the data set.
@@ -164,7 +157,20 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="dataSet">Data set to use for device detection</param>
         /// <param name="recordDetectionTime">True if the detection time should be recorded</param>
         /// <param name="cacheSize">Size of the cache used with the provider</param>
-        public Provider(DataSet dataSet, bool recordDetectionTime, int cacheSize)
+        public Provider(DataSet dataSet, bool recordDetectionTime, 
+            int cacheSize)
+            : this(dataSet, recordDetectionTime, cacheSize, new LruCacheBuilder())
+        { }
+
+        /// <summary>
+        /// Constructs a new provided using the data set.
+        /// </summary>
+        /// <param name="dataSet">Data set to use for device detection</param>
+        /// <param name="recordDetectionTime">True if the detection time should be recorded</param>
+        /// <param name="cacheSize">the size of the cache to use</param>
+        /// <param name="cacheBuilder">cache builder to use when building the cache</param>
+        public Provider(DataSet dataSet, bool recordDetectionTime, 
+            int cacheSize, ILoadingCacheBuilder cacheBuilder)
         {
             DataSet = dataSet;
             MethodCounts = new SortedList<MatchMethods, long>();
@@ -174,9 +180,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
             MethodCounts.Add(MatchMethods.Numeric, 0);
             MethodCounts.Add(MatchMethods.None, 0);
             RecordDetectionTime = recordDetectionTime;
-            _userAgentCache = cacheSize > 0 ? 
-                new Cache<string, MatchResult>(cacheSize) : null;
+            if (cacheSize > 0)
+            {
+                _userAgentCache = cacheBuilder.Build<string, MatchResult>(cacheSize);
+            }
         }
+
 
         #endregion
 

@@ -25,19 +25,8 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Diagnostics;
 
-namespace FiftyOne.Foundation.Mobile.Detection
+namespace FiftyOne.Foundation.Mobile.Detection.Caching
 {
-    /// <summary>
-    /// Source of items for the cache if the key does not 
-    /// already exist.
-    /// </summary>
-    /// <typeparam name="K">Key for the cache items</typeparam>
-    /// <typeparam name="V">Value for the cache items</typeparam>
-    internal interface ICacheLoader<K, V>
-    {
-        V Fetch(K key);
-    }
-
     /// <summary>
     /// Many of the entities used by the detector are requested repeatably. 
     /// The cache improves memory usage and reduces strain on the garbage collector
@@ -64,7 +53,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// </para>
     /// <typeparam name="K">Key for the cache items</typeparam>
     /// <typeparam name="V">Value for the cache items</typeparam>
-    internal class Cache<K, V> : IDisposable
+    internal class LruCache<K, V> : ILoadingCache<K, V>
     {
         #region Fields
 
@@ -77,7 +66,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Loader used to fetch items not in the cache.
         /// </summary>
-        private readonly ICacheLoader<K, V> _loader;
+        private IValueLoader<K, V> _loader;
 
         /// <summary>
         /// Hash map of keys to item values.
@@ -116,7 +105,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Percentage of cache misses.
         /// </summary>
-        internal double PercentageMisses
+        public double PercentageMisses
         {
             get
             {
@@ -131,7 +120,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="key">Key for the item required</param>
         /// <returns>An instance of the value associated with the key</returns>
-        internal V this[K key]
+        public V this[K key]
         {
             get
             {
@@ -147,7 +136,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="key">Key for the item required</param>
         /// <param name="loader">Loader to fetch the item from if not in the cache</param>
         /// <returns>An instance of the value associated with the key</returns>
-        internal V this[K key, ICacheLoader<K, V> loader]
+        public V this[K key, IValueLoader<K, V> loader]
         {
             get
             {
@@ -160,7 +149,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                     // to write the item to the cache.
                     Interlocked.Increment(ref _misses);
                     newNode = new LinkedListNode<KeyValuePair<K, V>>(
-                        new KeyValuePair<K, V>(key, loader.Fetch(key)));
+                        new KeyValuePair<K, V>(key, loader.Load(key)));
                     
                     lock (_writeLock)
                     {
@@ -208,7 +197,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// Constructs a new instance of the cache.
         /// </summary>
         /// <param name="cacheSize">The number of items to store in the cache</param>
-        internal Cache(int cacheSize) 
+        internal LruCache(int cacheSize) 
         {
             CacheSize = cacheSize;
             _dictionary = new ConcurrentDictionary<K, LinkedListNode<KeyValuePair<K, V>>>(
@@ -221,9 +210,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// </summary>
         /// <param name="cacheSize">The number of items to store in the cache</param>
         /// <param name="loader">Loader used to fetch items not in the cache</param>
-        internal Cache(int cacheSize, ICacheLoader<K,V> loader) : this (cacheSize)
+        internal LruCache(int cacheSize, IValueLoader<K,V> loader) : this (cacheSize)
         {
-            _loader = loader;
+            SetValueLoader(loader);
         }
 
         #endregion
@@ -233,7 +222,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Ensures the lock used to synchronise the cache is disposed.
         /// </summary>
-        ~Cache()
+        ~LruCache()
         {
             Dispose(false);
         }
@@ -260,6 +249,15 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #endregion
 
         #region Methods
+
+        /// <summary>
+        /// Set the value loader that will be used to load items on a cache miss
+        /// </summary>
+        /// <param name="loader"></param>
+        public void SetValueLoader(IValueLoader<K,V> loader)
+        {
+            _loader = loader;
+        }
         
         /// <summary>
         /// Removes the last item in the cache if the cache size is reached.
@@ -286,7 +284,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Resets the stats for the cache.
         /// </summary>
-        internal void ResetCache()
+        public void ResetCache()
         {
             _linkedList.Clear();
             _dictionary.Clear();

@@ -23,7 +23,6 @@ using System;
 using System.Linq;
 using System.Text;
 using System.IO;
-using FiftyOne.Foundation.Mobile.Detection.Factories;
 using System.Collections.Generic;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Entities
@@ -34,7 +33,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// <para>
     /// Every character position in the string contains a tree of nodes
     /// which are evaluated until either a complete node is found, or 
-    /// no nodes are found that match at the character positon.
+    /// no nodes are found that match at the character position.
     /// </para>
     /// <para>
     /// The list of <see cref="Signature"/> entities is in ascending order of 
@@ -53,7 +52,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// <para>
     /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
-    internal abstract class Node : BaseEntity<DataSet>, IComparable<Node>
+    internal abstract class Node : DeviceDetectionBaseEntity, IComparable<Node>
     {
         #region Classes
 
@@ -67,11 +66,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
 
         /// <summary>
-        /// Used to order the results of a numeric comparision of nodes.
+        /// Used to order the results of a numeric comparison of nodes.
         /// </summary>
-        private class NumericNodeComparer : IComparer<KeyValuePair<NodeNumericIndex, int>>
+        private class NumericNodeComparer : 
+            IComparer<KeyValuePair<NodeNumericIndex, int>>
         {
-            public int Compare(KeyValuePair<NodeNumericIndex, int> x, KeyValuePair<NodeNumericIndex, int> y)
+            public int Compare(
+                KeyValuePair<NodeNumericIndex, int> x, 
+                KeyValuePair<NodeNumericIndex, int> y)
             {
                 // Compare the difference between this pair and the other.
                 var difference = x.Value.CompareTo(y.Value);
@@ -98,9 +100,10 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             new Range { Lower = 10000, Upper = short.MaxValue } };
 
         /// <summary>
-        /// Used to order the results of a numeric comparision of nodes.
+        /// Used to order the results of a numeric comparison of nodes.
         /// </summary>
-        private static readonly NumericNodeComparer _numericNodeComparer = new NumericNodeComparer();
+        private static readonly NumericNodeComparer _numericNodeComparer = 
+            new NumericNodeComparer();
 
         /// <summary>
         /// Used to indicate an empty array of children.
@@ -115,8 +118,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <summary>
         /// Used to find matching numeric nodes.
         /// </summary>
-        private static readonly SearchLists<NodeNumericIndex, int> _numericChildrenSearch = 
-            new SearchLists<NodeNumericIndex, int>();
+        private static readonly SearchLists<NodeNumericIndex, int> 
+            _numericChildrenSearch = new SearchLists<NodeNumericIndex, int>();
 
         #endregion
 
@@ -310,7 +313,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// start reading.
         /// </param>
         internal Node(
-            DataSet dataSet,
+            IDataSet dataSet,
             int offset,
             BinaryReader reader) : base (dataSet, offset)
         {
@@ -340,11 +343,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <returns>
         /// Variable length list of child indexes that contain numeric values.
         /// </returns>
-        protected NodeNumericIndex[] ReadNodeNumericIndexes(Entities.DataSet dataSet, BinaryReader reader, short count)
+        protected NodeNumericIndex[] ReadNodeNumericIndexes(
+            Entities.DataSet dataSet,
+            BinaryReader reader,
+            short count)
         {
             var array = new NodeNumericIndex[count];
             for (int i = 0; i < array.Length; i++)
-                array[i] = new NodeNumericIndex(dataSet, reader.ReadInt16(), reader.ReadInt32());
+                array[i] = new NodeNumericIndex(
+                    dataSet, 
+                    reader.ReadInt16(),
+                    reader.ReadInt32());
             return array;
         }
 
@@ -397,17 +406,28 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             while (i >= 0 &&
                 state.TargetUserAgentArray[i] >= (byte)'0' &&
                 state.TargetUserAgentArray[i] <= (byte)'9')
+            {
                 i--;
+            }
 
             // If numeric characters were found then return the number.
             if (i < Position)
+            {
                 return Utils.GetNumber(
                     state.TargetUserAgentArray,
                     i + 1,
                     Position - i);
+            }
+
+            // Return -1 if there is no numeric value at this position.
             return -1;
         }
-        
+
+        static List<int> previous = new List<int>();
+        static bool tripped = false;
+
+        static TextWriter writer = null;
+
         /// <summary>
         /// Gets a complete node, or if one isn't available exactly the closest
         /// numeric one to the target User-Agent at the current position.
@@ -423,33 +443,59 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         {
             Node node = null;
 
-            // Check to see if there's a next node which matches
+            // Get the next child node that matches the target User-Agent
             // exactly.
             var nextNode = GetNextNode(state);
             if (nextNode != null)
+            {
+                // An exact matching child node was found. Evaluate it for
+                // a numeric child. 
                 node = nextNode.GetCompleteNumericNode(state);
+            }
 
             if (node == null && NumericChildrenCount > 0)
             {
-                // No. So try each of the numeric matches in ascending order of
-                // difference.
+                // There is either no exact matching normal child or there are
+                // no children that generated a numeric match. This node does 
+                // have numeric children that should be evaluated. Get the 
+                // numeric value of the current position from the target 
+                // User-Agent.
                 var target = GetCurrentPositionAsNumeric(state);
                 if (target >= 0)
                 {
+                    // Return the numeric nodes in the ascending order from 
+                    // the target value. i.e. if the target is 10 and the 
+                    // numeric nodes are ordered 5, 8, 11, 15 they would be
+                    // provided in the order 11, 8, 5, 15 by the enumerator.
                     var enumerator = GetNumericNodeEnumerator(state, target);
                     while (enumerator.MoveNext())
                     {
-                        node = enumerator.Current.Node.GetCompleteNumericNode(state);
-                        if (node != null)
+                        var current = enumerator.Current.Node;
+
+                        // Evaluate the node from the enumerator if it has
+                        // not already been evaluated earlier in the method
+                        // when it was found as the nextNode.
+                        if (nextNode == null || 
+                            nextNode.Equals(current) == false)
                         {
-                            var difference = Math.Abs(target - enumerator.Current.Value);
-                            state.LowestScore += difference;
-                            break;
+                            // Check if there is a complete numeric node under
+                            // this node. If there is then calculate and record
+                            // the difference value before returning it.
+                            node = current.GetCompleteNumericNode(state);
+                            if (node != null)
+                            {
+                                var difference = Math.Abs(
+                                    target - enumerator.Current.Value);
+                                state.LowestScore += difference;
+                                break;
+                            }
                         }
                     }
                 }
             }
 
+            // If no suitable child node could be found and this node is a 
+            // complete node then return this node.
             if (node == null && IsComplete)
             {
                 node = this;
@@ -472,9 +518,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             Node node = null;
             var nextNode = GetNextNode(state);
             if (nextNode != null)
+            {
                 node = nextNode.GetCompleteNode(state);
+            }
             if (node == null && IsComplete)
+            {
                 node = this;
+            }
             return node;
         }
 
@@ -532,6 +582,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             return null;
         }
 
+        /// <summary>
+        /// Determines if the characters for a number.
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="startIndex"></param>
+        /// <param name="length"></param>
+        /// <returns>
+        /// True if the characters are a number, otherwise false.
+        /// </returns>
         private bool IsNumeric(byte[] array, int startIndex, int length)
         {
             for (int i = startIndex; i < startIndex + length; i++)
@@ -574,15 +633,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// An enumerator for the numeric children of the node compared to the 
         /// target value.
         /// </returns>
-        private IEnumerator<NodeNumericIndex> GetNumericNodeEnumerator(MatchState state, int target)
+        private IEnumerator<NodeNumericIndex> GetNumericNodeEnumerator(
+            MatchState state, int target)
         {
             if (target >= 0 && target <= short.MaxValue)
             {
-                // Get the range in which the comparision values need to fall.
+                // Get the range in which the comparison values need to fall.
                 var range = GetRange(target);
 
                 // Get the index in the ordered list to start at.
-                var startIndex = _numericChildrenSearch.BinarySearch(NumericChildren, target);
+                var startIndex = _numericChildrenSearch.BinarySearch(
+                    NumericChildren, target);
                 if (startIndex < 0)
                 {
                     startIndex = ~startIndex - 1;
@@ -590,10 +651,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                 int lowIndex = startIndex, highIndex = startIndex + 1;
                 
                 // Determine if the low and high indexes are in range.
-                var lowInRange = lowIndex >= 0 && lowIndex < NumericChildren.Length &&
+                var lowInRange = lowIndex >= 0 &&
+                    lowIndex < NumericChildren.Length &&
                     NumericChildren[lowIndex].Value >= range.Lower && 
                     NumericChildren[lowIndex].Value < range.Upper;
-                var highInRange = highIndex < NumericChildren.Length && highIndex >= 0 &&
+                var highInRange = highIndex < NumericChildren.Length &&
+                    highIndex >= 0 &&
                     NumericChildren[highIndex].Value >= range.Lower &&
                     NumericChildren[highIndex].Value < range.Upper;
 
@@ -602,10 +665,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                     if (lowInRange && highInRange)
                     {
                         // Get the differences between the two values.
-                        var lowDifference = Math.Abs(NumericChildren[lowIndex].Value - target);
-                        var highDifference = Math.Abs(NumericChildren[highIndex].Value - target);
+                        var lowDifference = Math.Abs(
+                            NumericChildren[lowIndex].Value - target);
+                        var highDifference = Math.Abs(
+                            NumericChildren[highIndex].Value - target);
 
-                        // Favour the lowest value where the differences are equal.
+                        // Favour the lowest value where the differences are 
+                        // equal.
                         if (lowDifference <= highDifference)
                         {
                             yield return NumericChildren[lowIndex];
@@ -658,8 +724,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         internal void AddCharacters(byte[] values)
         {
             var characters = Characters == null ? GetCharacters() : Characters;
-            for (int i = 0; i < Length; i++)
-                values[Position + i + 1] = characters[i];
+            // caharacters array will be null if this is an incomplete node.
+            if (characters != null)
+            {
+                for (int i = 0; i < Length; i++)
+                    values[Position + i + 1] = characters[i];
+            }
         }
 
         /// <summary>
@@ -676,11 +746,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
 
         /// <summary>
-        /// Returns true if any of the nodes in the match have overlapping characters
-        /// with this one.
+        /// Returns true if any of the nodes in the match have overlapping
+        /// characters with this one.
         /// </summary>
-        /// <param name="state">Match state to compare with this node</param>
-        /// <returns>True if the states nodes overlap with this one, otherwise false.</returns>
+        /// <param name="state">
+        /// Match state to compare with this node
+        /// </param>
+        /// <returns>
+        /// True if the states nodes overlap with this one, otherwise false.
+        /// </returns>
         internal bool GetIsOverlap(MatchState state)
         {
             return state.Nodes.Any(i => GetIsOverlap(i));
@@ -716,6 +790,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         public int CompareTo(Node other)
         {
             return Index.CompareTo(other.Index);
+        }
+
+        /// <summary>
+        /// Evaluates this node against another for equality using the
+        /// <see cref="BaseEntity.Index"/> field of the nodes.
+        /// </summary>
+        /// <param name="other">The other node to evaluate</param>
+        /// <returns>True if equal, otherwise false</returns>
+        public bool Equals(Node other)
+        {
+            return Index.Equals(other.Index);
         }
 
         #endregion

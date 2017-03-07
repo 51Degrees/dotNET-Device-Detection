@@ -25,6 +25,7 @@ using System.Linq;
 using System.Text;
 using FiftyOne.Foundation.Mobile.Detection.Entities;
 using System.Diagnostics;
+using FiftyOne.Foundation.Mobile.Detection.Caching;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
@@ -472,7 +473,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// <summary>
     /// Working state used during the device detection matching process.
     /// </summary>
-    internal class MatchState : MatchResult, ICacheLoader<string, MatchResult>
+    internal class MatchState : MatchResult, IValueLoader<string, MatchResult>
     {
         #region Constants
 
@@ -662,7 +663,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             return -1;
         }
 
-        MatchResult ICacheLoader<string, MatchResult>.Fetch(string key)
+        MatchResult IValueLoader<string, MatchResult>.Load(string key)
         {
             Match.Provider.MatchNoCache(key, this);
             return new MatchResult(this);

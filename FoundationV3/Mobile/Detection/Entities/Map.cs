@@ -26,7 +26,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// <summary>
     /// Class used to link a property to one or more export maps.
     /// </summary>
-    public class Map : BaseEntity<DataSet>
+    public class Map : DeviceDetectionBaseEntity
     {
         #region Fields
 

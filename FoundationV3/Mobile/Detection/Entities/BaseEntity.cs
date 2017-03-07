@@ -37,15 +37,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// https://51degrees.com/Support/Documentation/Net
     /// </para>
     /// <remarks>Not intended to be used directly by 3rd parties.</remarks>
-    public abstract class BaseEntity<T> : 
-        IComparable<BaseEntity<T>>, IComparable<int>, IEquatable<int>
+    public abstract class BaseEntity : 
+        IComparable<BaseEntity>, IComparable<int>, IEquatable<int>
     {
         #region Properties
 
         /// <summary>
         /// The data set the entity relates to.
         /// </summary>
-        public readonly T DataSet;
+        public virtual IDataSet DataSet { get; private set; }
 
         /// <summary>
         /// The unique index of the item in the collection of items, or
@@ -62,13 +62,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// </summary>
         /// <remarks>Not intended to be used directly by 3rd parties.</remarks>
         /// <param name="dataSet">
-        /// The <see cref="DataSet"/> being created
+        /// The <see cref="IDataSet"/> being created
         /// </param>
         /// <param name="indexOrOffset">
         /// The unique index of the item in the collection of items, or
         /// the unique offset to the item in the source data structure.
         /// </param>
-        protected BaseEntity(T dataSet, int indexOrOffset)
+        protected BaseEntity(IDataSet dataSet, int indexOrOffset)
         {
             DataSet = dataSet;
             Index = indexOrOffset;
@@ -108,7 +108,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <returns>
         /// The position of one entity over the other.
         /// </returns>
-        public int CompareTo(BaseEntity<T> other)
+        public int CompareTo(BaseEntity other)
         {
             return CompareTo(other.Index);
         }

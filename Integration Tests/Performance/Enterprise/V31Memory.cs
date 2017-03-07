@@ -129,12 +129,5 @@ namespace FiftyOne.Tests.Integration.Performance.Enterprise
         {
             base.RandomUserAgentsSingle(_dataSet.Properties, 1);
         }
-
-        [TestMethod]
-        [TestCategory("Performance"), TestCategory("Memory"), TestCategory("Enterprise")]
-        public void EnterpriseV31Memory_Performance_FindProfiles()
-        {
-            base.FindProfiles(0.1);
-        }
     }
 }

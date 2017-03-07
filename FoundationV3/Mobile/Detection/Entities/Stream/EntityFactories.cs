@@ -24,10 +24,10 @@ using FiftyOne.Foundation.Mobile.Detection.Readers;
 
 namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
 {
-    internal class StreamAsciiStringFactory : BaseEntityFactory<AsciiString<Entities.DataSet>, DataSet>
+    internal class StreamAsciiStringFactory : BaseAsciiStringFactory<IStreamDataSet>
     {
         /// <summary>
-        /// Creates a new instance of <see cref="AsciiString{T}"/>
+        /// Creates a new instance of <see cref="AsciiString"/>
         /// </summary>
         /// <param name="dataSet">
         /// The data set whose strings list the string is contained within
@@ -39,17 +39,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <param name="reader">
         /// Binary reader positioned at the start of the AsciiString
         /// </param>
-        /// <returns>A new instance of an <see cref="AsciiString{T}"/></returns>
-        public override AsciiString<Entities.DataSet> Create(DataSet dataSet, int offset, Reader reader)
+        /// <returns>A new instance of an <see cref="AsciiString"/></returns>
+        public override AsciiString Create(IStreamDataSet dataSet, int offset, Reader reader)
         {
-            return new AsciiString<Entities.DataSet>(dataSet, offset, reader);
+            return new AsciiString(dataSet, offset, reader);
         }
     }
-
+    
     /// <summary>
     /// Factory used to create stream <see cref="Entities.Node"/> entities.
     /// </summary>
-    internal abstract class NodeStreamFactory : NodeFactory<DataSet>
+    internal class NodeStreamFactoryV31 : NodeFactoryV31<IStreamDataSet>
     {
         /// <summary>
         /// Pool for the corresponding data set used to get readers.
@@ -57,32 +57,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         protected readonly Pool _pool;
 
         /// <summary>
-        /// Constructs a new instance of <see cref="NodeStreamFactory"/>.
-        /// </summary>
-        /// <param name="pool">
-        /// Pool from the data set to be used when creating 
-        /// new <see cref="Entities.Node"/> entities.
-        /// </param>
-        internal NodeStreamFactory(Pool pool)
-        {
-            _pool = pool;
-        }
-    }
-
-    /// <summary>
-    /// Factory used to create stream <see cref="Entities.Node"/> entities.
-    /// </summary>
-    internal class NodeStreamFactoryV31 : NodeStreamFactory
-    {
-        /// <summary>
         /// Constructs a new instance of <see cref="NodeStreamFactoryV31"/>.
         /// </summary>
         /// <param name="pool">
         /// Pool from the data set to be used when creating 
         /// new <see cref="Entities.Node"/> entities.
         /// </param>
-        internal NodeStreamFactoryV31(Pool pool) : base(pool)
+        internal NodeStreamFactoryV31(Pool pool) 
         {
+            _pool = pool;
         }
 
         /// <summary>
@@ -102,7 +85,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <returns>
         /// A new <see cref="Entities.Node"/> entity from the data set.
         /// </returns>
-        protected override Entities.Node Construct(DataSet dataSet, int offset, Reader reader)
+        protected override Entities.Node Construct(IStreamDataSet dataSet, int offset, Reader reader)
         {
             return new Entities.Stream.NodeV31(dataSet, offset, reader);
         }
@@ -111,8 +94,13 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
     /// <summary>
     /// Factory used to create stream <see cref="Entities.Node"/> entities.
     /// </summary>
-    internal class NodeStreamFactoryV32 : NodeStreamFactory
+    internal class NodeStreamFactoryV32 : NodeFactoryV32<IStreamDataSet>
     {
+        /// <summary>
+        /// Pool for the corresponding data set used to get readers.
+        /// </summary>
+        protected readonly Pool _pool;
+        
         /// <summary>
         /// Constructs a new instance of <see cref="NodeStreamFactoryV32"/>.
         /// </summary>
@@ -121,8 +109,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <see cref="Entities.Node"/> entities
         /// </param>
         internal NodeStreamFactoryV32(Pool pool)
-            : base(pool)
         {
+            _pool = pool;
         }
 
         /// <summary>
@@ -142,7 +130,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <returns>
         /// A new <see cref="Entities.Node"/> entity from the data set.
         /// </returns>
-        protected override Entities.Node Construct(DataSet dataSet, int offset, Reader reader)
+        protected override Entities.Node Construct(IStreamDataSet dataSet, int offset, Reader reader)
         {
             return new Entities.Stream.NodeV32(dataSet, offset, reader);
         }
@@ -151,7 +139,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
     /// <summary>
     /// Factory used to create stream <see cref="Entities.Profile"/> entities.
     /// </summary>
-    internal class ProfileStreamFactory : ProfileFactory<DataSet>
+    internal class ProfileStreamFactory : ProfileFactory<IStreamDataSet>
     {
         /// <summary>
         /// Pool for the corresponding data set used to get readers.
@@ -187,7 +175,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// <returns>
         /// A new <see cref="Entities.Profile"/> entity from the data set.
         /// </returns>
-        protected override Entities.Profile Construct(DataSet dataSet, int offset, Reader reader)
+        protected override Entities.Profile Construct(IStreamDataSet dataSet, int offset, Reader reader)
         {
             return new Entities.Stream.Profile(dataSet, offset, reader);
         }

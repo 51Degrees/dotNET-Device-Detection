@@ -24,7 +24,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// <summary>
     /// Base class used by all node indexes containing common functionality.
     /// </summary>
-    internal abstract class NodeIndexBase : BaseEntity<DataSet>
+    internal abstract class NodeIndexBase : DeviceDetectionBaseEntity
     {
         #region Fields
 

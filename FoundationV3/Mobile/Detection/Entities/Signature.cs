@@ -47,7 +47,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// For more information about signature see 
     /// https://51degrees.com/Support/Documentation/Net
     /// </para>
-    public abstract class Signature : BaseEntity<DataSet>, IComparable<Signature>
+    public abstract class Signature : DeviceDetectionBaseEntity, IComparable<Signature>
     {
         #region Fields
 
@@ -324,7 +324,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// start reading.
         /// </param>
         internal Signature(
-            DataSet dataSet,
+            IDeviceDetectionDataSet dataSet,
             int index,
             Reader reader)
             : base(dataSet, index)
@@ -349,7 +349,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         /// <returns>
         /// An array of the offsets as integers read from the reader.
         /// </returns>
-        internal static int[] ReadOffsets(DataSet dataSet, Reader reader, int length) 
+        internal static int[] ReadOffsets(IDataSet dataSet, Reader reader, int length) 
         {
             reader.List.Clear();
 		    for (int i = 0; i < length; i++) {

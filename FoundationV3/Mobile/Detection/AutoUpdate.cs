@@ -481,23 +481,31 @@ namespace FiftyOne.Foundation.Mobile.Detection
             catch (WebException ex)
             {
                 //Server response was not 200. Data download can not commence.
-                switch (((HttpWebResponse)ex.Response).StatusCode)
+                var response = ex.Response as HttpWebResponse;
+                if (response != null)
                 {
-                    // Note: needed because TooManyRequests is not available in
-                    // earlier versions of the HttpStatusCode enum.
-                    case ((HttpStatusCode)429):
-                        result = AutoUpdateStatus.
-                            AUTO_UPDATE_ERR_429_TOO_MANY_ATTEMPTS;
-                        break;
-                    case HttpStatusCode.NotModified:
-                        result = AutoUpdateStatus.AUTO_UPDATE_NOT_NEEDED;
-                        break;
-                    case HttpStatusCode.Forbidden:
-                        result = AutoUpdateStatus.AUTO_UPDATE_ERR_403_FORBIDDEN;
-                        break;
-                    default:
-                        result = AutoUpdateStatus.AUTO_UPDATE_HTTPS_ERR;
-                        break;
+                    switch (response.StatusCode)
+                    {
+                        // Note: needed because TooManyRequests is not available in
+                        // earlier versions of the HttpStatusCode enum.
+                        case ((HttpStatusCode)429):
+                            result = AutoUpdateStatus.
+                                AUTO_UPDATE_ERR_429_TOO_MANY_ATTEMPTS;
+                            break;
+                        case HttpStatusCode.NotModified:
+                            result = AutoUpdateStatus.AUTO_UPDATE_NOT_NEEDED;
+                            break;
+                        case HttpStatusCode.Forbidden:
+                            result = AutoUpdateStatus.AUTO_UPDATE_ERR_403_FORBIDDEN;
+                            break;
+                        default:
+                            result = AutoUpdateStatus.AUTO_UPDATE_HTTPS_ERR;
+                            break;
+                    }
+                }
+                else
+                {
+                    result = AutoUpdateStatus.AUTO_UPDATE_HTTPS_ERR;
                 }
             }
 

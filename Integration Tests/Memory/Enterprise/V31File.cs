@@ -69,11 +69,5 @@ namespace FiftyOne.Tests.Integration.Memory.Enterprise
         {
             base.UserAgentsSingle(UserAgentGenerator.GetBadUserAgents(), 55);
         }
-
-        [TestMethod(), TestCategory("Memory"), TestCategory("File"), TestCategory("Enterprise")]
-        public void EnterpriseV31File_Memory_FindProfiles()
-        {
-            base.FindProfiles(50);
-        }
     }
 }

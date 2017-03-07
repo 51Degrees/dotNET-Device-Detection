@@ -26,7 +26,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// <summary>
     /// Maps a profile id to its position in the data file.
     /// </summary>
-    public class ProfileOffset : BaseEntity<DataSet>
+    public class ProfileOffset : DeviceDetectionBaseEntity
     {        
         #region Properties
 

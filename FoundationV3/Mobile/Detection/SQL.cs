@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.Linq;
 using FiftyOne.Foundation.Mobile.Detection.Entities;
 using System.Threading;
+using FiftyOne.Foundation.Mobile.Detection.Caching;
 
 namespace FiftyOne.Foundation.Mobile.Detection
 {
@@ -51,9 +52,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Loads byte array results into the cache.
         /// </summary>
-        class ByteArrayIdCacheLoad : ICacheLoader<byte[], InternalResult>
+        class ByteArrayIdCacheLoad : IValueLoader<byte[], InternalResult>
         {
-            public InternalResult Fetch(byte[] id)
+            public InternalResult Load(byte[] id)
             {
                 return GetMatch(IterateProfileIds(id));
             }
@@ -62,9 +63,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Loads missed string Id result into the cache.
         /// </summary>
-        class StringIdCacheLoader : ICacheLoader<string, InternalResult>
+        class StringIdCacheLoader : IValueLoader<string, InternalResult>
         {
-            public InternalResult Fetch(string id)
+            public InternalResult Load(string id)
             {
                 return GetMatch(IterateProfileIds(id));
             }
@@ -73,9 +74,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Loads a missed User-Agent result into the cache.
         /// </summary>
-        class UserAgentCacheLoader : ICacheLoader<string, InternalResult>
+        class UserAgentCacheLoader : IValueLoader<string, InternalResult>
         {
-            public InternalResult Fetch(string userAgent)
+            public InternalResult Load(string userAgent)
             {
                 // The result wasn't in the cache so find it from the 51Degrees provider.
                 var match = _provider.Match(userAgent);
@@ -244,17 +245,17 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Cache for User-Agent string keys to results.
         /// </summary>
-        private static Cache<string, InternalResult> _cacheUserAgent;
+        private static LruCache<string, InternalResult> _cacheUserAgent;
 
         /// <summary>
         /// Cache for Device ID string keys to results.
         /// </summary>
-        private static Cache<string, InternalResult> _cacheIdString;
+        private static LruCache<string, InternalResult> _cacheIdString;
 
         /// <summary>
         /// Cache for byte array device ID keys to results.
         /// </summary>
-        private static Cache<byte[], InternalResult> _cacheIdArray;
+        private static LruCache<byte[], InternalResult> _cacheIdArray;
 
         #endregion
 
@@ -444,13 +445,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
             {
                 // Configure the caches.
                 int cacheSize = 1000;
-                _cacheUserAgent = new Cache<string, InternalResult>(
+                _cacheUserAgent = new LruCache<string, InternalResult>(
                     cacheSize, 
                     new UserAgentCacheLoader());
-                _cacheIdString = new Cache<string, InternalResult>(
+                _cacheIdString = new LruCache<string, InternalResult>(
                     cacheSize,
                     new StringIdCacheLoader());
-                _cacheIdArray = new Cache<byte[], InternalResult>(
+                _cacheIdArray = new LruCache<byte[], InternalResult>(
                     cacheSize,
                     new ByteArrayIdCacheLoad());
 

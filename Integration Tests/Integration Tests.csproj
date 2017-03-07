@@ -18,6 +18,7 @@
     <TestProjectType>UnitTest</TestProjectType>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -63,6 +64,7 @@
       <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Runtime.Caching" />
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -77,6 +79,13 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="APIFindProfiles\Base.cs" />
+    <Compile Include="APIFindProfiles\Enterprise\V31API.cs" />
+    <Compile Include="APIFindProfiles\Enterprise\V32API.cs" />
+    <Compile Include="APIFindProfiles\Lite\V31API.cs" />
+    <Compile Include="APIFindProfiles\Lite\V32API.cs" />
+    <Compile Include="APIFindProfiles\Premium\V31API.cs" />
+    <Compile Include="APIFindProfiles\Premium\V32API.cs" />
     <Compile Include="API\Lite\V32APITrie.cs" />
     <Compile Include="API\Lite\V30APITrie.cs" />
     <Compile Include="API\TrieBase.cs" />
@@ -97,6 +106,13 @@
     <Compile Include="Cache\Enterprise\V31File.cs" />
     <Compile Include="Cache\Enterprise\V32Array.cs" />
     <Compile Include="Cache\Enterprise\V32File.cs" />
+    <Compile Include="DataSetBuilderTests\Base.cs" />
+    <Compile Include="DataSetBuilderTests\BufferBase.cs" />
+    <Compile Include="DataSetBuilderTests\FileBase.cs" />
+    <Compile Include="DataSetBuilderTests\Lite\V31Buffer.cs" />
+    <Compile Include="DataSetBuilderTests\Lite\V32Buffer.cs" />
+    <Compile Include="DataSetBuilderTests\Lite\V31File.cs" />
+    <Compile Include="DataSetBuilderTests\Lite\V32File.cs" />
     <Compile Include="HttpHeaders\Enterprise\V32TrieFile.cs" />
     <Compile Include="HttpHeaders\Premium\V32TrieFile.cs" />
     <Compile Include="HttpHeaders\TrieBase.cs" />
@@ -107,6 +123,28 @@
     <Compile Include="HttpHeaders\Enterprise\V32Array.cs" />
     <Compile Include="HttpHeaders\Premium\V31Array.cs" />
     <Compile Include="HttpHeaders\Premium\V32Array.cs" />
+    <Compile Include="MemoryFindProfiles\Array.cs" />
+    <Compile Include="MemoryFindProfiles\Base.cs" />
+    <Compile Include="MemoryFindProfiles\Enterprise\V31Array.cs" />
+    <Compile Include="MemoryFindProfiles\Enterprise\V31File.cs" />
+    <Compile Include="MemoryFindProfiles\Enterprise\V31Memory.cs" />
+    <Compile Include="MemoryFindProfiles\Enterprise\V32Array.cs" />
+    <Compile Include="MemoryFindProfiles\Enterprise\V32File.cs" />
+    <Compile Include="MemoryFindProfiles\Enterprise\V32Memory.cs" />
+    <Compile Include="MemoryFindProfiles\FileTest.cs" />
+    <Compile Include="MemoryFindProfiles\Lite\V31Array.cs" />
+    <Compile Include="MemoryFindProfiles\Lite\V31File.cs" />
+    <Compile Include="MemoryFindProfiles\Lite\V31Memory.cs" />
+    <Compile Include="MemoryFindProfiles\Lite\V32Array.cs" />
+    <Compile Include="MemoryFindProfiles\Lite\V32File.cs" />
+    <Compile Include="MemoryFindProfiles\Lite\V32Memory.cs" />
+    <Compile Include="MemoryFindProfiles\Memory.cs" />
+    <Compile Include="MemoryFindProfiles\Premium\V31Array.cs" />
+    <Compile Include="MemoryFindProfiles\Premium\V31File.cs" />
+    <Compile Include="MemoryFindProfiles\Premium\V31Memory.cs" />
+    <Compile Include="MemoryFindProfiles\Premium\V32Array.cs" />
+    <Compile Include="MemoryFindProfiles\Premium\V32File.cs" />
+    <Compile Include="MemoryFindProfiles\Premium\V32Memory.cs" />
     <Compile Include="Memory\Enterprise\V30TrieFile.cs" />
     <Compile Include="Memory\Enterprise\V32TrieFile.cs" />
     <Compile Include="Memory\Lite\V32TrieFile.cs" />
@@ -146,6 +184,22 @@
     <Compile Include="MetaData\Premium\V31Memory.cs" />
     <Compile Include="MetaData\Premium\V32File.cs" />
     <Compile Include="MetaData\Premium\V32Memory.cs" />
+    <Compile Include="PerformanceFindProfiles\Array.cs" />
+    <Compile Include="PerformanceFindProfiles\Base.cs" />
+    <Compile Include="PerformanceFindProfiles\Enterprise\V31Array.cs" />
+    <Compile Include="PerformanceFindProfiles\Enterprise\V31File.cs" />
+    <Compile Include="PerformanceFindProfiles\Enterprise\V31Memory.cs" />
+    <Compile Include="PerformanceFindProfiles\Enterprise\V32Array.cs" />
+    <Compile Include="PerformanceFindProfiles\Enterprise\V32File.cs" />
+    <Compile Include="PerformanceFindProfiles\Enterprise\V32Memory.cs" />
+    <Compile Include="PerformanceFindProfiles\FileTest.cs" />
+    <Compile Include="PerformanceFindProfiles\Memory.cs" />
+    <Compile Include="PerformanceFindProfiles\Premium\V31Array.cs" />
+    <Compile Include="PerformanceFindProfiles\Premium\V31File.cs" />
+    <Compile Include="PerformanceFindProfiles\Premium\V31Memory.cs" />
+    <Compile Include="PerformanceFindProfiles\Premium\V32Array.cs" />
+    <Compile Include="PerformanceFindProfiles\Premium\V32File.cs" />
+    <Compile Include="PerformanceFindProfiles\Premium\V32Memory.cs" />
     <Compile Include="Performance\Array.cs" />
     <Compile Include="Performance\Enterprise\V32Array.cs" />
     <Compile Include="Performance\Enterprise\V31Array.cs" />
@@ -193,6 +247,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="Playlists\Enterprise.playlist" />
     <None Include="Playlists\Lite.playlist" />
     <None Include="Playlists\Memory.playlist" />

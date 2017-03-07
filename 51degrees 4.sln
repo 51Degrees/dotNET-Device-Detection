@@ -63,6 +63,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "All Profiles", "Examples\Al
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "FiftyOne.Foundation SQL", "FoundationV3\FiftyOne.Foundation SQL.sqlproj", "{334A1D9F-82F5-41C0-8583-76823D8BF2B1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caching Configuration", "Examples\Caching Configuration\Caching Configuration.csproj", "{D3C0A9BC-E020-4ED0-A24A-13402FB668D8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -131,6 +133,10 @@ Global
 		{334A1D9F-82F5-41C0-8583-76823D8BF2B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{334A1D9F-82F5-41C0-8583-76823D8BF2B1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{334A1D9F-82F5-41C0-8583-76823D8BF2B1}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{D3C0A9BC-E020-4ED0-A24A-13402FB668D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3C0A9BC-E020-4ED0-A24A-13402FB668D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3C0A9BC-E020-4ED0-A24A-13402FB668D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3C0A9BC-E020-4ED0-A24A-13402FB668D8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -148,5 +154,6 @@ Global
 		{608157FD-165C-40F4-AF79-BC812C9BC70E} = {1AB29287-EBE4-42DD-BCF6-95E5D1158E4C}
 		{B91129C0-224A-4AA7-BE18-C13EB2E2BDFD} = {1AB29287-EBE4-42DD-BCF6-95E5D1158E4C}
 		{EA6A83FE-D698-4E4D-821E-1B5BCC22D501} = {1AB29287-EBE4-42DD-BCF6-95E5D1158E4C}
+		{D3C0A9BC-E020-4ED0-A24A-13402FB668D8} = {1AB29287-EBE4-42DD-BCF6-95E5D1158E4C}
 	EndGlobalSection
 EndGlobal
