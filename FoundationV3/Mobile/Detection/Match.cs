@@ -716,12 +716,14 @@ namespace FiftyOne.Foundation.Mobile.Detection
             get
             {
                 return _signature != null ? 
-                    _signature : 
-                    _dataSet.Signatures[_signatureIndex];
+                    _signature :
+                        _signatureIndex.HasValue ?
+                        _dataSet.Signatures[_signatureIndex.Value] :
+                        null;
             }
         }
         protected Signature _signature;
-        private readonly int _signatureIndex;
+        private readonly int? _signatureIndex;
 
         internal virtual int SignaturesCompared
         {
@@ -829,8 +831,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 // one and a cache, or no cache is being used. This approach 
                 // ensures a consistent memory profile.
                 _signatureIndex = source.Signature != null ? 
-                    source.Signature.Index : 
-                    -1;
+                    (int?)source.Signature.Index : 
+                    null;
                 _profileOffsets = source.Profiles.Select(i => i.Index).ToArray();
                 _nodeOffsets = source.Nodes.Select(i => i.Index).ToArray();
             }

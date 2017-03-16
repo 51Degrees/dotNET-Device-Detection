@@ -73,12 +73,6 @@ namespace FiftyOne.Tests.Integration.Memory.Lite
         public void LiteV31Array_Memory_BadUserAgentsSingle()
         {
             base.UserAgentsSingle(UserAgentGenerator.GetBadUserAgents(), ExpectedMemoryUsage);
-        }
-
-        [TestMethod(), TestCategory("Memory"), TestCategory("Array"), TestCategory("Lite")]
-        public void LiteV31Array_Memory_FindProfiles()
-        {
-            base.FindProfiles(ExpectedMemoryUsage);
-        }
+        }        
     }
 }
