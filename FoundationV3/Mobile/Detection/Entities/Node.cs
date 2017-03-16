@@ -422,12 +422,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             // Return -1 if there is no numeric value at this position.
             return -1;
         }
-
-        static List<int> previous = new List<int>();
-        static bool tripped = false;
-
-        static TextWriter writer = null;
-
+        
         /// <summary>
         /// Gets a complete node, or if one isn't available exactly the closest
         /// numeric one to the target User-Agent at the current position.

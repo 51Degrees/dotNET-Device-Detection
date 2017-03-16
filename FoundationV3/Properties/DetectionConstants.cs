@@ -133,10 +133,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// The URL to use to get the latest device data from if a Premium licence key is provided.
         /// </summary>
 #if DEBUG
-        internal const string AutoUpdateUrl = "https://51degrees.com/Products/Downloads/Premium.aspx";
+        internal const string AutoUpdateUrl = "https://distributor.51degrees.com/api/v2/download";
 #else
         // NEVER CHANGE THE RELEASE URL LINK TO THE PRODUCTION DATA DISTRIBUTOR
-        internal const string AutoUpdateUrl = "https://51degrees.com/Products/Downloads/Premium.aspx";
+        internal const string AutoUpdateUrl = "https://distributor.51degrees.com/api/v2/download";
 #endif
 
         /// <summary>
