@@ -168,15 +168,15 @@ namespace FiftyOne.Tests.Unit.Mobile.Detection
         private static void ValidateCache<K,V>(IDictionary<K, V> source) where V : IEquatable<V>
         {
             var loader = new CacheLoader<K, V>(source);
-            var cache = new LruCache<K, V>(source.Count / 2, loader);
+            var cache = new LruCache<K, V>(source.Count / 2, loader, 1);
 
             // Fill the cache with half of the values.
             foreach (var item in source.Take(source.Count / 2))
             {
-                var expectedLast = cache._linkedList.Last;
+                var expectedLast = cache._linkedLists[0].Last;
                 Assert.IsTrue(cache[item.Key].Equals(item.Value));
-                Assert.IsTrue(cache._linkedList.First.Value.Key.Equals(item.Key));
-                Assert.IsTrue(expectedLast == null || expectedLast == cache._linkedList.Last);
+                Assert.IsTrue(cache._linkedLists[0].First.Key.Equals(item.Key));
+                Assert.IsTrue(expectedLast == null || expectedLast == cache._linkedLists[0].Last);
             }
             Assert.IsTrue(cache.Misses == loader.Fetches);
             Assert.IsTrue(cache.Misses == source.Count / 2);
@@ -185,10 +185,10 @@ namespace FiftyOne.Tests.Unit.Mobile.Detection
             // Check all the values are returned from the cache.
             foreach (var item in source.Take(source.Count / 2))
             {
-                var expectedLast = cache._linkedList.Last.Previous;
+                var expectedLast = cache._linkedLists[0].Last.Previous;
                 Assert.IsTrue(cache[item.Key].Equals(item.Value));
-                Assert.IsTrue(cache._linkedList.First.Value.Key.Equals(item.Key));
-                Assert.IsTrue(expectedLast == cache._linkedList.Last);
+                Assert.IsTrue(cache._linkedLists[0].First.Key.Equals(item.Key));
+                Assert.IsTrue(expectedLast == cache._linkedLists[0].Last);
             }
             Assert.IsTrue(cache.Misses == loader.Fetches);
             Assert.IsTrue(cache.Misses == source.Count / 2);
@@ -198,10 +198,10 @@ namespace FiftyOne.Tests.Unit.Mobile.Detection
             // the first half.
             foreach (var item in source.Skip(source.Count / 2))
             {
-                var expectedLast = cache._linkedList.Last.Previous;
+                var expectedLast = cache._linkedLists[0].Last.Previous;
                 Assert.IsTrue(cache[item.Key].Equals(item.Value));
-                Assert.IsTrue(cache._linkedList.First.Value.Key.Equals(item.Key));
-                Assert.IsTrue(expectedLast == cache._linkedList.Last);
+                Assert.IsTrue(cache._linkedLists[0].First.Key.Equals(item.Key));
+                Assert.IsTrue(expectedLast == cache._linkedLists[0].Last);
             }
             Assert.IsTrue(cache.Misses == loader.Fetches);
             Assert.IsTrue(cache.Misses == source.Count);
@@ -211,10 +211,10 @@ namespace FiftyOne.Tests.Unit.Mobile.Detection
             // the values again. They should come from the cache.
             foreach (var item in source.Skip(source.Count / 2))
             {
-                var expectedLast = cache._linkedList.Last.Previous;
+                var expectedLast = cache._linkedLists[0].Last.Previous;
                 Assert.IsTrue(cache[item.Key].Equals(item.Value));
-                Assert.IsTrue(cache._linkedList.First.Value.Key.Equals(item.Key));
-                Assert.IsTrue(expectedLast == cache._linkedList.Last);
+                Assert.IsTrue(cache._linkedLists[0].First.Key.Equals(item.Key));
+                Assert.IsTrue(expectedLast == cache._linkedLists[0].Last);
             }
             Assert.IsTrue(cache.Misses == loader.Fetches);
             Assert.IsTrue(cache.Misses == source.Count);
@@ -224,10 +224,10 @@ namespace FiftyOne.Tests.Unit.Mobile.Detection
             // again and are not already in the cache.
             foreach (var item in source.Take(source.Count / 2))
             {
-                var expectedLast = cache._linkedList.Last.Previous;
+                var expectedLast = cache._linkedLists[0].Last.Previous;
                 Assert.IsTrue(cache[item.Key].Equals(item.Value));
-                Assert.IsTrue(cache._linkedList.First.Value.Key.Equals(item.Key));
-                Assert.IsTrue(expectedLast == cache._linkedList.Last);
+                Assert.IsTrue(cache._linkedLists[0].First.Key.Equals(item.Key));
+                Assert.IsTrue(expectedLast == cache._linkedLists[0].Last);
             }
             Assert.IsTrue(cache.Misses == loader.Fetches);
             Assert.IsTrue(cache.Misses == source.Count * 1.5);
@@ -238,11 +238,11 @@ namespace FiftyOne.Tests.Unit.Mobile.Detection
             foreach (var item in source.Take(source.Count / 2).OrderBy(i => 
                 Guid.NewGuid()))
             {
-                var expectedLast = cache._linkedList.Last;
+                var expectedLast = cache._linkedLists[0].Last;
                 Assert.IsTrue(cache[item.Key].Equals(item.Value));
-                Assert.IsTrue(cache._linkedList.First.Value.Key.Equals(item.Key));
-                Assert.IsTrue(expectedLast.Value.Key.Equals(item.Key) ||
-                    expectedLast == cache._linkedList.Last);
+                Assert.IsTrue(cache._linkedLists[0].First.Key.Equals(item.Key));
+                Assert.IsTrue(expectedLast.Key.Equals(item.Key) ||
+                    expectedLast == cache._linkedLists[0].Last);
             }
             Assert.IsTrue(cache.Misses == loader.Fetches);
             Assert.IsTrue(cache.Misses == source.Count * 1.5);
