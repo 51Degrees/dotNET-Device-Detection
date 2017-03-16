@@ -54,7 +54,11 @@ Data files which are updated weekly and daily, automatically, and with more prop
 * A new fluent builder - DataSetBuilder is now the preferred method to create a DataSet instead of the StreamFactory.  
 * The caching policy used by the API can now be customised as required by the application. This allows the developer to replace the 51Degrees cache entirely with their own implementation. If using the 51Degrees cache, this gives the developer the flexibility to make the decision about the memory usage / performance balance rather than having it imposed by the API. By default, the 51Degrees LRU cache will be used, with size values determined by internal testing to give good performance in a wide range of scenarios without using too much memory. Templates are available with size values more suited to specific use cases.
 * Improved performance of GetCompleteNumericNode method.
-* Updated lite data file with February 2017 data.
+* Improved performance of LruCache when running in multi-threaded environments.
+* Reduced memory usage when using a user agent cache in the Provider in conjuction with the StreamFactory or DataSetBuilder.
+* Fixed a bug in the SQL project: When an invalid device Id is provided, an empty array is now returned with zero rows. Previously, this was returning null, which will cause SQL to fail.
+* Updated lite data file with March 2017 data.
+
 
 ### Major Changes in Version 3.2
 
