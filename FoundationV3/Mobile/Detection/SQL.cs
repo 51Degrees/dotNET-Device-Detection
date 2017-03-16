@@ -575,7 +575,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             }
             catch
             {
-                return null;
+                return new InternalDeviceProperty[0];
             }
         }
 
@@ -597,7 +597,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             }
             catch
             {
-                return null;
+                return new InternalDeviceProperty[0];
             }
         }
         
@@ -618,7 +618,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
             }
             catch
             {
-                return null;
+                return new InternalDeviceProperty[0];
             }
         }
 
