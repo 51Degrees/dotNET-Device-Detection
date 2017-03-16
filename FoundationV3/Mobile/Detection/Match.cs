@@ -24,7 +24,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using FiftyOne.Foundation.Mobile.Detection.Entities;
-using System.Diagnostics;
 using FiftyOne.Foundation.Mobile.Detection.Caching;
 
 namespace FiftyOne.Foundation.Mobile.Detection
@@ -554,7 +553,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         #region Constructor
 
-        internal MatchState(Match match) : base()
+        internal MatchState(Match match) : base(match.DataSet)
         {
             Match = match;
         }
@@ -677,6 +676,15 @@ namespace FiftyOne.Foundation.Mobile.Detection
     /// </summary>
     internal class MatchResult
     {
+        #region Fields
+
+        /// <summary>
+        /// Reference to the Dataset the result was generated from.
+        /// </summary>
+        private readonly DataSet _dataSet;
+
+        #endregion
+
         #region Properties
 
         internal virtual long Elapsed
@@ -705,9 +713,15 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         internal virtual Signature Signature
         {
-            get { return _signature; }
+            get
+            {
+                return _signature != null ? 
+                    _signature : 
+                    _dataSet.Signatures[_signatureIndex];
+            }
         }
         protected Signature _signature;
+        private readonly int _signatureIndex;
 
         internal virtual int SignaturesCompared
         {
@@ -753,15 +767,27 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         internal virtual IList<Node> Nodes
         {
-            get { return _nodes; }
+            get
+            {
+                return _nodes != null ? 
+                    _nodes : 
+                    _nodeOffsets.Select(i => _dataSet.Nodes[i]).ToArray();
+            }
         }
         protected IList<Node> _nodes;
+        private readonly int[] _nodeOffsets;
 
         internal virtual Profile[] Profiles
         {
-            get { return _profiles; }
+            get
+            {
+                return _profiles != null ?
+                    _profiles :
+                    _profileOffsets.Select(i => _dataSet.Profiles[i]).ToArray();
+            }
         }
         protected Profile[] _profiles;
+        private readonly int[] _profileOffsets;
 
         #endregion
 
@@ -770,7 +796,10 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <summary>
         /// Constructs a default instance of <see cref="MatchResult"/>.
         /// </summary>
-        protected MatchResult() { }
+        protected MatchResult(DataSet dataSet)
+        {
+            _dataSet = dataSet;
+        }
 
         /// <summary>
         /// Constructs an instance of <see cref="MatchResult"/> based on the 
@@ -779,11 +808,11 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// <param name="source"></param>
         internal MatchResult(MatchState source)
         {
+            _dataSet = source._dataSet;
             _elapsed = source.Elapsed;
             _method = source.Method;
             _nodesEvaluated = source.NodesEvaluated;
             _rootNodesEvaluated = source.RootNodesEvaluated;
-            _signature = source.Signature;
             _signaturesCompared = source.SignaturesCompared;
             _signaturesRead = source.SignaturesRead;
             _stringsRead = source.StringsRead;
@@ -791,8 +820,28 @@ namespace FiftyOne.Foundation.Mobile.Detection
             _lowestScore = source.LowestScore;
             _targetUserAgent = source.TargetUserAgent;
             _targetUserAgentArray = source.TargetUserAgentArray;
-            _profiles = (Profile[])source.Profiles.Clone();
-            _nodes = source.Nodes.ToArray();
+
+            if (_dataSet is IndirectDataSet)
+            {
+                // The match result will only store the index or offset of the 
+                // related entity type in the source dataset to avoid creating 
+                // duplicate instances in cases where the data set is an indirect 
+                // one and a cache, or no cache is being used. This approach 
+                // ensures a consistent memory profile.
+                _signatureIndex = source.Signature != null ? 
+                    source.Signature.Index : 
+                    -1;
+                _profileOffsets = source.Profiles.Select(i => i.Index).ToArray();
+                _nodeOffsets = source.Nodes.Select(i => i.Index).ToArray();
+            }
+            else
+            {
+                // The entire data set is being held in memory so a direct 
+                // reference to the related entity instance can be stored.  
+                _signature = source.Signature;
+                _profiles = (Profile[])source.Profiles.Clone();
+                _nodes = source.Nodes.ToArray();
+            }
         }
 
         #endregion
