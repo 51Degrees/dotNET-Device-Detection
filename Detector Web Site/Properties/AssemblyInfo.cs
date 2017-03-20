@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("51 Degrees Mobile Experts Limited")]
 [assembly: AssemblyProduct("Mobile Device Detector Example")]
-[assembly: AssemblyCopyright("Copyright © 51 Degrees Mobile Experts Limited 2009 - 2015")]
+[assembly: AssemblyCopyright("Copyright © 51 Degrees Mobile Experts Limited 2009 - 2017")]
 [assembly: AssemblyTrademark("51degrees.mobi")]
 [assembly: AssemblyCulture("")]
 

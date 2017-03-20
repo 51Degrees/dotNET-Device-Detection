@@ -1,5 +1,5 @@
 ﻿/*
-* Copyright © 2010 - 2012 51 Degrees Mobile Experts Limited. All rights reserved.
+* Copyright © 2010 - 2017 51 Degrees Mobile Experts Limited. All rights reserved.
 */
 
 using System;

@@ -1,6 +1,6 @@
 ﻿/* *********************************************************************
  * This Source Code Form is copyright of 51Degrees Mobile Experts Limited. 
- * Copyright © 2015 51Degrees Mobile Experts Limited, 5 Charlotte Close,
+ * Copyright © 2017 51Degrees Mobile Experts Limited, 5 Charlotte Close,
  * Caversham, Reading, Berkshire, United Kingdom RG4 7BY
  * 
  * This Source Code Form is the subject of the following patent 
@@ -422,12 +422,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             // Return -1 if there is no numeric value at this position.
             return -1;
         }
-
-        static List<int> previous = new List<int>();
-        static bool tripped = false;
-
-        static TextWriter writer = null;
-
+        
         /// <summary>
         /// Gets a complete node, or if one isn't available exactly the closest
         /// numeric one to the target User-Agent at the current position.

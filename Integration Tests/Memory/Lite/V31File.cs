@@ -1,6 +1,6 @@
 ﻿/* *********************************************************************
  * This Source Code Form is copyright of 51Degrees Mobile Experts Limited. 
- * Copyright © 2015 51Degrees Mobile Experts Limited, 5 Charlotte Close,
+ * Copyright © 2017 51Degrees Mobile Experts Limited, 5 Charlotte Close,
  * Caversham, Reading, Berkshire, United Kingdom RG4 7BY
  * 
  * This Source Code Form is the subject of the following patent 
@@ -68,6 +68,12 @@ namespace FiftyOne.Tests.Integration.Memory.Lite
         public void LiteV31File_Memory_BadUserAgentsSingle()
         {
             base.UserAgentsSingle(UserAgentGenerator.GetBadUserAgents(), 40);
+        }
+
+        [TestMethod(), TestCategory("Memory"), TestCategory("File"), TestCategory("Lite")]
+        public void LiteV31File_Memory_FindProfiles()
+        {
+            base.FindProfiles(11);
         }
     }
 }
