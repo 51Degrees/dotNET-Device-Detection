@@ -82,8 +82,13 @@ var deviceType = detectionProvider.Match("[YOUR USERAGENT]")["DeviceType"];
 <ul>
 <li>A new fluent builder - DataSetBuilder is now the preferred method to create a DataSet instead of the StreamFactory.</li> 
 <li>The caching policy used by the API can now be customised as required by the application. This allows the developer to replace the 51 degrees cache entirely with their own implementation. If using the 51 degrees cache, this gives the developer the flexibility to make the decision about the memory usage / performance balance rather than having it imposed by the API. By default, the 51 degrees LRU cache will be used, with size values determined by internal testing to give good performance in a wide range of scenarios without using too much memory. Templates are available with size values more suited to specific use cases.</li>
+<li>Auto update now uses the new distributor URL.</li>
 <li>Improved performance of GetCompleteNumericNode method.</li>
-<li>Updated lite data file with February 2017 data.</li>
+<li>Improved performance of LRU cache in multi-threaded scenarios.</li>
+<li>Reduced memory usage when not using a dataset built by the MemoryFactory.</li>
+<li>Fixed a bug that could cause the embedded SQL server implementation to fail.</li>
+<li>Updated source copyright dates to 2017.</li>
+<li>Updated lite data file with March 2017 data.</li>
 </ul>
 
 <p>See <a href="https://github.com/51Degrees/dotNET-Device-Detection/commits/master" title="51Degrees .NET Device Detection commit history">GitHub commit history</a> for changes details and earlier versions.</p>
