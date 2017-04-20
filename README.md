@@ -52,6 +52,8 @@ Data files which are updated weekly and daily, automatically, and with more prop
 ### Version 3.2.16 Highlights
 
 * .NET Core build of the core device detection API. Note that this utilises links to the existing source code files and excludes certain features like data file automatic updates and ASP.NET integration. Both an ASP.NET Core integration package and a native .NET Standard implementation of the API are planned for a future release. 
+* Updated cache template values and comments based on testing
+* Updated lite data files for April 2017
 
 ### Major Changes in Version 3.2
 

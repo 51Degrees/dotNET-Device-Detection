@@ -1,10 +1,13 @@
 ﻿{
-  "version": "1.0.0-*",
+  "copyright": "Copyright 51 Degrees Mobile Experts Limited 2009 - 2017",
+  "description": "51degrees - Foundation NetStandard Open Source",
+  "title": "51degrees - Foundation NetStandard",
+  "version": "3.2.16-2",
 
   "dependencies": {
     "NETStandard.Library": "1.6.0",
     "System.Collections.Specialized": "4.0.1",
-    "System.Threading.Tasks.Parallel": "4.3.0" 
+    "System.Threading.Tasks.Parallel": "4.3.0"
   },
 
   "frameworks": {
