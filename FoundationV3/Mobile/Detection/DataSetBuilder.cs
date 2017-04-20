@@ -116,36 +116,127 @@ namespace FiftyOne.Foundation.Mobile.Detection
             /// Suitable for most users but not optimised for any specific
             /// environment.
             /// </summary>
+            /// <remarks>
+            /// <para>
+            /// Memory usage without a User Agent cache is expected
+            /// to be around 40Mb using <see cref="DataSetBuilder.File()"/> 
+            /// and around 240Mb using <see cref="DataSetBuilder.Buffer()"/>.
+            /// </para>
+            /// <para>
+            /// Bear in mind that actual memory load is dependent on the
+            /// data file type (i.e. Lite, Premium, etc) and to some extent 
+            /// upon the way in which the API is being used.
+            /// </para>
+            /// <para>
+            /// Note: Currently, the .NET API uses the same configuration
+            /// for multi-threaded and single-threaded templates.
+            /// This may change in response future development and testing.
+            /// </para>
+            /// </remarks>
             public static readonly CacheTemplate Default = 
                 new InternalCacheTemplate(defaultCacheSizes);
             /// <summary>
             /// Configuration optimised for a single-threaded environment
             /// where memory usage is not a particular concern.
             /// </summary>
+            /// <remarks>
+            /// <para>
+            /// Memory usage without a User Agent cache is expected
+            /// to be around 50Mb using <see cref="DataSetBuilder.File()"/> 
+            /// and around 255Mb using <see cref="DataSetBuilder.Buffer()"/>.
+            /// </para>
+            /// <para>
+            /// Bear in mind that actual memory load is dependent on the
+            /// data file type (i.e. Lite, Premium, etc) and to some extent 
+            /// upon the way in which the API is being used.
+            /// </para>
+            /// <para>
+            /// Note: Currently, the .NET API uses the same configuration
+            /// for multi-threaded and single-threaded templates.
+            /// This may change in response future development and testing.
+            /// </para>
+            /// </remarks>
             public static readonly CacheTemplate SingleThread = 
                 new InternalCacheTemplate(StCacheSizes);
             /// <summary>
             /// Configuration optimised for a single-threaded environment
             /// where low memory usage is required.
             /// </summary>
+            /// <remarks>
+            /// <para>
+            /// Memory usage without a User Agent cache is expected
+            /// to be around 25Mb using <see cref="DataSetBuilder.File()"/> 
+            /// and around 230Mb using <see cref="DataSetBuilder.Buffer()"/>.
+            /// </para>
+            /// <para>
+            /// Bear in mind that actual memory load is dependent on the
+            /// data file type (i.e. Lite, Premium, etc) and to some extent 
+            /// upon the way in which the API is being used.
+            /// </para>
+            /// <para>
+            /// Note: Currently, the .NET API uses the same configuration
+            /// for multi-threaded and single-threaded templates.
+            /// This may change in response future development and testing.
+            /// </para>
+            /// </remarks>
             public static readonly CacheTemplate SingleThreadLowMemory = 
                 new InternalCacheTemplate(StlmCacheSizes);
             /// <summary>
-            /// Configuration optimised for a multi-threaded environemnt
+            /// Configuration optimised for a multi-threaded environment
             /// where memory usage is not a particular concern.
+            /// </summary>
+            /// <remarks>
+            /// <para>
+            /// Memory usage without a User Agent cache is expected
+            /// to be around 50Mb using <see cref="DataSetBuilder.File()"/> 
+            /// and around 255Mb using <see cref="DataSetBuilder.Buffer()"/>.
+            /// </para>
+            /// <para>
+            /// Bear in mind that actual memory load is dependent on the
+            /// data file type (i.e. Lite, Premium, etc) and to some extent 
+            /// upon the way in which the API is being used.
+            /// </para>
+            /// <para>
+            /// Generally, it is not recommended to use more threads for
+            /// device detection than the number of logical cores on the
+            /// host machine as this can cause match times for individual 
+            /// threads to suffer.
+            /// </para>
+            /// <para>
             /// Note: Currently, the .NET API uses the same configuration
             /// for multi-threaded and single-threaded templates.
-            /// This may change in future in response to testing.
-            /// </summary>
+            /// This may change in response future development and testing.
+            /// </para>
+            /// </remarks>
             public static readonly CacheTemplate MultiThread = 
                 new InternalCacheTemplate(MtCacheSizes);
             /// <summary>
-            /// Configuration optimised for a multi-threaded environemnt
+            /// Configuration optimised for a multi-threaded environment
             /// where low memory usage is required.
+            /// </summary>
+            /// <remarks>
+            /// <para>
+            /// Memory usage without a User Agent cache is expected
+            /// to be around 25Mb using <see cref="DataSetBuilder.File()"/> 
+            /// and around 230Mb using <see cref="DataSetBuilder.Buffer()"/>.
+            /// </para>
+            /// <para>
+            /// Bear in mind that actual memory load is dependent on the
+            /// data file type (i.e. Lite, Premium, etc) and to some extent 
+            /// upon the way in which the API is being used.
+            /// </para>
+            /// <para>
+            /// Generally, it is not recommended to use more threads for
+            /// device detection than the number of logical cores on the
+            /// host machine as this can cause match times for individual 
+            /// threads to suffer.
+            /// </para>
+            /// <para>
             /// Note: Currently, the .NET API uses the same configuration
             /// for multi-threaded and single-threaded templates.
-            /// This may change in future in response to testing.
-            /// </summary>
+            /// This may change in response future development and testing.
+            /// </para>
+            /// </remarks>
             public static readonly CacheTemplate MultiThreadLowMemory =
                 new InternalCacheTemplate(StlmCacheSizes);
 
@@ -677,17 +768,37 @@ namespace FiftyOne.Foundation.Mobile.Detection
         #endregion
 
         #region Cache size configurations
-
-        /* Default Cache sizes */
-        private const int STRINGS_CACHE_SIZE = 8000;
-        private const int NODES_CACHE_SIZE = 30000;
-        private const int VALUES_CACHE_SIZE = 3000;
-        private const int PROFILES_CACHE_SIZE = 600;
-        private const int SIGNATURES_CACHE_SIZE = 16000;
-
+        
         private static ICacheBuilder LruBuilder = new LruCacheBuilder();
         
         private static Dictionary<CacheType, ICacheOptions> defaultCacheSizes = new Dictionary<CacheType, ICacheOptions>()
+        {
+            { CacheType.StringsCache, new CacheOptions() { Builder = LruBuilder, Size = 8000 } },
+            { CacheType.NodesCache, new CacheOptions() { Builder = LruBuilder, Size = 80000 } },
+            { CacheType.ValuesCache, new CacheOptions() { Builder = LruBuilder, Size = 5000 } },
+            { CacheType.ProfilesCache, new CacheOptions() { Builder = LruBuilder, Size = 1000 } },
+            { CacheType.SignaturesCache, new CacheOptions() { Builder = LruBuilder, Size = 40000 } },
+        };
+        
+        private static Dictionary<CacheType, ICacheOptions> MtCacheSizes = new Dictionary<CacheType, ICacheOptions>()
+        {
+            { CacheType.StringsCache, new CacheOptions() { Builder = LruBuilder, Size = 8000 } },
+            { CacheType.NodesCache, new CacheOptions() { Builder = LruBuilder, Size = 200000 } },
+            { CacheType.ValuesCache, new CacheOptions() { Builder = LruBuilder, Size = 10000 } },
+            { CacheType.ProfilesCache, new CacheOptions() { Builder = LruBuilder, Size = 2000 } },
+            { CacheType.SignaturesCache, new CacheOptions() { Builder = LruBuilder, Size = 60000 } },
+        };
+        
+        private static Dictionary<CacheType, ICacheOptions> StCacheSizes = new Dictionary<CacheType, ICacheOptions>()
+        {
+            { CacheType.StringsCache, new CacheOptions() { Builder = LruBuilder, Size = 8000 } },
+            { CacheType.NodesCache, new CacheOptions() { Builder = LruBuilder, Size = 200000 } },
+            { CacheType.ValuesCache, new CacheOptions() { Builder = LruBuilder, Size = 10000 } },
+            { CacheType.ProfilesCache, new CacheOptions() { Builder = LruBuilder, Size = 2000 } },
+            { CacheType.SignaturesCache, new CacheOptions() { Builder = LruBuilder, Size = 60000 } },
+        };
+        
+        private static Dictionary<CacheType, ICacheOptions> StlmCacheSizes = new Dictionary<CacheType, ICacheOptions>()
         {
             { CacheType.StringsCache, new CacheOptions() { Builder = LruBuilder, Size = 8000 } },
             { CacheType.NodesCache, new CacheOptions() { Builder = LruBuilder, Size = 40000 } },
@@ -696,40 +807,13 @@ namespace FiftyOne.Foundation.Mobile.Detection
             { CacheType.SignaturesCache, new CacheOptions() { Builder = LruBuilder, Size = 20000 } },
         };
         
-        private static Dictionary<CacheType, ICacheOptions> MtCacheSizes = new Dictionary<CacheType, ICacheOptions>()
-        {
-            { CacheType.StringsCache, new CacheOptions() { Builder = LruBuilder, Size = 8000 } },
-            { CacheType.NodesCache, new CacheOptions() { Builder = LruBuilder, Size = 80000 } },
-            { CacheType.ValuesCache, new CacheOptions() { Builder = LruBuilder, Size = 5000 } },
-            { CacheType.ProfilesCache, new CacheOptions() { Builder = LruBuilder, Size = 1000 } },
-            { CacheType.SignaturesCache, new CacheOptions() { Builder = LruBuilder, Size = 40000 } },
-        };
-        
-        private static Dictionary<CacheType, ICacheOptions> StCacheSizes = new Dictionary<CacheType, ICacheOptions>()
-        {
-            { CacheType.StringsCache, new CacheOptions() { Builder = LruBuilder, Size = 8000 } },
-            { CacheType.NodesCache, new CacheOptions() { Builder = LruBuilder, Size = 80000 } },
-            { CacheType.ValuesCache, new CacheOptions() { Builder = LruBuilder, Size = 5000 } },
-            { CacheType.ProfilesCache, new CacheOptions() { Builder = LruBuilder, Size = 1000 } },
-            { CacheType.SignaturesCache, new CacheOptions() { Builder = LruBuilder, Size = 40000 } },
-        };
-        
-        private static Dictionary<CacheType, ICacheOptions> StlmCacheSizes = new Dictionary<CacheType, ICacheOptions>()
-        {
-            { CacheType.StringsCache, new CacheOptions() { Builder = LruBuilder, Size = 5000 } },
-            { CacheType.NodesCache, new CacheOptions() { Builder = LruBuilder, Size = 30000 } },
-            { CacheType.ValuesCache, new CacheOptions() { Builder = LruBuilder, Size = 1000 } },
-            { CacheType.ProfilesCache, new CacheOptions() { Builder = LruBuilder, Size = 500 } },
-            { CacheType.SignaturesCache, new CacheOptions() { Builder = LruBuilder, Size = 10000 } },
-        };
-        
         private static Dictionary<CacheType, ICacheOptions> MtlmCacheSizes = new Dictionary<CacheType, ICacheOptions>()
         {
-            { CacheType.StringsCache, new CacheOptions() { Builder = LruBuilder, Size = 5000 } },
-            { CacheType.NodesCache, new CacheOptions() { Builder = LruBuilder, Size = 30000 } },
+            { CacheType.StringsCache, new CacheOptions() { Builder = LruBuilder, Size = 8000 } },
+            { CacheType.NodesCache, new CacheOptions() { Builder = LruBuilder, Size = 40000 } },
             { CacheType.ValuesCache, new CacheOptions() { Builder = LruBuilder, Size = 1000 } },
-            { CacheType.ProfilesCache, new CacheOptions() { Builder = LruBuilder, Size = 500 } },
-            { CacheType.SignaturesCache, new CacheOptions() { Builder = LruBuilder, Size = 10000 } },
+            { CacheType.ProfilesCache, new CacheOptions() { Builder = LruBuilder, Size = 1000 } },
+            { CacheType.SignaturesCache, new CacheOptions() { Builder = LruBuilder, Size = 20000 } },
         };
 
         #endregion
