@@ -69,11 +69,5 @@ namespace FiftyOne.Tests.Integration.Memory.Lite
         {
             base.UserAgentsSingle(UserAgentGenerator.GetBadUserAgents(), 40);
         }
-
-        [TestMethod(), TestCategory("Memory"), TestCategory("File"), TestCategory("Lite")]
-        public void LiteV32File_Memory_FindProfiles()
-        {
-            base.FindProfiles(11);
-        }
     }
 }
