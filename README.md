@@ -49,16 +49,11 @@ Data files which are updated weekly and daily, automatically, and with more prop
 
 ## Recent Changes
 
-### Version 3.2.15 Highlights
+### Version 3.2.16 Highlights
 
-* A new fluent builder - DataSetBuilder is now the preferred method to create a DataSet instead of the StreamFactory.  
-* The caching policy used by the API can now be customised as required by the application. This allows the developer to replace the 51Degrees cache entirely with their own implementation. If using the 51Degrees cache, this gives the developer the flexibility to make the decision about the memory usage / performance balance rather than having it imposed by the API. By default, the 51Degrees LRU cache will be used, with size values determined by internal testing to give good performance in a wide range of scenarios without using too much memory. Templates are available with size values more suited to specific use cases.
-* Improved performance of GetCompleteNumericNode method.
-* Improved performance of LruCache when running in multi-threaded environments.
-* Reduced memory usage when using a user agent cache in the Provider in conjuction with the StreamFactory or DataSetBuilder.
-* Fixed a bug in the SQL project: When an invalid device Id is provided, an empty array is now returned with zero rows. Previously, this was returning null, which will cause SQL to fail.
-* Updated lite data file with March 2017 data.
-
+* .NET Core build of the core device detection API. Note that this utilises links to the existing source code files and excludes certain features like data file automatic updates and ASP.NET integration. Both an ASP.NET Core integration package and a native .NET Standard implementation of the API are planned for a future release. 
+* Updated cache template values and comments based on testing
+* Updated lite data files for April 2017
 
 ### Major Changes in Version 3.2
 

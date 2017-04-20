@@ -63,6 +63,7 @@ namespace FiftyOne.Foundation.Mobile
         {
         }
 
+#if NET40
         /// <summary>
         /// Initializes a new instance of <see cref="MobileException"/>.
         /// </summary>
@@ -70,5 +71,6 @@ namespace FiftyOne.Foundation.Mobile
             : base(info, context)
         {
         }
+#endif
     }
 }
