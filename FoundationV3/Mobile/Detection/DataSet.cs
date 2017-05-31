@@ -916,7 +916,70 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
             }
         }
         private SearchReadonlyList<Value, string> _valuesNameSearch = null;
-            
+
+        /// <summary>
+        /// An array of the properties that are of type JavaScript.
+        /// </summary>
+        internal Property[] JavaScriptProperties
+        {
+            get
+            {
+                if (_javaScriptProperties == null)
+                {
+                    lock (this)
+                    {
+                        if (_javaScriptProperties == null)
+                        {
+                            _javaScriptProperties = Properties.Where(i =>
+                                i._valueType ==
+                                Property.PropertyValueType.JavaScript).ToArray();
+                        }
+                    }
+                }
+                return _javaScriptProperties;
+            }
+        }
+        private Property[] _javaScriptProperties = null;
+
+        /// <summary>
+        /// Find all the properties that are of type JavaScript and are marked
+        /// with the property value override category. 
+        /// </summary>
+        internal Property[] PropertyValueOverrideProperties
+        {
+            get
+            {
+                if (_propertyValueOverrideProperties == null)
+                {
+                    lock (this)
+                    {
+                        if (_propertyValueOverrideProperties == null)
+                        {
+                            _propertyValueOverrideProperties =
+                                JavaScriptProperties.Where(i =>
+                                    i.Category.Equals(
+                                    Constants.PropertyValueOverrideCategory)
+                                ).ToArray();
+                        }
+                    }
+                }
+                return _propertyValueOverrideProperties;
+            }
+        }
+        private Property[] _propertyValueOverrideProperties;
+
+        /// <summary>
+        /// Find all the properties that are of type JavaScript and are marked
+        /// with the property value override category. 
+        /// </summary>
+        /// <returns>Array of JavaScript properties for this feature.</returns>
+        private static Property[] GetJavaScriptProperties()
+        {
+            return WebProvider.ActiveProvider.DataSet.JavaScriptProperties.
+                Where(i => i.Category.Equals(
+                    Constants.PropertyValueOverrideCategory)).ToArray();
+        }
+
         #endregion
 
         #region Constructors
