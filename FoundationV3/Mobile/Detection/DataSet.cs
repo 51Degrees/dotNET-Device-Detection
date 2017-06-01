@@ -917,6 +917,8 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
         private SearchReadonlyList<Value, string> _valuesNameSearch = null;
 
+#if !SQL_BUILD && !NETCORE_BUILD
+
         /// <summary>
         /// An array of the properties that are of type JavaScript.
         /// </summary>
@@ -980,6 +982,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
                     Constants.PropertyValueOverrideCategory)).ToArray();
         }
 
+#endif
         #endregion
 
         #region Constructors

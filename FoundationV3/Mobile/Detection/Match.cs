@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using FiftyOne.Foundation.Mobile.Detection.Entities;
@@ -332,6 +333,30 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         #region Private Properties
 
+#if SQL_BUILD || NETCORE_BUILD
+        /// <summary>
+        /// If building the SQL or .NET Core project, just return an empty
+        /// dictionary as this is not used and required unneccesary includes.
+        /// </summary>
+        private Dictionary<string, string> PropertyValueOverrideCookies
+        {
+            get
+            {
+                if (_propertyValueOverrideCookies == null)
+                {
+                    lock (this)
+                    {
+                        if (_propertyValueOverrideCookies == null)
+                        {
+                            _propertyValueOverrideCookies =
+                                new Dictionary<string, string>();
+                        }
+                    }
+                }
+                return _propertyValueOverrideCookies;
+            }
+        }
+#else
         /// <summary>
         /// A dictionary of property names that have alterantive values based 
         /// on cookie header data if provided when the Match was populated. 
@@ -395,6 +420,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
                 return _propertyValueOverrideCookies;
             }
         }
+#endif
         private Dictionary<string, string> _propertyValueOverrideCookies = null;
 
         #endregion

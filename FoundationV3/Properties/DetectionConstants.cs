@@ -18,9 +18,7 @@
  * This Source Code Form is “Incompatible With Secondary Licenses”, as
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
-
-using FiftyOne.Foundation.Mobile.Detection.Entities;
-using FiftyOne.Foundation.Mobile.Detection.Feature;
+ 
 using System;
 using System.Collections.Generic;
 
@@ -119,8 +117,9 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         /// <summary>
         /// The name of the category 
-        /// <see cref="Property.PropertyValueType.JavaScript"/> properties
-        /// which should be used for <see cref="PropertyValueOverride"/> 
+        /// <see cref="FiftyOne.Foundation.Mobile.Detection.Entities.Property.PropertyValueType.JavaScript"/>
+        /// properties which should be used for
+        /// <see cref="FiftyOne.Foundation.Mobile.Detection.Feature.PropertyValueOverride"/> 
         /// methods must be assigned.
         /// </summary>
         internal const string PropertyValueOverrideCategory = "Property Value Override";
