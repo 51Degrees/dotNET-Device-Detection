@@ -183,6 +183,7 @@
     <Compile Include="Mobile\Detection\Factories\EntityFactories.cs" />
     <Compile Include="Mobile\Detection\Factories\CommonFactory.cs" />
     <Compile Include="Mobile\Detection\Factories\EntityLoaderFactory.cs" />
+    <Compile Include="Mobile\Detection\Feature\PropertyValueOverride.cs" />
     <Compile Include="Mobile\Detection\IDataSet.cs" />
     <Compile Include="Mobile\Detection\IndirectDataSet.cs" />
     <Compile Include="Mobile\Detection\ISimpleList.cs" />

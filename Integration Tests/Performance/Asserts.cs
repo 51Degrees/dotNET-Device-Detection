@@ -51,7 +51,7 @@ namespace FiftyOne.Tests.Integration.Performance
         internal static void AssertCacheMissesBadAll(DataSet dataSet)
         {
             Assert.IsTrue(dataSet.PercentageSignatureCacheMisses < 0.4, "Signature Cache Misses");
-            Assert.IsTrue(dataSet.PercentageStringsCacheMisses < 0.5, "Strings Cache Misses");
+            Assert.IsTrue(dataSet.PercentageStringsCacheMisses < 0.7, "Strings Cache Misses");
             Assert.IsTrue(dataSet.PercentageNodeCacheMisses < 0.5, "Node Cache Misses");
             Assert.IsTrue(dataSet.PercentageValuesCacheMisses < 0.3, "Value Cache Misses");
             Assert.IsTrue(dataSet.PercentageProfilesCacheMisses < 0.3, "Profile Cache Misses");

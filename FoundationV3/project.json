@@ -12,7 +12,10 @@
 
   "frameworks": {
     "netstandard1.6": {
-      "imports": "dnxcore50"
+      "imports": "dnxcore50",
+      "buildOptions": {
+        "define": ["NETCORE_BUILD"]
+      }
     }
   },
   "buildOptions": {

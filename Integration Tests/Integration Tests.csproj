@@ -65,6 +65,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Runtime.Caching" />
+    <Reference Include="System.Web" />
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -106,6 +107,13 @@
     <Compile Include="Cache\Enterprise\V31File.cs" />
     <Compile Include="Cache\Enterprise\V32Array.cs" />
     <Compile Include="Cache\Enterprise\V32File.cs" />
+    <Compile Include="Cookies\Base.cs" />
+    <Compile Include="Cookies\Lite\V31Array.cs" />
+    <Compile Include="Cookies\Lite\V32Array.cs" />
+    <Compile Include="Cookies\Premium\V31Array.cs" />
+    <Compile Include="Cookies\Premium\V32Array.cs" />
+    <Compile Include="Cookies\Enterprise\V31Array.cs" />
+    <Compile Include="Cookies\Enterprise\V32Array.cs" />
     <Compile Include="DataSetBuilderTests\Base.cs" />
     <Compile Include="DataSetBuilderTests\BufferBase.cs" />
     <Compile Include="DataSetBuilderTests\FileBase.cs" />
