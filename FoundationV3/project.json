@@ -89,7 +89,6 @@
         "Mobile/Detection/Factories/EntityLoaderFactory.cs",
         "Mobile/Detection/Factories/MemoryFactory.cs",
         "Mobile/Detection/Factories/StreamFactory.cs",
-        "Mobile/Detection/Factories/TrieFactory.cs",
         "Mobile/Detection/Readers/Reader.cs",
         "Mobile/Detection/Readers/Source.cs",
         "Mobile/Detection/Controller.cs",
@@ -107,9 +106,6 @@
         "Mobile/Detection/Provider.cs",
         "Mobile/Detection/Search.cs",
         "Mobile/Detection/StreamList.cs",
-        "Mobile/Detection/TrieProvider.cs",
-        "Mobile/Detection/TrieProviderV3.cs",
-        "Mobile/Detection/TrieProviderV32.cs",
         "Mobile/MobileException.cs",
         "SerializableAttribute.cs"
       ]

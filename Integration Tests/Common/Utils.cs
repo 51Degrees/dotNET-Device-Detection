@@ -262,28 +262,6 @@ namespace FiftyOne.Tests.Integration
         }
 
         /// <summary>
-        /// In a single thread loops through the useragents in the file
-        /// provided perform a match with the data set provided passing
-        /// control back to the method provided for further processing.
-        /// </summary>
-        /// <param name="provider"></param>
-        /// <param name="userAgents"></param>
-        /// <param name="method"></param>
-        /// <returns>Counts for each of the methods used</returns>
-        internal static Results DetectLoopSingleThreaded(TrieProvider provider, IEnumerable<string> userAgents, ProcessTrie method, object state)
-        {
-            var results = new Results();
-            foreach (var line in userAgents)
-            {
-                method(results, provider.GetDeviceIndex(line.Trim()), state);
-                results.Count++;
-            }
-            ReportMethods(results.Methods);
-            ReportTime(results);
-            return results;
-        }
-
-        /// <summary>
         /// Using multiple threads loops through the useragents in the file
         /// provided perform a match with the data set provided passing
         /// control back to the method provided for further processing.
@@ -309,28 +287,6 @@ namespace FiftyOne.Tests.Integration
             AssertPool(provider);
             ReportMethods(results.Methods);
             ReportProvider(provider);
-            ReportTime(results);
-            return results;
-        }
-
-        /// <summary>
-        /// Using multiple threads loops through the useragents in the file
-        /// provided perform a match with the data set provided passing
-        /// control back to the method provided for further processing.
-        /// </summary>
-        /// <param name="provider"></param>
-        /// <param name="userAgents"></param>
-        /// <param name="method"></param>
-        /// <returns>Counts for each of the methods used</returns>
-        internal static Results DetectLoopMultiThreaded(TrieProvider provider, IEnumerable<string> userAgents, ProcessTrie method, object state)
-        {
-            var results = new Results();
-            Parallel.ForEach(userAgents, line =>
-            {
-                method(results, provider.GetDeviceIndex(line.Trim()), state);
-                Interlocked.Increment(ref results.Count);
-            });
-            ReportMethods(results.Methods);
             ReportTime(results);
             return results;
         }
@@ -446,19 +402,6 @@ namespace FiftyOne.Tests.Integration
         public static void TrieDoNothing(Results results, int deviceIndex, object state)
         {
             // Do nothing.
-        }
-
-        public static void RetrieveTriePropertyValues(Results results, int deviceIndex, object state)
-        {
-            if (state != null)
-            {
-                var checkSum = 0;
-                foreach (var property in ((TrieProvider)state).PropertyNames)
-                {
-                    checkSum += ((TrieProvider)state).GetPropertyValue(deviceIndex, property).GetHashCode();
-                }
-                Interlocked.Add(ref results.CheckSum, checkSum);
-            }
         }
 
         internal static void CheckFileExists(string dataFile)

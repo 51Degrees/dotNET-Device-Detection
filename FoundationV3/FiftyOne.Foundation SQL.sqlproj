@@ -139,11 +139,8 @@
     <Compile Include="Mobile\Detection\Factories\EntityFactories.cs" />
     <Compile Include="Mobile\Detection\Factories\CommonFactory.cs" />
     <Compile Include="Mobile\Detection\Factories\MemoryFactory.cs" />
-    <Compile Include="Mobile\Detection\Factories\TrieFactory.cs" />
     <Compile Include="Mobile\Detection\Factories\StreamFactory.cs" />
     <Compile Include="Mobile\Detection\IReadonlyList.cs" />
-    <Compile Include="Mobile\Detection\TrieProviderV3.cs" />
-    <Compile Include="Mobile\Detection\TrieProvider.cs" />
     <Compile Include="Mobile\Detection\Controller.cs" />
     <Compile Include="Mobile\Detection\IMatch.cs" />
     <Compile Include="Mobile\Detection\DataSetBuilder.cs" />
@@ -153,9 +150,6 @@
     <Compile Include="Mobile\Detection\Match.cs" />
     <Compile Include="Mobile\Detection\MatchMethods.cs" />
     <Compile Include="Mobile\Detection\DataSet.cs" />
-    <Compile Include="Mobile\Detection\TrieProviderV32.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Mobile\Detection\NewDeviceDetails.cs" />
     <Compile Include="Mobile\Detection\Readers\Reader.cs" />
     <Compile Include="Mobile\Detection\SQL.cs" />

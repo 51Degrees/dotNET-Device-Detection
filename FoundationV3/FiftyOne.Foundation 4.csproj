@@ -189,15 +189,12 @@
     <Compile Include="Mobile\Detection\ISimpleList.cs" />
     <Compile Include="Mobile\Detection\IReadonlyList.cs" />
     <Compile Include="Mobile\Detection\Factories\MemoryFactory.cs" />
-    <Compile Include="Mobile\Detection\Factories\TrieFactory.cs" />
     <Compile Include="Mobile\Detection\LicenceKeyActivationResults.cs" />
     <Compile Include="Mobile\Detection\Readers\Source.cs" />
     <Compile Include="Mobile\Detection\Search.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Mobile\Detection\StreamList.cs" />
-    <Compile Include="Mobile\Detection\TrieProviderV3.cs" />
-    <Compile Include="Mobile\Detection\TrieProvider.cs" />
     <Compile Include="Mobile\Detection\Entities\ProfileOffset.cs" />
     <Compile Include="Mobile\Detection\Factories\StreamFactory.cs" />
     <Compile Include="Mobile\Detection\Entities\Memory\MemoryFixedList.cs" />
@@ -225,9 +222,6 @@
     <Compile Include="Mobile\Detection\Entities\Values.cs" />
     <Compile Include="Mobile\Detection\Entities\Memory\MemoryVariableList.cs" />
     <Compile Include="Mobile\Detection\Readers\Reader.cs" />
-    <Compile Include="Mobile\Detection\TrieProviderV32.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Mobile\Detection\WebProvider.cs" />
     <Compile Include="Properties\BinaryConstants.cs" />
     <Compile Include="LogMessageEntity.cs" />
