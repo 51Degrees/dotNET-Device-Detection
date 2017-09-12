@@ -135,10 +135,14 @@ namespace FiftyOne.Tests.Integration.APIFindProfiles
                 foreach (var value in property.Values)
                 {
                     var profiles = property.FindProfiles(value.Name, value.Profiles);
-                    Assert.IsTrue(profiles.SequenceEqual(value.Profiles), 
+                    Assert.IsTrue(profiles.SequenceEqual(value.Profiles),
                         String.Format(
-                            "Value '{0}' for property '{1}' returned mismatched results.",
-                            value, property));
+                            "Value '{0}' for property '{1}' returned mismatched results.\r\n" +
+                            "Profiles from FindProfiles: '{2}'\r\n" +
+                            "Profiles from value: '{3}'",
+                            value, property,
+                            string.Join(",", profiles.OrderBy(p => p.ProfileId).ToList()),
+                            string.Join(",", value.Profiles.OrderBy(p => p.ProfileId).ToList())));
                 }
             }
         }

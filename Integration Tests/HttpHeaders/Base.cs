@@ -74,9 +74,12 @@ namespace FiftyOne.Tests.Integration.HttpHeaders
                 headers.Add(httpHeaders[random.Next(httpHeaders.Length)], deviceIterator.Current);
                 headers.Add("User-Agent", userAgentIterator.Current);
                 provider.Match(headers, match);
-                Assert.IsTrue(match.Signature == null, "Signature not equal null");
-                Assert.IsTrue(match.Difference == 0, "Match difference not equal to zero");
-                Assert.IsTrue(match.Method == MatchMethods.Exact, "Match method not equal to Exact");
+                Assert.IsTrue(match.Signature == null, string.Format("Signature not equal null.\r\nUA: '{0}'\r\nDevice UA: '{1}'", 
+                    userAgentIterator.Current, deviceIterator.Current));
+                Assert.IsTrue(match.Difference == 0, string.Format("Match difference not equal to zero.\r\nUA: '{0}'\r\nDevice UA: '{1}''", 
+                    userAgentIterator.Current, deviceIterator.Current));
+                Assert.IsTrue(match.Method == MatchMethods.Exact, string.Format("Match method not equal to Exact.\r\nUA: '{0}'\r\nDevice UA: '{1}'", 
+                    userAgentIterator.Current, deviceIterator.Current));
                 Validate(match, state);
                 results.Methods[match.Method]++;
             }
