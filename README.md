@@ -49,10 +49,10 @@ Data files which are updated weekly and daily, automatically, and with more prop
 
 ## Recent Changes
 
-### Version 3.2.17 Highlights
+### Version 3.2.18 Highlights
 
-* Property value overrides have now been introduced from beta to stable
-* Updated Lite data files for May 2017
+* Updated Lite data files for Sept 2017
+* Updates to patent notification text
 
 ### Major Changes in Version 3.2
 
