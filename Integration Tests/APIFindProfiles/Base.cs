@@ -3,11 +3,13 @@
  * Copyright © 2017 51Degrees Mobile Experts Limited, 5 Charlotte Close,
  * Caversham, Reading, Berkshire, United Kingdom RG4 7BY
  * 
- * This Source Code Form is the subject of the following patent 
+ * This Source Code Form is the subject of the following patents and patent 
  * applications, owned by 51Degrees Mobile Experts Limited of 5 Charlotte
  * Close, Caversham, Reading, Berkshire, United Kingdom RG4 7BY: 
- * European Patent Application No. 13192291.6; and
- * United States Patent Application Nos. 14/085,223 and 14/085,301.
+ * European Patent No. 2871816;
+ * European Patent Application No. 17184134.9;
+ * United States Patent Nos. 9,332,086 and 9,350,823; and
+ * United States Patent Application No. 15/686,066.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0.
@@ -135,10 +137,14 @@ namespace FiftyOne.Tests.Integration.APIFindProfiles
                 foreach (var value in property.Values)
                 {
                     var profiles = property.FindProfiles(value.Name, value.Profiles);
-                    Assert.IsTrue(profiles.SequenceEqual(value.Profiles), 
+                    Assert.IsTrue(profiles.SequenceEqual(value.Profiles),
                         String.Format(
-                            "Value '{0}' for property '{1}' returned mismatched results.",
-                            value, property));
+                            "Value '{0}' for property '{1}' returned mismatched results.\r\n" +
+                            "Profiles from FindProfiles: '{2}'\r\n" +
+                            "Profiles from value: '{3}'",
+                            value, property,
+                            string.Join(",", profiles.OrderBy(p => p.ProfileId).ToList()),
+                            string.Join(",", value.Profiles.OrderBy(p => p.ProfileId).ToList())));
                 }
             }
         }
