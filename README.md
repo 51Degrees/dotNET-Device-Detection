@@ -7,13 +7,9 @@
 **Server Side:** Use code like...
 
 ```cs
-Request.Browser["IsMobile"]
-```
-
-or 
-
-```cs
-Request.Browser["IsTablet"]
+//Request is of class HttpRequest
+if (Request.Browser.IsMobileDevice)
+{ }
 ```
 
 ... from within a web application server side to determine the requesting device type.
