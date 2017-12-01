@@ -47,15 +47,29 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
         private const string AUTO_STRING = "auto";
 
         /// <summary>
-        /// Set a property in the application state to quickly determine if image optimisation
+        /// True if image optimiser is enabled.
+        /// </summary>
+        private static bool? _enabled;
+
+        /// <summary>
+        /// Get or set the enabled flag against the image optimisation service
+        /// </summary>
+        public static bool Enabled
+        {
+            get { return _enabled ?? false; }
+            set { _enabled = value; }
+        }
+
+        /// <summary>
+        /// Set a static field to quickly determine if image optimisation
         /// is supported by the data set.
         /// </summary>
         /// <param name="application"></param>
         internal static void Init(HttpApplicationState application)
         {
-            application["51D_ImageOptimiser"] = new bool?(Manager.ImageOptimisation.Enabled &&
-                WebProvider.ActiveProvider != null);
-            EventLog.Debug(String.Format("Image Optimisation '{0}'", application["51D_ImageOptimiser"]));
+            _enabled = Manager.ImageOptimisation.Enabled &&
+                WebProvider.ActiveProvider != null;
+            EventLog.Debug(String.Format("Image Optimisation '{0}'", _enabled));
         }
 
         /// <summary>
@@ -126,28 +140,26 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
         }
 
         /// <summary>
-        /// Determines if the feature is enabled based on the information
-        /// written to the application when initialised.
+        /// Determines if the feature is enabled based on configuration
+        /// when initialised.
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
         internal static bool GetIsEnabled(HttpContext context)
         {
-            var enabled = context.Application["51D_ImageOptimiser"] as bool?;
-            return enabled.HasValue && enabled.Value;
+            return _enabled.HasValue && _enabled.Value;
         }
 
         /// <summary>
-        /// Determines if the feature is enabled based on the information
-        /// written to the application when initialised and the presence of 
-        /// image optimiser java script in the detected device results.
+        /// Determines if the feature is enabled based on configuration
+        /// when initialised and the presence of image optimiser 
+        /// Java script in the detected device results.
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
         internal static bool GetIsJavaScriptEnabled(HttpContext context)
         {
-            var enabled = context.Application["51D_ImageOptimiser"] as bool?;
-            if (enabled.HasValue && enabled.Value)
+            if (_enabled.HasValue && _enabled.Value)
             {
                 // If the image optimiser javascript is present for this device then it's enabled.
                 return GetJavascriptValues(context.Request) != null;
