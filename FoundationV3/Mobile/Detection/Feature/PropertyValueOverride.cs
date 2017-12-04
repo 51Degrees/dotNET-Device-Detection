@@ -31,10 +31,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
 {
     internal static class PropertyValueOverride
     {
+        #region Fields
+        /// <summary>
+        /// True if profile overrides are enabled.
+        /// </summary>
+        private static bool? _enabled;
+        #endregion
+
         #region Internal Methods
 
         /// <summary>
-        /// Set a property in the application state to quickly determine if property
+        /// Set a static field to quickly determine if property
         /// value override is supported.
         /// </summary>
         /// <param name="application"></param>
@@ -43,18 +50,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
             if (Configuration.Manager.FeatureDetectionEnabled == false ||
                 WebProvider.ActiveProvider == null)
             {
-                application[Constants.PropertyValueOverrideFlag] = 
-                    new bool?(false);
+                _enabled = false;
             }
             else
             {
-                application[Constants.PropertyValueOverrideFlag] = new bool?(
-                    WebProvider.GetActiveProvider().DataSet.
-                    PropertyValueOverrideProperties.Length > 0);
+                _enabled = WebProvider.GetActiveProvider().DataSet.
+                    PropertyValueOverrideProperties.Length > 0;
             }
             EventLog.Debug(String.Format(
-                "Property Value Override '{0}'", 
-                application[Constants.PropertyValueOverrideFlag]));
+                "Property Value Override '{0}'", _enabled));
         }
 
         /// <summary>
@@ -64,8 +68,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
         /// <returns>JavaScript for the device, otherwise null.</returns>
         internal static string GetJavascript(HttpContext context)
         {
-            var enabled = context.Application[Constants.PropertyValueOverrideFlag] as bool?;
-            if (enabled.HasValue && enabled.Value)
+            if (_enabled.HasValue && _enabled.Value)
             {
                 var jsvalues = GetJavascriptValues(context.Request);
                 if (jsvalues.Count > 0)

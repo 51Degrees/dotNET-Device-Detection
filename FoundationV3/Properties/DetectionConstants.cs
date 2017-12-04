@@ -117,6 +117,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         #region Internal Constants
 
+#if !SQL_BUILD && !NETCORE_BUILD
         /// <summary>
         /// The name of the category 
         /// <see cref="FiftyOne.Foundation.Mobile.Detection.Entities.Property.PropertyValueType.JavaScript"/>
@@ -125,7 +126,8 @@ namespace FiftyOne.Foundation.Mobile.Detection
         /// methods must be assigned.
         /// </summary>
         internal const string PropertyValueOverrideCategory = "Property Value Override";
-        
+#endif
+
         /// <summary>
         /// Used to split up a cookie string.
         /// </summary>

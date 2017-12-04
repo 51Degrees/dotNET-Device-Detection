@@ -21,6 +21,7 @@
  * defined by the Mozilla Public License, v. 2.0.
  * ********************************************************************* */
 
+using FiftyOne.Foundation.Mobile.Detection.Feature;
 using System;
 using System.Web.UI.WebControls;
 
@@ -422,10 +423,7 @@ namespace FiftyOne.Foundation.UI.Web
             try
             {
                 FiftyOne.Foundation.Mobile.Configuration.Manager.ImageOptimisation.Enabled = _checkBoxImageOptimiser.Checked;
-
-                
-
-                Context.Application["51D_ImageOptimiser"] = _checkBoxImageOptimiser.Checked;
+                ImageOptimiser.Enabled = _checkBoxImageOptimiser.Checked;
 
                 message = String.Format(
                     _checkBoxImageOptimiser.Checked ?

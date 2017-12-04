@@ -37,7 +37,12 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
         private static readonly char[] _split = new char[] { '|' };
 
         /// <summary>
-        /// Set a property in the application state to quickly determine if profile 
+        /// True if profile overrides are enabled.
+        /// </summary>
+        private static bool? _enabled;
+
+        /// <summary>
+        /// Set a static field to quickly determine if profile 
         /// override is supported.
         /// </summary>
         /// <param name="application"></param>
@@ -46,15 +51,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
             if (Configuration.Manager.FeatureDetectionEnabled == false  ||
                 WebProvider.ActiveProvider == null)
             {
-                application[Constants.ProfileOverrideCookieName] = new bool?(false);
+                _enabled = false;
             }
             else
             {
                 var property = WebProvider.ActiveProvider.DataSet.Properties.FirstOrDefault(i =>
                     i.Name == "JavascriptHardwareProfile");
-                application[Constants.ProfileOverrideCookieName] = new bool?(property != null);
+                _enabled = property != null;
             }
-            EventLog.Debug(String.Format("Profile Override '{0}'", application[Constants.ProfileOverrideCookieName]));
+            EventLog.Debug(String.Format("Profile Override '{0}'", _enabled));
         }
 
         /// <summary>
@@ -96,15 +101,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
         }
 
         /// <summary>
-        /// Determines if the feature is enabled based on the information
-        /// written to the application when initialised.
+        /// Determines if the feature is enabled based on configuration
+        /// when initialised.
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
         private static bool GetIsEnabled(HttpContext context)
         {
-            var enabled = context.Application[Constants.ProfileOverrideCookieName] as bool?;
-            if (enabled.HasValue && enabled.Value)
+            if (_enabled.HasValue && _enabled.Value)
             {
                 // If the profile javascript is present for this device then it's enabled.
                 return  GetJavascriptValues(context.Request) != null;

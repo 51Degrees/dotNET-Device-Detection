@@ -10,8 +10,5 @@
     ".NETFramework,Version=v4.0": []
   },
   "tools": {},
-  "projectFileToolGroups": {},
-  "packageFolders": {
-    "C:\\Users\\Stephen\\.nuget\\packages\\": {}
-  }
+  "projectFileToolGroups": {}
 }

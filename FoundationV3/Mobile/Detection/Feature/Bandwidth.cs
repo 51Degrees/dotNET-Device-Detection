@@ -291,10 +291,16 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
 
         #endregion
 
-        #region HttpModule Events
-
+        #region Fields
         /// <summary>
-        /// Set a property in the application state to quickly determine if bandwidth monitoring
+        /// True if bandwidth monitoring is enabled.
+        /// </summary>
+        private static bool? _enabled;
+        #endregion
+
+        #region HttpModule Events
+        /// <summary>
+        /// Set a static field to quickly determine if bandwidth monitoring
         /// is supported by the data set.
         /// </summary>
         /// <param name="application"></param>
@@ -303,14 +309,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
             if (Configuration.Manager.BandwidthMonitoringEnabled == false ||
                 WebProvider.ActiveProvider == null)
             {
-                application["51D_Bandwidth"] = new bool?(false);
+                _enabled = false;
             }
             else
             {
                 var property = WebProvider.ActiveProvider.DataSet.Properties["JavascriptBandwidth"];
-                application["51D_Bandwidth"] = new bool?(property != null);
+                _enabled = property != null;
             }
-            EventLog.Debug(String.Format("Bandwidth monitoring '{0}'", application["51D_Bandwidth"]));
+            EventLog.Debug(String.Format("Bandwidth monitoring '{0}'", _enabled));
         }
 
         /// <summary>
@@ -451,15 +457,14 @@ namespace FiftyOne.Foundation.Mobile.Detection.Feature
         }
 
         /// <summary>
-        /// Determines if the feature is enabled based on the information
-        /// written to the application when initialised.
+        /// Determines if the feature is enabled based on configuration
+        /// when initialised.
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
         internal static bool GetIsEnabled(HttpContext context)
         {
-            var enabled = context.Application["51D_Bandwidth"] as bool?;
-            if (enabled.HasValue && enabled.Value)
+            if (_enabled.HasValue && _enabled.Value)
             {
                 // If the bandwidth javascript is present for this device then it's enabled.
                 var javascript = GetJavascriptValues(context.Request);
