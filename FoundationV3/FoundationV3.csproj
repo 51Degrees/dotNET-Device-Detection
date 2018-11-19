@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>51degrees - Foundation NetStandard Open Source</Description>
+    <Copyright>Copyright 51 Degrees Mobile Experts Limited 2009 - 2017</Copyright>
+    <AssemblyTitle>51degrees - Foundation NetStandard</AssemblyTitle>
+    <VersionPrefix>3.2.16-2</VersionPrefix>
+    <TargetFramework>netstandard1.6</TargetFramework>
+    <AssemblyName>FiftyOne.Foundation</AssemblyName>
+    <PackageId>FoundationV3</PackageId>
+    <NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>
+    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateNeutralResourcesLanguageAttribute>false</GenerateNeutralResourcesLanguageAttribute>
+    <Platforms>AnyCPU;x64</Platforms>
+    <RootNamespace>FiftyOne.Foundation</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="**\**" />
+    <Compile Include="Mobile\Detection\Entities\Utf8String.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs;Properties\BinaryConstants.cs;Properties\Constants.cs;Properties\DetectionConstants.cs;Mobile\Detection\Caching\CacheMap.cs;Mobile\Detection\Caching\CacheOptions.cs;Mobile\Detection\Caching\ICache.cs;Mobile\Detection\Caching\ICacheBuilder.cs;Mobile\Detection\Caching\ICacheOptions.cs;Mobile\Detection\Caching\ICacheSet.cs;Mobile\Detection\Caching\ILoadingCache.cs;Mobile\Detection\Caching\ILoadingCacheBuilder.cs;Mobile\Detection\Caching\IPutCache.cs;Mobile\Detection\Caching\IValueLoader.cs;Mobile\Detection\Caching\LruCache.cs;Mobile\Detection\Caching\LruCacheBuilder.cs;Mobile\Detection\Entities\Headers\Header.cs;Mobile\Detection\Entities\Memory\EntityFactories.cs;Mobile\Detection\Entities\Memory\NodeV32.cs;Mobile\Detection\Entities\Memory\NodeV31.cs;Mobile\Detection\Entities\Memory\Node.cs;Mobile\Detection\Entities\Memory\MemoryBaseList.cs;Mobile\Detection\Entities\Memory\MemoryFixedList.cs;Mobile\Detection\Entities\Memory\MemoryIntegerList.cs;Mobile\Detection\Entities\Memory\MemoryVariableList.cs;Mobile\Detection\Entities\Memory\Profile.cs;Mobile\Detection\Entities\Memory\PropertiesList.cs;Mobile\Detection\Entities\Stream\DataSet.cs;Mobile\Detection\Entities\Stream\EntityFactories.cs;Mobile\Detection\Entities\Stream\IntegerList.cs;Mobile\Detection\Entities\Stream\IStreamDataSet.cs;Mobile\Detection\Entities\Stream\Node.cs;Mobile\Detection\Entities\Stream\NodeV32.cs;Mobile\Detection\Entities\Stream\NodeV31.cs;Mobile\Detection\Entities\Stream\Profile.cs;Mobile\Detection\Entities\Stream\Pool.cs;Mobile\Detection\Entities\AsciiString.cs;Mobile\Detection\Entities\BaseEntity.cs;Mobile\Detection\Entities\Component.cs;Mobile\Detection\Entities\ComponentV31.cs;Mobile\Detection\Entities\ComponentV32.cs;Mobile\Detection\Entities\DeviceDetectionBaseEntity.cs;Mobile\Detection\Entities\Map.cs;Mobile\Detection\Entities\Node.cs;Mobile\Detection\Entities\NodeIndex.cs;Mobile\Detection\Entities\NodeIndexBase.cs;Mobile\Detection\Entities\NodeNumericIndex.cs;Mobile\Detection\Entities\Profile.cs;Mobile\Detection\Entities\ProfileOffset.cs;Mobile\Detection\Entities\Property.cs;Mobile\Detection\Entities\Signature.cs;Mobile\Detection\Entities\SignatureV32.cs;Mobile\Detection\Entities\SignatureV31.cs;Mobile\Detection\Entities\Utils.cs;Mobile\Detection\Entities\Value.cs;Mobile\Detection\Entities\Values.cs;Mobile\Detection\Factories\CommonFactory.cs;Mobile\Detection\Factories\EntityFactories.cs;Mobile\Detection\Factories\EntityLoaderFactory.cs;Mobile\Detection\Factories\MemoryFactory.cs;Mobile\Detection\Factories\StreamFactory.cs;Mobile\Detection\Readers\Reader.cs;Mobile\Detection\Readers\Source.cs;Mobile\Detection\Controller.cs;Mobile\Detection\DataSet.cs;Mobile\Detection\DataSetBuilder.cs;Mobile\Detection\IDataSet.cs;Mobile\Detection\IMatch.cs;Mobile\Detection\IReadonlyList.cs;Mobile\Detection\ISimpleList.cs;Mobile\Detection\IndirectDataSet.cs;Mobile\Detection\LicenceKeyActivationResults.cs;Mobile\Detection\Match.cs;Mobile\Detection\MatchMethods.cs;Mobile\Detection\NewDeviceDetails.cs;Mobile\Detection\Provider.cs;Mobile\Detection\Search.cs;Mobile\Detection\StreamList.cs;Mobile\MobileException.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Collections.Specialized" Version="4.0.1" />
+    <PackageReference Include="System.Threading.Tasks.Parallel" Version="4.3.0" />
+  </ItemGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
+    <DefineConstants>$(DefineConstants);NETCORE_BUILD</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;DEBUG;NETSTD_BUILD;NETSTANDARD1_6</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <DefineConstants>TRACE;DEBUG;NETSTANDARD1_6</DefineConstants>
+  </PropertyGroup>
+
+</Project>

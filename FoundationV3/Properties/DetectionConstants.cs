@@ -117,7 +117,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         #region Internal Constants
 
-#if !SQL_BUILD && !NETCORE_BUILD
+#if !SQL_BUILD && !NETSTANDARD1_6
         /// <summary>
         /// The name of the category 
         /// <see cref="FiftyOne.Foundation.Mobile.Detection.Entities.Property.PropertyValueType.JavaScript"/>

@@ -43,7 +43,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
     /// <para>
     /// For more information see https://51degrees.com/Support/Documentation/Net
     /// </para>
-    internal class AsciiString : DeviceDetectionBaseEntity
+    public class AsciiString : DeviceDetectionBaseEntity
     {
         #region Fields
 

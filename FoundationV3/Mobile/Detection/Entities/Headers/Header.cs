@@ -37,17 +37,17 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Headers
         /// <summary>
         /// The number of items contain in the collection.
         /// </summary>
-        internal readonly int Count;
+        public readonly int Count;
 
         /// <summary>
         /// The position in the file where the data structure starts.
         /// </summary>
-        internal readonly int StartPosition;
+        public readonly int StartPosition;
 
         /// <summary>
         /// The number of bytes consumed by the data structure.
         /// </summary>
-        internal readonly int Length;
+        public readonly int Length;
 
         #endregion
 

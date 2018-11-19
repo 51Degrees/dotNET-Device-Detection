@@ -49,10 +49,9 @@ Data files which are updated weekly and daily, automatically, and with more prop
 
 ## Recent Changes
 
-### Version 3.2.19 Highlights
+### Version 3.2.21 Highlights
 
-* ASP.NET integration features such as bandwidth monitoring and profile overrides previously stored their 'enabled' setting in HttpApplicationState. This uses a lot of locking which could cause problems in highly concurrent web applications. The setting will now be stored in a static field instead.
-* Updated the Lite Binary files for November 2017.
+* Updated the Lite Binary files for November 2018.
 
 ### Major Changes in Version 3.2
 

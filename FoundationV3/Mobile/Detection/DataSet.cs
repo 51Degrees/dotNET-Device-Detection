@@ -919,7 +919,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities
         }
         private SearchReadonlyList<Value, string> _valuesNameSearch = null;
 
-#if !SQL_BUILD && !NETCORE_BUILD
+#if !SQL_BUILD && !NETSTANDARD1_6
 
         /// <summary>
         /// An array of the properties that are of type JavaScript.

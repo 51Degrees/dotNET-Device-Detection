@@ -63,7 +63,7 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Memory
         /// <summary>
         /// Information about the data structure the list is associated with.
         /// </summary>
-        internal readonly Header Header;
+        public readonly Header Header;
 
         /// <summary>
         /// Method used to create a new instance of an item in the list.

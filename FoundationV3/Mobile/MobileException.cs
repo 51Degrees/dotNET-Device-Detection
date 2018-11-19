@@ -24,7 +24,9 @@
 #region Usings
 
 using System;
+#if NET40
 using System.Runtime.Serialization;
+#endif
 
 #endregion
 
@@ -36,7 +38,9 @@ namespace FiftyOne.Foundation.Mobile
     /// Toolkit.
     /// </para>
     /// </summary>
+#if NET40
     [Serializable]
+#endif
     public class MobileException : Exception
     {
         /// <summary>

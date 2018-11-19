@@ -335,7 +335,7 @@ namespace FiftyOne.Foundation.Mobile.Detection
 
         #region Private Properties
 
-#if SQL_BUILD || NETCORE_BUILD
+#if SQL_BUILD || NETSTANDARD1_6
         /// <summary>
         /// If building the SQL or .NET Core project, just return an empty
         /// dictionary as this is not used and required unneccesary includes.

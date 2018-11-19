@@ -17,7 +17,7 @@ namespace FiftyOne.Foundation.Properties
         /// <summary>
         /// Valid device data products Ids. Premium, Enterprise and Basic.
         /// </summary>
-        internal static readonly byte[] ProductIDs = new byte[] { 2, 4, 7, 8 };
+        internal static readonly byte[] ProductIDs = new byte[] { 2, 4, 7, 8, 9 };
 
         /// <summary>
         /// Key to verify signature of licence.

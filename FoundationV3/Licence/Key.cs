@@ -30,6 +30,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using FiftyOne.Foundation.Properties;
 using FiftyOne.Foundation.Bases;
+using System.Xml;
 
 namespace FiftyOne.Foundation.Licence
 {
@@ -177,7 +178,7 @@ namespace FiftyOne.Foundation.Licence
         /// </summary>
         public int DaysRemaining
         {
-            get { return _endDateOffset - Convert(DateTime.UtcNow.Date); }
+            get { return _endDateOffset - ConvertDate(DateTime.UtcNow.Date); }
         }
 
         /// <summary>
@@ -205,13 +206,100 @@ namespace FiftyOne.Foundation.Licence
             DSACryptoServiceProvider.UseMachineKeyStore = false;
             using (DSACryptoServiceProvider DSA = new DSACryptoServiceProvider())
             {
-                DSA.FromXmlString(xmlKeyInfo);
+                DSA.ImportParameters(FromXmlString(xmlKeyInfo));
                 DSASignatureDeformatter DSAFormatter = new DSASignatureDeformatter(DSA);
                 DSAFormatter.SetHashAlgorithm(hashAlg);
                 return DSAFormatter.VerifySignature(hashValue, signedHashValue);
             }
         }
 
+        private static DSAParameters FromXmlString(String xmlString)
+        {
+            if (xmlString == null) throw new ArgumentNullException("xmlString");
+
+            DSAParameters dsaParams = new DSAParameters();
+
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.LoadXml(xmlString);
+
+            // P is always present
+            String pString = xmlDoc.GetElementsByTagName("P")[0].InnerText;
+            if (pString == null)
+            {
+                throw new CryptographicException("Element P missing");
+            }
+            dsaParams.P = Convert.FromBase64String(pString);
+
+            // Q is always present
+            String qString = xmlDoc.GetElementsByTagName("Q")[0].InnerText;
+            if (qString == null)
+            {
+                throw new CryptographicException("Element Q missing");
+            }
+            dsaParams.Q = Convert.FromBase64String(qString);
+
+            // G is always present
+            String gString = xmlDoc.GetElementsByTagName("G")[0].InnerText;
+            if (gString == null)
+            {
+                throw new CryptographicException("Element G missing");
+            }
+            dsaParams.G = Convert.FromBase64String(gString);
+
+            // Y is always present
+            String yString = xmlDoc.GetElementsByTagName("Y")[0].InnerText;
+            if (yString == null)
+            {
+                throw new CryptographicException("Element Y missing");
+            }
+            dsaParams.Y = Convert.FromBase64String(yString);
+
+            // J is optional
+            String jString = xmlDoc.GetElementsByTagName("J")[0].InnerText;
+            if (jString != null) dsaParams.J = Convert.FromBase64String(jString);
+
+            // X is optional -- private key if present
+            try
+            {
+                String xString = xmlDoc.GetElementsByTagName("X").Item(0).InnerText;
+                if (xString != null) dsaParams.X = Convert.FromBase64String(xString);
+            }
+            catch { }
+
+            // Seed and PgenCounter are optional as a unit -- both present or both absent
+            String seedString = xmlDoc.GetElementsByTagName("Seed")[0].InnerText;
+            String pgenCounterString = xmlDoc.GetElementsByTagName("PgenCounter")[0].InnerText;
+            if ((seedString != null) && (pgenCounterString != null))
+            {
+                dsaParams.Seed = Convert.FromBase64String(seedString);
+                dsaParams.Counter = ConvertByteArrayToInt(Convert.FromBase64String(pgenCounterString));
+            }
+            else if ((seedString != null) || (pgenCounterString != null))
+            {
+                if (seedString == null)
+                {
+                    throw new CryptographicException("Seed missing");
+                }
+                else
+                {
+                    throw new CryptographicException("PgenCounter missing");
+                }
+            }
+
+            return dsaParams;
+        }
+
+        internal static int ConvertByteArrayToInt(byte[] input)
+        {
+            // Input to this routine is always big endian
+            int dwOutput = 0;
+            for (int i = 0; i < input.Length; i++)
+            {
+                dwOutput *= 256;
+                dwOutput += input[i];
+            }
+            return (dwOutput);
+        }
         #endregion
 
         #region Protected Methods
@@ -221,7 +309,7 @@ namespace FiftyOne.Foundation.Licence
         /// </summary>
         /// <param name="date">Date to be converted.</param>
         /// <returns>The ushort value that represents the date internally.</returns>
-        protected static ushort Convert(DateTime date)
+        protected static ushort ConvertDate(DateTime date)
         {
             if (date > MaxDate)
                 throw new ArgumentOutOfRangeException("date",
