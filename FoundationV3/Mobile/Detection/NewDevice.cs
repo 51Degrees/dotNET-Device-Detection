@@ -204,10 +204,12 @@ namespace FiftyOne.Foundation.Mobile.Detection
             var queue = (Queue<byte[]>)state;
             try
             {
-                // Check that the queue isn't empty. This can happen if a signle Module didn't
+                // Check that the queue isn't empty. This can happen if a single Module didn't
                 // record any information before it was disposed of. This check prevents empty
-                // requests being sent.
-                if (queue.Count > 0)
+                // requests being sent. Check to make sure the queue is not null for those who
+                // have disabled Usage Sharing.
+                if (queue != null &&
+                    queue.Count > 0)
                 {
 #if DEBUG
                     EventLog.Debug("Sending NewDevice Queue");
