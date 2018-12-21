@@ -49,9 +49,10 @@ Data files which are updated weekly and daily, automatically, and with more prop
 
 ## Recent Changes
 
-### Version 3.2.21 Highlights
+### Version 3.2.22 Highlights
 
-* Updated the Lite Binary files for November 2018.
+* Updated the Lite Binary files for December 2018.
+* Added an additional check to ensure Usage Sharing process is not executed for those who have it disabled.
 
 ### Major Changes in Version 3.2
 
