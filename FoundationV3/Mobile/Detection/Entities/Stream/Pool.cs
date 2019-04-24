@@ -105,11 +105,15 @@ namespace FiftyOne.Foundation.Mobile.Detection.Entities.Stream
         /// </returns>
         public Reader GetReader()
         {
-            lock(_readers)
+            lock (_readers)
             {
                 if (_readers.Count > 0)
                 {
-                    return _readers.Dequeue();
+                    var reader = _readers.Dequeue();
+                    if (reader.BaseStream != null)
+                    {
+                        return reader;
+                    }
                 }
             }
             Interlocked.Increment(ref _readerCount);
