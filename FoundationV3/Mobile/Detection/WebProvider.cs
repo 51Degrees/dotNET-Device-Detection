@@ -398,6 +398,23 @@ namespace FiftyOne.Foundation.Mobile.Detection
         }
 
         /// <summary>
+        /// Creates a new provider and then sets it as active provider
+        /// </summary>
+        public static bool Reload()
+		{
+			var newProvider = Create();
+			if (newProvider == null)
+			{
+				return false;
+			}
+			EventLog.Info("Replacing the active provider.");
+			var oldProvider = _activeProvider;
+			_activeProvider = newProvider;
+			oldProvider?.Dispose();
+			return true;
+		}
+
+        /// <summary>
         /// Checks if the data file has been updated and refreshes if it has.
         /// </summary>
         /// <param name="state">Required for timer callback. This parameter is not used.</param>
